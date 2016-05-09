@@ -2,7 +2,7 @@ var queryStudentCount = function (projectId, subjectId, rangeName, rangeId) {
     if (!subjectId) {
         subjectId = '000';
     }
-    var match = {'projectId': projectId, 'subject': subjectId};
+    var match = {'projectId': projectId, 'subjectId': subjectId};
     if (rangeName && rangeId) {
         match[rangeName] = rangeId;
     }

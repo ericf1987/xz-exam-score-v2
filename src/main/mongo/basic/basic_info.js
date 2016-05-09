@@ -26,7 +26,7 @@ var generateStudenCount = function (projectId) {
                 $project: {
                     _id: 0,
                     projectId: "$_id.projectId",
-                    subject: "$_id.subjectId",
+                    subjectId: "$_id.subjectId",
                     class: "$_id.classId",
                     school: "$_id.schoolId",
                     area: "$_id.area",
@@ -145,49 +145,12 @@ var generateProvinceList = function (projectId) {
     }
 };
 
-//////////////////////////////////////////////////////////////
-
-// f(rangeName, rangeId)
-var iterateRanges = function (projectId, f) {
-
-    var classes = [];
-    var classesCursor = db.class_list.find({projectId: projectId}, {classIds: 1});
-    if (classesCursor.hasNext()) {
-        classesCursor.forEach(function (doc) {
-            classes = classes.concat(doc.classIds);
-        });
-    }
-    classes.forEach(function (classId) {
-        f("class", classId);
-    });
-
-    var schools = db.school_list.findOne({projectId: projectId}, {schoolIds: 1});
-    if (schools) {
-        schools.schoolIds.forEach(function (schoolId) {
-            f("school", schoolId);
-        });
-    }
-
-    var areas = db.area_list.findOne({projectId: projectId}, {areaIds: 1});
-    if (areas) {
-        areas.areaIds.forEach(function (areaId) {
-            f("area", areaId);
-        });
-    }
-
-    var cities = db.city_list.findOne({projectId: projectId}, {cityIds: 1});
-    if (cities) {
-        cities.cityIds.forEach(function (cityId) {
-            f("city", cityId);
-        });
-    }
-
-    var provinces = db.province_list.findOne({projectId: projectId}, {provinceIds: 1});
-    if (provinces) {
-        provinces.provinceIds.forEach(function (provinceId) {
-            f("province", provinceId);
-        });
-    }
+var generateRangeLists = function (projectId) {
+    generateClassList(projectId);
+    generateSchoolList(projectId);
+    generateAreaList(projectId);
+    generateCityList(projectId);
+    generateProvinceList(projectId);
 };
 
 //////////////////////////////////////////////////////////////
@@ -207,26 +170,6 @@ var generateSubjectList = function (projectId) {
                 {projectId: projectId},
                 {$push: {subjectIds: key._id.subjectId}},
                 {upsert: true});
-        })
-    }
-};
-
-// 查询题目列表
-var generateQuestList = function (projectId) {
-    var questsResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$group: {_id: {subjectId: "$subjectId", questNo: "$questNo"}}}
-    ]);
-
-    if (questsResult.hasNext()) {
-        db.quest_list.remove({projectId: projectId});
-
-        questsResult.forEach(function (key) {
-            db.quest_list.update(
-                {projectId: projectId, subjectId: key._id.subjectId},
-                {$push: {questNos: key._id.questNo}},
-                {upsert: true}
-            );
         })
     }
 };

@@ -64,10 +64,5 @@ var generateTotalScore = function (projectId) {
     });
 };
 
-var iterateRanges = function (f) {
-    var RANGES = ["classId", "schoolId", "area", "city", "province"];
-    RANGES.forEach(f);
-};
+////////////////////////////////////////////////
 
-var generateAllAvgs = function (projectId) {
-};

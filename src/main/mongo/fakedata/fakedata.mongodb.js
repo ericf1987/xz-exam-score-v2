@@ -1,8 +1,9 @@
-var projectId = "FAKE_PROJECT_2";
+var projectId = "FAKE_PROJECT_1";
 var subjectIds = ["001", "002", "003"];
 var questCount = {"001": 20, "002": 30, "003": 50};
 var questOptions = ["A", "B", "C", "D"];
 var objQuestCount = {"001": 10, "002": 15, "003": 45};
+var fullScores = {"001": 100, "002": 100, "003": 100};
 var areaIds = ["430101", "430102", "430201", "430202"];
 var scoreCollection = db.score;
 
@@ -36,8 +37,8 @@ var schoolIdPrefix = "SCHOOL_";
 var classIdPrefix = "CLASS_";
 
 var schoolCount = 10;
-var classCountPerSchool = 20;
-var studentCountPerClass = 50;
+var classCountPerSchool = 10;
+var studentCountPerClass = 10;
 
 var format = function (num, length) {
     var r = "" + num;
@@ -73,8 +74,8 @@ var quests = [];
 var createFakeQuests = function () {
     quests = [];
 
-    for (var isbj = 0; isbj < subjectIds.length; isbj++) {
-        var subjectId = subjectIds[isbj];
+    for (var iSbj = 0; iSbj < subjectIds.length; iSbj++) {
+        var subjectId = subjectIds[iSbj];
 
         for (var iquest = 0; iquest < questCount[subjectId]; iquest++) {
             var isObj = iquest < objQuestCount[subjectId];
@@ -95,10 +96,17 @@ var createFakeQuests = function () {
                 isObjective: isObj,
                 questNo: (iquest + 1).toString(),
                 score: score,
-                standardAnswer: standardAnswer
+                standardAnswer: isObj ? standardAnswer : ""
             });
         }
     }
+};
+
+var saveFakeQuests = function () {
+    db.quest_list.remove({projectId: projectId});
+    quests.forEach(function (quest) {
+        db.quest_list.save(quest);
+    });
 };
 
 var createFakeScores = function () {
@@ -165,4 +173,36 @@ var createFakeScoreForStudent = function (school, classId, studentId) {
             areaId: school.areaId
         });
     }
+};
+
+var createFakeFullScores = function () {
+    for (var subjectId in fullScores) {
+        if (fullScores.hasOwnProperty(subjectId)) {
+            db.full_scores.save({
+                _id: {
+                    projectId: projectId,
+                    subjectId: subjectId
+                },
+                fullScore: fullScores[subjectId]
+            });
+        }
+    }
+};
+
+var createAll = function () {
+
+    db.area_list.remove({projectId: projectId});
+    db.city_list.remove({projectId: projectId});
+    db.class_list.remove({projectId: projectId});
+    db.province_list.remove({projectId: projectId});
+    db.school_list.remove({projectId: projectId});
+    db.score.remove({projectId: projectId});
+    db.student_count.remove({projectId: projectId});
+    db.total_score.remove({"_id.projectId": projectId});
+
+    createFakeQuests();
+    saveFakeQuests();
+    createFakeFullScores();
+    createFakeSchools();
+    createFakeScores();
 };
