@@ -41,6 +41,10 @@ var mapFunction = function () {
             }
             key.target = {name: targetName, id: getTargetId(targetName, t)};
             emit(key, {totalScore: t.score});
+            if (targetName == 'subject') {  // 科目需要统计主客观得分
+                key.isObjective = t.isObjective;
+                emit(key, {totalScore: t.score});
+            }
         });
     });
 };
@@ -63,6 +67,3 @@ var generateTotalScore = function (projectId) {
         out: {merge: "total_score", sharded: true}
     });
 };
-
-////////////////////////////////////////////////
-

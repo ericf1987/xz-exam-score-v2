@@ -165,6 +165,7 @@ var createFakeScoreForStudent = function (school, classId, studentId) {
             studentId: studentId,
             subjectId: quest.subjectId,
             questNo: quest.questNo,
+            isObjective: quest.isObjective,
             score: score,
             right: isRight,
             answer: answer,
