@@ -42,8 +42,10 @@ var mapFunction = function () {
             key.target = {name: targetName, id: getTargetId(targetName, t)};
             emit(key, {totalScore: t.score});
             if (targetName == 'subject') {  // 科目需要统计主客观得分
-                key.isObjective = t.isObjective;
-                emit(key, {totalScore: t.score});
+                var tempKey = {
+                    projectId: key.projectId, range: key.range, target: key.target, isObjective: t.isObjective
+                };
+                emit(tempKey, {totalScore: t.score});
             }
         });
     });
