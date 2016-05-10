@@ -33,8 +33,8 @@ public abstract class TaskDispatcher {
         taskDispatcherFactory.registerTaskDispatcher(this);
     }
 
-    protected AggrTask createTask() {
-        return new AggrTask(this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
+    protected AggrTask createTask(String projectId) {
+        return new AggrTask(projectId, this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
     }
 
     protected void dispatchTask(AggrTask task) {

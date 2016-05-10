@@ -10,6 +10,8 @@ import com.xz.bean.Range;
  */
 public class AggrTask {
 
+    private String projectId;
+
     private String type;
 
     private Range range;
@@ -17,8 +19,23 @@ public class AggrTask {
     public AggrTask() {
     }
 
-    public AggrTask(String type) {
+    public AggrTask(String projectId, String type) {
+        this.projectId = projectId;
         this.type = type;
+    }
+
+    public AggrTask(String projectId, String type, Range range) {
+        this.projectId = projectId;
+        this.type = type;
+        this.range = range;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
 
     public String getType() {
