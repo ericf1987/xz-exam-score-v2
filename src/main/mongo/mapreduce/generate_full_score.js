@@ -4,7 +4,7 @@ var generateObjectiveFullScore = function (projectId) {
         {
             $group: {
                 _id: {projectId: "$projectId", subjectId: "$subjectId", isObjective: "$isObjective"},
-                totalScore: {$sum: "$score"}
+                fullScore: {$sum: "$score"}
             }
         }
     ]);

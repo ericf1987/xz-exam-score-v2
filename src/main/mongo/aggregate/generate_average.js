@@ -1,4 +1,4 @@
-var generateAvg = function (projectId) {
+var generateAverage = function (projectId) {
 
     var counter = 0;
     db.total_score.find({"_id.projectId": projectId}).forEach(function (score) {

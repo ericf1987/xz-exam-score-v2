@@ -31,9 +31,9 @@ var mapFunction = function () {
             return obj.subjectId + ":" + obj.questNo;  // 科目和题目组合才是唯一
         }
     };
-    var key = {projectId: this.projectId};
     var t = this;
     iterateRanges(function (rangeName) {
+        var key = {projectId: this.projectId};
         key.range = {name: rangeName, id: getRangeId(rangeName, t)};
         iterateTargets(function (targetName) {
             if (rangeName == 'student' && targetName == 'quest') {
@@ -64,6 +64,7 @@ var generateTotalScore = function (projectId) {
     db.runCommand({
         mapReduce: "score",
         query: {projectId: projectId},
+        sort: {schoolId: 1, classId: 1},
         map: mapFunction,
         reduce: reduceFunction,
         out: {merge: "total_score", sharded: true}
