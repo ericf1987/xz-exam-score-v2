@@ -13,4 +13,3 @@ var queryStudentCount = function (projectId, subjectId, rangeName, rangeId) {
     return result.hasNext() ? result.next().sum : 0;
 };
 
-queryStudentCount('FAKE_PROJECT_1', '000', 'city', '430100');

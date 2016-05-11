@@ -1,8 +1,11 @@
-package com.xz.mqreceivers;
+package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.mqreceivers.AggrTask;
+import com.xz.mqreceivers.Receiver;
+import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.StudentCountService;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -20,9 +23,9 @@ import java.util.function.Consumer;
  */
 @Component
 @ReceiverInfo(taskType = "average")
-public class AverageTaskReceiver extends Receiver {
+public class AverageTask extends Receiver {
 
-    static final Logger LOG = LoggerFactory.getLogger(AverageTaskReceiver.class);
+    static final Logger LOG = LoggerFactory.getLogger(AverageTask.class);
 
     @Autowired
     MongoDatabase scoreDatabase;

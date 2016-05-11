@@ -1,6 +1,7 @@
 package com.xz.mqreceivers;
 
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 
 /**
  * (description)
@@ -16,6 +17,8 @@ public class AggrTask {
 
     private Range range;
 
+    private Target target;
+
     public AggrTask() {
     }
 
@@ -28,6 +31,16 @@ public class AggrTask {
         this.projectId = projectId;
         this.type = type;
         this.range = range;
+    }
+
+    public AggrTask(String projectId, String type, Target target) {
+        this.projectId = projectId;
+        this.type = type;
+        this.target = target;
+    }
+
+    public Target getTarget() {
+        return target;
     }
 
     public void setProjectId(String projectId) {
@@ -57,5 +70,20 @@ public class AggrTask {
 
     public AggrTask setRange(String name, String id) {
         return setRange(new Range(name, id));
+    }
+
+    public AggrTask setTarget(Target target) {
+        this.target = target;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "AggrTask{" +
+                "projectId='" + projectId + '\'' +
+                ", type='" + type + '\'' +
+                ", range=" + range +
+                ", target=" + target +
+                '}';
     }
 }

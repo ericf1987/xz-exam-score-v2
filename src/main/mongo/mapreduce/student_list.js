@@ -17,8 +17,8 @@ var generateStudentList = function (projectId, subjectId) {
         map: function () {
             var key = {
                 projectId: this.projectId,
-                classId: this.classId,
-                schoolId: this.schoolId,
+                class: this.classId,
+                school: this.schoolId,
                 area: this.areaId,
                 city: this.areaId.substring(0, 4) + "00",
                 province: this.areaId.substring(0, 2) + "0000"
@@ -55,6 +55,9 @@ var generateStudentList = function (projectId, subjectId) {
     })
 };
 
-generateStudentList("FAKE_PROJECT_2", "000");
 
-db.student_list.find({'_id.projectId': 'FAKE_PROJECT_2', '_id.subjectId': '000'});
+var generateProjectStudentList = function (projectId) {
+    iterateSubjects(projectId, true, function (subjectId) {
+        generateStudentList(projectId, subjectId);
+    });
+};

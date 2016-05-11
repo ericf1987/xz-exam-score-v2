@@ -32,25 +32,24 @@ var mapFunction = function () {
         }
     };
     var t = this;
+    var projectId = this.projectId;
+    var isObjective = this.isObjective;
     iterateRanges(function (rangeName) {
-        var key = {projectId: this.projectId};
-        key.range = {name: rangeName, id: getRangeId(rangeName, t)};
+        var range = {name: rangeName, id: getRangeId(rangeName, t)};
         iterateTargets(function (targetName) {
             if (rangeName == 'student' && targetName == 'quest') {
                 return;
             }
-            key.target = {name: targetName, id: getTargetId(targetName, t)};
+            var target = {name: targetName, id: getTargetId(targetName, t)};
+            var key = {projectId: projectId, range: range, target: target};
             emit(key, {totalScore: t.score});
             if (targetName == 'subject') {  // 科目需要统计主客观得分
-                var tempKey = {
-                    projectId: key.projectId, range: key.range, target: key.target, isObjective: t.isObjective
-                };
-                emit(tempKey, {totalScore: t.score});
+                key.isObjective = isObjective;
+                emit(key, {totalScore: t.score});
             }
         });
     });
 };
-
 var reduceFunction = function (key, values) {
     var totalScore = 0;
     values.forEach(function (value) {
@@ -58,9 +57,9 @@ var reduceFunction = function (key, values) {
     });
     return {totalScore: totalScore};
 };
-
 // 统计班校区市省的项目科目题目总分
 var generateTotalScore = function (projectId) {
+    db.total_score.remove({"id.projectId": projectId});
     db.runCommand({
         mapReduce: "score",
         query: {projectId: projectId},

@@ -1,15 +1,11 @@
 package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * (description)
@@ -35,7 +31,7 @@ public class StudentCountService {
      * @return 考生数量
      */
     public int getStudentCount(String projectId, Range range) {
-        return getStudentCount(projectId, "000", range);
+        return getStudentCount(projectId, null, range);
     }
 
     /**
@@ -49,25 +45,16 @@ public class StudentCountService {
      */
     public int getStudentCount(String projectId, String subjectId, Range range) {
         String cacheKey = "student_count:" + projectId;
+        if (subjectId != null) {
+            cacheKey += ":" + subjectId;
+        }
 
         return simpleCache.get(cacheKey, () -> {
-
-            Document match = new Document("$match", new Document("projectId", projectId)
-                    .append("subjectId", subjectId).append(range.getName(), range.getId()));
-
-            Document group = new Document("$group", new Document("_id", null)
-                    .append("sum", new Document("$sum", "$studentCount")));
-
-            AggregateIterable<Document> iterable = scoreDatabase
-                    .getCollection("student_count")
-                    .aggregate(Arrays.asList(match, group));
-
-            Iterator<Document> iterator = iterable.iterator();
-            if (iterator.hasNext()) {
-                return ((Number) iterator.next().get("sum")).intValue();
-            } else {
-                return 0;
+            Document query = new Document("project", projectId).append(range.getName(), range.getId());
+            if (subjectId != null) {
+                query.append("subjects", subjectId);
             }
+            return (int) scoreDatabase.getCollection("student_list").count(query);
         });
     }
 }

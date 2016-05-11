@@ -1,7 +1,8 @@
-package com.xz.mqreceivers;
+package com.xz.mqreceivers.impl;
 
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.Range;
+import com.xz.mqreceivers.AggrTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author yiding_he
  */
-public class AverageTaskReceiverTest extends XzExamScoreV2ApplicationTests {
+public class AverageTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    AverageTaskReceiver averageTaskReceiver;
+    AverageTask averageTask;
 
     @Test
     public void testTaskReceived() throws Exception {
-        averageTaskReceiver.taskReceived(new AggrTask("FAKE_PROJECT_1", "average", new Range("area", "430101")));
+        averageTask.taskReceived(new AggrTask("FAKE_PROJECT_1", "average", new Range("area", "430101")));
     }
 }

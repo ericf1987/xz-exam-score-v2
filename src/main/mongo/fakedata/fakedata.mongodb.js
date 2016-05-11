@@ -58,7 +58,7 @@ var pickRandom = function (arr, without) {
 
 var schools = [];
 
-var createFakeSchools = function () {
+var createFakeSchools = function (projectId) {
     schools = [];
 
     for (var ischool = 0; ischool < schoolCount; ischool++) {
@@ -71,7 +71,7 @@ var createFakeSchools = function () {
 
 var quests = [];
 
-var createFakeQuests = function () {
+var createFakeQuests = function (projectId) {
     quests = [];
 
     for (var iSbj = 0; iSbj < subjectIds.length; iSbj++) {
@@ -102,14 +102,14 @@ var createFakeQuests = function () {
     }
 };
 
-var saveFakeQuests = function () {
+var saveFakeQuests = function (projectId) {
     db.quest_list.remove({projectId: projectId});
     quests.forEach(function (quest) {
         db.quest_list.save(quest);
     });
 };
 
-var createFakeScores = function () {
+var createFakeScores = function (projectId) {
 
     var counter = 0;
     for (var ischool = 0; ischool < schools.length; ischool++) {
@@ -121,7 +121,7 @@ var createFakeScores = function () {
             for (var istu = 0; istu < studentCountPerClass; istu++) {
                 var studentId = classId + "_" + format(istu + 1, 2);
 
-                createFakeScoreForStudent(school, classId, studentId);
+                createFakeScoreForStudent(school, classId, studentId, projectId);
 
                 counter++;
                 if (counter % 100 == 0) {
@@ -136,7 +136,7 @@ var createStudentScoreLevel = function () {
     return parseInt(Math.random() * 90 + 10);
 };
 
-var createFakeScoreForStudent = function (school, classId, studentId) {
+var createFakeScoreForStudent = function (school, classId, studentId, projectId) {
     var scoreLevel = createStudentScoreLevel();
 
     for (var iq = 0; iq < quests.length; iq++) {
@@ -161,22 +161,24 @@ var createFakeScoreForStudent = function (school, classId, studentId) {
         }
 
         scoreCollection.save({
-            projectId: projectId,
-            studentId: studentId,
-            subjectId: quest.subjectId,
+            project: projectId,
+            student: studentId,
+            subject: quest.subjectId,
             questNo: quest.questNo,
             isObjective: quest.isObjective,
             score: score,
             right: isRight,
             answer: answer,
-            classId: classId,
-            schoolId: school.schoolId,
-            areaId: school.areaId
+            class: classId,
+            school: school.schoolId,
+            area: school.areaId,
+            city: school.areaId.substring(0, 4) + "00",
+            province: school.areaId.substring(0, 2) + "0000"
         });
     }
 };
 
-var createFakeFullScores = function () {
+var createFakeFullScores = function (projectId) {
     for (var subjectId in fullScores) {
         if (fullScores.hasOwnProperty(subjectId)) {
             db.full_scores.save({
@@ -190,20 +192,21 @@ var createFakeFullScores = function () {
     }
 };
 
-var createAll = function () {
-
+var createAll = function (projectId) {
+    db.score.remove({projectId: projectId});
     db.area_list.remove({projectId: projectId});
     db.city_list.remove({projectId: projectId});
     db.class_list.remove({projectId: projectId});
     db.province_list.remove({projectId: projectId});
     db.school_list.remove({projectId: projectId});
-    db.score.remove({projectId: projectId});
+    db.student_list.remove({projectId: projectId});
     db.student_count.remove({projectId: projectId});
-    db.total_score.remove({"_id.projectId": projectId});
+    db.min_max_score.remove({projectId: projectId});
+    db.total_score.remove({projectId: projectId});
 
-    createFakeQuests();
-    saveFakeQuests();
-    createFakeFullScores();
-    createFakeSchools();
-    createFakeScores();
+    createFakeQuests(projectId);
+    saveFakeQuests(projectId);
+    createFakeFullScores(projectId);
+    createFakeSchools(projectId);
+    createFakeScores(projectId);
 };
