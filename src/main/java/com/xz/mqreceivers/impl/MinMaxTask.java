@@ -9,6 +9,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.TargetService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,9 @@ public class MinMaxTask extends Receiver {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    TargetService targetService;
 
     @Override
     public void taskReceived(AggrTask aggrTask) {
@@ -102,8 +106,6 @@ public class MinMaxTask extends Receiver {
 
     // 取任务信息中的科目ID
     private String getSubjectId(Target target) {
-        String targetName = target.getName();
-        return targetName.equals(Target.PROJECT) ? "000" :
-                (targetName.equals(Target.SUBJECT) ? target.getId() : target.getSubjectId());
+        return targetService.getTargetSubjectId(target);
     }
 }

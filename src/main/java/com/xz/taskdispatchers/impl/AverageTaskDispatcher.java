@@ -1,8 +1,10 @@
-package com.xz.taskdispatchers;
+package com.xz.taskdispatchers.impl;
 
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
 import com.xz.services.RangeService;
+import com.xz.taskdispatchers.TaskDispatcher;
+import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,5 +1,7 @@
-package com.xz.taskdispatchers;
+package com.xz.taskdispatchers.impl;
 
+import com.xz.taskdispatchers.TaskDispatcher;
+import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.stereotype.Component;
 
 @TaskDispatcherInfo(taskType = "range_list")

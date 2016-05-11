@@ -72,6 +72,7 @@ var createFakeSchools = function (projectId) {
 var quests = [];
 
 var createFakeQuests = function (projectId) {
+    db.quest_list.remove({project: projectId});
     quests = [];
 
     for (var iSbj = 0; iSbj < subjectIds.length; iSbj++) {
@@ -90,22 +91,24 @@ var createFakeQuests = function (projectId) {
                 }
             }
 
-            quests.push({
-                projectId: projectId,
-                subjectId: subjectId,
+            var quest = {
+                _id: ObjectId(),
+                project: projectId,
+                subject: subjectId,
                 isObjective: isObj,
                 questNo: (iquest + 1).toString(),
                 score: score,
                 standardAnswer: isObj ? standardAnswer : ""
-            });
+            };
+
+            db.quest_list.save(quest);
+            quests.push(quest);
         }
     }
 };
 
 var saveFakeQuests = function (projectId) {
-    db.quest_list.remove({projectId: projectId});
     quests.forEach(function (quest) {
-        db.quest_list.save(quest);
     });
 };
 
@@ -163,8 +166,8 @@ var createFakeScoreForStudent = function (school, classId, studentId, projectId)
         scoreCollection.save({
             project: projectId,
             student: studentId,
-            subject: quest.subjectId,
-            questNo: quest.questNo,
+            subject: quest.subject,
+            quest: quest._id.str,
             isObjective: quest.isObjective,
             score: score,
             right: isRight,
@@ -193,16 +196,16 @@ var createFakeFullScores = function (projectId) {
 };
 
 var createAll = function (projectId) {
-    db.score.remove({projectId: projectId});
-    db.area_list.remove({projectId: projectId});
-    db.city_list.remove({projectId: projectId});
-    db.class_list.remove({projectId: projectId});
-    db.province_list.remove({projectId: projectId});
-    db.school_list.remove({projectId: projectId});
-    db.student_list.remove({projectId: projectId});
-    db.student_count.remove({projectId: projectId});
-    db.min_max_score.remove({projectId: projectId});
-    db.total_score.remove({projectId: projectId});
+    db.score.remove({project: projectId});
+    db.area_list.remove({project: projectId});
+    db.city_list.remove({project: projectId});
+    db.class_list.remove({project: projectId});
+    db.province_list.remove({project: projectId});
+    db.school_list.remove({project: projectId});
+    db.student_list.remove({project: projectId});
+    db.student_count.remove({project: projectId});
+    db.min_max_score.remove({project: projectId});
+    db.total_score.remove({project: projectId});
 
     createFakeQuests(projectId);
     saveFakeQuests(projectId);

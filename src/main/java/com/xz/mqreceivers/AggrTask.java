@@ -77,6 +77,10 @@ public class AggrTask {
         return this;
     }
 
+    public AggrTask setTarget(String name, Object id) {
+        return setTarget(new Target(name, id));
+    }
+
     @Override
     public String toString() {
         return "AggrTask{" +

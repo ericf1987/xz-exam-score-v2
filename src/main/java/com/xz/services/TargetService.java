@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +14,21 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.bean.Target.SUBJECT_OBJECTIVE;
+
 @SuppressWarnings("unchecked")
 @Service
 public class TargetService {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    QuestService questService;
+
+    @Autowired
+    SubjectService subjectService;
 
     public List<Target> queryTargets(String projectId, String... targetNames) {
         List<Target> targetList = new ArrayList<>();
@@ -36,36 +46,66 @@ public class TargetService {
             targetList.addAll(queryQuests(projectId));
         }
 
+        if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
+            targetList.addAll(querySubjectObjectives(projectId));
+        }
+
         return targetList;
     }
 
-    private List<Target> querySubjects(String projectId) {
-        ArrayList<Target> targets = new ArrayList<>();
-        Document query = new Document("projectId", projectId);
-        MongoCollection<Document> collection = scoreDatabase.getCollection("subject_list");
+    private List<Target> querySubjectObjectives(String projectId) {
+        List<Target> result = new ArrayList<>();
 
-        collection.find(query).forEach((Consumer<Document>) document -> {
-            List<String> subjectIds = (List<String>) document.get("subjectIds");
-            targets.addAll(subjectIds.stream()
-                    .map(subjectId -> new Target(Target.SUBJECT, subjectId))
-                    .collect(Collectors.toList())
-            );
+        subjectService.querySubjects(projectId).forEach(subjectId -> {
+            result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, true)));
+            result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, false)));
         });
 
-        return targets;
+        return result;
+    }
+
+    private List<Target> querySubjects(String projectId) {
+        return subjectService.querySubjects(projectId).stream()
+                .map(subjectId -> new Target(Target.SUBJECT, subjectId))
+                .collect(Collectors.toList());
     }
 
     private List<Target> queryQuests(String projectId) {
         ArrayList<Target> quests = new ArrayList<>();
-        Document query = new Document("projectId", projectId);
+        Document query = doc("project", projectId);
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
         collection.find(query).forEach((Consumer<Document>) document -> {
-            String subjectId = document.getString("subjectId");
-            String questNo = document.getString("questNo");
-            quests.add(new Target(Target.QUEST, questNo).setSubjectId(subjectId));
+            String questId = document.getObjectId("_id").toString();
+            quests.add(new Target(Target.QUEST, questId));
         });
 
         return quests;
+    }
+
+    public String getTargetSubjectId(Target target) {
+        String targetName = target.getName();
+
+        switch (targetName) {
+            case Target.PROJECT:
+                return "000";
+
+            case Target.SUBJECT:
+                return target.getId().toString();
+
+            case Target.SUBJECT_OBJECTIVE:
+                return target.getId(SubjectObjective.class).getSubject();
+
+            case Target.QUEST:
+                String questId = target.getId().toString();
+                Document quest = questService.findQuest(questId);
+                if (quest != null) {
+                    return quest.getString("subject");
+                } else {
+                    throw new IllegalArgumentException("Target not found: " + target);
+                }
+        }
+
+        throw new IllegalArgumentException("Unsupported target: " + target);
     }
 }

@@ -48,17 +48,17 @@ var generateStudenCount = function (projectId) {
 // 查询班级列表
 var generateClassList = function (projectId) {
     var classResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$group: {_id: {schoolId: "$schoolId", classId: "$classId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {school: "$school", class: "$class"}}}
     ]);
 
     if (classResult.hasNext()) {
-        db.class_list.remove({projectId: projectId});
+        db.class_list.remove({project: projectId});
 
         classResult.forEach(function (key) {
             db.class_list.update(
-                {projectId: projectId, schoolId: key._id.schoolId},
-                {$push: {classIds: key._id.classId}},
+                {project: projectId, school: key._id.school},
+                {$push: {classes: key._id.class}},
                 {upsert: true});
         })
     }
@@ -67,17 +67,17 @@ var generateClassList = function (projectId) {
 // 查询学校列表
 var generateSchoolList = function (projectId) {
     var schoolResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$group: {_id: {schoolId: "$schoolId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {school: "$school"}}}
     ]);
 
     if (schoolResult.hasNext()) {
-        db.school_list.remove({projectId: projectId});
+        db.school_list.remove({project: projectId});
 
         schoolResult.forEach(function (key) {
             db.school_list.update(
-                {projectId: projectId},
-                {$push: {schoolIds: key._id.schoolId}},
+                {project: projectId},
+                {$push: {schools: key._id.school}},
                 {upsert: true});
         })
     }
@@ -86,17 +86,17 @@ var generateSchoolList = function (projectId) {
 // 查询区县列表
 var generateAreaList = function (projectId) {
     var areaResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$group: {_id: {areaId: "$areaId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {area: "$area"}}}
     ]);
 
     if (areaResult.hasNext()) {
-        db.area_list.remove({projejctId: projectId});
+        db.area_list.remove({project: projectId});
 
         areaResult.forEach(function (key) {
             db.area_list.update(
-                {projectId: projectId},
-                {$push: {areaIds: key._id.areaId}},
+                {project: projectId},
+                {$push: {areas: key._id.area}},
                 {upsert: true}
             );
         });
@@ -106,18 +106,17 @@ var generateAreaList = function (projectId) {
 // 查询市列表
 var generateCityList = function (projectId) {
     var areaResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$project: {cityId: {$substr: ["$areaId", 0, 4]}}},
-        {$group: {_id: {cityId: "$cityId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {city: "$city"}}}
     ]);
 
     if (areaResult.hasNext()) {
-        db.city_list.remove({projejctId: projectId});
+        db.city_list.remove({project: projectId});
 
         areaResult.forEach(function (key) {
             db.city_list.update(
-                {projectId: projectId},
-                {$push: {cityIds: key._id.cityId + "00"}},
+                {project: projectId},
+                {$push: {citys: key._id.city}},
                 {upsert: true}
             );
         });
@@ -127,18 +126,17 @@ var generateCityList = function (projectId) {
 // 查询省列表
 var generateProvinceList = function (projectId) {
     var areaResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$project: {provinceId: {$substr: ["$areaId", 0, 2]}}},
-        {$group: {_id: {provinceId: "$provinceId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {province: "$province"}}}
     ]);
 
     if (areaResult.hasNext()) {
-        db.province_list.remove({projejctId: projectId});
+        db.province_list.remove({project: projectId});
 
         areaResult.forEach(function (key) {
             db.province_list.update(
-                {projectId: projectId},
-                {$push: {provinceIds: key._id.provinceId + "0000"}},
+                {project: projectId},
+                {$push: {provinces: key._id.province}},
                 {upsert: true}
             );
         });
@@ -158,17 +156,17 @@ var generateRangeLists = function (projectId) {
 // 查询科目列表
 var generateSubjectList = function (projectId) {
     var subjectsResult = db.score.aggregate([
-        {$match: {projectId: projectId}},
-        {$group: {_id: {subjectId: "$subjectId"}}}
+        {$match: {project: projectId}},
+        {$group: {_id: {subject: "$subject"}}}
     ]);
 
     if (subjectsResult.hasNext()) {
-        db.subject_list.remove({projectId: projectId});
+        db.subject_list.remove({project: projectId});
 
         subjectsResult.forEach(function (key) {
             db.subject_list.update(
-                {projectId: projectId},
-                {$push: {subjectIds: key._id.subjectId}},
+                {project: projectId},
+                {$push: {subjects: key._id.subject}},
                 {upsert: true});
         })
     }

@@ -1,5 +1,7 @@
 package com.xz.bean;
 
+import java.util.Objects;
+
 /**
  * (description)
  * created at 16/05/10
@@ -46,6 +48,10 @@ public class Range {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public boolean match(String range) {
+        return Objects.equals(this.name, range);
     }
 
     @Override

@@ -1,9 +1,11 @@
-package com.xz.taskdispatchers;
+package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
+import com.xz.taskdispatchers.TaskDispatcher;
+import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

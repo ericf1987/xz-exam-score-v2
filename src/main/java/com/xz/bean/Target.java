@@ -1,16 +1,23 @@
 package com.xz.bean;
 
+import com.alibaba.fastjson.JSON;
+
+import java.util.Objects;
+
 /**
  * (description)
  * created at 16/05/10
  *
  * @author yiding_he
  */
+@SuppressWarnings("unchecked")
 public class Target {
 
     public static final String PROJECT = "project";
 
     public static final String SUBJECT = "subject";
+
+    public static final String SUBJECT_OBJECTIVE = "subjectObjective";
 
     public static final String QUEST = "quest";
 
@@ -22,25 +29,14 @@ public class Target {
 
     private String name;
 
-    private String id;
-
-    private String subjectId;   // 当 name 为 quest 时，id 仅包含 questNo，科目 ID 信息保存在这里
+    private Object id;
 
     public Target() {
     }
 
-    public Target(String name, String id) {
+    public Target(String name, Object id) {
         this.name = name;
         this.id = id;
-    }
-
-    public String getSubjectId() {
-        return subjectId;
-    }
-
-    public Target setSubjectId(String subjectId) {
-        this.subjectId = subjectId;
-        return this;
     }
 
     public String getName() {
@@ -51,12 +47,21 @@ public class Target {
         this.name = name;
     }
 
-    public String getId() {
+    public Object getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public <T> T getId(Class<T> type) {
+        if (type.isAssignableFrom(this.id.getClass())) {
+            return (T) this.id;
+        } else {
+            return JSON.toJavaObject((JSON) JSON.toJSON(this.id), type);
+        }
+    }
+
+    public Target setId(Object id) {
         this.id = id;
+        return this;
     }
 
     @Override
@@ -64,7 +69,10 @@ public class Target {
         return "Target{" +
                 "name='" + name + '\'' +
                 ", id='" + id + '\'' +
-                ", subjectId='" + subjectId + '\'' +
                 '}';
+    }
+
+    public boolean match(String target) {
+        return Objects.equals(target, this.name);
     }
 }

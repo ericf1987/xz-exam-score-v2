@@ -40,6 +40,12 @@ public class ReceiverManager {
 
     @PostConstruct
     public void init() {
+
+        // 单元测试时不侦听任务
+        if (System.getProperty("unit_testing") != null) {
+            return;
+        }
+
         Thread keeperThread = new Thread(() -> {
             while (!stop) {
                 try {
@@ -66,20 +72,53 @@ public class ReceiverManager {
 
         if (taskJson != null) {
             AggrTask aggrTask = JSON.parseObject(taskJson, AggrTask.class);
-            handleCommand(aggrTask);
+            handleCommand(aggrTask, true);
         }
     }
 
-    private void handleCommand(AggrTask aggrTask) {
+    private void handleCommand(AggrTask aggrTask, boolean async) {
         String commandType = aggrTask.getType();
         Receiver receiver = receiverMap.get(commandType);
         if (receiver != null) {
-            executionPool.submit(() -> receiver.taskReceived(aggrTask));
+            if (async) {
+                executionPool.submit(() -> receiver.taskReceived(aggrTask));
+            } else {
+                receiver.taskReceived(aggrTask);
+            }
         }
     }
 
     public void registerReceiver(Receiver receiver) {
         ReceiverInfo info = receiver.getClass().getAnnotation(ReceiverInfo.class);
         receiverMap.put(info.taskType(), receiver);
+    }
+
+    /**
+     * 取一个特定类型的任务并执行（单元测试用）
+     *
+     * @param taskType 任务类型
+     */
+    public void pickOneTask(String taskType) {
+        Redis.RedisQueue queue = redis.getQueue(listKey);
+        AggrTask aggrTask = null;
+
+        while (aggrTask == null) {
+            String taskJson = queue.popBlocking(Redis.Direction.Right, 3);
+            while (taskJson == null) {
+                taskJson = queue.popBlocking(Redis.Direction.Right, 3);
+            }
+
+            aggrTask = JSON.parseObject(taskJson, AggrTask.class);
+            if (!aggrTask.getType().equals(taskType)) {
+                aggrTask = null;
+            }
+        }
+
+        handleCommand(aggrTask, false);
+    }
+
+    public void listTasks() {
+        Redis.RedisQueue queue = redis.getQueue(listKey);
+        queue.all().forEach(System.out::println);
     }
 }
