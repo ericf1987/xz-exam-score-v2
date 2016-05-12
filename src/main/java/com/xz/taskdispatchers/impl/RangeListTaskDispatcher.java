@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class RangeListTaskDispatcher extends TaskDispatcher {
 
     @Override
-    public void dispatch(String projectId) {
-        dispatchTask(createTask(projectId));
+    public void dispatch(String projectId, String aggregationId) {
+        dispatchTask(createTask(projectId, aggregationId));
     }
 }

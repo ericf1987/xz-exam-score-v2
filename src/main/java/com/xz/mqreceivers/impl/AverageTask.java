@@ -34,7 +34,7 @@ public class AverageTask extends Receiver {
     StudentCountService studentCountService;
 
     @Override
-    public void taskReceived(AggrTask aggrTask) {
+    public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         LOG.info("command received for project " + projectId + ": " + aggrTask.getRange());
 

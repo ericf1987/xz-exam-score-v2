@@ -21,7 +21,7 @@ public class StudentListTask extends Receiver {
     MongoDatabase scoreDatabase;
 
     @Override
-    public void taskReceived(AggrTask aggrTask) {
+    public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
 
         MongoCollection<Document> stuListCollection = scoreDatabase.getCollection("student_list");

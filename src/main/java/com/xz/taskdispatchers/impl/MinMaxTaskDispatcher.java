@@ -22,7 +22,7 @@ public class MinMaxTaskDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId) {
+    public void dispatch(String projectId, String aggregationId) {
 
         // 题目的最高最低分统计在 mapreduce 中完成
         List<Target> targets = targetService.queryTargets(projectId,
@@ -33,7 +33,7 @@ public class MinMaxTaskDispatcher extends TaskDispatcher {
 
         for (Target target : targets) {
             for (Range range : ranges) {
-                dispatchTask(createTask(projectId).setTarget(target).setRange(range));
+                dispatchTask(createTask(projectId, aggregationId).setTarget(target).setRange(range));
             }
         }
     }

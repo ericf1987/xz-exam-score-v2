@@ -1,11 +1,8 @@
 package com.xz.taskdispatchers;
 
-import com.alibaba.fastjson.JSON;
-import com.xz.ajiaedu.common.redis.Redis;
-import com.xz.ajiaedu.common.redis.Redis.Direction;
 import com.xz.mqreceivers.AggrTask;
+import com.xz.services.AggregationRoundService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 
@@ -21,24 +18,35 @@ public abstract class TaskDispatcher {
     TaskDispatcherFactory taskDispatcherFactory;
 
     @Autowired
-    Redis redis;
+    AggregationRoundService aggregationRoundService;
 
-    @Value("${redis.task.list.key}")
-    private String listKey;
-
-    public abstract void dispatch(String projectId);
+    public abstract void dispatch(String projectId, String aggregationId);
 
     @PostConstruct
     private void init() {
         taskDispatcherFactory.registerTaskDispatcher(this);
     }
 
-    protected AggrTask createTask(String projectId) {
-        return new AggrTask(projectId, this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
+    protected AggrTask createTask(String projectId, String aggregationId) {
+        return new AggrTask(projectId, aggregationId, this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
     }
 
     protected void dispatchTask(AggrTask task) {
-        redis.getQueue(listKey).push(Direction.Left, JSON.toJSONString(task));
+        aggregationRoundService.pushTask(task);
     }
 
+    public String getTaskType() {
+        TaskDispatcherInfo info = this.getClass().getAnnotation(TaskDispatcherInfo.class);
+        return info == null ? null : info.taskType();
+    }
+
+    /**
+     * 获取依赖任务类型
+     *
+     * @return 如果没有依赖任务类型则返回 null
+     */
+    public String getDependentTaskType() {
+        TaskDispatcherInfo info = this.getClass().getAnnotation(TaskDispatcherInfo.class);
+        return info == null ? null : (info.dependentTaskType().equals("") ? null : info.dependentTaskType());
+    }
 }

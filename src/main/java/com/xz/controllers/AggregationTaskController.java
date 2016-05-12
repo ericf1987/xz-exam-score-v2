@@ -1,5 +1,6 @@
 package com.xz.controllers;
 
+import com.xz.services.AggregationService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.UUID;
 
 /**
  * (description)
@@ -21,21 +24,31 @@ public class AggregationTaskController {
     @Autowired
     TaskDispatcherFactory taskDispatcherFactory;
 
+    @Autowired
+    AggregationService aggregationService;
+
     /**
      * 开始统计任务
      *
      * @param projectId 项目ID
      * @param taskType  任务类型
      */
-    @RequestMapping("/start")
+    @RequestMapping("/start/task")
     @ResponseBody
     public String startAggregationTask(
             @RequestParam("project") String projectId,
             @RequestParam("task") String taskType
     ) {
         TaskDispatcher taskDispatcher = taskDispatcherFactory.getTaskDispatcher(taskType);
-        taskDispatcher.dispatch(projectId);
+        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString());
 
         return "项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。";
+    }
+
+    @RequestMapping("/start/project")
+    @ResponseBody
+    public String startAggregation(@RequestParam("project") String projectId) {
+        aggregationService.startAggregation(projectId);
+        return "项目 " + projectId + " 已经开始统计。";
     }
 }

@@ -26,7 +26,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId) {
+    public void dispatch(String projectId, String aggregationId) {
 
         List<Range> ranges = rangeService.queryRanges(projectId,
                 Range.STUDENT, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
@@ -43,7 +43,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
                     continue;
                 }
 
-                dispatchTask(createTask(projectId).setRange(range).setTarget(target));
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
                 if (counter % 100 == 0) {
                     LOG.info("为项目 " + projectId + " 的 total_score 统计发布了 " + counter + " 个任务");

@@ -1,11 +1,10 @@
 package com.xz.mqreceivers;
 
 import com.alibaba.fastjson.JSON;
-import com.xz.ajiaedu.common.redis.Redis;
+import com.xz.services.AggregationRoundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,10 +32,7 @@ public class ReceiverManager {
     private boolean stop = false;
 
     @Autowired
-    Redis redis;
-
-    @Value("${redis.task.list.key}")
-    private String listKey;
+    AggregationRoundService aggregationRoundService;
 
     @PostConstruct
     public void init() {
@@ -68,7 +64,7 @@ public class ReceiverManager {
     }
 
     private void handleMessages() throws Exception {
-        String taskJson = redis.getQueue(listKey).popBlocking(Redis.Direction.Right, 3);
+        String taskJson = aggregationRoundService.pickTask();
 
         if (taskJson != null) {
             AggrTask aggrTask = JSON.parseObject(taskJson, AggrTask.class);
@@ -99,26 +95,7 @@ public class ReceiverManager {
      * @param taskType 任务类型
      */
     public void pickOneTask(String taskType) {
-        Redis.RedisQueue queue = redis.getQueue(listKey);
-        AggrTask aggrTask = null;
-
-        while (aggrTask == null) {
-            String taskJson = queue.popBlocking(Redis.Direction.Right, 3);
-            while (taskJson == null) {
-                taskJson = queue.popBlocking(Redis.Direction.Right, 3);
-            }
-
-            aggrTask = JSON.parseObject(taskJson, AggrTask.class);
-            if (!aggrTask.getType().equals(taskType)) {
-                aggrTask = null;
-            }
-        }
-
+        AggrTask aggrTask = aggregationRoundService.pickOneTask(taskType);
         handleCommand(aggrTask, false);
-    }
-
-    public void listTasks() {
-        Redis.RedisQueue queue = redis.getQueue(listKey);
-        queue.all().forEach(System.out::println);
     }
 }

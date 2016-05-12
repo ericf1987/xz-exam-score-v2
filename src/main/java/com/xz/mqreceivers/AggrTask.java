@@ -13,6 +13,8 @@ public class AggrTask {
 
     private String projectId;
 
+    private String aggregationId;
+
     private String type;
 
     private Range range;
@@ -22,21 +24,32 @@ public class AggrTask {
     public AggrTask() {
     }
 
-    public AggrTask(String projectId, String type) {
+    public AggrTask(String projectId, String aggregationId, String type) {
         this.projectId = projectId;
+        this.aggregationId = aggregationId;
         this.type = type;
     }
 
-    public AggrTask(String projectId, String type, Range range) {
+    public AggrTask(String projectId, String aggregationId, String type, Range range) {
         this.projectId = projectId;
+        this.aggregationId = aggregationId;
         this.type = type;
         this.range = range;
     }
 
-    public AggrTask(String projectId, String type, Target target) {
+    public AggrTask(String projectId, String aggregationId, String type, Target target) {
         this.projectId = projectId;
+        this.aggregationId = aggregationId;
         this.type = type;
         this.target = target;
+    }
+
+    public String getAggregationId() {
+        return aggregationId;
+    }
+
+    public void setAggregationId(String aggregationId) {
+        this.aggregationId = aggregationId;
     }
 
     public Target getTarget() {

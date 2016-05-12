@@ -38,7 +38,7 @@ public class MinMaxTask extends Receiver {
     TargetService targetService;
 
     @Override
-    public void taskReceived(AggrTask aggrTask) {
+    public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
         String subjectId = getSubjectId(target);

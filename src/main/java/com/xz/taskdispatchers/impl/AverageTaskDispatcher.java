@@ -21,13 +21,13 @@ public class AverageTaskDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId) {
+    public void dispatch(String projectId, String aggregationId) {
 
         List<Range> ranges = rangeService.queryRanges(
                 projectId, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
 
         for (Range range : ranges) {
-            dispatchTask(createTask(projectId).setRange(range));
+            dispatchTask(createTask(projectId, aggregationId).setRange(range));
         }
     }
 }

@@ -7,8 +7,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * (description)
- * created at 16/05/10
+ * 任务相关属性
  *
  * @author yiding_he
  */
@@ -16,6 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(TYPE)
 public @interface TaskDispatcherInfo {
 
-    String taskType();
+    String taskType();                      // 任务类型
 
+    String dependentTaskType() default "";  // 依赖任务类型
 }

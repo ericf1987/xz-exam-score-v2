@@ -29,7 +29,7 @@ public class TotalScoreTask extends Receiver {
     MongoDatabase scoreDatabase;
 
     @Override
-    public void taskReceived(AggrTask aggrTask) {
+    protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
         Range range = aggrTask.getRange();
