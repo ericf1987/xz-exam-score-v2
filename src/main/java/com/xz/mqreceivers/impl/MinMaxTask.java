@@ -1,24 +1,24 @@
 package com.xz.mqreceivers.impl;
 
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.ScoreService;
+import com.xz.services.StudentService;
 import com.xz.services.TargetService;
+import com.xz.util.Mongo;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * 最高分最低分统计（不包含题目，题目在 mapreduce 中统计）
@@ -35,7 +35,13 @@ public class MinMaxTask extends Receiver {
     MongoDatabase scoreDatabase;
 
     @Autowired
+    ScoreService scoreService;
+
+    @Autowired
     TargetService targetService;
+
+    @Autowired
+    StudentService studentService;
 
     @Override
     public void runTask(AggrTask aggrTask) {
@@ -45,9 +51,12 @@ public class MinMaxTask extends Receiver {
         Range range = aggrTask.getRange();
 
         Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
-        List<String> studentIds = getStudentList(projectId, subjectId, range);
+        List<String> studentIds = studentService.getStudentList(projectId, subjectId, range);
+
         if (studentIds.isEmpty()) {
             LOG.info("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);
+        } else {
+            LOG.info("找到{}个学生，计算最大最小分数{}", studentIds.size(), target);
         }
 
         queryMinMax(projectId, target, studentIds, min, max);
@@ -55,55 +64,25 @@ public class MinMaxTask extends Receiver {
     }
 
     private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
-        Document id = new Document("projectId", projectId)
-                .append("range", new Document("name", range.getName()).append("id", range.getId()))
-                .append("target", new Document("name", target.getName()).append("id", target.getId()));
+        Document id = Mongo.generateId(projectId, range, target);
+        Document result = new Document("_id", id).append("value",
+                new Document("min", min.get()).append("max", max.get()));
 
-        Document result = new Document("_id", id).append("value", new Document("min", min.get()).append("max", max.get()));
-
-        scoreDatabase.getCollection("min_max_score").replaceOne(new Document("_id", id), result);
+        scoreDatabase.getCollection("min_max_score")
+                .replaceOne(new Document("_id", id), result, new UpdateOptions().upsert(true));
     }
 
     private void queryMinMax(String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
-        MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
+
         for (String studentId : studentIds) {
+            double totalScore = scoreService.getTotalScore(projectId, new Range(Range.STUDENT, studentId), target);
 
-            Document query = new Document("_id.projectId", projectId)
-                    .append("_id.range.name", Range.STUDENT).append("_id.range.id", studentId)
-                    .append("_id.target.name", target.getName()).append("_id.target.id", target.getId());
-
-            Document totalScoreDoc = totalScores.find(query).first();
-            if (totalScoreDoc == null) {
-                throw new IllegalStateException("无法找到分数：" + query.toJson());
-            }
-
-            double totalScore = ((Document) totalScoreDoc.get("value")).getDouble("totalScore");
             if (totalScore < min.get()) {
                 min.set(totalScore);
             } else if (totalScore > max.get()) {
                 max.set(totalScore);
             }
         }
-    }
-
-    // 查询任务涵盖的学生列表
-    @SuppressWarnings("unchecked")
-    protected List<String> getStudentList(String projectId, String subjectId, Range range) {
-        MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
-
-        List<String> studentIds = new ArrayList<>();
-
-        FindIterable<Document> studentLists = students.find(
-                new Document("project", projectId)
-                        .append("subjects", subjectId)
-                        .append(range.getName(), range.getId())
-        );
-
-        studentLists.forEach((Consumer<Document>) doc -> {
-            List<String> studentIdsPart = (List<String>) ((Document) doc.get("value")).get("studentIds");
-            studentIds.addAll(studentIdsPart);
-        });
-        return studentIds;
     }
 
     // 取任务信息中的科目ID

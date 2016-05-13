@@ -6,7 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
-import com.xz.services.StudentCountService;
+import com.xz.services.StudentService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class AverageTask extends Receiver {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    StudentCountService studentCountService;
+    StudentService studentService;
 
     @Override
     public void runTask(AggrTask aggrTask) {
@@ -45,7 +45,7 @@ public class AverageTask extends Receiver {
         );
 
         totalScores.forEach((Consumer<Document>) document -> {
-            int studentCount = studentCountService.getStudentCount(projectId, aggrTask.getRange());
+            int studentCount = studentService.getStudentCount(projectId, aggrTask.getRange());
             double totalScore = ((Document) document.get("value")).getDouble("totalScore");
             double average = totalScore / studentCount;
             ((Document) document.get("value")).put("average", average);

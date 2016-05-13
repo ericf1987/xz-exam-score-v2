@@ -83,6 +83,13 @@ public class TargetService {
         return quests;
     }
 
+    /**
+     * 从任意 Target 中获取对应的科目信息
+     *
+     * @param target 要获取科目信息的 target 对象
+     *
+     * @return target 对象对应的科目
+     */
     public String getTargetSubjectId(Target target) {
         String targetName = target.getName();
 

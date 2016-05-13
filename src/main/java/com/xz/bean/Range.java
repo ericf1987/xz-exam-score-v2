@@ -22,6 +22,30 @@ public class Range {
 
     public static final String STUDENT = "student";
 
+    public static Range student(String student) {
+        return new Range(Range.STUDENT, student);
+    }
+
+    public static Range clazz(String clazz) {
+        return new Range(Range.CLASS, clazz);
+    }
+
+    public static Range school(String school) {
+        return new Range(Range.SCHOOL, school);
+    }
+
+    public static Range area(String area) {
+        return new Range(Range.AREA, area);
+    }
+
+    public static Range city(String city) {
+        return new Range(Range.CITY, city);
+    }
+
+    public static Range province(String province) {
+        return new Range(Range.PROVINCE, province);
+    }
+
     private String name;
 
     private String id;

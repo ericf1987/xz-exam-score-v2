@@ -5,30 +5,39 @@ import com.xz.bean.Range;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 /**
  * (description)
  * created at 16/05/10
  *
  * @author yiding_he
  */
-public class StudentCountServiceTest extends XzExamScoreV2ApplicationTests {
+public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     public static final String PROJECT = "FAKE_PROJECT_1";
 
     @Autowired
-    StudentCountService studentCountService;
+    StudentService studentService;
 
     @Test
     public void testGetStudentCount() throws Exception {
         Range range = new Range("school", "SCHOOL_001");
-        int studentCount = studentCountService.getStudentCount(PROJECT, range);
+        int studentCount = studentService.getStudentCount(PROJECT, range);
         System.out.println(studentCount);
     }
 
     @Test
     public void testGetStudentCount1() throws Exception {
         Range range = new Range("school", "SCHOOL_001");
-        int studentCount = studentCountService.getStudentCount(PROJECT, "001", range);
+        int studentCount = studentService.getStudentCount(PROJECT, "001", range);
         System.out.println(studentCount);
+    }
+
+    @Test
+    public void testGetStudentList() throws Exception {
+        Range range = new Range("school", "SCHOOL_001");
+        List<String> studentList = studentService.getStudentList(PROJECT_ID, "001", range);
+        studentList.forEach(System.out::println);
     }
 }

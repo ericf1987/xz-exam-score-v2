@@ -27,6 +27,34 @@ public class Target {
 
     public static final String ABILITY_LEVEL = "abilityLevel";
 
+    public static Target project(String project) {
+        return new Target(Target.PROJECT, project);
+    }
+
+    public static Target subject(String subject) {
+        return new Target(Target.SUBJECT, subject);
+    }
+
+    public static Target subjectObjective(SubjectObjective subjectObjective) {
+        return new Target(Target.SUBJECT_OBJECTIVE, subjectObjective);
+    }
+
+    public static Target quest(String quest) {
+        return new Target(Target.QUEST, quest);
+    }
+
+    public static Target questType(String questType) {
+        return new Target(Target.QUEST_TYPE, questType);
+    }
+
+    public static Target point(String point) {
+        return new Target(Target.POINT, point);
+    }
+
+    public static Target abilityLevel(String abilityLevel) {
+        return new Target(Target.ABILITY_LEVEL, abilityLevel);
+    }
+
     private String name;
 
     private Object id;
