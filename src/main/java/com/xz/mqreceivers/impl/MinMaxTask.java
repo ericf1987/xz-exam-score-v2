@@ -57,7 +57,7 @@ public class MinMaxTask extends Receiver {
                 .append("range", new Document("name", range.getName()).append("id", range.getId()))
                 .append("target", new Document("name", target.getName()).append("id", target.getId()));
 
-        Document result = new Document("_id", id).append("value", new Document("min", min).append("max", max));
+        Document result = new Document("_id", id).append("value", new Document("min", min.get()).append("max", max.get()));
 
         scoreDatabase.getCollection("min_max_score").replaceOne(new Document("_id", id), result);
     }

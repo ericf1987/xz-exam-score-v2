@@ -2,6 +2,8 @@ package com.xz.services;
 
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.UUID;
 @Service
 public class AggregationService {
 
+    static final Logger LOG = LoggerFactory.getLogger(AggregationService.class);
+
     @Autowired
     TaskDispatcherFactory taskDispatcherFactory;
 
@@ -24,14 +28,11 @@ public class AggregationService {
 
     public void startAggregation(final String projectId, boolean async) {
         Runnable runnable = () -> {
-            String aggregationId = UUID.randomUUID().toString();
-            List<TaskDispatcher> dispatcherList;
-
-            do {
-                dispatcherList = createDispatchers(aggregationId);
-                runDispatchers(projectId, aggregationId, dispatcherList);
-                waitForTaskCompletion(aggregationId);
-            } while (!dispatcherList.isEmpty());
+            try {
+                runAggregation0(projectId);
+            } catch (Exception e) {
+                LOG.error("分发任务失败", e);
+            }
         };
 
         if (async) {
@@ -41,6 +42,24 @@ public class AggregationService {
         } else {
             runnable.run();
         }
+    }
+
+    private void runAggregation0(String projectId) {
+        String aggregationId = UUID.randomUUID().toString();
+        LOG.info("开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
+        List<TaskDispatcher> dispatcherList;
+        int round = 1;
+
+        do {
+            dispatcherList = createDispatchers(aggregationId);
+            LOG.info("对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
+            runDispatchers(projectId, aggregationId, dispatcherList);
+            LOG.info("对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);
+            waitForTaskCompletion(aggregationId);
+            LOG.info("对项目{}的第{}轮统计(ID={})任务执行完毕。", projectId, round, aggregationId);
+
+            round += 1;
+        } while (!dispatcherList.isEmpty());
     }
 
     private void waitForTaskCompletion(String aggregationId) {

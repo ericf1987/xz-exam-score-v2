@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@TaskDispatcherInfo(taskType = "average")
+@TaskDispatcherInfo(taskType = "average", dependentTaskType = "total_score")
 public class AverageTaskDispatcher extends TaskDispatcher {
 
     @Autowired

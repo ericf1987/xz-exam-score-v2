@@ -5,6 +5,7 @@ import com.xz.services.AggregationRoundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +26,7 @@ public class ReceiverManager {
 
     static final Logger LOG = LoggerFactory.getLogger(ReceiverManager.class);
 
-    private ExecutorService executionPool = Executors.newFixedThreadPool(10);
+    private ExecutorService executionPool;
 
     private Map<String, Receiver> receiverMap = new HashMap<>();
 
@@ -33,6 +34,9 @@ public class ReceiverManager {
 
     @Autowired
     AggregationRoundService aggregationRoundService;
+
+    @Value("${task.executor.poolsize}")
+    private int poolSize;
 
     @PostConstruct
     public void init() {
@@ -42,12 +46,14 @@ public class ReceiverManager {
             return;
         }
 
+        executionPool = Executors.newFixedThreadPool(poolSize);
+
         Thread keeperThread = new Thread(() -> {
             while (!stop) {
                 try {
                     handleMessages();
                 } catch (Exception e) {
-                    LOG.error("", e);
+                    LOG.error("获取任务失败", e);
                 }
             }
         });
@@ -61,6 +67,7 @@ public class ReceiverManager {
     @PreDestroy
     public void shutdown() {
         this.stop = true;
+        this.executionPool.shutdown();
     }
 
     private void handleMessages() throws Exception {

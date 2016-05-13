@@ -45,8 +45,10 @@ public class TaskDispatcherFactory {
         return dispatchers;
     }
 
+    // 没有依赖任务亦可视为依赖任务已完成
     private boolean isDependencyCompleted(TaskDispatcher dispatcher, List<String> completedTaskTypes) {
-        return completedTaskTypes.contains(dispatcher.getDependentTaskType());
+        String dependentTaskType = dispatcher.getDependentTaskType();
+        return dependentTaskType == null || completedTaskTypes.contains(dependentTaskType);
     }
 
     private boolean isDispatcherCompleted(TaskDispatcher dispatcher, List<String> completedTaskTypes) {

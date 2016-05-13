@@ -3,6 +3,8 @@ package com.xz.services;
 import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.redis.Redis;
 import com.xz.mqreceivers.AggrTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class AggregationRoundService {
+
+    static final Logger LOG = LoggerFactory.getLogger(AggregationRoundService.class);
 
     @Autowired
     Redis redis;
@@ -49,7 +53,7 @@ public class AggregationRoundService {
      */
     public void pushTask(AggrTask task) {
         redis.getQueue(taskListKey).push(Redis.Direction.Left, JSON.toJSONString(task));
-        redis.getCounter(taskCounterKey + ":" + task.getAggregationId(), 0).incr();
+        redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(task.getType());
     }
 
     /**
@@ -58,8 +62,11 @@ public class AggregationRoundService {
      * @param task 完成的任务
      */
     public void taskFinished(AggrTask task) {
-        redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(task.getType(), -1);
-        redis.getCounter(taskCounterKey + ":" + task.getAggregationId(), 0).add(-1);
+        String aggregationId = task.getAggregationId();
+
+        if (redis.getHash(taskCounterKey + ":" + aggregationId).incr(task.getType(), -1) == 0) {
+            redis.getList("completed_tasks:" + aggregationId).append(false, task.getType());
+        }
     }
 
     /**
@@ -98,13 +105,23 @@ public class AggregationRoundService {
     }
 
     public void waitForRoundCompletion(String aggregationId) {
-        Redis.RedisCounter counter = redis.getCounter(taskCounterKey + ":" + aggregationId);
-        while (counter.get() > 0) {
+        LOG.info("等待统计 {} 完成。", aggregationId);
+        Redis.RedisHash hash = redis.getHash(taskCounterKey + ":" + aggregationId);
+        while (!allValuesAreZero(hash)) {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 return;
             }
         }
+    }
+
+    private boolean allValuesAreZero(Redis.RedisHash hash) {
+        for (String key : hash.keys()) {
+            if (!hash.get(key).equals("0")) {
+                return false;
+            }
+        }
+        return true;
     }
 }

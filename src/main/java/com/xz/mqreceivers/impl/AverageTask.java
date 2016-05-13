@@ -36,8 +36,6 @@ public class AverageTask extends Receiver {
     @Override
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
-        LOG.info("command received for project " + projectId + ": " + aggrTask.getRange());
-
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
 
         FindIterable<Document> totalScores = totalScoreCollection.find(

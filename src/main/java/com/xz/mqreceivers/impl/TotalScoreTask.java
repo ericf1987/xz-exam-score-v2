@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.bean.Range;
 import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
@@ -12,12 +11,10 @@ import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -53,33 +50,40 @@ public class TotalScoreTask extends Receiver {
     }
 
     private void saveAggregate(String projectId, Document match, AggrTask aggrTask) {
-        Target target = aggrTask.getTarget();
-        Range range = aggrTask.getRange();
 
+        Object totalScoreValue = getTotalScoreValue(match);
+        Range range = aggrTask.getRange();
+        Target target = aggrTask.getTarget();
+
+        Document saveKey = doc("project", projectId)
+                .append("target", doc("name", target.getName()).append("id", getTargetIdObject(target)))
+                .append("range", doc("name", range.getName()).append("id", range.getId()));
+
+        MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
+        Document totalScore = new Document(saveKey)
+                .append("totalScore", totalScoreValue);
+
+        totalScoreCollection.deleteMany(saveKey);
+        totalScoreCollection.insertOne(totalScore);
+    }
+
+    private Object getTotalScoreValue(Document match) {
         Document group = new Document()
                 .append("_id", null)
                 .append("totalScore", new Document("$sum", "$score"));
 
-        MongoCollection<Document> scoreCollection = scoreDatabase.getCollection("score");
-        AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
-                new Document("$match", match),
-                new Document("$group", group)
-        ));
+        AggregateIterable<Document> aggregate = scoreDatabase.getCollection("score")
+                .aggregate(Arrays.asList(
+                        new Document("$match", match),
+                        new Document("$group", group)
+                ));
+        Document aggregateResult = aggregate.first();
+        return aggregateResult.get("totalScore");
+    }
 
-        Object targetId = target.getId() instanceof String ?
+    private Object getTargetIdObject(Target target) {
+        // target.getId() 可能是 String 也可能是其他对象。如果是后者，则需要转换为 Document 对象
+        return target.getId() instanceof String ?
                 target.getId() : Document.parse(JSON.toJSONString(target.getId()));
-
-        Document saveKey = doc("project", projectId)
-                .append("target", doc("name", target.getName()).append("id", targetId))
-                .append("range", doc("name", range.getName()).append("id", range.getId()));
-
-        MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-        aggregate.forEach((Consumer<Document>) document -> {
-            Document totalScore = new Document(saveKey)
-                    .append("totalScore", document.get("totalScore"))
-                    .append("_id", new ObjectId());
-
-            totalScoreCollection.replaceOne(saveKey, totalScore, new UpdateOptions().upsert(true));
-        });
     }
 }

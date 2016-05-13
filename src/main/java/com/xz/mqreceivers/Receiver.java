@@ -1,6 +1,8 @@
 package com.xz.mqreceivers;
 
 import com.xz.services.AggregationRoundService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -13,6 +15,8 @@ import javax.annotation.PostConstruct;
  * @author yiding_he
  */
 public abstract class Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(Receiver.class);
 
     @Autowired
     ReceiverManager receiverManager;
@@ -29,8 +33,13 @@ public abstract class Receiver {
     }
 
     public void taskReceived(AggrTask task) {
-        runTask(task);
-        aggregationRoundService.taskFinished(task);
+        try {
+            runTask(task);
+        } catch (Exception e) {
+            LOG.error("执行任务失败", e);
+        } finally {
+            aggregationRoundService.taskFinished(task);
+        }
     }
 
     protected abstract void runTask(AggrTask aggrTask);

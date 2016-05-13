@@ -48,7 +48,7 @@ public class AggregationTaskController {
     @RequestMapping("/start/project")
     @ResponseBody
     public String startAggregation(@RequestParam("project") String projectId) {
-        aggregationService.startAggregation(projectId);
+        aggregationService.startAggregation(projectId, true);
         return "项目 " + projectId + " 已经开始统计。";
     }
 }
