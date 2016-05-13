@@ -105,9 +105,8 @@ public class AggregationRoundService {
     }
 
     public void waitForRoundCompletion(String aggregationId) {
-        LOG.info("等待统计 {} 完成。", aggregationId);
         Redis.RedisHash hash = redis.getHash(taskCounterKey + ":" + aggregationId);
-        while (!allValuesAreZero(hash)) {
+        while (!allValuesAreZero(aggregationId, hash)) {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -116,7 +115,8 @@ public class AggregationRoundService {
         }
     }
 
-    private boolean allValuesAreZero(Redis.RedisHash hash) {
+    private boolean allValuesAreZero(String aggregationId, Redis.RedisHash hash) {
+        LOG.info("等待统计 {} 完成: {}", aggregationId, hash.toMap());
         for (String key : hash.keys()) {
             if (!hash.get(key).equals("0")) {
                 return false;

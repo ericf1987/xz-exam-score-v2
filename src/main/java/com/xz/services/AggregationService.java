@@ -60,6 +60,8 @@ public class AggregationService {
 
             round += 1;
         } while (!dispatcherList.isEmpty());
+
+        LOG.info(" ==> 对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
     }
 
     private void waitForTaskCompletion(String aggregationId) {

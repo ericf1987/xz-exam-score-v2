@@ -46,7 +46,9 @@ public class MinMaxTask extends Receiver {
 
         Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
         List<String> studentIds = getStudentList(projectId, subjectId, range);
-        LOG.info("查询到学生数量: " + studentIds.size());
+        if (studentIds.isEmpty()) {
+            LOG.info("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);
+        }
 
         queryMinMax(projectId, target, studentIds, min, max);
         saveMinMax(projectId, target, range, min, max);
@@ -86,15 +88,15 @@ public class MinMaxTask extends Receiver {
 
     // 查询任务涵盖的学生列表
     @SuppressWarnings("unchecked")
-    private List<String> getStudentList(String projectId, String subjectId, Range range) {
+    protected List<String> getStudentList(String projectId, String subjectId, Range range) {
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
         List<String> studentIds = new ArrayList<>();
 
         FindIterable<Document> studentLists = students.find(
-                new Document("_id.projectId", projectId)
-                        .append("_id.subjectId", subjectId)
-                        .append("_id." + range.getName(), range.getId())
+                new Document("project", projectId)
+                        .append("subjects", subjectId)
+                        .append(range.getName(), range.getId())
         );
 
         studentLists.forEach((Consumer<Document>) doc -> {
