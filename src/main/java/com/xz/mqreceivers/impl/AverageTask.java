@@ -3,6 +3,7 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.Range;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
@@ -36,16 +37,18 @@ public class AverageTask extends Receiver {
     @Override
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
+        Range range = aggrTask.getRange();
+
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
 
         FindIterable<Document> totalScores = totalScoreCollection.find(
-                new Document("_id.projectId", projectId)
-                        .append("_id.range.name", aggrTask.getRange().getName())
-                        .append("_id.range.id", aggrTask.getRange().getId())
+                new Document("_id.project", projectId)
+                        .append("_id.range.name", range.getName())
+                        .append("_id.range.id", range.getId())
         );
 
         totalScores.forEach((Consumer<Document>) document -> {
-            int studentCount = studentService.getStudentCount(projectId, aggrTask.getRange());
+            int studentCount = studentService.getStudentCount(projectId, range);
             double totalScore = ((Document) document.get("value")).getDouble("totalScore");
             double average = totalScore / studentCount;
             ((Document) document.get("value")).put("average", average);

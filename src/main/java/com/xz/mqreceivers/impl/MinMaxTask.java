@@ -47,8 +47,8 @@ public class MinMaxTask extends Receiver {
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
-        String subjectId = getSubjectId(target);
         Range range = aggrTask.getRange();
+        String subjectId = targetService.getTargetSubjectId(target);
 
         Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
         List<String> studentIds = studentService.getStudentList(projectId, subjectId, range);
@@ -85,8 +85,4 @@ public class MinMaxTask extends Receiver {
         }
     }
 
-    // 取任务信息中的科目ID
-    private String getSubjectId(Target target) {
-        return targetService.getTargetSubjectId(target);
-    }
 }
