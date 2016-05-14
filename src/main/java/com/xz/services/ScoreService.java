@@ -9,6 +9,8 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+
 /**
  * (description)
  * created at 16/05/11
@@ -21,7 +23,33 @@ public class ScoreService {
     @Autowired
     MongoDatabase scoreDatabase;
 
-    public double getTotalScore(String projectId, Range range, Target target) {
+    /**
+     * 查询分数
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     *
+     * @return 分数
+     */
+    public double getScore(String projectId, Range range, Target target) {
+
+        // 学生的题目得分从 score 查询，其他得分从 total_score 查询
+        if (range.match(Range.STUDENT) && target.match(Target.QUEST)) {
+            return getQuestScore(projectId, range.getId(), target.getId().toString());
+        } else {
+            return getTotalScore(projectId, range, target);
+        }
+    }
+
+    private double getQuestScore(String projectId, String studentId, String questId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+        Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
+        Document document = collection.find(query).first();
+        return document == null ? 0d : document.getDouble("score");
+    }
+
+    private double getTotalScore(String projectId, Range range, Target target) {
         MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
 
         Object targetId = target.getId();

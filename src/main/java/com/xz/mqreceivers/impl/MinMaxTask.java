@@ -75,7 +75,7 @@ public class MinMaxTask extends Receiver {
     private void queryMinMax(String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
 
         for (String studentId : studentIds) {
-            double totalScore = scoreService.getTotalScore(projectId, new Range(Range.STUDENT, studentId), target);
+            double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentId), target);
 
             if (totalScore < min.get()) {
                 min.set(totalScore);

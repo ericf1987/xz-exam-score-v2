@@ -40,7 +40,7 @@ public class RankService {
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, String studentId) {
-        double score = scoreService.getTotalScore(projectId, Range.student(studentId), target);
+        double score = scoreService.getScore(projectId, Range.student(studentId), target);
         return getRank(projectId, range, target, score);
     }
 

@@ -21,8 +21,8 @@ public class RankTaskTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testRunTask() throws Exception {
         rankTask.runTask(new AggrTask(PROJECT_ID, "aaaa", "rank")
-                .setRange(Range.school("SCHOOL_001"))
-                .setTarget(Target.subject("001"))
+                .setRange(Range.clazz("SCHOOL_004_CLASS_04"))
+                .setTarget(Target.quest("5732e1f6c5a637047a2f43f8"))
         );
     }
 }
