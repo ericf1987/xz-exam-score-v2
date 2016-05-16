@@ -1,6 +1,7 @@
 package com.xz.bean;
 
 import com.alibaba.fastjson.JSON;
+import org.bson.Document;
 
 import java.util.Objects;
 
@@ -85,6 +86,12 @@ public class Target {
         } else {
             return JSON.toJavaObject((JSON) JSON.toJSON(this.id), type);
         }
+    }
+
+    public Object idToParam() {
+        // target.getId() 可能是 String 也可能是其他对象。如果是后者，则需要转换为 Document 对象
+        return this.id instanceof String ?
+                this.id : Document.parse(JSON.toJSONString(this.id));
     }
 
     public Target setId(Object id) {

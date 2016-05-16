@@ -22,4 +22,11 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println("rank of 90: " +
                 rankService.getRank(PROJECT_ID, Range.school("SCHOOL_001"), Target.subject("001"), 90));
     }
+
+    @Test
+    public void testGetRankLevel() throws Exception {
+        System.out.println(
+                rankService.getRankLevel(
+                        PROJECT_ID, Range.school("SCHOOL_001"), Target.subject("001"), "SCHOOL_001_CLASS_01_01"));
+    }
 }

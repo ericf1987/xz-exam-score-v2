@@ -56,7 +56,7 @@ public class TotalScoreTask extends Receiver {
         Target target = aggrTask.getTarget();
 
         Document saveKey = doc("project", projectId)
-                .append("target", doc("name", target.getName()).append("id", getTargetIdObject(target)))
+                .append("target", doc("name", target.getName()).append("id", target.idToParam()))
                 .append("range", doc("name", range.getName()).append("id", range.getId()));
 
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
@@ -81,9 +81,4 @@ public class TotalScoreTask extends Receiver {
         return aggregateResult.get("totalScore");
     }
 
-    private Object getTargetIdObject(Target target) {
-        // target.getId() 可能是 String 也可能是其他对象。如果是后者，则需要转换为 Document 对象
-        return target.getId() instanceof String ?
-                target.getId() : Document.parse(JSON.toJSONString(target.getId()));
-    }
 }

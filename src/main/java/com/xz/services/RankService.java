@@ -3,6 +3,7 @@ package com.xz.services;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.util.Mongo;
@@ -10,7 +11,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -28,6 +29,12 @@ public class RankService {
 
     @Autowired
     ScoreService scoreService;
+
+    @Autowired
+    StudentService studentService;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     /**
      * 查询排名
@@ -63,6 +70,34 @@ public class RankService {
                 $group(doc("_id", null).append("count", $sum("$scoreMap.count")))
         ));
 
-        return aggregate.first().getInteger("count") + 1;
+        Document document = aggregate.first();
+        if (document == null) {
+            throw new IllegalStateException(String.format(
+                    "找不到排名, project=%s, range=%s, target=%s, score=%f",
+                    projectId, range, target, score));
+        }
+
+        return document.getInteger("count") + 1;
+    }
+
+    public String getRankLevel(String projectId, Range range, Target target, String studentId) {
+        int rank = getRank(projectId, range, target, studentId);
+        int studentCount = studentService.getStudentCount(projectId, range);
+
+        ProjectConfig config = projectConfigService.getProjectConfig(projectId);
+
+        Map<String, Double> rankingLevels = config.getRankingLevels();
+        List<String> levelKeys = new ArrayList<>(rankingLevels.keySet());
+        Collections.sort(levelKeys);
+
+        double sum = 0, rankLevelValue = (double) rank / studentCount;
+        for (String levelKey : levelKeys) {
+            sum += rankingLevels.get(levelKey);
+            if (rankLevelValue < sum) {
+                return levelKey;
+            }
+        }
+
+        return "";
     }
 }

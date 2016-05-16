@@ -42,16 +42,16 @@ public class AverageTask extends Receiver {
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
 
         FindIterable<Document> totalScores = totalScoreCollection.find(
-                new Document("_id.project", projectId)
-                        .append("_id.range.name", range.getName())
-                        .append("_id.range.id", range.getId())
+                new Document("project", projectId)
+                        .append("range.name", range.getName())
+                        .append("range.id", range.getId())
         );
 
         totalScores.forEach((Consumer<Document>) document -> {
             int studentCount = studentService.getStudentCount(projectId, range);
-            double totalScore = ((Document) document.get("value")).getDouble("totalScore");
+            double totalScore = document.getDouble("totalScore");
             double average = totalScore / studentCount;
-            ((Document) document.get("value")).put("average", average);
+            document.put("average", average);
             totalScoreCollection.replaceOne(new Document("_id", document.get("_id")), document);
         });
     }
