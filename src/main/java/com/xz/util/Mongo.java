@@ -35,4 +35,28 @@ public class Mongo {
                 .append("range", doc().append("name", range.getName()).append("id", range.getId()))
                 .append("target", doc().append("name", target.getName()).append("id", targetId));
     }
+
+    /**
+     * 将 Target 对象转换为 Document 对象
+     *
+     * @param target 转换之前的对象
+     *
+     * @return 转换之后的对象
+     */
+    public static Document target(Target target) {
+        return doc("name", target.getName()).append("id", target.idToParam());
+    }
+
+    /**
+     * 将 Range 对象转换为 Document 对象
+     *
+     * @param range 转换之前的对象
+     *
+     * @return 转换之后的对象
+     */
+    public static Document range(Range range) {
+        return doc("name", range.getName()).append("id", range.getId());
+    }
 }
+
+

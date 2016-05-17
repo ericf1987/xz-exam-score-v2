@@ -28,6 +28,13 @@ public class SubjectService {
     @Autowired
     SimpleCache simpleCache;
 
+    /**
+     * 查询考试项目的科目列表
+     *
+     * @param projectId 项目ID
+     *
+     * @return 科目ID列表
+     */
     @SuppressWarnings("unchecked")
     public List<String> querySubjects(String projectId) {
         String cacheKey = "subject_list:" + projectId;

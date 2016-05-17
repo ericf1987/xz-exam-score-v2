@@ -5,8 +5,6 @@ import com.xz.bean.ProjectConfig;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * (description)
  * created at 16/05/16
@@ -21,8 +19,8 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testSaveProjectConfig() throws Exception {
         ProjectConfig config = new ProjectConfig();
-        config.setProjectId("[default]");
-        config.setCombineCategorySubjects(false);
+        config.setProjectId(PROJECT_ID);
+        config.setCombineCategorySubjects(true);
         config.addRankingLevel("A", 0.2);
         config.addRankingLevel("B", 0.2);
         config.addRankingLevel("C", 0.2);

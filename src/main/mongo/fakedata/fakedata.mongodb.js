@@ -1,9 +1,29 @@
 var projectId = "FAKE_PROJECT_1";
-var subjectIds = ["001", "002", "003"];
-var questCount = {"001": 20, "002": 30, "003": 50};
+var subjectIds = ["001", "002", "003", "004", "005", "006", "007", "008", "009"];
+var questCount = {"001": 20, "002": 30, "003": 50, "004": 20, "005": 30, "006": 50, "007": 20, "008": 30, "009": 50};
 var questOptions = ["A", "B", "C", "D"];
-var objQuestCount = {"001": 10, "002": 15, "003": 45};
-var fullScores = {"001": 100, "002": 100, "003": 100};
+var objQuestCount = {
+    "001": 10,
+    "002": 15,
+    "003": 45,
+    "004": 10,
+    "005": 15,
+    "006": 45,
+    "007": 10,
+    "008": 15,
+    "009": 45,
+};
+var fullScores = {
+    "001": 100,
+    "002": 100,
+    "003": 100,
+    "004": 100,
+    "005": 100,
+    "006": 100,
+    "007": 100,
+    "008": 100,
+    "009": 100,
+};
 var areaIds = ["430101", "430102", "430201", "430202"];
 var scoreCollection = db.score;
 
@@ -30,7 +50,53 @@ var questScores = {
         {min: 6, max: 35, score: 2},
         {min: 36, max: 45, score: 1},
         {min: 46, max: 50, score: 5}
-    ]
+    ],
+    "004": [
+        {min: 1, max: 3, score: 1},
+        {min: 4, max: 4, score: 7},
+        {min: 5, max: 5, score: 8},
+        {min: 6, max: 10, score: 3},
+        {min: 11, max: 15, score: 3},
+        {min: 16, max: 19, score: 3},
+        {min: 20, max: 20, score: 40}
+    ],
+    "005": [
+        {min: 1, max: 5, score: 2},
+        {min: 6, max: 10, score: 2},
+        {min: 11, max: 15, score: 2},
+        {min: 16, max: 20, score: 2},
+        {min: 21, max: 25, score: 2},
+        {min: 26, max: 30, score: 10}
+    ],
+    "006": [
+        {min: 1, max: 5, score: 1},
+        {min: 6, max: 35, score: 2},
+        {min: 36, max: 45, score: 1},
+        {min: 46, max: 50, score: 5}
+    ],
+    "007": [
+        {min: 1, max: 3, score: 1},
+        {min: 4, max: 4, score: 7},
+        {min: 5, max: 5, score: 8},
+        {min: 6, max: 10, score: 3},
+        {min: 11, max: 15, score: 3},
+        {min: 16, max: 19, score: 3},
+        {min: 20, max: 20, score: 40}
+    ],
+    "008": [
+        {min: 1, max: 5, score: 2},
+        {min: 6, max: 10, score: 2},
+        {min: 11, max: 15, score: 2},
+        {min: 16, max: 20, score: 2},
+        {min: 21, max: 25, score: 2},
+        {min: 26, max: 30, score: 10}
+    ],
+    "009": [
+        {min: 1, max: 5, score: 1},
+        {min: 6, max: 35, score: 2},
+        {min: 36, max: 45, score: 1},
+        {min: 46, max: 50, score: 5}
+    ],
 };
 
 var schoolIdPrefix = "SCHOOL_";
@@ -196,16 +262,22 @@ var createFakeFullScores = function (projectId) {
 };
 
 var createAll = function (projectId) {
-    db.score.remove({project: projectId});
     db.area_list.remove({project: projectId});
     db.city_list.remove({project: projectId});
     db.class_list.remove({project: projectId});
+    db.full_score.remove({project: projectId});
+    db.full_scores.remove({project: projectId});
+    db.project_config.remove({project: projectId});
     db.province_list.remove({project: projectId});
+    db.quest_list.remove({project: projectId});
     db.school_list.remove({project: projectId});
+    db.score.remove({project: projectId});
     db.student_list.remove({project: projectId});
-    db.student_count.remove({project: projectId});
-    db.min_max_score.remove({project: projectId});
+    db.subject_list.remove({project: projectId});
     db.total_score.remove({project: projectId});
+    db.min_max_score.remove({"_id.project": projectId});
+    db.score_rank_map.remove({"_id.project": projectId});
+    db.total_score_objective.remove({"_id.project": projectId});
 
     createFakeQuests(projectId);
     saveFakeQuests(projectId);

@@ -1,6 +1,8 @@
 package com.xz.controllers;
 
+import com.xz.bean.ProjectConfig;
 import com.xz.services.AggregationService;
+import com.xz.services.ProjectConfigService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class AggregationTaskController {
     @Autowired
     AggregationService aggregationService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     /**
      * 开始统计任务
      *
@@ -39,8 +44,11 @@ public class AggregationTaskController {
             @RequestParam("project") String projectId,
             @RequestParam("task") String taskType
     ) {
+
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
         TaskDispatcher taskDispatcher = taskDispatcherFactory.getTaskDispatcher(taskType);
-        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString(), null);
+        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString(), projectConfig);
 
         return "项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。";
     }

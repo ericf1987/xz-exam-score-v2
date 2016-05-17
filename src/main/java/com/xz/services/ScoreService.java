@@ -24,6 +24,19 @@ public class ScoreService {
     MongoDatabase scoreDatabase;
 
     /**
+     * 查询科目成绩
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 科目ID
+     *
+     * @return 成绩
+     */
+    public double getSubjectScore(String projectId, String studentId, String subjectId) {
+        return getScore(projectId, Range.student(studentId), Target.subject(subjectId));
+    }
+
+    /**
      * 查询分数
      *
      * @param projectId 项目ID
