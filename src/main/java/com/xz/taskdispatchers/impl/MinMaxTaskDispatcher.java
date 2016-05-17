@@ -1,5 +1,6 @@
 package com.xz.taskdispatchers.impl;
 
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.RangeService;
@@ -22,7 +23,7 @@ public class MinMaxTaskDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         // 题目的最高最低分统计在 mapreduce 中完成
         List<Target> targets = targetService.queryTargets(projectId,

@@ -1,6 +1,7 @@
 package com.xz.taskdispatchers.impl;
 
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.services.RangeService;
@@ -22,7 +23,7 @@ public class AverageTaskDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(
                 projectId, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);

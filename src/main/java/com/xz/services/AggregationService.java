@@ -1,5 +1,6 @@
 package com.xz.services;
 
+import com.xz.ajiaedu.common.lang.Context;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.slf4j.Logger;
@@ -25,6 +26,9 @@ public class AggregationService {
 
     @Autowired
     AggregationRoundService aggregationRoundService;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     /**
      * 开始对项目执行统计
@@ -91,7 +95,11 @@ public class AggregationService {
      */
     private void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList) {
         for (TaskDispatcher dispatcher : dispatcherList) {
-            dispatcher.dispatch(projectId, aggregationId);
+            Context context = new Context();
+            context.put("projectId", projectId);
+            context.put("aggregationId", aggregationId);
+            context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
+            dispatcher.dispatch(context);
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.xz.taskdispatchers;
 
+import com.xz.ajiaedu.common.lang.Context;
+import com.xz.bean.ProjectConfig;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.services.AggregationRoundService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,15 @@ public abstract class TaskDispatcher {
     @Autowired
     AggregationRoundService aggregationRoundService;
 
-    public abstract void dispatch(String projectId, String aggregationId);
+    public void dispatch(Context context) {
+        dispatch(
+                context.get("projectId"),
+                context.get("aggregationId"),
+                context.get("projectConfig")
+        );
+    }
+
+    public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);
 
     @PostConstruct
     private void init() {

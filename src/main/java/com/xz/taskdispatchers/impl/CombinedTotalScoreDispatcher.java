@@ -5,12 +5,15 @@ import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.stereotype.Component;
 
-@TaskDispatcherInfo(taskType = "student_list")
+/**
+ * 有些项目需要对文科理科分数合起来统计
+ */
+@TaskDispatcherInfo(taskType = "combined_total_score", dependentTaskType = "total_score")
 @Component
-public class StudentListTaskDispatcher extends TaskDispatcher {
+public class CombinedTotalScoreDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        dispatchTask(createTask(projectId, aggregationId));
+
     }
 }

@@ -1,5 +1,6 @@
 package com.xz.taskdispatchers.impl;
 
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.RangeService;
@@ -26,7 +27,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(projectId,
                 Range.STUDENT, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);

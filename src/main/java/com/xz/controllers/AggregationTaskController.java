@@ -40,7 +40,7 @@ public class AggregationTaskController {
             @RequestParam("task") String taskType
     ) {
         TaskDispatcher taskDispatcher = taskDispatcherFactory.getTaskDispatcher(taskType);
-        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString());
+        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString(), null);
 
         return "项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。";
     }

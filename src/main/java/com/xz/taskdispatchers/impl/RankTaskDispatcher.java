@@ -1,5 +1,6 @@
 package com.xz.taskdispatchers.impl;
 
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.RangeService;
@@ -22,7 +23,7 @@ public class RankTaskDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         // 对哪些范围进行排名
         List<Range> ranges = rangeService.queryRanges(projectId,
