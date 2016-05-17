@@ -72,14 +72,22 @@ public class RankService {
 
         Document document = aggregate.first();
         if (document == null) {
-            throw new IllegalStateException(String.format(
-                    "找不到排名, project=%s, range=%s, target=%s, score=%f",
-                    projectId, range, target, score));
+            return 1;
         }
 
         return document.getInteger("count") + 1;
     }
 
+    /**
+     * 查询考生分数的排名等级
+     *
+     * @param projectId 项目ID
+     * @param range     排名范围
+     * @param target    排名目标
+     * @param studentId 学生ID
+     *
+     * @return 排名等级
+     */
     public String getRankLevel(String projectId, Range range, Target target, String studentId) {
         int rank = getRank(projectId, range, target, studentId);
         int studentCount = studentService.getStudentCount(projectId, range);
@@ -93,11 +101,14 @@ public class RankService {
         double sum = 0, rankLevelValue = (double) rank / studentCount;
         for (String levelKey : levelKeys) {
             sum += rankingLevels.get(levelKey);
-            if (rankLevelValue < sum) {
+            if (rankLevelValue <= sum) {
                 return levelKey;
             }
         }
 
-        return "";
+        throw new IllegalStateException("无法找到排名等级: " +
+                "project=" + projectId + ", range=" + range + ", target=" + target +
+                ", student=" + studentId + ", rank=" + rank + ", levels=" + rankingLevels +
+                ", studentCount=" + studentCount);
     }
 }

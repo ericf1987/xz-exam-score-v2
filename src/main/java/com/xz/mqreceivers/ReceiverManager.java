@@ -101,6 +101,7 @@ public class ReceiverManager {
      *
      * @param taskType 任务类型
      */
+    @SuppressWarnings("unused")
     public void pickOneTask(String taskType) {
         AggrTask aggrTask = aggregationRoundService.pickOneTask(taskType);
         handleCommand(aggrTask, false);
