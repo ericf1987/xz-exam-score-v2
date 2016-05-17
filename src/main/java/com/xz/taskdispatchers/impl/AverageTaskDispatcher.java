@@ -2,6 +2,7 @@ package com.xz.taskdispatchers.impl;
 
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
+import com.xz.mqreceivers.AggrTask;
 import com.xz.services.RangeService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
@@ -27,7 +28,8 @@ public class AverageTaskDispatcher extends TaskDispatcher {
                 projectId, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
 
         for (Range range : ranges) {
-            dispatchTask(createTask(projectId, aggregationId).setRange(range));
+            AggrTask task = createTask(projectId, aggregationId).setRange(range);
+            dispatchTask(task);
         }
     }
 }

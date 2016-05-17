@@ -22,6 +22,9 @@ import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
+/**
+ * 生成排名记录
+ */
 @ReceiverInfo(taskType = "rank")
 @Component
 public class RankTask extends Receiver {
@@ -55,6 +58,7 @@ public class RankTask extends Receiver {
             Range studentRange = new Range(Range.STUDENT, studentId);
             double totalScore = scoreService.getScore(projectId, studentRange, target);
 
+            // 先尝试 update，如果受影响的记录数为 0 则表示记录不存在，再做 insert
             UpdateResult updateResult = collection.updateOne(
                     doc("_id", id).append("scoreMap", $elemMatch("score", totalScore)),
                     doc("$inc", doc("scoreMap.$.count", 1))

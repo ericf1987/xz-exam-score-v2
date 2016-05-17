@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
 /**
- * (description)
- * created at 16/05/10
- *
- * @author yiding_he
+ * 执行平均分统计
  */
 @Component
 @ReceiverInfo(taskType = "average")
@@ -39,6 +36,7 @@ public class AverageTask extends Receiver {
         String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
 
+        // 根据 aggrTask 来遍历 total_score 集合中的记录，对每条记录计算平均分，再写回记录当中
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
 
         FindIterable<Document> totalScores = totalScoreCollection.find(

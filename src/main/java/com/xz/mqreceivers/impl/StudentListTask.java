@@ -13,6 +13,11 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+
+/**
+ * 统计学生列表
+ */
 @ReceiverInfo(taskType = "student_list")
 @Component
 public class StudentListTask extends Receiver {
@@ -23,11 +28,12 @@ public class StudentListTask extends Receiver {
     @Override
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
-
         MongoCollection<Document> stuListCollection = scoreDatabase.getCollection("student_list");
+
+        // 删除原有记录
         deleteOldData(projectId, stuListCollection);
 
-        AggregateIterable<Document> aggregate = createAggregation(projectId);
+        AggregateIterable<Document> aggregate = aggregateStudentList(projectId);
         saveNewData(projectId, stuListCollection, aggregate);
     }
 
@@ -42,13 +48,13 @@ public class StudentListTask extends Receiver {
         });
     }
 
-    private AggregateIterable<Document> createAggregation(String projectId) {
+    // 统计学生列表
+    private AggregateIterable<Document> aggregateStudentList(String projectId) {
         MongoCollection<Document> scoreCollection = scoreDatabase.getCollection("score");
         return scoreCollection
                 .aggregate(Arrays.asList(
-                        new Document("$match", new Document("project", projectId)),
-                        new Document("$group", new Document("_id", getGroupId())
-                                .append("subjects", new Document("$addToSet", "$subject")))
+                        $match("project", projectId),
+                        $group(doc("_id", getGroupId()).append("subjects", $addToSet("$subject")))
                 ));
     }
 

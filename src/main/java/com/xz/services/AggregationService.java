@@ -26,6 +26,12 @@ public class AggregationService {
     @Autowired
     AggregationRoundService aggregationRoundService;
 
+    /**
+     * 开始对项目执行统计
+     *
+     * @param projectId 项目ID
+     * @param async     是否另起线程执行
+     */
     public void startAggregation(final String projectId, boolean async) {
         Runnable runnable = () -> {
             try {
@@ -53,8 +59,10 @@ public class AggregationService {
         do {
             dispatcherList = createDispatchers(aggregationId);
             LOG.info("对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
+
             runDispatchers(projectId, aggregationId, dispatcherList);
             LOG.info("对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);
+
             waitForTaskCompletion(aggregationId);
             LOG.info("对项目{}的第{}轮统计(ID={})任务执行完毕。", projectId, round, aggregationId);
 
@@ -64,14 +72,23 @@ public class AggregationService {
         LOG.info(" ==> 对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
     }
 
+    // 等待本轮统计
     private void waitForTaskCompletion(String aggregationId) {
         aggregationRoundService.waitForRoundCompletion(aggregationId);
     }
 
+    // 查询本轮统计用到的 Dispatcher 对象列表
     private List<TaskDispatcher> createDispatchers(String aggregationId) {
         return taskDispatcherFactory.listAvailableDispatchers(aggregationId);
     }
 
+    /**
+     * 执行 Dispatcher 列表
+     *
+     * @param projectId      项目ID
+     * @param aggregationId  本次统计ID
+     * @param dispatcherList Dispatcher 列表
+     */
     private void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList) {
         for (TaskDispatcher dispatcher : dispatcherList) {
             dispatcher.dispatch(projectId, aggregationId);

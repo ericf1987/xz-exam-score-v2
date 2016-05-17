@@ -1,6 +1,5 @@
 package com.xz.mqreceivers.impl;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
@@ -32,13 +31,13 @@ public class RankingLevelTask extends Receiver {
         Range rankRange = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
-        FindIterable<Document> documents = collection.find(doc("project", projectId)
+        // 查询符合条件的总分记录，对每条记录查询分数的排名等级，并保存
+        Document query = doc("project", projectId)
                 .append("range.name", Range.STUDENT)
-                .append("target", doc("name", target.getName()).append("id", target.idToParam()))
-        );
+                .append("target", doc("name", target.getName()).append("id", target.idToParam()));
 
-        for (Document document : documents) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
+        for (Document document : collection.find(query)) {
             String studentId = ((Document) document.get("range")).getString("id");
             String rankLevel = rankService.getRankLevel(projectId, rankRange, target, studentId);
 

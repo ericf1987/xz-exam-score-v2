@@ -50,7 +50,18 @@ public class MinMaxTask extends Receiver {
         Range range = aggrTask.getRange();
         String subjectId = targetService.getTargetSubjectId(target);
 
+        // 查询考生列表
+        List<String> studentIds = queryStudentList(projectId, target, range, subjectId);
+
+        // 查询每个考生的分数，得出最高分最低分
         Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
+        queryMinMax(projectId, target, studentIds, min, max);
+
+        // 保存最高分最低分
+        saveMinMax(projectId, target, range, min, max);
+    }
+
+    private List<String> queryStudentList(String projectId, Target target, Range range, String subjectId) {
         List<String> studentIds = studentService.getStudentList(projectId, subjectId, range);
 
         if (studentIds.isEmpty()) {
@@ -58,21 +69,11 @@ public class MinMaxTask extends Receiver {
         } else {
             LOG.info("找到{}个学生，计算最大最小分数{}", studentIds.size(), target);
         }
-
-        queryMinMax(projectId, target, studentIds, min, max);
-        saveMinMax(projectId, target, range, min, max);
+        return studentIds;
     }
 
-    private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
-        Document id = Mongo.generateId(projectId, range, target);
-        Document result = new Document("_id", id).append("value",
-                new Document("min", min.get()).append("max", max.get()));
-
-        scoreDatabase.getCollection("min_max_score")
-                .replaceOne(new Document("_id", id), result, new UpdateOptions().upsert(true));
-    }
-
-    private void queryMinMax(String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
+    private void queryMinMax(
+            String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
 
         for (String studentId : studentIds) {
             double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentId), target);
@@ -83,6 +84,15 @@ public class MinMaxTask extends Receiver {
                 max.set(totalScore);
             }
         }
+    }
+
+    private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
+        Document id = Mongo.generateId(projectId, range, target);
+        Document result = new Document("_id", id).append("value",
+                new Document("min", min.get()).append("max", max.get()));
+
+        scoreDatabase.getCollection("min_max_score")
+                .replaceOne(new Document("_id", id), result, new UpdateOptions().upsert(true));
     }
 
 }
