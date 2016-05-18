@@ -1,9 +1,12 @@
 package com.xz.taskdispatchers;
 
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.ProjectConfig;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.services.AggregationRoundService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +19,10 @@ import javax.annotation.PostConstruct;
  */
 public abstract class TaskDispatcher {
 
+    static final Logger LOG = LoggerFactory.getLogger(TaskDispatcher.class);
+
+    private static final ThreadLocal<Value<Integer>> taskCounter = new ThreadLocal<>();
+
     @Autowired
     TaskDispatcherFactory taskDispatcherFactory;
 
@@ -23,11 +30,20 @@ public abstract class TaskDispatcher {
     AggregationRoundService aggregationRoundService;
 
     public void dispatch(Context context) {
+        String projectId = context.get("projectId");
+        String aggregationId = context.get("aggregationId");
+        String taskType = getTaskType();
+
+        taskCounter.set(Value.of(0));
+        LOG.info("开始分发项目{}的{}统计任务,id={}", projectId, taskType, aggregationId);
+
         dispatch(
-                context.get("projectId"),
-                context.get("aggregationId"),
+                projectId,
+                aggregationId,
                 context.get("projectConfig")
         );
+
+        LOG.info("项目{}的{}统计任务分发完毕，共分发{}条任务", projectId, taskType, taskCounter.get().get());
     }
 
     public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);
@@ -42,6 +58,9 @@ public abstract class TaskDispatcher {
     }
 
     protected void dispatchTask(AggrTask task) {
+        Value<Integer> counterValue = taskCounter.get();
+        counterValue.set(counterValue.get() + 1);
+
         aggregationRoundService.pushTask(task);
     }
 

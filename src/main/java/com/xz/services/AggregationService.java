@@ -93,7 +93,7 @@ public class AggregationService {
      * @param aggregationId  本次统计ID
      * @param dispatcherList Dispatcher 列表
      */
-    private void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList) {
+    public void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList) {
         for (TaskDispatcher dispatcher : dispatcherList) {
             Context context = new Context();
             context.put("projectId", projectId);

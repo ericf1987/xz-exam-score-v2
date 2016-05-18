@@ -1,6 +1,5 @@
 package com.xz.controllers;
 
-import com.xz.bean.ProjectConfig;
 import com.xz.services.AggregationService;
 import com.xz.services.ProjectConfigService;
 import com.xz.taskdispatchers.TaskDispatcher;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -45,11 +45,9 @@ public class AggregationTaskController {
             @RequestParam("task") String taskType
     ) {
 
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-
+        String aggregationId = UUID.randomUUID().toString();
         TaskDispatcher taskDispatcher = taskDispatcherFactory.getTaskDispatcher(taskType);
-        taskDispatcher.dispatch(projectId, UUID.randomUUID().toString(), projectConfig);
-
+        aggregationService.runDispatchers(projectId, aggregationId, Collections.singletonList(taskDispatcher));
         return "项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。";
     }
 

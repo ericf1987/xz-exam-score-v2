@@ -33,6 +33,13 @@ public class RankTaskDispatcher extends TaskDispatcher {
         List<Target> targets = targetService.queryTargets(projectId,
                 Target.QUEST, Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.PROJECT, Target.POINT, Target.QUEST_TYPE);
 
+        // 如果项目需要对文综理综进行整合（考试本身没有这两个科目），则额外
+        // 添加文综理综的排名统计（总分统计在 CombinedSubjectScoreDispatcher 里已经做了）
+        if (projectConfig.isCombineCategorySubjects()) {
+            targets.add(Target.subject("004005006"));   // 理综
+            targets.add(Target.subject("007008009"));   // 文综
+        }
+
         for (Range range : ranges) {
             for (Target target : targets) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));

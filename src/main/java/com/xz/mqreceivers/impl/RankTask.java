@@ -42,8 +42,6 @@ public class RankTask extends Receiver {
 
     @Override
     protected void runTask(AggrTask aggrTask) {
-        LOG.debug("开始统计排名：" + aggrTask);
-
         String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
