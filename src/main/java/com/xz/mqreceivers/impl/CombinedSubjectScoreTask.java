@@ -51,8 +51,8 @@ public class CombinedSubjectScoreTask extends Receiver {
             l += isL(subjectId) ? scoreService.getSubjectScore(projectId, studentId, subjectId) : 0;
         }
 
-        saveScore(projectId, studentId, l, "004005006");
-        saveScore(projectId, studentId, w, "007008009");
+        saveScore(projectId, studentId, l, "004005006");    // 保存文科合计分数
+        saveScore(projectId, studentId, w, "007008009");    // 保存理科合计分数
     }
 
     private void saveScore(String projectId, String studentId, double score, String subjectId) {

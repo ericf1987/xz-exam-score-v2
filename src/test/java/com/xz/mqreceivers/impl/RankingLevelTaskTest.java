@@ -7,8 +7,6 @@ import com.xz.mqreceivers.AggrTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * (description)
  * created at 16/05/16
@@ -23,6 +21,6 @@ public class RankingLevelTaskTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testRunTask() throws Exception {
         rankingLevelTask.runTask(new AggrTask(PROJECT_ID, "aaa", "ranking_level")
-                .setRange(Range.school("SCHOOL_001")).setTarget(Target.subject("001")));
+                .setRange(Range.clazz("SCHOOL_009_CLASS_03")).setTarget(Target.subject("004005006")));
     }
 }

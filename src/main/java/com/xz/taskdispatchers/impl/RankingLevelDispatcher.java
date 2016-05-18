@@ -31,6 +31,12 @@ public class RankingLevelDispatcher extends TaskDispatcher {
         // 对哪些分数计算排名等级
         List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.PROJECT);
 
+        // 需要合计文科理科成绩的项目
+        if (projectConfig.isCombineCategorySubjects()) {
+            targets.add(Target.subject("004005006"));
+            targets.add(Target.subject("007008009"));
+        }
+
         for (Range range : ranges) {
             for (Target target : targets) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));

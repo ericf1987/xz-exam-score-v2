@@ -3,6 +3,8 @@ package com.xz;
 import com.hyd.simplecache.EhCacheConfiguration;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.redis.Redis;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +35,9 @@ public class Config {
 
     @Bean
     public MongoClient mongoClient() throws Exception {
-        return new MongoClient(mongoHost, mongoPort);
+        ServerAddress serverAddress = new ServerAddress(mongoHost, mongoPort);
+        MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
+        return new MongoClient(serverAddress, options);
     }
 
     @Bean

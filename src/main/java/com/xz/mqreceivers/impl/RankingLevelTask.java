@@ -7,6 +7,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.ProjectConfigService;
 import com.xz.services.RankService;
 import com.xz.services.StudentService;
 import com.xz.util.Mongo;
@@ -32,6 +33,9 @@ public class RankingLevelTask extends Receiver {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -44,8 +48,10 @@ public class RankingLevelTask extends Receiver {
         for (String studentId : studentList) {
             String rankLevel = rankService.getRankLevel(projectId, rankRange, target, studentId);
 
-            totalScoreCollection.updateOne(
-                    doc("_id", Mongo.generateId(projectId, Range.student(studentId), target)),
+            totalScoreCollection.updateMany(doc()
+                            .append("project", projectId)
+                            .append("target", Mongo.target(target))
+                            .append("range", Mongo.range(Range.student(studentId))),
                     $set("rankLevel." + rankRange.getName(), rankLevel));
         }
     }
