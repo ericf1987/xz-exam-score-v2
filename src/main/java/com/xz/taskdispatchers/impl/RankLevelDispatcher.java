@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@TaskDispatcherInfo(taskType = "rank", dependentTaskType = "combined_total_score")
 @Component
-public class RankTaskDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "ranking_level", dependentTaskType = "rank")
+public class RankLevelDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;
@@ -25,19 +25,16 @@ public class RankTaskDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
-        // 对哪些范围进行排名
-        List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
+        // 对哪些范围计算排名等级
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
 
-        // 对哪些分数进行排名
-        List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.PROJECT, Target.POINT, Target.QUEST_TYPE);
+        // 对哪些分数计算排名等级
+        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.PROJECT);
 
-        // 如果项目需要对文综理综进行整合（考试本身没有这两个科目），则额外
-        // 添加文综理综的排名统计（总分统计在 CombinedSubjectScoreDispatcher 里已经做了）
+        // 需要合计文科理科成绩的项目
         if (projectConfig.isCombineCategorySubjects()) {
-            targets.add(Target.subject("004005006"));   // 理综
-            targets.add(Target.subject("007008009"));   // 文综
+            targets.add(Target.subject("004005006"));
+            targets.add(Target.subject("007008009"));
         }
 
         for (Range range : ranges) {
@@ -45,5 +42,6 @@ public class RankTaskDispatcher extends TaskDispatcher {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
             }
         }
+
     }
 }

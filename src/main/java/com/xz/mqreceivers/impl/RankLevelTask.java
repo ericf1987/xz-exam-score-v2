@@ -2,6 +2,7 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
@@ -22,7 +23,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 @ReceiverInfo(taskType = "ranking_level")
 @Component
-public class RankingLevelTask extends Receiver {
+public class RankLevelTask extends Receiver {
 
     @Autowired
     RankService rankService;
@@ -42,7 +43,7 @@ public class RankingLevelTask extends Receiver {
         Range rankRange = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
+        MongoCollection<Document> totalScoreCollection = getCollection(projectId);
         List<String> studentList = studentService.getStudentList(projectId, rankRange, target);
 
         for (String studentId : studentList) {
@@ -53,6 +54,15 @@ public class RankingLevelTask extends Receiver {
                             .append("target", Mongo.target(target))
                             .append("range", Mongo.range(Range.student(studentId))),
                     $set("rankLevel." + rankRange.getName(), rankLevel));
+        }
+    }
+
+    private MongoCollection<Document> getCollection(String projectId) {
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        if (projectConfig.isCombineCategorySubjects()) {
+            return scoreDatabase.getCollection("total_score_combined");
+        } else {
+            return scoreDatabase.getCollection("total_score");
         }
     }
 }
