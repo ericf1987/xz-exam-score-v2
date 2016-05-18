@@ -2,7 +2,6 @@ package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
-import com.xz.bean.Target;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.taskdispatchers.TaskDispatcher;
@@ -26,22 +25,10 @@ public class RankLevelDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         // 对哪些范围计算排名等级
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        List<Range> students = rangeService.queryRanges(projectId, Range.STUDENT);
 
-        // 对哪些分数计算排名等级
-        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.PROJECT);
-
-        // 需要合计文科理科成绩的项目
-        if (projectConfig.isCombineCategorySubjects()) {
-            targets.add(Target.subject("004005006"));
-            targets.add(Target.subject("007008009"));
+        for (Range student : students) {
+            dispatchTask(createTask(projectId, aggregationId).setRange(student));
         }
-
-        for (Range range : ranges) {
-            for (Target target : targets) {
-                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
-            }
-        }
-
     }
 }

@@ -1,6 +1,7 @@
 package com.xz.util;
 
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.bean.Target;
 
 /**
  * (description)
@@ -9,6 +10,11 @@ import com.xz.ajiaedu.common.lang.StringUtil;
  * @author yiding_he
  */
 public class SubjectUtil {
+
+    // 是否是综合科目
+    public static boolean isCombinedSubject(Target target) {
+        return target.match(Target.SUBJECT) && isCombinedSubject(target.getId().toString());
+    }
 
     // 是否是综合科目
     public static boolean isCombinedSubject(String subjectId) {

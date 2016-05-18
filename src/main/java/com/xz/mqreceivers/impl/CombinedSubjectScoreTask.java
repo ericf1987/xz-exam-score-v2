@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.range;
-import static com.xz.util.Mongo.target;
+import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.target2Doc;
 
 /**
  * 文理综合科目合计，结果存入 total_score_combined 集合
@@ -57,8 +57,8 @@ public class CombinedSubjectScoreTask extends Receiver {
 
     private void saveScore(String projectId, String studentId, double score, String subjectId) {
         Document lQuery = doc("project", projectId)
-                .append("target", target(Target.subject(subjectId)))
-                .append("range", range(Range.student(studentId)));
+                .append("target", target2Doc(Target.subject(subjectId)))
+                .append("range", range2Doc(Range.student(studentId)));
 
         MongoCollection<Document> totalScore = scoreDatabase.getCollection("total_score_combined");
         totalScore.deleteMany(lQuery);

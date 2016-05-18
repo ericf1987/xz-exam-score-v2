@@ -43,7 +43,7 @@ public class Mongo {
      *
      * @return 转换之后的对象
      */
-    public static Document target(Target target) {
+    public static Document target2Doc(Target target) {
         return doc("name", target.getName()).append("id", target.idToParam());
     }
 
@@ -54,7 +54,7 @@ public class Mongo {
      *
      * @return 转换之后的对象
      */
-    public static Document range(Range range) {
+    public static Document range2Doc(Range range) {
         return doc("name", range.getName()).append("id", range.getId());
     }
 }
