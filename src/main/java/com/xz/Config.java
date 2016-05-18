@@ -44,8 +44,8 @@ public class Config {
     @Bean
     public SimpleCache simpleCache() {
         EhCacheConfiguration c = new EhCacheConfiguration();
-        c.setTimeToLiveSeconds(3600);
-        c.setMaxEntriesLocalHeap(100000);
+        c.setTimeToLiveSeconds(600);
+        c.setMaxEntriesLocalHeap(1000000);
         return new SimpleCache(c);
     }
 }

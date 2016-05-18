@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.alibaba.fastjson.JSON;
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
@@ -28,18 +29,8 @@ public class ScoreService {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    /**
-     * 查询科目成绩
-     *
-     * @param projectId 项目ID
-     * @param studentId 学生ID
-     * @param subjectId 科目ID
-     *
-     * @return 成绩
-     */
-    public double getSubjectScore(String projectId, String studentId, String subjectId) {
-        return getScore(projectId, Range.student(studentId), Target.subject(subjectId));
-    }
+    @Autowired
+    SimpleCache cache;
 
     /**
      * 查询分数
@@ -65,6 +56,19 @@ public class ScoreService {
         }
     }
 
+    /**
+     * 查询科目成绩
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 科目ID
+     *
+     * @return 成绩
+     */
+    public double getSubjectScore(String projectId, String studentId, String subjectId) {
+        return getScore(projectId, Range.student(studentId), Target.subject(subjectId));
+    }
+
     private boolean isQueryCombinedSubjectScore(String projectId, Target target) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
 
@@ -80,10 +84,14 @@ public class ScoreService {
     //////////////////////////////////////////////////////////////
 
     private double getQuestScore(String projectId, String studentId, String questId) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
-        Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
-        Document document = collection.find(query).first();
-        return document == null ? 0d : document.getDouble("score");
+        String cacheKey = "quest_score:" + projectId + ":" + studentId + ":" + questId;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
+            Document document = collection.find(query).first();
+            return document == null ? 0d : document.getDouble("score");
+        });
     }
 
     private double getCombinedSubjectScore(String projectId, Range range, Target target) {
@@ -95,22 +103,26 @@ public class ScoreService {
     }
 
     private double getTotalScore(String collection, String projectId, Range range, Target target) {
-        MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
+        String cacheKey = "score:" + collection + ":" + projectId + ":" + range + ":" + target;
 
-        Object targetId = target.getId();
-        if (!(targetId instanceof String)) {
-            targetId = Document.parse(JSON.toJSONString(targetId));
-        }
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
 
-        Document query = new Document("project", projectId)
-                .append("range.name", range.getName()).append("range.id", range.getId())
-                .append("target.name", target.getName()).append("target.id", targetId);
+            Object targetId = target.getId();
+            if (!(targetId instanceof String)) {
+                targetId = Document.parse(JSON.toJSONString(targetId));
+            }
 
-        Document totalScoreDoc = totalScores.find(query).first();
-        if (totalScoreDoc != null) {
-            return totalScoreDoc.getDouble("totalScore");
-        } else {
-            return 0d;
-        }
+            Document query = new Document("project", projectId)
+                    .append("range.name", range.getName()).append("range.id", range.getId())
+                    .append("target.name", target.getName()).append("target.id", targetId);
+
+            Document totalScoreDoc = totalScores.find(query).projection(doc("totalScore", 1)).first();
+            if (totalScoreDoc != null) {
+                return totalScoreDoc.getDouble("totalScore");
+            } else {
+                return 0d;
+            }
+        });
     }
 }
