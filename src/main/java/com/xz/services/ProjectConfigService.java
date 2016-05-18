@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.alibaba.fastjson.JSON;
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.xz.bean.ProjectConfig;
@@ -22,6 +23,9 @@ public class ProjectConfigService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    SimpleCache cache;
+
     public void saveProjectConfig(ProjectConfig projectConfig) {
         Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig));
         scoreDatabase.getCollection("project_config").replaceOne(
@@ -31,13 +35,17 @@ public class ProjectConfigService {
     }
 
     public ProjectConfig getProjectConfig(String projectId) {
-        Document document = scoreDatabase.getCollection("project_config")
-                .find(doc("projectId", projectId)).first();
+        String cacheKey = "project_config:" + projectId;
 
-        if (document == null) {
-            return projectId.equals("[default]") ? null : getProjectConfig("[default]");
-        } else {
-            return JSON.toJavaObject(JSON.parseObject(document.toJson()), ProjectConfig.class);
-        }
+        return cache.get(cacheKey, () -> {
+            Document document = scoreDatabase.getCollection("project_config")
+                    .find(doc("projectId", projectId)).first();
+
+            if (document == null) {
+                return projectId.equals("[default]") ? null : getProjectConfig("[default]");
+            } else {
+                return JSON.toJavaObject(JSON.parseObject(document.toJson()), ProjectConfig.class);
+            }
+        });
     }
 }

@@ -12,8 +12,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
+import static com.xz.ajiaedu.common.concurrent.Executors.newBlockingThreadPoolExecutor;
 
 /**
  * (description)
@@ -26,7 +27,7 @@ public class ReceiverManager {
 
     static final Logger LOG = LoggerFactory.getLogger(ReceiverManager.class);
 
-    private ExecutorService executionPool;
+    private ThreadPoolExecutor executionPool;
 
     private Map<String, Receiver> receiverMap = new HashMap<>();
 
@@ -46,8 +47,38 @@ public class ReceiverManager {
             return;
         }
 
-        executionPool = Executors.newFixedThreadPool(poolSize);
+        executionPool = newBlockingThreadPoolExecutor(poolSize, poolSize, 10000);
+        startKeeperThread();
+        startMonitorThread();
 
+        LOG.info("Message Listener initialized.");
+    }
+
+    private void startMonitorThread() {
+        Thread monitorThread = new Thread(() -> {
+            boolean isLastCheckEmpty = false;
+            while (!stop) {
+                try {
+                    int queueSize = executionPool.getQueue().size();
+
+                    // 长度为 0 只报一次，非 0 每次都报
+                    if (queueSize > 0 || !isLastCheckEmpty) {
+                        LOG.info("ExecutorService 任务队列长度：" + queueSize);
+                    }
+
+                    isLastCheckEmpty = queueSize == 0;
+                    Thread.sleep(3000);
+                } catch (Exception e) {
+                    LOG.error("", e);
+                }
+            }
+        });
+
+        monitorThread.setDaemon(true);
+        monitorThread.start();
+    }
+
+    private void startKeeperThread() {
         Thread keeperThread = new Thread(() -> {
             while (!stop) {
                 try {
@@ -60,8 +91,6 @@ public class ReceiverManager {
 
         keeperThread.setDaemon(true);
         keeperThread.start();
-
-        LOG.info("Message Listener initialized.");
     }
 
     @PreDestroy

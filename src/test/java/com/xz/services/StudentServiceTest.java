@@ -36,8 +36,8 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentList() throws Exception {
-        Range range = new Range("school", "SCHOOL_001");
-        List<String> studentList = studentService.getStudentList(PROJECT_ID, "001", range);
+        Range range = new Range("class", "SCHOOL_001_CLASS_01");
+        List<String> studentList = studentService.getStudentList(PROJECT_ID, "004005006", range);
         studentList.forEach(System.out::println);
     }
 }

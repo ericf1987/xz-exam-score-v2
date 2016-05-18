@@ -20,6 +20,11 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.Mongo.range;
 import static com.xz.util.Mongo.target;
 
+/**
+ * 文理综合科目合计，结果存入 total_score_combined 集合
+ * 之所以不存入 total_score 集合，是因为如果这样做的话就会存在重复成绩，
+ * 遍历考生所有科目得分纪录的总和就会大于其考试总分
+ */
 @Component
 @ReceiverInfo(taskType = "combined_total_score")
 public class CombinedSubjectScoreTask extends Receiver {
@@ -55,7 +60,7 @@ public class CombinedSubjectScoreTask extends Receiver {
                 .append("target", target(Target.subject(subjectId)))
                 .append("range", range(Range.student(studentId)));
 
-        MongoCollection<Document> totalScore = scoreDatabase.getCollection("total_score");
+        MongoCollection<Document> totalScore = scoreDatabase.getCollection("total_score_combined");
         totalScore.deleteMany(lQuery);
         totalScore.insertOne(doc(lQuery).append("totalScore", score));
     }

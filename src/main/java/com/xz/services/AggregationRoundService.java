@@ -35,6 +35,9 @@ public class AggregationRoundService {
     @Value("${redis.task.counter.key}")
     private String taskCounterKey;
 
+    // 上次输出队列长度的时间
+    private long lastQueueSizeLogTime = System.currentTimeMillis();
+
     /**
      * 查询已经完成的任务类型
      *
@@ -75,7 +78,12 @@ public class AggregationRoundService {
      * @return 取到的任务，null 表示没有任务
      */
     public String pickTask() {
-        return redis.getQueue(taskListKey).popBlocking(Redis.Direction.Right, 3);
+        Redis.RedisQueue queue = redis.getQueue(taskListKey);
+        String s = queue.popBlocking(Redis.Direction.Right, 3);
+        if (s != null) {
+            logTaskQueueSize(queue.size());
+        }
+        return s;
     }
 
     /**
@@ -101,7 +109,15 @@ public class AggregationRoundService {
             }
         }
 
+        logTaskQueueSize(queue.size());
         return aggrTask;
+    }
+
+    private void logTaskQueueSize(long size) {
+        if (System.currentTimeMillis() - lastQueueSizeLogTime > 3000) {
+            lastQueueSizeLogTime = System.currentTimeMillis();
+            LOG.info("Redis 任务队列长度：" + size);
+        }
     }
 
     public void waitForRoundCompletion(String aggregationId) {

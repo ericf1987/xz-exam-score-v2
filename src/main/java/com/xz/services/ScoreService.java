@@ -3,6 +3,8 @@ package com.xz.services;
 import com.alibaba.fastjson.JSON;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -22,6 +24,9 @@ public class ScoreService {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     /**
      * 查询科目成绩
@@ -47,13 +52,32 @@ public class ScoreService {
      */
     public double getScore(String projectId, Range range, Target target) {
 
-        // 学生的题目得分从 score 查询，其他得分从 total_score 查询
-        if (range.match(Range.STUDENT) && target.match(Target.QUEST)) {
+        // 1. 学生的题目得分从 score 查询;
+        // 2. 文理合计的得分从 total_score_combined 查询;
+        // 3. 其他得分从 total_score 查询
+
+        if (isQueryQuestScore(range, target)) {
             return getQuestScore(projectId, range.getId(), target.getId().toString());
+        } else if (isQueryCombinedSubjectScore(projectId, target)) {
+            return getCombinedSubjectScore(projectId, range, target);
         } else {
             return getTotalScore(projectId, range, target);
         }
     }
+
+    private boolean isQueryCombinedSubjectScore(String projectId, Target target) {
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
+        return projectConfig.isCombineCategorySubjects()
+                && target.match(Target.SUBJECT)
+                && StringUtil.isOneOf(target.getId().toString(), "004005006", "007008009");
+    }
+
+    private boolean isQueryQuestScore(Range range, Target target) {
+        return range.match(Range.STUDENT) && target.match(Target.QUEST);
+    }
+
+    //////////////////////////////////////////////////////////////
 
     private double getQuestScore(String projectId, String studentId, String questId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");
@@ -62,8 +86,16 @@ public class ScoreService {
         return document == null ? 0d : document.getDouble("score");
     }
 
+    private double getCombinedSubjectScore(String projectId, Range range, Target target) {
+        return getTotalScore("total_score_combined", projectId, range, target);
+    }
+
     private double getTotalScore(String projectId, Range range, Target target) {
-        MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
+        return getTotalScore("total_score", projectId, range, target);
+    }
+
+    private double getTotalScore(String collection, String projectId, Range range, Target target) {
+        MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
 
         Object targetId = target.getId();
         if (!(targetId instanceof String)) {

@@ -4,6 +4,8 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.Value;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.SubjectUtil.isCombinedSubject;
 
 /**
  * (description)
@@ -31,6 +36,9 @@ public class StudentService {
 
     @Autowired
     TargetService targetService;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     /**
      * 查询项目考生数量
@@ -54,10 +62,7 @@ public class StudentService {
      * @return 考生数量
      */
     public int getStudentCount(String projectId, String subjectId, Range range) {
-        String cacheKey = "student_count:" + projectId;
-        if (subjectId != null) {
-            cacheKey += ":" + subjectId;
-        }
+        String cacheKey = getCacheKey("student_count:", projectId, subjectId, range);
 
         return simpleCache.get(cacheKey, () -> {
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
@@ -66,6 +71,15 @@ public class StudentService {
             }
             return (int) scoreDatabase.getCollection("student_list").count(query);
         });
+    }
+
+    private String getCacheKey(String prefix, String projectId, String subjectId, Range range) {
+        String cacheKey = prefix + projectId;
+        if (subjectId != null) {
+            cacheKey += ":" + subjectId;
+        }
+        cacheKey += ":" + range.getName() + ":" + range.getId();
+        return cacheKey;
     }
 
     /**
@@ -92,20 +106,31 @@ public class StudentService {
      * @return 学生ID列表
      */
     public List<String> getStudentList(String projectId, String subjectId, Range range) {
-        MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
-        List<String> studentIds = new ArrayList<>();
+        final Value<String> subjectIdValue = Value.of(subjectId);  // needs to be final
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
 
-        FindIterable<Document> studentLists = students.find(
-                new Document("project", projectId)
-                        .append("subjects", subjectId)
-                        .append(range.getName(), range.getId())
-        );
+        // 如果查询文理合并科目的学生列表，则将 subjectId 置为空，这样将返回 project 的学生列表
+        if (projectConfig.isCombineCategorySubjects() && isCombinedSubject(subjectId)) {
+            subjectIdValue.set(null);
+        }
 
-        studentLists.forEach((Consumer<Document>) doc -> {
-            studentIds.add(doc.getString("student"));
+        String cacheKey = getCacheKey("student_list:", projectId, subjectIdValue.get(), range);
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+            ArrayList<String> studentIds = new ArrayList<>();
+            Document query = new Document("project", projectId).append(range.getName(), range.getId());
+
+            if (subjectIdValue.get() != null) {
+                query.append("subjects", subjectIdValue.get());
+            }
+
+            FindIterable<Document> studentLists = students.find(query).projection(doc("student", 1));
+            studentLists.forEach((Consumer<Document>) doc -> studentIds.add(doc.getString("student")));
+
+            return studentIds;
         });
-        return studentIds;
     }
 
 }

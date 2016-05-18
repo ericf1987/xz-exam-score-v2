@@ -1,5 +1,6 @@
 package com.xz.bean;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,7 @@ import java.util.Map;
  *
  * @author yiding_he
  */
-public class ProjectConfig {
+public class ProjectConfig implements Serializable {
 
     /**
      * 项目ID
