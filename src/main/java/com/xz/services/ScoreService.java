@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.target2Doc;
 
 /**
  * (description)
@@ -114,8 +116,8 @@ public class ScoreService {
             }
 
             Document query = new Document("project", projectId)
-                    .append("range.name", range.getName()).append("range.id", range.getId())
-                    .append("target.name", target.getName()).append("target.id", targetId);
+                    .append("range", range2Doc(range))
+                    .append("target", target2Doc(target));
 
             Document totalScoreDoc = totalScores.find(query).projection(doc("totalScore", 1)).first();
             if (totalScoreDoc != null) {
