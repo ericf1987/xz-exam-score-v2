@@ -9,8 +9,11 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.redis.Redis;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+
+import javax.servlet.MultipartConfigElement;
 
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
@@ -27,6 +30,12 @@ public class Config {
 
     @Value("${mongo.port}")
     private int mongoPort;
+
+    @Value("${multipart.maxFileSize}")
+    private String maxFileSize;
+
+    @Value("${multipart.maxRequestSize}")
+    private String maxRequestSize;
 
     @Bean
     public Redis redis() {
@@ -51,5 +60,13 @@ public class Config {
         c.setTimeToLiveSeconds(600);
         c.setMaxEntriesLocalHeap(1000000);
         return new SimpleCache(c);
+    }
+
+    @Bean
+    public MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setMaxFileSize(maxFileSize);
+        factory.setMaxRequestSize(maxRequestSize);
+        return factory.createMultipartConfig();
     }
 }
