@@ -70,6 +70,6 @@ public class CombinedSubjectScoreTask extends Receiver {
     }
 
     private boolean isW(String subjectId) {
-        return StringUtil.isOneOf(subjectId, "007", "008", "009");
+        return StringUtil.isOneOf(subjectId, "007", "008", "009", "013");
     }
 }
