@@ -1,6 +1,5 @@
 package com.xz.mqreceivers.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -52,6 +51,10 @@ public class TotalScoreTask extends Receiver {
     private void saveAggregate(String projectId, Document match, AggrTask aggrTask) {
 
         Object totalScoreValue = getTotalScoreValue(match);
+        if (totalScoreValue == null) {
+            return;
+        }
+
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
@@ -78,6 +81,12 @@ public class TotalScoreTask extends Receiver {
                         new Document("$group", group)
                 ));
         Document aggregateResult = aggregate.first();
+
+        // 如果缺考则会导致 aggregate() 没有返回值
+        if (aggregateResult == null) {
+            return null;
+        }
+
         return aggregateResult.get("totalScore");
     }
 

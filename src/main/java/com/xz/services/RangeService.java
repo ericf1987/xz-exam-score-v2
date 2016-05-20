@@ -7,9 +7,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -22,17 +23,6 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @Service
 @SuppressWarnings("unchecked")
 public class RangeService {
-
-    // range -> 集合 [range]_list 中的列表属性名
-    private static final Map<String, String> RANGE_FIELD_MAP = new HashMap<>();
-
-    static {
-        RANGE_FIELD_MAP.put("province", "provinces");
-        RANGE_FIELD_MAP.put("city", "citys");
-        RANGE_FIELD_MAP.put("area", "areas");
-        RANGE_FIELD_MAP.put("school", "schools");
-        RANGE_FIELD_MAP.put("class", "classes");
-    }
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -68,11 +58,7 @@ public class RangeService {
         if (Objects.equals(range, Range.STUDENT)) {
             return queryStudentRangeList(projectId);
         } else {
-            String fieldName = RANGE_FIELD_MAP.get(range);
-            if (fieldName == null) {
-                throw new IllegalArgumentException("找不到 Range '" + range + "' 对应的属性名");
-            }
-            return queryRangeList(projectId, range + "_list", fieldName, range);
+            return queryRangeList(projectId, range + "_list", range);
         }
 
     }
@@ -88,20 +74,15 @@ public class RangeService {
         return result;
     }
 
-    private List<Range> queryRangeList(String projectId, String collectionName, String idListField, String rangeName) {
+    private List<Range> queryRangeList(String projectId, String collectionName, String rangeName) {
         List<Range> classIds = new ArrayList<>();
 
         FindIterable<Document> documents = scoreDatabase
                 .getCollection(collectionName)
                 .find(new Document("project", projectId));
 
-        documents.forEach((Consumer<Document>) document -> {
-            List<String> idList = (List<String>) document.get(idListField);
-            if (idList == null) {
-                throw new IllegalStateException("找不到集合 " + collectionName + " 的属性: " + idListField);
-            }
-            classIds.addAll(idList.stream().map(id -> new Range(rangeName, id)).collect(Collectors.toList()));
-        });
+        documents.forEach((Consumer<Document>) document ->
+                classIds.add(new Range(rangeName, document.getString(rangeName))));
 
         return classIds;
     }

@@ -9,7 +9,7 @@ public class XzExamScoreV2Application {
     static {
         if (!"production".equals(System.getProperty("env"))) {
             System.setProperty("socksProxyHost", "127.0.0.1");
-            System.setProperty("socksProxyPort", "1234");
+            System.setProperty("socksProxyPort", "2346");
         }
     }
 
