@@ -29,18 +29,14 @@ public class QuestListProcessor extends DataProcessor {
     protected void processLine(Context context, String line) {
         JSONObject jsonObject = JSON.parseObject(line);
 
-        Document query = new Document();
-        query.put("project", getString(jsonObject, "project"));
-        query.put("questId", getString(jsonObject, "questId"));
-
         Document document = new Document();
+        document.put("project", getString(jsonObject, "project"));
+        document.put("questId", getString(jsonObject, "questId"));
         document.put("subject", getString(jsonObject, "subject"));
         document.put("isObjective", getString(jsonObject, "isObjective", ""));
         document.put("questNo", getString(jsonObject, "questNo"));
         document.put("score", getString(jsonObject, "score"));
         document.put("standardAnswer", getString(jsonObject, "standardAnswer", ""));
-
-        Document update = new Document("$set", document);
-        scoreDatabase.getCollection("quest_list").updateOne(query, update, UPSERT);
+        scoreDatabase.getCollection("quest_list").insertOne(document);
     }
 }
