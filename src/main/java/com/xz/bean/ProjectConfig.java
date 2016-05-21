@@ -1,7 +1,9 @@
 package com.xz.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,6 +27,32 @@ public class ProjectConfig implements Serializable {
      * 排名等级配置，每个排名等级占整个排名的多少比例，加起来为 1
      */
     private Map<String, Double> rankingLevels = new HashMap<>();
+
+    /**
+     * 文科科目列表
+     */
+    private List<String> wenSubjects = new ArrayList<>();
+
+    /**
+     * 理科科目列表
+     */
+    private List<String> liSubjects = new ArrayList<>();
+
+    public List<String> getWenSubjects() {
+        return wenSubjects;
+    }
+
+    public void setWenSubjects(List<String> wenSubjects) {
+        this.wenSubjects = wenSubjects;
+    }
+
+    public List<String> getLiSubjects() {
+        return liSubjects;
+    }
+
+    public void setLiSubjects(List<String> liSubjects) {
+        this.liSubjects = liSubjects;
+    }
 
     public String getProjectId() {
         return projectId;

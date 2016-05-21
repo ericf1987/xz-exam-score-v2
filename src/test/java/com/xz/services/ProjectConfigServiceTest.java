@@ -19,13 +19,14 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testSaveProjectConfig() throws Exception {
         ProjectConfig config = new ProjectConfig();
-        config.setProjectId(PROJECT_ID);
+        config.setProjectId("430200-8a9be9fc2e1842a4b9b4894eee1f5f73");
         config.setCombineCategorySubjects(true);
-        config.addRankingLevel("A", 0.2);
-        config.addRankingLevel("B", 0.2);
-        config.addRankingLevel("C", 0.2);
-        config.addRankingLevel("D", 0.2);
-        config.addRankingLevel("E", 0.2);
+        config.addRankingLevel("A", 0.35);
+        config.addRankingLevel("B", 0.30);
+        config.addRankingLevel("C", 0.23);
+        config.addRankingLevel("D", 0.07);
+        config.addRankingLevel("E", 0.04);
+        config.addRankingLevel("F", 0.01);
 
         projectConfigService.saveProjectConfig(config);
     }

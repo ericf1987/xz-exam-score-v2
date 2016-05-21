@@ -95,12 +95,13 @@ public class RankLevelTask extends Receiver {
     }
 
     private void removeCombiningSubjects(Map<String, String> rankLevels) {
-        rankLevels.remove("004");
-        rankLevels.remove("005");
-        rankLevels.remove("006");
-        rankLevels.remove("007");
-        rankLevels.remove("008");
-        rankLevels.remove("009");
+        Iterator<Map.Entry<String, String>> iterator = rankLevels.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            if (!StringUtil.isOneOf(entry.getKey(), "001", "002", "003", "004005006", "007008009")) {
+                iterator.remove();
+            }
+        }
     }
 
     /**

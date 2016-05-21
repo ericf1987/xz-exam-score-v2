@@ -70,6 +70,7 @@ public class CombinedSubjectScoreTask extends Receiver {
     }
 
     private boolean isW(String subjectId) {
+        // 有的学校把政治课(007)称作思想品德(013)
         return StringUtil.isOneOf(subjectId, "007", "008", "009", "013");
     }
 }
