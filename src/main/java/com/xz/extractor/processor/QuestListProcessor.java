@@ -1,7 +1,5 @@
 package com.xz.extractor.processor;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Context;
 import org.bson.Document;
@@ -26,17 +24,12 @@ public class QuestListProcessor extends DataProcessor {
     }
 
     @Override
-    protected void processLine(Context context, String line) {
-        JSONObject jsonObject = JSON.parseObject(line);
+    protected void before(Context context) {
+        scoreDatabase.getCollection("quest_list").deleteMany(new Document("project", context.get("project")));
+    }
 
-        Document document = new Document();
-        document.put("project", getString(jsonObject, "project"));
-        document.put("questId", getString(jsonObject, "questId"));
-        document.put("subject", getString(jsonObject, "subject"));
-        document.put("isObjective", getString(jsonObject, "isObjective", ""));
-        document.put("questNo", getString(jsonObject, "questNo"));
-        document.put("score", getString(jsonObject, "score"));
-        document.put("standardAnswer", getString(jsonObject, "standardAnswer", ""));
-        scoreDatabase.getCollection("quest_list").insertOne(document);
+    @Override
+    protected void processLine(Context context, String line) {
+        scoreDatabase.getCollection("quest_list").insertOne(Document.parse(line.trim()));
     }
 }

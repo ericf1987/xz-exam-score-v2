@@ -1,9 +1,10 @@
 package com.xz.extractor.processor;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.extractor.InvalidExamDataException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -20,8 +21,6 @@ import java.util.stream.Collectors;
  * @author zhaorenwu
  */
 public abstract class DataProcessor {
-
-    public static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
 
     protected void assertNotEmpty(Object obj, String propName) {
         if (obj == null ||
@@ -94,15 +93,15 @@ public abstract class DataProcessor {
      *
      * @throws IOException 如果读取失败
      */
-    public void read(String filename, byte[] content) throws IOException {
+    public void read(String project, String filename, byte[] content) throws IOException {
 
         if (!filename.endsWith(".json")) {
             return;
         }
 
         Context context = new Context();
-        context.put("filename", filename);          // 供 reader 获取文件名
-
+        context.put("filename", filename);
+        context.put("project", project);
 
         int lineCounter = 1;
         try {
@@ -125,6 +124,46 @@ public abstract class DataProcessor {
             throw e;
         } catch (Exception e) {
             throw new InvalidExamDataException(context, lineCounter, e);
+        }
+    }
+
+    /**
+     * 读取文件中的考试项目id
+     *
+     * @param filename  文件名称
+     * @param content   文件内容
+     *
+     * @return  考试项目id
+     */
+    public String readExamProject(String filename, byte[] content) {
+        if (!filename.endsWith(".json")) {
+            return null;
+        }
+
+        try {
+
+            // 按行读取文件内容
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
+            LineIterator lineIterator = IOUtils.lineIterator(inputStream, "UTF-8");
+
+            String line = null;
+            while (lineIterator.hasNext()) {
+                line = lineIterator.nextLine();
+                if (StringUtil.isEmpty(line)) {
+                    break;
+                }
+            }
+
+            if (StringUtil.isBlank(line)) {
+                return null;
+            }
+
+            JSONObject jsonObject = JSON.parseObject(line);
+            return getString(jsonObject, "project");
+        } catch (InvalidExamDataException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InvalidExamDataException("考试项目信息读取失败", e);
         }
     }
 

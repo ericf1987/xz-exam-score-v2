@@ -3,6 +3,7 @@ package com.xz.controllers;
 import ch.qos.logback.core.util.CloseUtil;
 import com.xz.AppException;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.extractor.ProcessorFactory;
 import com.xz.extractor.processor.DataProcessor;
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -111,20 +113,69 @@ public class ZipUploadController {
 
     private void readEntries(Supplier<ZipInputStream> zipInputStreamSupplier) throws IOException {
 
+        // 先读取项目信息，在读取考试数据
+        Predicate<String> isProjectData = filename -> filename.equals("subject_list.json");
+        String project = readProjectInfo(zipInputStreamSupplier, isProjectData);
+
+        if (StringUtil.isNotEmpty(project)) {
+            readExamDatas(project, zipInputStreamSupplier);
+        } else {
+            LOG.error("未读取到 subject_list.json 文件中的考试项目信息");
+        }
+    }
+
+    // 读取 subject_list.json 文件中的考试项目信息
+    private String readProjectInfo(
+            Supplier<ZipInputStream> zipInputStreamSupplier, Predicate<String> filenameCondition) throws IOException {
+
+        ZipInputStream zipInputStream = zipInputStreamSupplier.get();
+        try {
+            ZipEntry zipEntry;
+            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+
+                String fileName = getFilePattern(zipEntry.getName().replace("\\", "/"));
+                if (!filenameCondition.test(fileName)) {
+                    continue;
+                }
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                while (zipInputStream.available() > 0) {
+                    int read = zipInputStream.read();
+                    if (read != -1) {
+                        bos.write(read);
+                    }
+                }
+
+                try {
+                    DataProcessor dataProcessor = processorFactory.getDataProcessor(fileName);
+                    return dataProcessor.readExamProject(fileName, bos.toByteArray());
+                } finally {
+                    CloseUtil.closeQuietly(bos);
+                }
+            }
+
+            return null;
+        } finally {
+            CloseUtil.closeQuietly(zipInputStream);
+        }
+    }
+
+    private void readExamDatas(String project, Supplier<ZipInputStream> zipInputStreamSupplier) throws IOException {
+
         ZipInputStream zipInputStream = zipInputStreamSupplier.get();
         try {
             ZipEntry zipEntry;
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
 
                 String fileName = zipEntry.getName().replace("\\", "/");
-                readEntry(zipInputStream, fileName);
+                readExamData(project, zipInputStream, fileName);
             }
         } finally {
             CloseUtil.closeQuietly(zipInputStream);
         }
     }
 
-    private void readEntry(ZipInputStream zipInputStream, String fileName) throws IOException {
+    private void readExamData(String project, ZipInputStream zipInputStream, String fileName) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         while (zipInputStream.available() > 0) {
             int read = zipInputStream.read();
@@ -141,7 +192,7 @@ public class ZipUploadController {
                 LOG.info("跳过文件 '" + fileName);
             } else {
                 LOG.info("正在读取文件 '" + fileName + "'...");
-                dataProcessor.read(fileName, bos.toByteArray());
+                dataProcessor.read(project, fileName, bos.toByteArray());
             }
         } finally {
             CloseUtil.closeQuietly(bos);
