@@ -47,7 +47,7 @@ public class ProcessorFactory {
         registerProcessor(fullScoreProcessor);
         registerProcessor(questListProcessor);
         registerProcessor(schoolListProcessor);
-//        registerProcessor(scoreProcessor);
+        registerProcessor(scoreProcessor);
         registerProcessor(studentListProcessor);
         registerProcessor(subjectListProcessor);
     }
