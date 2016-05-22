@@ -32,7 +32,8 @@ public class RankLevelService {
     @Autowired
     MongoDatabase scoreDatabase;
 
-    public String getRankLevel(String projectId, String studentId, Target target, String rankRange) {
+    public String getRankLevel(
+            String projectId, String studentId, Target target, String rankRange, String defaultValue) {
 
         String collectionName = "total_score";
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
@@ -40,16 +41,18 @@ public class RankLevelService {
             collectionName = "total_score_combined";
         }
 
-        Document document = scoreDatabase.getCollection(collectionName).find(
-                doc("project", projectId)
-                        .append("target", target2Doc(target))
-                        .append("range", range2Doc(Range.student(studentId)))
-        ).projection(doc("rankLevel", 1)).first();
+        Document query = doc("project", projectId)
+                .append("target", target2Doc(target))
+                .append("range", range2Doc(Range.student(studentId)));
+
+        Document document = scoreDatabase.getCollection(collectionName)
+                .find(query).projection(doc("rankLevel", 1)).first();
 
         if (document != null) {
             return ((Document) document.get("rankLevel")).getString(rankRange);
         } else {
-            return null;
+            LOG.warn("找不到排名等级（可能缺考）: query=" + query);
+            return defaultValue;
         }
     }
 

@@ -1,10 +1,7 @@
 package com.xz.bean;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 报表的项目个性化配置
@@ -26,33 +23,7 @@ public class ProjectConfig implements Serializable {
     /**
      * 排名等级配置，每个排名等级占整个排名的多少比例，加起来为 1
      */
-    private Map<String, Double> rankingLevels = new HashMap<>();
-
-    /**
-     * 文科科目列表
-     */
-    private List<String> wenSubjects = new ArrayList<>();
-
-    /**
-     * 理科科目列表
-     */
-    private List<String> liSubjects = new ArrayList<>();
-
-    public List<String> getWenSubjects() {
-        return wenSubjects;
-    }
-
-    public void setWenSubjects(List<String> wenSubjects) {
-        this.wenSubjects = wenSubjects;
-    }
-
-    public List<String> getLiSubjects() {
-        return liSubjects;
-    }
-
-    public void setLiSubjects(List<String> liSubjects) {
-        this.liSubjects = liSubjects;
-    }
+    private Map<String, Double> rankLevels = new HashMap<>();
 
     public String getProjectId() {
         return projectId;
@@ -70,18 +41,25 @@ public class ProjectConfig implements Serializable {
         this.combineCategorySubjects = combineCategorySubjects;
     }
 
-    public Map<String, Double> getRankingLevels() {
-        return rankingLevels;
+    public Map<String, Double> getRankLevels() {
+        return rankLevels;
     }
 
-    public void setRankingLevels(Map<String, Double> rankingLevels) {
-        this.rankingLevels = rankingLevels;
+    public void setRankLevels(Map<String, Double> rankLevels) {
+        this.rankLevels = rankLevels;
     }
 
     public void addRankingLevel(String level, double portion) {
-        if (this.rankingLevels == null) {
-            this.rankingLevels = new HashMap<>();
+        if (this.rankLevels == null) {
+            this.rankLevels = new HashMap<>();
         }
-        this.rankingLevels.put(level, portion);
+        this.rankLevels.put(level, portion);
+    }
+
+    public String getLastRankLevel() {
+        List<String> levels = new ArrayList<>(rankLevels.keySet());
+        Collections.sort(levels);
+        Collections.reverse(levels);
+        return levels.get(0);
     }
 }

@@ -61,6 +61,7 @@ public class GenerateRankLevelReportController {
         List<SortItem> sortItems = new ArrayList<>();   // 用来做最后的排名
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        String lastRankLevel = projectConfig.getLastRankLevel();
         if (projectConfig.isCombineCategorySubjects()) {
             subjects.add(Target.subject("004005006"));
             subjects.add(Target.subject("007008009"));
@@ -101,13 +102,16 @@ public class GenerateRankLevelReportController {
             for (Target subject : subjects) {
                 String subjectId = subject.getId().toString();
                 double score = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subjectId));
-                String rankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.subject(subjectId), Range.SCHOOL);
+                String rankLevel = rankLevelService.getRankLevel(
+                        projectId, studentId, Target.subject(subjectId), Range.SCHOOL, lastRankLevel);
+
                 excelWriter.set(row.get(), column.incrementAndGet(), score);
                 excelWriter.set(row.get(), column.incrementAndGet(), rankLevel);
             }
 
             double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
-            String totalRankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.project(projectId), Range.SCHOOL);
+            String totalRankLevel = rankLevelService.getRankLevel(
+                    projectId, studentId, Target.project(projectId), Range.SCHOOL, lastRankLevel);
             excelWriter.set(row.get(), column.incrementAndGet(), totalScore);
             excelWriter.set(row.get(), column.incrementAndGet(), totalRankLevel);
 

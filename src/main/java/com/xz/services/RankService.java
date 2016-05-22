@@ -94,7 +94,7 @@ public class RankService {
 
         ProjectConfig config = projectConfigService.getProjectConfig(projectId);
 
-        Map<String, Double> rankingLevels = config.getRankingLevels();
+        Map<String, Double> rankingLevels = config.getRankLevels();
         List<String> levelKeys = new ArrayList<>(rankingLevels.keySet());
         Collections.sort(levelKeys);
 

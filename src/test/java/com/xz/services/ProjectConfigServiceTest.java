@@ -19,6 +19,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testSaveProjectConfig() throws Exception {
         saveShifengConfig();
+        save19SchoolConfig();
     }
 
     // 石峰中学配置
@@ -32,6 +33,21 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         config.addRankingLevel("D", 0.07);
         config.addRankingLevel("E", 0.04);
         config.addRankingLevel("F", 0.01);
+
+        projectConfigService.saveProjectConfig(config);
+    }
+
+    // 石峰中学配置
+    private void save19SchoolConfig() {
+        ProjectConfig config = new ProjectConfig();
+        config.setProjectId("430200-89c9dc7481cd47a69d85af3f0808e0c4");
+        config.setCombineCategorySubjects(false);
+        config.addRankingLevel("A", 0.12);
+        config.addRankingLevel("B", 0.20);
+        config.addRankingLevel("C", 0.25);
+        config.addRankingLevel("D", 0.25);
+        config.addRankingLevel("E", 0.16);
+        config.addRankingLevel("F", 0.02);
 
         projectConfigService.saveProjectConfig(config);
     }
