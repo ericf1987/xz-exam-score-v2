@@ -19,8 +19,10 @@ public class CombinedSubjectScoreTaskTest extends XzExamScoreV2ApplicationTests 
 
     @Test
     public void testRunTask() throws Exception {
-        task.runTask(new AggrTask(PROJECT_ID, "aaa", "combined_total_score")
-                .setRange(Range.student("SCHOOL_009_CLASS_03_02")));
+        String projectId = "430200-8a9be9fc2e1842a4b9b4894eee1f5f73";
+        String type = "combined_total_score";
 
+        task.runTask(new AggrTask(projectId, "aaa", type)
+                .setRange(Range.student("a9e1be16-9fe9-4741-91ba-591587e15560")));
     }
 }

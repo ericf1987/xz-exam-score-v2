@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.xz.services.SubjectService.getSubjectName;
@@ -58,6 +58,8 @@ public class GenerateRankLevelReportController {
         List<Range> students = rangeService.queryRanges(projectId, Range.STUDENT);
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
 
+        List<SortItem> sortItems = new ArrayList<>();   // 用来做最后的排名
+
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         if (projectConfig.isCombineCategorySubjects()) {
             subjects.add(Target.subject("004005006"));
@@ -68,6 +70,7 @@ public class GenerateRankLevelReportController {
 
         AtomicInteger column = new AtomicInteger(-1);
         ExcelWriter excelWriter = new ExcelWriter();
+        excelWriter.set(0, column.incrementAndGet(), "编号");
         excelWriter.set(0, column.incrementAndGet(), "学生");
         excelWriter.set(0, column.incrementAndGet(), "班级");
 
@@ -78,6 +81,7 @@ public class GenerateRankLevelReportController {
 
         excelWriter.set(0, column.incrementAndGet(), "总分");
         excelWriter.set(0, column.incrementAndGet(), "等第");
+        excelWriter.set(0, column.incrementAndGet(), "等第排名");
 
         //////////////////////////////////////////////////////////////
 
@@ -90,6 +94,7 @@ public class GenerateRankLevelReportController {
             String className = classService.findClass(projectId, classId).getString("name");
             column = new AtomicInteger(-1);
 
+            excelWriter.set(row.get(), column.incrementAndGet(), studentId);
             excelWriter.set(row.get(), column.incrementAndGet(), student.getString("name"));
             excelWriter.set(row.get(), column.incrementAndGet(), className);
 
@@ -106,12 +111,111 @@ public class GenerateRankLevelReportController {
             excelWriter.set(row.get(), column.incrementAndGet(), totalScore);
             excelWriter.set(row.get(), column.incrementAndGet(), totalRankLevel);
 
+            sortItems.add(new SortItem(studentId, totalRankLevel, totalScore));
+
             row.incrementAndGet();
+        }
+
+        //////////////////////////////////////////////////////////////
+
+        Collections.sort(sortItems);
+        Map<String, SortItem> sortItemMap = new HashMap<>();
+
+        // 1. 计算排名，2. 构造 sortItemMap
+        for (int i = 0; i < sortItems.size(); i++) {
+            SortItem sortItem = sortItems.get(i);
+            sortItemMap.put(sortItem.getStudentId(), sortItem); // 构造 map 给后面的循环用
+
+            if (i > 0) {
+                SortItem last = sortItems.get(i - 1);
+                if (sortItem.compareTo(last) == 0) {
+                    sortItem.setRank(last.rank);
+                } else {
+                    sortItem.setRank(i + 1);
+                }
+            } else {
+                sortItem.setRank(1);
+            }
+        }
+
+        int studentSize = students.size();
+        int columnIndex = column.incrementAndGet();
+        for (int i = 0; i < studentSize; i++) {
+            int rowIndex = i + 1;
+            String studentId = excelWriter.getString(rowIndex, 0);
+            SortItem sortItem = sortItemMap.get(studentId);
+            excelWriter.set(rowIndex, columnIndex, sortItem.getRank());
         }
 
         //////////////////////////////////////////////////////////////
 
         excelWriter.save("target/report.xlsx");
         return Result.success();
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    // 等第、总分排名
+    private static class SortItem implements Comparable<SortItem> {
+
+        private String studentId;
+
+        private String rankLevels;
+
+        private double totalScore;
+
+        private int rank;
+
+        public SortItem(String studentId, String rankLevels, double totalScore) {
+            this.studentId = studentId;
+            this.rankLevels = rankLevels;
+            this.totalScore = totalScore;
+        }
+
+        public String getStudentId() {
+            return studentId;
+        }
+
+        public void setStudentId(String studentId) {
+            this.studentId = studentId;
+        }
+
+        public String getRankLevels() {
+            return rankLevels;
+        }
+
+        public void setRankLevels(String rankLevels) {
+            this.rankLevels = rankLevels;
+        }
+
+        public double getTotalScore() {
+            return totalScore;
+        }
+
+        public void setTotalScore(double totalScore) {
+            this.totalScore = totalScore;
+        }
+
+        public int getRank() {
+            return rank;
+        }
+
+        public void setRank(int rank) {
+            this.rank = rank;
+        }
+
+        @Override
+        public int compareTo(SortItem o) {
+
+            // 排名等级顺序
+            int rankLevelCompare = this.rankLevels.compareTo(o.rankLevels);
+
+            if (rankLevelCompare != 0) {
+                return rankLevelCompare;
+            } else {
+                // 分数倒序
+                return this.totalScore > o.totalScore ? -1 : (this.totalScore < o.totalScore ? 1 : 0);
+            }
+        }
     }
 }
