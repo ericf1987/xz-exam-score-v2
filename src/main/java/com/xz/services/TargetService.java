@@ -95,7 +95,7 @@ public class TargetService {
 
         switch (targetName) {
             case Target.PROJECT:
-                return "000";
+                return null;
 
             case Target.SUBJECT:
                 return target.getId().toString();

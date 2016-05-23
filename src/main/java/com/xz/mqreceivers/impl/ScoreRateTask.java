@@ -55,7 +55,7 @@ public class ScoreRateTask extends Receiver {
         }
 
         double scoreRate = score / fullScore;
-        String scoreLevel = scoreLevelService.getScoreLevel(projectId, scoreRate);
+        String scoreLevel = scoreLevelService.calculateScoreLevel(projectId, scoreRate);
 
         Document query = doc("project", projectId)
                 .append("range", Mongo.range2Doc(range))

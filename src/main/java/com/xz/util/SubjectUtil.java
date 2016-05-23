@@ -18,6 +18,9 @@ public class SubjectUtil {
 
     // 是否是综合科目
     public static boolean isCombinedSubject(String subjectId) {
+        if (subjectId == null) {
+            return false;
+        }
         return StringUtil.isOneOf(subjectId, "004005006", "007008009");
     }
 }
