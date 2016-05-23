@@ -3,14 +3,12 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.*;
-import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +19,6 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
-import static com.xz.util.SubjectUtil.isCombinedSubject;
 
 @ReceiverInfo(taskType = "ranking_level")
 @Component
@@ -135,6 +132,20 @@ public class RankLevelTask extends Receiver {
         }
     }
 
+    // 计算并保存科目排名等级
+    private String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
+        String rankLevel = rankService.getRankLevel(projectId, rankRange, sbjTarget, studentId);
+
+        Document query = doc("project", projectId)
+                .append("student", studentId)
+                .append("target", target2Doc(sbjTarget));
+
+        MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+        collection.updateMany(query, $set("rankLevel." + rankRange.getName(), rankLevel));
+
+        return rankLevel;
+    }
+
     private Range[] getRankRanges(String projectId, String studentId) {
         Range classRange = studentService.getStudentRange(projectId, studentId, Range.CLASS);
         Range schoolRange = studentService.getStudentRange(projectId, studentId, Range.SCHOOL);
@@ -152,25 +163,4 @@ public class RankLevelTask extends Receiver {
         return sbjTargets;
     }
 
-    private String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
-        String rankLevel = rankService.getRankLevel(projectId, rankRange, sbjTarget, studentId);
-
-        MongoCollection<Document> totalScoreCollection = getCollection(projectId, sbjTarget);
-        totalScoreCollection.updateMany(doc()
-                        .append("project", projectId)
-                        .append("target", Mongo.target2Doc(sbjTarget))
-                        .append("range", range2Doc(Range.student(studentId))),
-                $set("rankLevel." + rankRange.getName(), rankLevel));
-
-        return rankLevel;
-    }
-
-    private MongoCollection<Document> getCollection(String projectId, Target target) {
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        if (projectConfig.isCombineCategorySubjects() && isCombinedSubject(target)) {
-            return scoreDatabase.getCollection("total_score_combined");
-        } else {
-            return scoreDatabase.getCollection("total_score");
-        }
-    }
 }

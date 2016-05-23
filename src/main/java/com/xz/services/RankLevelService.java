@@ -1,9 +1,6 @@
 package com.xz.services;
 
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.bean.ProjectConfig;
-import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -12,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
 
 /**
@@ -35,15 +31,11 @@ public class RankLevelService {
     public String getRankLevel(
             String projectId, String studentId, Target target, String rankRange, String defaultValue) {
 
-        String collectionName = "total_score";
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        if (projectConfig.isCombineCategorySubjects() && isCombinedSubject(target)) {
-            collectionName = "total_score_combined";
-        }
+        String collectionName = "rank_level";
 
         Document query = doc("project", projectId)
-                .append("target", target2Doc(target))
-                .append("range", range2Doc(Range.student(studentId)));
+                .append("student", studentId)
+                .append("target", target2Doc(target));
 
         Document document = scoreDatabase.getCollection(collectionName)
                 .find(query).projection(doc("rankLevel", 1)).first();
@@ -56,12 +48,4 @@ public class RankLevelService {
         }
     }
 
-    private boolean isCombinedSubject(Target target) {
-        if (!target.match(Target.SUBJECT)) {
-            return false;
-        }
-
-        String subjectId = target.getId().toString();
-        return StringUtil.isOneOf(subjectId, "004005006", "007008009");
-    }
 }

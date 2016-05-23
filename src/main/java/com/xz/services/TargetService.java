@@ -76,7 +76,7 @@ public class TargetService {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
         collection.find(query).forEach((Consumer<Document>) document -> {
-            String questId = document.getObjectId("_id").toString();
+            String questId = document.getString("questId");
             quests.add(new Target(Target.QUEST, questId));
         });
 

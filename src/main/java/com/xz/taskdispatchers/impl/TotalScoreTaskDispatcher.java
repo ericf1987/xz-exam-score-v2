@@ -33,7 +33,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
                 Range.STUDENT, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
 
         List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.PROJECT);
+                Target.QUEST, Target.SUBJECT, Target.PROJECT, Target.SUBJECT_OBJECTIVE);
 
         int counter = 0;
         for (Range range : ranges) {
