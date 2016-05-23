@@ -19,7 +19,10 @@ public class RankLevelTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        String student = "SCHOOL_009_CLASS_03_02";
-        rankLevelTask.runTask(new AggrTask(PROJECT_ID, "aaa", "ranking_level").setRange(Range.student(student)));
+        String student = "bbe2e6dd-200d-480f-a93e-152c2209a8f9";
+        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        AggrTask aggrTask = new AggrTask(projectId, "aaa", "ranking_level").setRange(Range.student(student));
+
+        rankLevelTask.runTask(aggrTask);
     }
 }

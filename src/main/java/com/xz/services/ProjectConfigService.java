@@ -26,6 +26,22 @@ public class ProjectConfigService {
     @Autowired
     SimpleCache cache;
 
+    /**
+     * 从缺省的配置模板产生一个新的项目配置
+     *
+     * @param projectId 项目ID
+     */
+    public void createProjectConfig(String projectId) {
+        ProjectConfig template = getDefaultProjectConfig();
+        template.setProjectId(projectId);
+        saveProjectConfig(template);
+    }
+
+    /**
+     * 保存项目配置
+     *
+     * @param projectConfig 要保存的项目配置
+     */
     public void saveProjectConfig(ProjectConfig projectConfig) {
         Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig));
         scoreDatabase.getCollection("project_config").replaceOne(
@@ -34,6 +50,22 @@ public class ProjectConfigService {
         );
     }
 
+    /**
+     * 获得缺省的项目配置模板
+     *
+     * @return 缺省的项目配置模板
+     */
+    public ProjectConfig getDefaultProjectConfig() {
+        return getProjectConfig("[default]");
+    }
+
+    /**
+     * 获取指定项目的配置
+     *
+     * @param projectId 项目ID
+     *
+     * @return 项目配置
+     */
     public ProjectConfig getProjectConfig(String projectId) {
         String cacheKey = "project_config:" + projectId;
 

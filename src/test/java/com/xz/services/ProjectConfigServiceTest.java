@@ -1,5 +1,6 @@
 package com.xz.services;
 
+import com.alibaba.fastjson.JSON;
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.ProjectConfig;
 import org.junit.Test;
@@ -50,5 +51,12 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         config.addRankingLevel("F", 0.02);
 
         projectConfigService.saveProjectConfig(config);
+    }
+
+    @Test
+    public void testGetProjectConfig() throws Exception {
+        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        System.out.println(JSON.toJSONString(projectConfig));
     }
 }

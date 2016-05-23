@@ -8,13 +8,18 @@ import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.StudentService;
+import com.xz.util.Mongo;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * 执行平均分统计
@@ -41,16 +46,19 @@ public class AverageTask extends Receiver {
 
         FindIterable<Document> totalScores = totalScoreCollection.find(
                 new Document("project", projectId)
-                        .append("range.name", range.getName())
-                        .append("range.id", range.getId())
+                        .append("range", Mongo.range2Doc(range))
         );
 
         totalScores.forEach((Consumer<Document>) document -> {
+            ObjectId _id = document.getObjectId("_id");
+
+            // 计算平均分
             int studentCount = studentService.getStudentCount(projectId, range);
             double totalScore = document.getDouble("totalScore");
             double average = totalScore / studentCount;
-            document.put("average", average);
-            totalScoreCollection.replaceOne(new Document("_id", document.get("_id")), document);
+
+            // 保存平均分
+            totalScoreCollection.updateOne(doc("_id", _id), $set("average", average));
         });
     }
 }
