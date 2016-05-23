@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.target2Doc;
+
 /**
  * (description)
  * created at 16/05/14
@@ -25,13 +28,11 @@ public class AverageService {
     MongoDatabase scoreDatabase;
 
     public double getAverage(String projectId, Range range, Target target) {
-        MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-        Document document = totalScoreCollection.find(
+        MongoCollection<Document> averageCollection = scoreDatabase.getCollection("average");
+        Document document = averageCollection.find(
                 new Document("project", projectId)
-                        .append("range.name", range.getName())
-                        .append("range.id", range.getId())
-                        .append("target.name", target.getName())
-                        .append("target.id", target.idToParam())
+                        .append("range", range2Doc(range))
+                        .append("target", target2Doc(target))
         ).first();
 
         if (document != null) {

@@ -2,6 +2,7 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -141,7 +142,7 @@ public class RankLevelTask extends Receiver {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        collection.updateMany(query, $set("rankLevel." + rankRange.getName(), rankLevel));
+        collection.updateMany(query, $set("rankLevel." + rankRange.getName(), rankLevel), new UpdateOptions().upsert(true));
 
         return rankLevel;
     }
