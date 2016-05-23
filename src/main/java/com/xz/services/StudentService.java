@@ -92,7 +92,7 @@ public class StudentService {
      * @return 学生ID列表
      */
     public List<String> getStudentList(String projectId, Range range, Target target) {
-        String subjectId = targetService.getTargetSubjectId(target);
+        String subjectId = targetService.getTargetSubjectId(projectId, target);
         return getStudentList(projectId, subjectId, range);
     }
 
