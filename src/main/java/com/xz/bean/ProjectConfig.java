@@ -25,6 +25,19 @@ public class ProjectConfig implements Serializable {
      */
     private Map<String, Double> rankLevels = new HashMap<>();
 
+    /**
+     * 得分等级配置
+     */
+    private Map<String, Double> scoreLevels = new HashMap<>();
+
+    public Map<String, Double> getScoreLevels() {
+        return scoreLevels;
+    }
+
+    public void setScoreLevels(Map<String, Double> scoreLevels) {
+        this.scoreLevels = scoreLevels;
+    }
+
     public String getProjectId() {
         return projectId;
     }
@@ -61,5 +74,12 @@ public class ProjectConfig implements Serializable {
         Collections.sort(levels);
         Collections.reverse(levels);
         return levels.get(0);
+    }
+
+    public void addScoreLevel(String scoreLevel, double rate) {
+        if (this.scoreLevels == null) {
+            this.scoreLevels = new HashMap<>();
+        }
+        this.scoreLevels.put(scoreLevel, rate);
     }
 }

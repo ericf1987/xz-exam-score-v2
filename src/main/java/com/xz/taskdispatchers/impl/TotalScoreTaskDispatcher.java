@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@TaskDispatcherInfo(taskType = "total_score")
+@TaskDispatcherInfo(taskType = "total_score", dependentTaskType = "full_score")
 @Component
 public class TotalScoreTaskDispatcher extends TaskDispatcher {
 

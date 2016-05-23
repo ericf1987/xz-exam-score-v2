@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.alibaba.fastjson.JSON;
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.ajiaedu.common.report.Keys.ScoreLevel;
 import com.xz.bean.ProjectConfig;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,27 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testSaveProjectConfig() throws Exception {
-        saveShifengConfig();
-        save19SchoolConfig();
+        saveDefaultConfig();
+    }
+
+    // 缺省配置
+    private void saveDefaultConfig() {
+        ProjectConfig config = new ProjectConfig();
+        config.setProjectId("[default]");
+        config.setCombineCategorySubjects(false);
+
+        config.addScoreLevel(ScoreLevel.Excellent.name(), 0.9);
+        config.addScoreLevel(ScoreLevel.Good.name(), 0.8);
+        config.addScoreLevel(ScoreLevel.Pass.name(), 0.6);
+        config.addScoreLevel(ScoreLevel.Fail.name(), 0.0);
+
+        config.addRankingLevel("A", 0.20);
+        config.addRankingLevel("B", 0.20);
+        config.addRankingLevel("C", 0.20);
+        config.addRankingLevel("D", 0.20);
+        config.addRankingLevel("E", 0.20);
+
+        projectConfigService.saveProjectConfig(config);
     }
 
     // 石峰中学配置

@@ -47,7 +47,7 @@ public class FullScoreService {
         if (document != null) {
             return document.getDouble("fullScore");
         } else {
-            LOG.warn("没有找到满分值: " + query.toJson());
+            // LOG.warn("没有找到满分值: " + query.toJson());
             return 0;
         }
     }
