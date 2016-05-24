@@ -92,7 +92,7 @@ public class StudentService {
      * @return 学生ID列表
      */
     public List<String> getStudentList(String projectId, Range range, Target target) {
-        String subjectId = targetService.getTargetSubjectId(target);
+        String subjectId = targetService.getTargetSubjectId(projectId, target);
         return getStudentList(projectId, subjectId, range);
     }
 
@@ -133,4 +133,27 @@ public class StudentService {
         });
     }
 
+    /**
+     * 查询学生所属的班级、学校、省市区ID
+     *
+     * @param studentId 学生ID
+     * @param rangeName 范围类型，例如 Range.SCHOOL
+     */
+    public Range getStudentRange(String projectId, String studentId, String rangeName) {
+        Document studentDoc = findStudent(projectId, studentId);
+        if (studentDoc == null) {
+            throw new IllegalArgumentException("找不到考生, project=" + projectId + ", student=" + studentId);
+        } else {
+            return new Range(rangeName, studentDoc.getString(rangeName));
+        }
+    }
+
+    public Document findStudent(String projectId, String studentId) {
+        String cacheKey = "student:" + projectId + ":" + studentId;
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+            return students.find(doc("student", studentId).append("project", projectId)).first();
+        });
+    }
 }

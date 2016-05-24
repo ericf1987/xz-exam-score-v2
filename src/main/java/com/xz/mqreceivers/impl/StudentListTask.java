@@ -29,10 +29,6 @@ public class StudentListTask extends Receiver {
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         MongoCollection<Document> stuListCollection = scoreDatabase.getCollection("student_list");
-
-        // 删除原有记录
-        deleteOldData(projectId, stuListCollection);
-
         AggregateIterable<Document> aggregate = aggregateStudentList(projectId);
         saveNewData(projectId, stuListCollection, aggregate);
     }
@@ -42,9 +38,11 @@ public class StudentListTask extends Receiver {
 
         aggregate.forEach((Consumer<Document>) document -> {
             Document resultId = (Document) document.get("_id");
-            resultId.append("project", projectId);
-            resultId.append("subjects", document.get("subjects"));
-            stuListCollection.insertOne(resultId);
+            String studentId = resultId.getString("student");
+            stuListCollection.updateMany(
+                    doc("project", projectId).append("student", studentId),
+                    $set("subjects", document.get("subjects"))
+            );
         });
     }
 
@@ -56,10 +54,6 @@ public class StudentListTask extends Receiver {
                         $match("project", projectId),
                         $group(doc("_id", getGroupId()).append("subjects", $addToSet("$subject")))
                 ));
-    }
-
-    private void deleteOldData(String projectId, MongoCollection<Document> stuListCollection) {
-        stuListCollection.deleteMany(new Document("project", projectId));
     }
 
     private Document getGroupId() {

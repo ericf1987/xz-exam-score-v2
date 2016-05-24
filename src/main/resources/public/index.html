@@ -17,6 +17,16 @@
 </fieldset>
 
 <fieldset>
+    <legend>生成项目排名等级报表</legend>
+    <form action="report/rank_level">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">开始统计</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>统计单个任务</legend>
     <form action="aggr/start/task">
         <p>项目ID：<input type="text" name="project"/></p>
@@ -24,6 +34,14 @@
         <p>
             <button type="submit">开始统计</button>
         </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>上传基础数据文件</legend>
+    <form action="upload-exam-data" method="post" enctype="multipart/form-data">
+        <p>数据文件zip包：<input type="file" name="file"></p>
+        <input type="submit" value="提交"/>
     </form>
 </fieldset>
 

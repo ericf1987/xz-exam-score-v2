@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@TaskDispatcherInfo(taskType = "total_score")
+@TaskDispatcherInfo(taskType = "total_score", dependentTaskType = "full_score")
 @Component
 public class TotalScoreTaskDispatcher extends TaskDispatcher {
 
@@ -33,7 +33,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
                 Range.STUDENT, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
 
         List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.PROJECT, Target.POINT, Target.QUEST_TYPE);
+                Target.QUEST, Target.SUBJECT, Target.PROJECT, Target.SUBJECT_OBJECTIVE);
 
         int counter = 0;
         for (Range range : ranges) {

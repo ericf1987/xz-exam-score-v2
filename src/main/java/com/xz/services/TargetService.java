@@ -76,7 +76,7 @@ public class TargetService {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
         collection.find(query).forEach((Consumer<Document>) document -> {
-            String questId = document.getObjectId("_id").toString();
+            String questId = document.getString("questId");
             quests.add(new Target(Target.QUEST, questId));
         });
 
@@ -90,12 +90,12 @@ public class TargetService {
      *
      * @return target 对象对应的科目
      */
-    public String getTargetSubjectId(Target target) {
+    public String getTargetSubjectId(String projectId, Target target) {
         String targetName = target.getName();
 
         switch (targetName) {
             case Target.PROJECT:
-                return "000";
+                return null;
 
             case Target.SUBJECT:
                 return target.getId().toString();
@@ -105,7 +105,7 @@ public class TargetService {
 
             case Target.QUEST:
                 String questId = target.getId().toString();
-                Document quest = questService.findQuest(questId);
+                Document quest = questService.findQuest(projectId, questId);
                 if (quest != null) {
                     return quest.getString("subject");
                 } else {

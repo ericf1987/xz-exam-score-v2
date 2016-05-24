@@ -2,7 +2,6 @@ package com.xz.mqreceivers.impl;
 
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.Range;
-import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author yiding_he
  */
-public class RankingLevelTaskTest extends XzExamScoreV2ApplicationTests {
+public class RankLevelTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    RankingLevelTask rankingLevelTask;
+    RankLevelTask rankLevelTask;
 
     @Test
     public void testRunTask() throws Exception {
-        rankingLevelTask.runTask(new AggrTask(PROJECT_ID, "aaa", "ranking_level")
-                .setRange(Range.clazz("SCHOOL_009_CLASS_03")).setTarget(Target.subject("004005006")));
+        String student = "bbe2e6dd-200d-480f-a93e-152c2209a8f9";
+        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        AggrTask aggrTask = new AggrTask(projectId, "aaa", "ranking_level").setRange(Range.student(student));
+
+        rankLevelTask.runTask(aggrTask);
     }
 }

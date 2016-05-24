@@ -1,6 +1,7 @@
 package com.xz.util;
 
 import com.alibaba.fastjson.JSON;
+import com.mongodb.client.model.UpdateOptions;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -14,6 +15,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  * @author yiding_he
  */
 public class Mongo {
+
+    public static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
 
     /**
      * 根据三个参数生成一个 Document，可用于分片集合的 key。
@@ -43,7 +46,7 @@ public class Mongo {
      *
      * @return 转换之后的对象
      */
-    public static Document target(Target target) {
+    public static Document target2Doc(Target target) {
         return doc("name", target.getName()).append("id", target.idToParam());
     }
 
@@ -54,7 +57,7 @@ public class Mongo {
      *
      * @return 转换之后的对象
      */
-    public static Document range(Range range) {
+    public static Document range2Doc(Range range) {
         return doc("name", range.getName()).append("id", range.getId());
     }
 }

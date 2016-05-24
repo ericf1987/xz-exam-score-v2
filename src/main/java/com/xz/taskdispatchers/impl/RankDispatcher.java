@@ -14,7 +14,7 @@ import java.util.List;
 
 @TaskDispatcherInfo(taskType = "rank", dependentTaskType = "combined_total_score")
 @Component
-public class RankTaskDispatcher extends TaskDispatcher {
+public class RankDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;

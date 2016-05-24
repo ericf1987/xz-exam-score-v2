@@ -4,11 +4,8 @@ import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
-import com.xz.services.AverageService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.Assert.*;
 
 /**
  * (description)
@@ -23,7 +20,7 @@ public class AverageTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        averageTask.runTask(new AggrTask(PROJECT_ID, "1111", "average")
-                .setTarget(Target.subject("001")).setRange(Range.school("SCHOOL_005")));
+        averageTask.runTask(new AggrTask("430200-8a9be9fc2e1842a4b9b4894eee1f5f73", "1111", "average")
+                .setTarget(Target.subject("001")).setRange(Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700")));
     }
 }

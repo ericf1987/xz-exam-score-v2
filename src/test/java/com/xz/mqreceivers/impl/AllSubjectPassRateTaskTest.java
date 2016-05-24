@@ -8,21 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * (description)
- * created at 16/05/17
+ * created at 16/05/23
  *
  * @author yiding_he
  */
-public class CombinedSubjectScoreTaskTest extends XzExamScoreV2ApplicationTests {
+public class AllSubjectPassRateTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    CombinedSubjectScoreTask task;
+    AllSubjectPassRateTask allSubjectPassRateTask;
 
     @Test
     public void testRunTask() throws Exception {
         String projectId = "430200-8a9be9fc2e1842a4b9b4894eee1f5f73";
-        String type = "combined_total_score";
+        String schoolId = "200f3928-a8bd-48c4-a2f4-322e9ffe3700";
 
-        task.runTask(new AggrTask(projectId, "aaa", type)
-                .setRange(Range.student("a9e1be16-9fe9-4741-91ba-591587e15560")));
+        allSubjectPassRateTask.runTask(
+                new AggrTask(projectId, "1", "all_subject_pass_rate").setRange(Range.school(schoolId)));
     }
 }
