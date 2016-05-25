@@ -52,7 +52,7 @@ public class FunctionController {
 
         Function function = ServerConsole.getFunctionByName(functionName);
         if (function == null) {
-            return Result.fail("未知的接口");
+            return Result.fail("未知的接口(" + functionName + ")");
         }
 
         functionInfo.put("functionName", functionName);
@@ -127,6 +127,7 @@ public class FunctionController {
 
     /////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("unused")
     public class FuncParameter {
 
         // 参数名
@@ -207,6 +208,7 @@ public class FunctionController {
 
     //////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("unused")
     public class FuncListProperty {
 
         // 返回值名称
