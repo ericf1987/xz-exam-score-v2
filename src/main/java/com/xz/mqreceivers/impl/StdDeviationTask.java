@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.util.Mongo.UPSERT;
@@ -44,8 +43,6 @@ public class StdDeviationTask extends Receiver {
         String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
-
-        Map<String, Double> studentScores = scoreService.getScores(projectId, range, target);
 
         List<String> studentIds = studentService.getStudentList(projectId, range, target);
         double average = averageService.getAverage(projectId, range, target);

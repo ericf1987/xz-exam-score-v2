@@ -6,7 +6,7 @@
 * 平均分(OK)
 * 超均率（与平均分差值/平均分）(OK)
 
-* 标准差
+* 标准差(OK)
 * 联考T分数（（校平均分-联考平均分）/联考标准差 x 10 + 50）、得分率、贡献率
 
 * 排名(OK)
@@ -54,14 +54,16 @@
 
 ##### 统计数据集合
 
-* all_subject_pass_rate   全科及格率/全科不及格率
-* average                 平均分
-* option_map              选项人数统计
-* rank_level              排名等级
-* rank_level_map          排名等级人数统计
-* score_level_map         得分等级人数统计
-* score_map               得分排名统计
-* score_minmax            最高分最低分
-* score_rate              得分率
-* total_score             总分
-* total_score_combined    文理合并的得分（仅用于需要合并文理科目的项目）
+* all_subject_pass_rate     全科及格率/全科不及格率
+* average                   平均分
+* option_map                选项人数统计
+* rank_level                排名等级
+* rank_level_map            排名等级人数统计
+* score_level_map           得分等级人数统计
+* score_map                 得分排名统计
+* score_minmax              最高分最低分
+* score_rate                得分率
+* score_segment             分数分段人数统计
+* total_score               总分
+* total_score_combined      文理合并的得分（仅用于需要合并文理科目的项目）
+* std_deviation             标准差
