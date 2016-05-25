@@ -53,20 +53,19 @@ public class OptionMapTask extends Receiver {
         ));
 
         List<Document> optionMapList = new ArrayList<>();
+        int studentCount = studentService.getStudentCount(projectId, range);
 
         aggregate.forEach((Consumer<Document>) document -> {
-            String rangeId = ((Document) document.get("_id")).getString(range.getName());
             String answer = ((Document) document.get("_id")).getString("answer");
 
             int count = document.getInteger("count");
-            int studentCount = studentService.getStudentCount(projectId, Range.clazz(rangeId));
             double rate = (double) count / studentCount;
 
-            addUpToList(optionMapList, answer, studentCount, rate);
+            addUpToList(optionMapList, answer, count, rate);
         });
 
         Document query = doc("project", projectId).append("range", range2Doc(range)).append("quest", questId);
-        optionMapCollection.updateOne(query, $set("optionMap", optionMapList), UPSERT);
+        optionMapCollection.updateOne(query, $set(doc("optionMap", optionMapList).append("count", studentCount)), UPSERT);
     }
 
     private void addUpToList(List<Document> optionMapList, String answer, int studentCount, double rate) {
