@@ -19,8 +19,8 @@ import java.util.List;
  * @author yiding_he
  */
 @Component
-@TaskDispatcherInfo(taskType = "option_count", dependentTaskType = "student_list")
-public class OptionCountDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "option_map", dependentTaskType = "student_list")
+public class OptionMapDispatcher extends TaskDispatcher {
 
     @Autowired
     QuestService questService;
@@ -30,11 +30,11 @@ public class OptionCountDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Document> quests = questService.getQuests(projectId, true);
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL);
+        List<Document> objecitveQuests = questService.getQuests(projectId, true);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL, Range.CLASS);
 
-        // 对每个学校和每个客观题发布一个任务
-        for (Document quest : quests) {
+        // 对每个学校、班级和每个客观题发布一个任务
+        for (Document quest : objecitveQuests) {
             for (Range range : ranges) {
                 dispatchTask(createTask(projectId, aggregationId)
                         .setRange(range)

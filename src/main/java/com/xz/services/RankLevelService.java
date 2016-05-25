@@ -1,5 +1,6 @@
 package com.xz.services;
 
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -28,9 +29,20 @@ public class RankLevelService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    SimpleCache cache;
+
     public String getRankLevel(
             String projectId, String studentId, Target target, String rankRange, String defaultValue) {
 
+        String cacheKey = "rank_level:" + projectId + ":" + studentId + ":" + target + ":" + rankRange;
+
+        return cache.get(cacheKey, () -> {
+            return getRankLevel0(projectId, studentId, target, rankRange, defaultValue);
+        });
+    }
+
+    private String getRankLevel0(String projectId, String studentId, Target target, String rankRange, String defaultValue) {
         String collectionName = "rank_level";
 
         Document query = doc("project", projectId)
@@ -43,7 +55,7 @@ public class RankLevelService {
         if (document != null) {
             return ((Document) document.get("rankLevel")).getString(rankRange);
         } else {
-            LOG.warn("找不到排名等级（可能缺考）: query=" + query);
+            LOG.warn("找不到排名等级（可能缺考）: query=" + query.toJson());
             return defaultValue;
         }
     }

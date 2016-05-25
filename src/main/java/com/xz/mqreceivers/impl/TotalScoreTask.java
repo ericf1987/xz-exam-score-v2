@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.Mongo.UPSERT;
 
 @Component
 @ReceiverInfo(taskType = "total_score")
@@ -58,16 +60,12 @@ public class TotalScoreTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        Document saveKey = doc("project", projectId)
+        Document query = doc("project", projectId)
                 .append("target", doc("name", target.getName()).append("id", target.idToParam()))
                 .append("range", doc("name", range.getName()).append("id", range.getId()));
 
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-        Document totalScore = new Document(saveKey)
-                .append("totalScore", totalScoreValue);
-
-        totalScoreCollection.deleteMany(saveKey);
-        totalScoreCollection.insertOne(totalScore);
+        totalScoreCollection.updateOne(query, $set("totalScore", totalScoreValue), UPSERT);
     }
 
     private Object getTotalScoreValue(Document match) {

@@ -67,9 +67,14 @@ public class AggregationRoundService {
     public void taskFinished(AggrTask task) {
         String aggregationId = task.getAggregationId();
 
-        if (redis.getHash(taskCounterKey + ":" + aggregationId).incr(task.getType(), -1) == 0) {
-            redis.getList("completed_tasks:" + aggregationId).append(false, task.getType());
+        String taskType = task.getType();
+        if (redis.getHash(taskCounterKey + ":" + aggregationId).incr(taskType, -1) == 0) {
+            taskTypeFinished(aggregationId, taskType);
         }
+    }
+
+    public void taskTypeFinished(String aggregationId, String taskType) {
+        redis.getList("completed_tasks:" + aggregationId).append(false, taskType);
     }
 
     /**
@@ -129,10 +134,10 @@ public class AggregationRoundService {
                 return;
             }
         }
+        LOG.info("统计 {} 本轮完成。", aggregationId);
     }
 
     private boolean allValuesAreZero(String aggregationId, Redis.RedisHash hash) {
-        LOG.info("等待统计 {} 完成: {}", aggregationId, hash.toMap());
         for (String key : hash.keys()) {
             if (!hash.get(key).equals("0")) {
                 return false;

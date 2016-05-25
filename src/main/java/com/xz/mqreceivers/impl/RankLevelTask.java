@@ -2,7 +2,6 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -18,10 +17,10 @@ import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.UPSERT;
 import static com.xz.util.Mongo.target2Doc;
 
-@ReceiverInfo(taskType = "ranking_level")
+@ReceiverInfo(taskType = "rank_level")
 @Component
 public class RankLevelTask extends Receiver {
 
@@ -84,11 +83,13 @@ public class RankLevelTask extends Receiver {
             List<String> rankLevelList = new ArrayList<>(rankLevels.values());
             Collections.sort(rankLevelList);  // 把等级高的放在前面，例如 "AABAA" 排列成 "AAAAB"
 
-            MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-            totalScoreCollection.updateMany(
-                    doc("project", projectId).append("range", range2Doc(student)).append("target", target2Doc(project)),
-                    $set("rankLevel." + rangeName, StringUtil.join(rankLevelList, ""))
-            );
+            MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+            Document query = doc("project", projectId)
+                    .append("target", target2Doc(project))
+                    .append("student", studentId);
+
+            String levels = StringUtil.join(rankLevelList, "");
+            collection.updateOne(query, $set("rankLevel." + rangeName, levels), UPSERT);
         }
     }
 
@@ -142,7 +143,7 @@ public class RankLevelTask extends Receiver {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        collection.updateMany(query, $set("rankLevel." + rankRange.getName(), rankLevel), new UpdateOptions().upsert(true));
+        collection.updateOne(query, $set("rankLevel." + rankRange.getName(), rankLevel), UPSERT);
 
         return rankLevel;
     }

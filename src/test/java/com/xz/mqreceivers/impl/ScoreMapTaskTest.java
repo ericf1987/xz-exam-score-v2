@@ -13,14 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author yiding_he
  */
-public class RankTaskTest extends XzExamScoreV2ApplicationTests {
+public class ScoreMapTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    RankTask rankTask;
+    ScoreMapTask scoreMapTask;
 
     @Test
     public void testRunTask() throws Exception {
-        rankTask.runTask(new AggrTask(PROJECT_ID, "aaaa", "rank")
+        scoreMapTask.runTask(new AggrTask(PROJECT_ID, "aaaa", "rank")
                 .setRange(Range.clazz("SCHOOL_003_CLASS_10"))
                 .setTarget(Target.subject("004005006"))
         );

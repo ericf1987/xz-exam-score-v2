@@ -62,11 +62,11 @@ public class RankService {
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, double score) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score_rank_map");
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
         Document id = Mongo.generateId(projectId, range, target);
 
         AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
-                $match("_id", id), $unwind("$scoreMap"), $match("scoreMap.score", $gt(score)),
+                $match(id), $unwind("$scoreMap"), $match("scoreMap.score", $gt(score)),
                 $group(doc("_id", null).append("count", $sum("$scoreMap.count")))
         ));
 

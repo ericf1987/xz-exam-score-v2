@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 四率统计
+ * 分数分段人数统计
  *
  * @author yiding_he
  */
 @Component
-@TaskDispatcherInfo(taskType = "score_level_rate", dependentTaskType = "score_rate")
-public class ScoreLevelRateDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "score_segment", dependentTaskType = "total_score")
+public class ScoreSegmentDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;
@@ -29,15 +29,12 @@ public class ScoreLevelRateDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-
-        List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
-
-        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
 
         for (Target target : targets) {
             for (Range range : ranges) {
-                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
+                dispatchTask(createTask(projectId, aggregationId).setTarget(target).setRange(range));
             }
         }
     }

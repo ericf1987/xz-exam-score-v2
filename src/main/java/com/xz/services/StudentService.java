@@ -9,6 +9,8 @@ import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,8 @@ import static com.xz.util.SubjectUtil.isCombinedSubject;
  */
 @Service
 public class StudentService {
+
+    static final Logger LOG = LoggerFactory.getLogger(StudentService.class);
 
     @Autowired
     SimpleCache simpleCache;
@@ -69,7 +73,11 @@ public class StudentService {
             if (subjectId != null) {
                 query.append("subjects", subjectId);
             }
-            return (int) scoreDatabase.getCollection("student_list").count(query);
+            int studentCount = (int) scoreDatabase.getCollection("student_list").count(query);
+            if (studentCount == 0) {
+                LOG.error("找不到学生数量: " + query.toJson());
+            }
+            return studentCount;
         });
     }
 

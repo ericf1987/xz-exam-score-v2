@@ -9,21 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * (description)
- * created at 16/05/23
+ * created at 16/05/25
  *
  * @author yiding_he
  */
-public class OptionCountTaskTest extends XzExamScoreV2ApplicationTests {
+public class RankLevelMapTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    OptionCountTask optionCountTask;
+    RankLevelMapTask rankLevelMapTask;
 
     @Test
     public void testRunTask() throws Exception {
         String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
-        String schoolId = "7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52";
-        String questId = "57403a032d560287556b90ca";
-        optionCountTask.runTask(new AggrTask(projectId, "11", "option_count")
-                .setRange(Range.school(schoolId)).setTarget(Target.quest(questId)));
+        rankLevelMapTask.runTask(new AggrTask(projectId, "111", "rank_level_map")
+                .setRange(Range.clazz("825d4b39-9934-4af2-9799-02536e8507aa"))
+                .setTarget(Target.subject("001")));
     }
 }

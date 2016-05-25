@@ -26,7 +26,7 @@ public class AverageTaskDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
+                projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
 
         for (Range range : ranges) {
             AggrTask task = createTask(projectId, aggregationId).setRange(range);

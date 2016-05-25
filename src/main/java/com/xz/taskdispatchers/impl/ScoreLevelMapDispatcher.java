@@ -2,6 +2,7 @@ package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.taskdispatchers.TaskDispatcher;
@@ -11,9 +12,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 四率统计
+ *
+ * @author yiding_he
+ */
 @Component
-@TaskDispatcherInfo(taskType = "rank_level", dependentTaskType = "rank")
-public class RankLevelDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "score_level_map", dependentTaskType = "score_rate")
+public class ScoreLevelMapDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;
@@ -24,11 +30,15 @@ public class RankLevelDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
-        // 对哪些范围计算排名等级
-        List<Range> students = rangeService.queryRanges(projectId, Range.STUDENT);
+        List<Range> ranges = rangeService.queryRanges(
+                projectId, Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
 
-        for (Range student : students) {
-            dispatchTask(createTask(projectId, aggregationId).setRange(student));
+        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT);
+
+        for (Target target : targets) {
+            for (Range range : ranges) {
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
+            }
         }
     }
 }

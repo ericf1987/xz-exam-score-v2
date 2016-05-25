@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.Mongo.UPSERT;
 import static com.xz.util.Mongo.range2Doc;
 
 /**
@@ -55,8 +57,7 @@ public class AverageTask extends Receiver {
             double average = totalScore / studentCount;
 
             // 保存平均分
-            averageCollection.deleteMany(query);
-            averageCollection.insertOne(doc(query).append("average", average));
+            averageCollection.updateOne(query, $set("average", average), UPSERT);
         });
     }
 }

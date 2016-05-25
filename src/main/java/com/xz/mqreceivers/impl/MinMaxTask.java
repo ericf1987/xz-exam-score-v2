@@ -1,7 +1,6 @@
 package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -19,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * 最高分最低分统计（不包含题目，题目在 mapreduce 中统计）
@@ -88,11 +89,8 @@ public class MinMaxTask extends Receiver {
 
     private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
         Document id = Mongo.generateId(projectId, range, target);
-        Document result = new Document("_id", id).append("value",
-                new Document("min", min.get()).append("max", max.get()));
-
-        scoreDatabase.getCollection("min_max_score")
-                .replaceOne(new Document("_id", id), result, new UpdateOptions().upsert(true));
+        scoreDatabase.getCollection("score_minmax")
+                .updateOne(id, $set(doc("min", min.get()).append("max", max.get())), UPSERT);
     }
 
 }
