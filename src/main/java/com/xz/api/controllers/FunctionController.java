@@ -3,11 +3,13 @@ package com.xz.api.controllers;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.annotation.*;
 import com.xz.api.server.ServerConsole;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +60,39 @@ public class FunctionController {
         functionInfo.put("params", parseParameters(function.parameters()));
         functionInfo.put("result", parseResult(function.result()));
         return Result.success().set("functionInfo", functionInfo);
+    }
+
+    /**
+     * 获取IP地址
+     */
+    @RequestMapping(value="/getIp", method = RequestMethod.GET)
+    public Result getIp(HttpServletRequest request) {
+        String ip = request.getHeader("x-forwarded-for");
+
+        if (StringUtils.isNotEmpty(ip)) {
+            return Result.success().set("ip", ipHandler(ip)) ;
+        }
+
+        ip = request.getHeader("X-Real-IP");
+        if (StringUtils.isNotEmpty(ip)) {
+            return Result.success().set("ip", ipHandler(ip)) ;
+        }
+
+        return Result.success().set("ip", ipHandler(request.getRemoteAddr()));
+    }
+
+    // 对Ip地址进行一些格式化处理，防止出现类似这样的情况：10.44.123.238, 61.158.153.53
+    private String ipHandler(String initIp) {
+
+        if (StringUtils.isEmpty(initIp)) {
+            return initIp;
+        }
+
+        if (initIp.contains(",")) {
+            return initIp.split(",")[1];
+        } else {
+            return initIp;
+        }
     }
 
     private Map<String, Object> parseResult(ResultInfo resultInfo) {

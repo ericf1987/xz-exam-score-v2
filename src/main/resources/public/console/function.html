@@ -8,15 +8,15 @@
 <link rel="stylesheet" href="css/default.css"/>
 <link rel="stylesheet" href="css/function.css"/>
 <script src="js/jquery-1.8.3.min.js"></script>
-<script src="js/param.js"></script>
+<script src="js/param.min.js"></script>
 <script type="text/javascript" src="js/function.js"></script>
 </head>
 <body>
 <div style="margin:5px;" id="function-title">
 <a href="/console/index.html">接口列表</a> &gt;
 </div>
-<div class="result"><strong>请求</strong><br/></div>
-<div class="result" id="call-result"><strong>调用结果</strong><br/></div>
+<div class="result" id="call-request"><strong>请求</strong><br/></div>
+<div class="result" id="call-response"><strong>调用结果</strong><br/></div>
 
 <div class="description">
   <div class="field"><div class="label">名称</div>
@@ -24,9 +24,9 @@
   </div>
   <div class="field"><div class="label">描述</div><div class="fieldvalue" id="func-desc"></div></div>
   <div class="field"><div class="label">参数（红色表示必填，日期格式可以是 yyyy-MM-dd、yyyy-MM-dd HH:mm 或 yyyy-MM-dd HH:mm:ss）</div>
-      <form id="func-params" func="" action="#">
+      <div id="func-params" func="">
 
-      </form>
+      </div>
   </div>
   <div class="field" id="func-result"><div class="label">返回值属性</div></div>
 </div>

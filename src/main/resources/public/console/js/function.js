@@ -24,8 +24,10 @@ $(document).ready(function() {
                         html += "<br/>" + escapeHtml(msg);
                     }
 
-                    $("#call-result").html(html)
+                    $("#call-response").html(html)
                 }
+
+                $("#call-request").html(parseRequest(funcName, p));
             },
         });
     }
@@ -119,6 +121,44 @@ $(document).ready(function() {
         return html;
     }
 
+    function parseRequest(funcName, p) {
+        var html = "";
+        var parameters = {};
+
+        if (p) {
+            p = decodeURIComponent(p);
+            var paramInfos = p.split(";");
+            if (paramInfos.length) {
+                for(var i=0; i<paramInfos.length; i++) {
+                    var paramElement = paramInfos[i];
+
+                    var paramInfo = paramElement.split("=");
+                    var paramName = paramInfo[0];
+                    var paramValue = paramInfo[1];
+
+                    parameters[paramName]=paramValue ? paramValue.split(",") : "";
+
+                }
+            }
+        }
+
+        $.getJSON("/apiconsole/getIp", function (res) {
+            var ip = res.data.ip;
+
+            var clientInfo =
+            {
+                "clientInfo": {"ipAddress": ip},
+                "functionName": funcName,
+                "parameters": parameters
+            };
+
+            html += "<strong>请求</strong><br/>" + JSON.stringify(clientInfo);
+            $("#call-request").html(html);
+        });
+
+        return html;
+    }
+
     function getPropertyHtml (property) {
         var html = "";
 
@@ -166,5 +206,6 @@ $(document).ready(function() {
         }
 
         callBackFunction(func, params);
+        $(window).scrollTop(0);
     })
 });
