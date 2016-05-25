@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.util.Mongo.UPSERT;
 import static com.xz.util.Mongo.range2Doc;
 
 @Component
@@ -36,7 +37,7 @@ public class OptionMapTask extends Receiver {
         String questId = aggrTask.getTarget().getId().toString();
 
         MongoCollection<Document> scoreCollection = scoreDatabase.getCollection("score");
-        MongoCollection<Document> optionMapCollection = scoreDatabase.getCollection("option_count");
+        MongoCollection<Document> optionMapCollection = scoreDatabase.getCollection("option_map");
 
         processRange(projectId, questId, aggrTask.getRange(), scoreCollection, optionMapCollection);
     }
@@ -65,7 +66,7 @@ public class OptionMapTask extends Receiver {
         });
 
         Document query = doc("project", projectId).append("range", range2Doc(range)).append("quest", questId);
-        optionMapCollection.updateOne(query, $set("optionMap", optionMapList));
+        optionMapCollection.updateOne(query, $set("optionMap", optionMapList), UPSERT);
     }
 
     private void addUpToList(List<Document> optionMapList, String answer, int studentCount, double rate) {

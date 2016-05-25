@@ -52,7 +52,7 @@ public class ScoreMapTask extends Receiver {
 
         // 保存新记录
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
-        collection.insertOne(doc(query).append("scoreMap", scoreCountList));
+        collection.insertOne(doc(query).append("scoreMap", scoreCountList).append("count", studentIds.size()));
     }
 
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {
@@ -63,6 +63,7 @@ public class ScoreMapTask extends Receiver {
             double totalScore = scoreService.getScore(projectId, studentRange, target);
             addUpScoreMap(scoreCountList, totalScore);
         }
+
         return scoreCountList;
     }
 

@@ -11,9 +11,9 @@
 
 * 排名(OK)
 * 排名等级(OK)
-* 排名等级分布
+* 排名等级分布(OK)
 * 排名前30%总分平均分
-* 排名数 1/4 位数，分数 1/2 位数，分数 3/4 位数
+* 排名数 1/4 位数，1/2 位数，3/4 位数
 
 * 得分率/得分等级(OK)
 * 优秀率(OK)
@@ -36,3 +36,32 @@
 * 知识点-能力层级的得分，知识点得分合计、能力层级得分合计
 * 个人题型得分、得分率
 * （班、校、联考）的（题型、知识点、能力层级）平均分、得分率
+
+
+##### 基础信息集合
+
+* area_list
+* city_list
+* class_list
+* full_score
+* project_config
+* province_list
+* quest_list
+* school_list
+* score
+* student_list
+* subject_list
+
+##### 统计数据集合
+
+* all_subject_pass_rate   全科及格率/全科不及格率
+* average                 平均分
+* option_map              选项人数统计
+* rank_level              排名等级
+* rank_level_map          排名等级人数统计
+* score_level_map         得分等级人数统计
+* score_map               得分等级
+* score_minmax            最高分最低分
+* score_rate              得分率
+* total_score             总分
+* total_score_combined    文理合并的得分（仅用于需要合并文理科目的项目）
