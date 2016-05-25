@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author fengye
  */
-@TaskDispatcherInfo(taskType = "rank_level_map", dependentTaskType = "ranking_level")
+@TaskDispatcherInfo(taskType = "rank_level_map", dependentTaskType = "rank_level")
 @Component
 public class RankLevelMapDispatcher extends TaskDispatcher {
 

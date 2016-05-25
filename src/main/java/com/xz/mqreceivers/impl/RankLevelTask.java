@@ -2,7 +2,6 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -18,6 +17,7 @@ import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.Mongo.UPSERT;
 import static com.xz.util.Mongo.target2Doc;
 
 @ReceiverInfo(taskType = "rank_level")
@@ -88,9 +88,8 @@ public class RankLevelTask extends Receiver {
                     .append("target", target2Doc(project))
                     .append("student", studentId);
 
-            collection.updateMany(
-                    query, $set("rankLevel." + rangeName, StringUtil.join(rankLevelList, ""))
-            );
+            String levels = StringUtil.join(rankLevelList, "");
+            collection.updateOne(query, $set("rankLevel." + rangeName, levels), UPSERT);
         }
     }
 
@@ -144,7 +143,7 @@ public class RankLevelTask extends Receiver {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        collection.updateMany(query, $set("rankLevel." + rankRange.getName(), rankLevel), new UpdateOptions().upsert(true));
+        collection.updateOne(query, $set("rankLevel." + rankRange.getName(), rankLevel), UPSERT);
 
         return rankLevel;
     }

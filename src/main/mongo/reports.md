@@ -4,7 +4,7 @@
 * 最高分(OK)
 * 最低分(OK)
 * 平均分(OK)
-* 超均率（与平均分差值/平均分）
+* 超均率（与平均分差值/平均分）(OK)
 
 * 标准差
 * 联考T分数（（校平均分-联考平均分）/联考标准差 x 10 + 50）、得分率、贡献率
@@ -60,7 +60,7 @@
 * rank_level              排名等级
 * rank_level_map          排名等级人数统计
 * score_level_map         得分等级人数统计
-* score_map               得分等级
+* score_map               得分排名统计
 * score_minmax            最高分最低分
 * score_rate              得分率
 * total_score             总分

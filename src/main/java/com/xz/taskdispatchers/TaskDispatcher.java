@@ -43,7 +43,12 @@ public abstract class TaskDispatcher {
                 context.get("projectConfig")
         );
 
-        LOG.info("项目{}的{}统计任务分发完毕，共分发{}条任务", projectId, taskType, taskCounter.get().get());
+        Integer taskCount = taskCounter.get().get();
+        LOG.info("项目{}的{}统计任务分发完毕，共分发{}条任务", projectId, taskType, taskCount);
+
+        if (taskCount == 0) {
+            aggregationRoundService.taskTypeFinished(aggregationId, taskType);
+        }
     }
 
     public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);

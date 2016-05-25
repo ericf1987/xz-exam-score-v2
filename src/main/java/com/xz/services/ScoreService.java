@@ -12,6 +12,8 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
@@ -33,6 +35,10 @@ public class ScoreService {
 
     @Autowired
     SimpleCache cache;
+
+    public Map<String, Double> getScores(String projectId, Range range, Target target) {
+        return null;
+    }
 
     /**
      * 查询分数
