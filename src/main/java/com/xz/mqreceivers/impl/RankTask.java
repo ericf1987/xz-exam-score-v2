@@ -43,7 +43,7 @@ public class RankTask extends Receiver {
         Target target = aggrTask.getTarget();
 
         List<String> studentIds = studentService.getStudentList(projectId, range, target);
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score_rank_map");
+        MongoCollection<Document> collection = scoreDatabase.getCollection("rank_map");
         Document id = Mongo.generateId(projectId, range, target);
 
         collection.deleteOne(doc("_id", id));

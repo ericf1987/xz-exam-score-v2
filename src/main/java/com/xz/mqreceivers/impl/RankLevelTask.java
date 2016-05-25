@@ -18,10 +18,9 @@ import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
 
-@ReceiverInfo(taskType = "ranking_level")
+@ReceiverInfo(taskType = "rank_level")
 @Component
 public class RankLevelTask extends Receiver {
 
@@ -84,10 +83,13 @@ public class RankLevelTask extends Receiver {
             List<String> rankLevelList = new ArrayList<>(rankLevels.values());
             Collections.sort(rankLevelList);  // 把等级高的放在前面，例如 "AABAA" 排列成 "AAAAB"
 
-            MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-            totalScoreCollection.updateMany(
-                    doc("project", projectId).append("range", range2Doc(student)).append("target", target2Doc(project)),
-                    $set("rankLevel." + rangeName, StringUtil.join(rankLevelList, ""))
+            MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+            Document query = doc("project", projectId)
+                    .append("target", target2Doc(project))
+                    .append("student", studentId);
+
+            collection.updateMany(
+                    query, $set("rankLevel." + rangeName, StringUtil.join(rankLevelList, ""))
             );
         }
     }
