@@ -13,6 +13,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +24,8 @@ import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
 
 @Component
-@ReceiverInfo(taskType = "score_level_rate")
-public class ScoreLevelRateTask extends Receiver {
+@ReceiverInfo(taskType = "score_level_map")
+public class ScoreLevelMapTask extends Receiver {
 
     @Autowired
     StudentService studentService;
@@ -54,16 +55,17 @@ public class ScoreLevelRateTask extends Receiver {
         }
 
         // 计算各得分等级占比
-        Map<String, Double> scoreLevelRate = new HashMap<>();
+        List<Document> scoreLevelRate = new ArrayList<>();
         for (String scoreLevel : counters.keySet()) {
-            double rate = (double) (counters.get(scoreLevel).get()) / studentList.size();
-            scoreLevelRate.put(scoreLevel, rate);
+            int levelStudentCount = counters.get(scoreLevel).get();
+            double rate = (double) levelStudentCount / studentList.size();
+            scoreLevelRate.add(doc("scoreLevel", scoreLevel).append("count", levelStudentCount).append("rate", rate));
         }
 
         // 保存 scoreLevelRate
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score_level_rate");
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score_level_map");
         Document query = doc("project", projectId).append("range", range2Doc(range)).append("target", target2Doc(target));
         collection.deleteMany(query);
-        collection.insertOne(doc(query).append("scoreLevelRate", scoreLevelRate));
+        collection.insertOne(doc(query).append("scoreLevels", scoreLevelRate));
     }
 }

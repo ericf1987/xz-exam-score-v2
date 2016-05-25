@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
+/**
+ * 得分率/得分等级
+ */
 @Component
 @ReceiverInfo(taskType = "score_rate")
 public class ScoreRateTask extends Receiver {

@@ -45,12 +45,12 @@ public class RankLevelMapTask extends Receiver {
 
         // 删除旧记录
         MongoCollection<Document> rankLevelMapCollection = scoreDatabase.getCollection("rank_level_map");
-        Document _id = generateId(projectId, range, target);
-        rankLevelMapCollection.deleteOne(doc("_id", _id));
+        Document key = generateId(projectId, range, target);
+        rankLevelMapCollection.deleteOne(key);
 
         // 保存新记录
         List<Document> rankLevelMap = generateRankLevelMap(projectId, range, target);
-        rankLevelMapCollection.insertOne(doc("_id", _id).append("rankLevelMap", rankLevelMap));
+        rankLevelMapCollection.insertOne(doc(key).append("rankLevelMap", rankLevelMap));
     }
 
     private List<Document> generateRankLevelMap(String projectId, Range range, Target target) {

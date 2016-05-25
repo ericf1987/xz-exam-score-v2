@@ -13,17 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author yiding_he
  */
-public class OptionCountTaskTest extends XzExamScoreV2ApplicationTests {
+public class OptionMapTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    OptionCountTask optionCountTask;
+    OptionMapTask optionMapTask;
 
     @Test
     public void testRunTask() throws Exception {
         String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
         String schoolId = "7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52";
         String questId = "57403a032d560287556b90ca";
-        optionCountTask.runTask(new AggrTask(projectId, "11", "option_count")
+        optionMapTask.runTask(new AggrTask(projectId, "11", "option_count")
                 .setRange(Range.school(schoolId)).setTarget(Target.quest(questId)));
     }
 }

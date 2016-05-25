@@ -21,6 +21,8 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testSaveProjectConfig() throws Exception {
         saveDefaultConfig();
+        saveShifengConfig();
+        save19SchoolConfig();
     }
 
     // 缺省配置

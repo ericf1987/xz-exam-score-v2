@@ -18,8 +18,8 @@ import java.util.List;
  * @author yiding_he
  */
 @Component
-@TaskDispatcherInfo(taskType = "score_level_rate", dependentTaskType = "score_rate")
-public class ScoreLevelRateDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "score_level_map", dependentTaskType = "score_rate")
+public class ScoreLevelMapDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;

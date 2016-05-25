@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@TaskDispatcherInfo(taskType = "rank", dependentTaskType = "combined_total_score")
+@TaskDispatcherInfo(taskType = "score_map", dependentTaskType = "combined_total_score")
 @Component
-public class RankDispatcher extends TaskDispatcher {
+public class ScoreMapDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;
