@@ -78,8 +78,4 @@ public class ServerConsole {
     public static Map<String, Function> getAllFunctions() {
         return SERVER_FUNCTION_MAP;
     }
-
-    public static void main(String[] args) throws Exception {
-        ServerConsole.start();
-    }
 }
