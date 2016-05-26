@@ -12,6 +12,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
@@ -30,6 +34,9 @@ public class ScoreService {
 
     @Autowired
     ProjectConfigService projectConfigService;
+
+    @Autowired
+    SubjectService subjectService;
 
     @Autowired
     SimpleCache cache;
@@ -145,5 +152,17 @@ public class ScoreService {
                 return 0d;
             }
         });
+    }
+
+    public Map<String, Double> getAllSubjectScore(String projectId, Range range) {
+        List<String> subjectIds = subjectService.querySubjects(projectId);
+        Map<String, Double> result = new HashMap<>();
+
+        for (String subjectId : subjectIds) {
+            result.put(subjectId, getScore(projectId, range, Target.subject(subjectId)));
+        }
+
+        return result;
+
     }
 }
