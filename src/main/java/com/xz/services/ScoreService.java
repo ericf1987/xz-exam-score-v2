@@ -35,6 +35,25 @@ public class ScoreService {
     SimpleCache cache;
 
     /**
+     * 查询题目的答对人数
+     *
+     * @param projectId 项目ID
+     * @param questId   题目ID
+     * @param range     范围
+     *
+     * @return 答对人数
+     */
+    public int getQuestCorrentCount(String projectId, String questId, Range range) {
+
+        Document query = doc("project", projectId)
+                .append("quest", questId)
+                .append(range.getName(), range.getId())
+                .append("right", true);
+
+        return (int) scoreDatabase.getCollection("score").count(query);
+    }
+
+    /**
      * 查询分数
      *
      * @param projectId 项目ID

@@ -25,4 +25,15 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
         System.out.println(score);
     }
+
+    @Test
+    public void testGetQuestCorrectCount() throws Exception {
+        int count = scoreService.getQuestCorrentCount(
+                "430200-89c9dc7481cd47a69d85af3f0808e0c4",
+                "57403a032d560287556b90d4",
+                Range.school("7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52")
+        );
+
+        System.out.println(count);
+    }
 }
