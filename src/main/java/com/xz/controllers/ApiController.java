@@ -2,11 +2,8 @@ package com.xz.controllers;
 
 import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.api.ApiException;
 import com.xz.api.Param;
 import com.xz.api.annotation.Function;
-import com.xz.api.annotation.Parameter;
 import com.xz.api.server.Server;
 import com.xz.api.server.ServerConsole;
 import com.xz.api.utils.ParamUtils;
@@ -17,9 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * API接口
@@ -43,18 +37,11 @@ public class ApiController {
             return Result.fail("(未知的接口'" + server + "')");
         }
 
-        // 解析参数
+        // 解析与验证参数
         Param param;
-        try {
-            param = ParamUtils.decipherParam(p);
-        } catch (Exception e) {
-            return Result.fail("parameters('" + p + "') is error");
-        }
-
-        // 验证与初始化参数
         Function function = ServerConsole.getFunctionByName(server);
         try {
-            validateParam(function, param);
+            param = ParamUtils.decipherParam(function, p);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             return Result.fail(e.getMessage());
@@ -71,33 +58,5 @@ public class ApiController {
 
         LOG.info(server + " return :" + JSON.toJSONString(result));
         return result;
-    }
-
-    private void validateParam(Function function, Param param) {
-        List<String> emptyParams = new ArrayList<>();
-
-        Parameter[] parameters = function.parameters();
-        for (Parameter parameter : parameters) {
-            String name = parameter.name();
-            boolean required = parameter.required();
-            String defaultValue = parameter.defaultValue();
-
-            String paramValue = param.getString(name);
-            if (StringUtil.isNotBlank(paramValue)) {
-                continue;
-            }
-
-            if (required) {
-                emptyParams.add(name);
-            }
-
-            if (!required && StringUtil.isNotBlank(defaultValue)) {
-                param.setParameter(name, defaultValue);
-            }
-        }
-
-        if (emptyParams.size() > 0) {
-            throw new ApiException("参数不能为空：" + emptyParams);
-        }
     }
 }
