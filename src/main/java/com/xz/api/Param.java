@@ -77,7 +77,7 @@ public class Param implements Serializable {
 
     @Override
     public String toString() {
-        return "Request{" +
+        return "Param {" +
                 "parameters=" + parameterToString() + '\'' +
                 '}';
     }
