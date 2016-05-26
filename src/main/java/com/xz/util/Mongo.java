@@ -1,7 +1,5 @@
 package com.xz.util;
 
-import com.alibaba.fastjson.JSON;
-import com.mongodb.client.model.UpdateOptions;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -16,27 +14,35 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  */
 public class Mongo {
 
-    public static final UpdateOptions UPSERT = new UpdateOptions().upsert(true);
+    public static Document query(String projectId, Range range) {
+        return query(projectId, range, null);
+    }
+
+    public static Document query(String projectId, Target target) {
+        return query(projectId, null, target);
+    }
 
     /**
      * 根据三个参数生成一个 Document，可用于分片集合的 key。
      *
      * @param projectId 项目ID
-     * @param range     范围
-     * @param target    目标
+     * @param range     范围（可选）
+     * @param target    目标（可选）
      *
      * @return 生成的 key 对象
      */
-    public static Document generateId(String projectId, Range range, Target target) {
+    public static Document query(String projectId, Range range, Target target) {
+        Document document = doc("project", projectId);
 
-        Object targetId = target.getId();
-        if (!(targetId instanceof String)) {
-            targetId = Document.parse(JSON.toJSONString(targetId));
+        if (range != null) {
+            document.append("range", range2Doc(range));
         }
 
-        return doc("project", projectId)
-                .append("range", doc().append("name", range.getName()).append("id", range.getId()))
-                .append("target", doc().append("name", target.getName()).append("id", targetId));
+        if (target != null) {
+            document.append("target", target2Doc(target));
+        }
+
+        return document;
     }
 
     /**

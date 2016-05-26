@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.generateId;
+import static com.xz.util.Mongo.query;
 
 @ReceiverInfo(taskType = "rank_level_map")
 @Component
@@ -45,7 +45,7 @@ public class RankLevelMapTask extends Receiver {
 
         // 删除旧记录
         MongoCollection<Document> rankLevelMapCollection = scoreDatabase.getCollection("rank_level_map");
-        Document key = generateId(projectId, range, target);
+        Document key = query(projectId, range, target);
         rankLevelMapCollection.deleteOne(key);
 
         // 保存新记录

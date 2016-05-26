@@ -63,7 +63,7 @@ public class RankService {
      */
     public int getRank(String projectId, Range range, Target target, double score) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
-        Document id = Mongo.generateId(projectId, range, target);
+        Document id = Mongo.query(projectId, range, target);
 
         AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
                 $match(id), $unwind("$scoreMap"), $match("scoreMap.score", $gt(score)),

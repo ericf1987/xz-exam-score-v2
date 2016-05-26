@@ -15,9 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.util.Mongo.target2Doc;
 
 @ReceiverInfo(taskType = "rank_level")

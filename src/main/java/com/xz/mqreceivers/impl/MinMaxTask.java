@@ -88,7 +88,7 @@ public class MinMaxTask extends Receiver {
     }
 
     private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
-        Document id = Mongo.generateId(projectId, range, target);
+        Document id = Mongo.query(projectId, range, target);
         scoreDatabase.getCollection("score_minmax")
                 .updateOne(id, $set(doc("min", min.get()).append("max", max.get())), UPSERT);
     }

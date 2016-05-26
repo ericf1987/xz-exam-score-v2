@@ -9,6 +9,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.util.Mongo.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 
 @Component
 @ReceiverInfo(taskType = "total_score")
@@ -60,9 +60,7 @@ public class TotalScoreTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        Document query = doc("project", projectId)
-                .append("target", doc("name", target.getName()).append("id", target.idToParam()))
-                .append("range", doc("name", range.getName()).append("id", range.getId()));
+        Document query = Mongo.query(projectId, range, target);
 
         MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
         totalScoreCollection.updateOne(query, $set("totalScore", totalScoreValue), UPSERT);

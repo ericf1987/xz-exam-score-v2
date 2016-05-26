@@ -9,22 +9,18 @@ import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.AverageService;
 import com.xz.services.ScoreService;
 import com.xz.services.StudentService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.util.Mongo.UPSERT;
-import static com.xz.util.Mongo.generateId;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.util.Mongo.query;
 
 @ReceiverInfo(taskType = "std_deviation")
 @Component
 public class StdDeviationTask extends Receiver {
-
-    static final Logger LOG = LoggerFactory.getLogger(StdDeviationTask.class);
 
     @Autowired
     StudentService studentService;
@@ -55,6 +51,6 @@ public class StdDeviationTask extends Receiver {
 
         double deviation = Math.sqrt(delta / studentIds.size());
         scoreDatabase.getCollection("std_deviation").updateOne(
-                generateId(projectId, range, target), $set("stdDeviation", deviation), UPSERT);
+                query(projectId, range, target), $set("stdDeviation", deviation), UPSERT);
     }
 }
