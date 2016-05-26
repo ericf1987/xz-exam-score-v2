@@ -1,5 +1,6 @@
 package com.xz.controllers;
 
+import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.ApiException;
@@ -68,7 +69,7 @@ public class ApiController {
             return Result.fail(ThrowableUtils.toString(e));
         }
 
-        LOG.info(server + " return :" + result);
+        LOG.info(server + " return :" + JSON.toJSONString(result));
         return result;
     }
 
