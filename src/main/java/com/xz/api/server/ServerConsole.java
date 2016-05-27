@@ -1,9 +1,9 @@
 package com.xz.api.server;
 
+import com.alibaba.fastjson.JSON;
 import com.xz.AppException;
 import com.xz.api.annotation.Function;
 import com.xz.context.App;
-import com.xz.api.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class ServerConsole {
 
-    static final Logger log = LoggerFactory.getLogger(ServerConsole.class);
+    static final Logger LOG = LoggerFactory.getLogger(ServerConsole.class);
 
     public static Map<String, Function> SERVER_FUNCTION_MAP = new HashMap<>();
 
@@ -34,9 +34,9 @@ public class ServerConsole {
 
             //获取包下的类
             List<Class<Server>> classLists = ClassUtils.findClasses(Server.class, packageName);
+            LOG.info("load Servers:{}", JSON.toJSONString(classLists));
 
             for (Class<Server> clazz : classLists) {
-                log.info(clazz.getName());
 
                 // 不列出接口和抽象类
                 if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {

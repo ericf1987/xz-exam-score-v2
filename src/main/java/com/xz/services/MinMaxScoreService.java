@@ -1,8 +1,11 @@
 package com.xz.services;
 
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
+import com.xz.util.Mongo;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,14 @@ public class MinMaxScoreService {
      * @return 最低分、最高分
      */
     public double[] getMinMaxScore(String projectId, Range range, Target target) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score_minmax");
 
+        Document query = Mongo.query(projectId, range, target);
+        Document document = collection.find(query).first();
+        if (document != null) {
+            return new double[]{document.getDouble("min"), document.getDouble("max")};
+        }
+
+        return new double[]{0, 0};
     }
 }
