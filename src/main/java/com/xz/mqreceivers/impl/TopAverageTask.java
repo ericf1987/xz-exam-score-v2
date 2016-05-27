@@ -30,7 +30,7 @@ public class TopAverageTask extends Receiver{
     @Autowired
     TargetService targetService;
     @Autowired
-    MongoDatabase mongoDatabase;
+    MongoDatabase scoreDatabase;
 
     @Override
     protected void runTask(AggrTask aggrTask) {
@@ -38,8 +38,8 @@ public class TopAverageTask extends Receiver{
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        MongoCollection<Document> scoreCol = mongoDatabase.getCollection("score_map");
-        MongoCollection<Document> top_averageCol = mongoDatabase.getCollection("top_average");
+        MongoCollection<Document> scoreCol = scoreDatabase.getCollection("score_map");
+        MongoCollection<Document> top_averageCol = scoreDatabase.getCollection("top_average");
 
         Document query = new Document("project", projectId).
                 append("range", Mongo.range2Doc(range)).
