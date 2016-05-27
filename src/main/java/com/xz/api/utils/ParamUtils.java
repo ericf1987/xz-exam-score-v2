@@ -111,7 +111,6 @@ public class ParamUtils {
             Double[] values = parseDecimalArray(parameterValue);
             param.setParameter(parameterName, values);
         }
-
     }
 
     private static Double[] parseDecimalArray(String parameterValue) {
