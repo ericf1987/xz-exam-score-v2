@@ -3,6 +3,7 @@ package com.xz.api.server;
 import com.alibaba.fastjson.JSON;
 import com.xz.AppException;
 import com.xz.api.annotation.Function;
+import com.xz.api.utils.PackageUtil;
 import com.xz.context.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,32 +28,40 @@ public class ServerConsole {
     public static Map<String, Server> SERVER_MAP = new HashMap<>();
 
     public static final String[] packageName = new String[]{
-        "com.xz.api.server.sys"
+        "com.xz.api.server"
     };
 
     public static void start() throws AppException {
+        List<Class<Object>> loadClasses = new ArrayList<>();
+
         try {
 
-            //获取包下的类
-            List<Class<Server>> classLists = new ArrayList<>();
-            LOG.info("load Servers:{}", JSON.toJSONString(classLists));
-
-            for (Class<Server> clazz : classLists) {
+            List<Class<Object>> packageClass = PackageUtil.findPackageClass(packageName);
+            for (Class<Object> clazz : packageClass) {
 
                 // 不列出接口和抽象类
                 if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
                     continue;
                 }
 
+                // 过滤非Server子类
+                if (!Server.class.isAssignableFrom(clazz)) {
+                    continue;
+                }
+
                 //获取类的注解对象
-                Function function = Class.forName(clazz.getName()).getAnnotation(Function.class);
-                SERVER_FUNCTION_MAP.put(clazz.getSimpleName(), function);
-                SERVER_MAP.put(clazz.getSimpleName(), App.getBean(clazz));
+                Function function = clazz.getAnnotation(Function.class);
+                String simpleName = clazz.getSimpleName();
+                SERVER_FUNCTION_MAP.put(simpleName, function);
+                SERVER_MAP.put(simpleName, (Server) App.getBean(clazz));
+                loadClasses.add(clazz);
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw new AppException("server api start is Exception", e.fillInStackTrace());
         }
+
+        LOG.info("load Servers:{}", JSON.toJSONString(loadClasses));
     }
 
     /**
