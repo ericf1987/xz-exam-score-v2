@@ -54,6 +54,14 @@ public class QuestService {
                 scoreDatabase.getCollection("quest_list").find(doc("project", projectId)));
     }
 
+    /**
+     * 查询项目中的主观题/客观题列表
+     *
+     * @param projectId   项目ID
+     * @param isObjective 是否是客观题
+     *
+     * @return 题目列表
+     */
     public List<Document> getQuests(String projectId, boolean isObjective) {
         return MongoUtils.toList(
                 scoreDatabase.getCollection("quest_list").find(
