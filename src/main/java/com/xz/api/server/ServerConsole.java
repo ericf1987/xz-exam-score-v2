@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class ServerConsole {
         try {
 
             //获取包下的类
-            List<Class<Server>> classLists = ClassUtils.findClasses(Server.class, packageName);
+            List<Class<Server>> classLists = new ArrayList<>();
             LOG.info("load Servers:{}", JSON.toJSONString(classLists));
 
             for (Class<Server> clazz : classLists) {
