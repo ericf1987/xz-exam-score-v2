@@ -62,7 +62,8 @@ public class SubjectRateTask extends Receiver {
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates)
+                MongoUtils.$set("subjectRates", subjectRates),
+                MongoUtils.UPSERT
         );
     }
 
@@ -82,7 +83,8 @@ public class SubjectRateTask extends Receiver {
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates)
+                MongoUtils.$set("subjectRates", subjectRates),
+                MongoUtils.UPSERT
         );
     }
 }
