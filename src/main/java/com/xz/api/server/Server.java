@@ -17,5 +17,5 @@ public interface Server {
      *
      * @return 处理结果
      */
-    public Result execute(Param param) throws Exception;
+    Result execute(Param param) throws Exception;
 }
