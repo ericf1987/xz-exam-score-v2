@@ -24,8 +24,26 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @SuppressWarnings("unchecked")
 public class RangeService {
 
+    public static String DEFAULT_PROVINCE = "430000";
+
     @Autowired
     MongoDatabase scoreDatabase;
+
+    /**
+     * 查询指定项目的省份范围
+     *
+     * @param projectId 项目id
+     *
+     * @return  range
+     */
+    public Range queryProvinceRange(String projectId) {
+        Document document = scoreDatabase.getCollection("province_list").find(doc("project", projectId)).first();
+        if (document == null) {
+            return Range.province(DEFAULT_PROVINCE);
+        }
+
+        return Range.province(document.getString("province"));
+    }
 
     /**
      * 列出一个项目的所有 Range

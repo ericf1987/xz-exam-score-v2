@@ -25,7 +25,7 @@ import static com.xz.services.SubjectService.getSubjectName;
 @Function(description = "根据考试项目ID查询考试科目列表", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
 }, result = @ResultInfo(listProperties =
-@ListProperty(name = "examSubjects", description = "考试科目列表", properties = {
+@ListProperty(name = "subjects", description = "考试科目列表", properties = {
         @Property(name = "subjectId", type = Type.String, description = "科目id"),
         @Property(name = "subjectName", type = Type.String, description = "科目名称")
 })))
@@ -43,7 +43,7 @@ public class QueryExamSubjects implements Server {
         List<String> subjectIds = subjectService.querySubjects(projectId);
         examSubjects.addAll(subjectIds.stream().map(this::getSubjectInfo).collect(Collectors.toList()));
 
-        return Result.success().set("examSubjects", examSubjects);
+        return Result.success().set("subjects", examSubjects);
     }
 
     private Map<String, String> getSubjectInfo(String subjectId) {

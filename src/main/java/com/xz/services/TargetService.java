@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -29,6 +30,14 @@ public class TargetService {
 
     @Autowired
     SubjectService subjectService;
+
+    public Target getTarget (String projectId, String subjectId) {
+        if (StringUtil.isNotBlank(subjectId)) {
+            return Target.subject(subjectId);
+        } else {
+            return Target.project(projectId);
+        }
+    }
 
     public List<Target> queryTargets(String projectId, String... targetNames) {
         List<Target> targetList = new ArrayList<>();
