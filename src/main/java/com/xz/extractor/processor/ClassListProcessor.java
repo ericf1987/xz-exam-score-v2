@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * ${描述}
+ * 班级列表数据处理
  *
  * @author zhaorenwu
  */

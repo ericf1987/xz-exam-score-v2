@@ -3,7 +3,7 @@ package com.xz.extractor.processor;
 import java.text.MessageFormat;
 
 /**
- * ${描述}
+ * 数据处理异常
  *
  * @author zhaorenwu
  */

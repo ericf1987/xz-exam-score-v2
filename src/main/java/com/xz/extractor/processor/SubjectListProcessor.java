@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 处理考试科目列表数据录入
+ * 考试科目列表数据处理
  *
  * @author zhaorenwu
  */

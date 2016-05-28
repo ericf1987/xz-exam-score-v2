@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ${描述}
+ * 得分明细数据处理
  *
  * @author zhaorenwu
  */
