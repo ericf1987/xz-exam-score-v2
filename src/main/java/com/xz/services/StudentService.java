@@ -49,6 +49,24 @@ public class StudentService {
      *
      * @param projectId 项目ID
      * @param range     范围
+     * @param target    目标
+     *
+     * @return 考生数量
+     */
+    public int getStudentCount(String projectId, Range range, Target target) {
+        if (target.match(Target.PROJECT)) {
+            return getStudentCount(projectId, range);
+        } else {
+            String subjectId = targetService.getTargetSubjectId(projectId, target);
+            return getStudentCount(projectId, subjectId, range);
+        }
+    }
+
+    /**
+     * 查询项目考生数量
+     *
+     * @param projectId 项目ID
+     * @param range     范围
      *
      * @return 考生数量
      */

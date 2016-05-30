@@ -27,7 +27,10 @@ $(document).ready(function() {
                     $("#call-response").html(html)
                 }
 
-                $("#call-request").html(parseRequest(funcName, p));
+                $.getJSON("/apiconsole/getIp", function (res) {
+                    var ip = res.data.ip;
+                    $("#call-request").html(parseRequest(funcName, p, ip));
+                });
             },
         });
     }
@@ -121,7 +124,7 @@ $(document).ready(function() {
         return html;
     }
 
-    function parseRequest(funcName, p) {
+    function parseRequest(funcName, p, ip) {
         var html = "";
         var parameters = {};
 
@@ -142,20 +145,14 @@ $(document).ready(function() {
             }
         }
 
-        $.getJSON("/apiconsole/getIp", function (res) {
-            var ip = res.data.ip;
+        var clientInfo =
+        {
+            "clientInfo": {"ipAddress": ip},
+            "functionName": funcName,
+            "parameters": parameters
+        };
 
-            var clientInfo =
-            {
-                "clientInfo": {"ipAddress": ip},
-                "functionName": funcName,
-                "parameters": parameters
-            };
-
-            html += "<strong>请求</strong><br/>" + JSON.stringify(clientInfo);
-            $("#call-request").html(html);
-        });
-
+        html += "<strong>请求</strong><br/>" + JSON.stringify(clientInfo);
         return html;
     }
 

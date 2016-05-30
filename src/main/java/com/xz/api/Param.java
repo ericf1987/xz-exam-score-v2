@@ -77,9 +77,7 @@ public class Param implements Serializable {
 
     @Override
     public String toString() {
-        return "Param {" +
-                "parameters=" + parameterToString() + '\'' +
-                '}';
+        return "Param {" + parameterToString() + '}';
     }
 
     private String parameterToString() {
@@ -87,7 +85,7 @@ public class Param implements Serializable {
 
         for (String key : parameters.keySet()) {
             String[] values = parameters.get(key);
-            sb.append(key).append('=').append(Arrays.toString(values)).append(',');
+            sb.append(key).append(':').append(Arrays.toString(values)).append(',');
         }
 
         if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',') {
