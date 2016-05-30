@@ -37,6 +37,9 @@ public class RankPositionTask extends Receiver{
     @Autowired
     MongoDatabase scoreDataBase;
 
+    //统计指标
+    static final String [] POSITIONS = new String[]{"1/4","2/4","3/4"};
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         //获取
@@ -53,9 +56,6 @@ public class RankPositionTask extends Receiver{
                 append("range", Mongo.range2Doc(range)).
                 append("target", Mongo.target2Doc(target));
 
-        //统计指标
-        double arr[] = new double[]{0.25, 0.5, 0.75};
-
         List<Document> positions = new ArrayList<Document>();
         Document oneScoreMapDoc = scoreCol.find(query).first();
         //获取总人数
@@ -63,22 +63,29 @@ public class RankPositionTask extends Receiver{
 
         //获取总分表中的scoreMap节点
         List<Document> scoreMap = (List<Document>)oneScoreMapDoc.get("scoreMap");
-        for(double d : arr){
-            double score = getScoreAtIndex(scoreMap, count, d);
-            Document position = new Document("position", d).append("score", score);
+        for(String s : POSITIONS){
+            double score = getScoreAtIndex(scoreMap, count, s2d(s));
+            Document position = new Document("position", s2d(s)).append("score", score);
             positions.add(position);
         }
 
         rankPositionCol.deleteMany(query);
-        rankPositionCol.updateOne(
+        rankPositionCol.updateMany(
                 query,
-                MongoUtils.$push("positions", positions),
+                MongoUtils.$set("positions", positions),
                 MongoUtils.UPSERT
         );
 
     }
 
+    private Double s2d(String s){
+        String[] arr = s.split("/");
+        Double d = Double.valueOf(arr[0])/Double.valueOf(arr[1]);
+        return d;
+    }
+
     private double getScoreAtIndex(List<Document> scoreMap, int count, double d) {
+        double score = 0;
         Collections.sort(scoreMap, (Document d1, Document d2) -> {
             return d2.getDouble("score").compareTo(d1.getDouble("score"));
         });
@@ -90,9 +97,11 @@ public class RankPositionTask extends Receiver{
         int oneCount = 0;
         for(Document item : scoreMap){
             oneCount += item.getInteger("count");
-            if(oneCount >= index)
+            if(oneCount >= index){
                 return item.getDouble("score");
+            }
+            score = item.getDouble("score");
         }
-        return 0;
+        return score;
     }
 }
