@@ -2,6 +2,7 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
@@ -9,6 +10,7 @@ import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
+import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,7 +47,9 @@ public class QuestDeviationTask extends Receiver{
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        Document query = new Document("project", projectId).append("range", range).append("target", target);
+        Document query = new Document("project", projectId).
+                append("range", Mongo.range2Doc(range)).
+                append("target", Mongo.target2Doc(target));
 
         MongoCollection<Document> scoreMapCol = scoreDatabase.getCollection("score_map");
         MongoCollection<Document> questDeviationCol = scoreDatabase.getCollection("quest_deviation");
@@ -60,8 +64,11 @@ public class QuestDeviationTask extends Receiver{
 
         questDeviationCol.deleteMany(query);
         questDeviationCol.updateMany(
-                new Document("project", projectId).append("range", range).append("quest", target),
-                $set("deviation", deviation), UPSERT
+                new Document("project", projectId).
+                        append("range", Mongo.range2Doc(range)).
+                        append("quest", Mongo.target2Doc(target)),
+                $set("deviation", deviation),
+                UPSERT
         );
     }
 
@@ -90,6 +97,8 @@ public class QuestDeviationTask extends Receiver{
             count += d.getInteger("count");
             sum += d.getDouble("score") * d.getInteger("count");
             if(count >= Double.valueOf(rankCount).intValue()){
+                count = count - d.getInteger("count") + 1;
+                sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score");
                 return sum / count;
             }
         }
