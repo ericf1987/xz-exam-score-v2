@@ -19,7 +19,8 @@ import java.util.List;
  */
 @TaskDispatcherInfo(taskType = "quest_deviation", dependentTaskType = "total_score")
 @Component
-public class QuestDeviationDispatcher extends TaskDispatcher{
+public class QuestDeviationDispatcher extends TaskDispatcher {
+
     static final Logger LOG = LoggerFactory.getLogger(QuestDeviationDispatcher.class);
 
     @Autowired
@@ -34,11 +35,11 @@ public class QuestDeviationDispatcher extends TaskDispatcher{
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST);
 
         int counter = 0;
-        for(Range range : ranges){
-            for(Target target : targets){
-                dispatchTask(createTask(projectId,aggregationId).setRange(range).setTarget(target));
+        for (Range range : ranges) {
+            for (Target target : targets) {
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
-                if(counter % 1000 == 0){
+                if (counter % 1000 == 0) {
                     LOG.info("为项目 " + projectId + " 的 quest_deviation 统计发布了 " + counter + " 个任务");
                 }
             }

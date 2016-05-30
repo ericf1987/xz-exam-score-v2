@@ -24,8 +24,8 @@ public class AllSubjectPassRateDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
+        List<Range> ranges = rangeService.queryRanges(
+                projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
 
         for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
