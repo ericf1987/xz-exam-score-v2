@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -26,6 +26,14 @@ public class ScoreLevelService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    /**
+     * 根据得分率计算得分等级
+     *
+     * @param projectId 项目ID
+     * @param scoreRate 得分率
+     *
+     * @return 得分等级
+     */
     public String calculateScoreLevel(String projectId, double scoreRate) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         Map<String, Double> scoreLevels = projectConfig.getScoreLevels();
@@ -41,6 +49,15 @@ public class ScoreLevelService {
         }
     }
 
+    /**
+     * 查询得分等级
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param target    目标
+     *
+     * @return 得分等级
+     */
     public String getScoreLevel(String projectId, String studentId, Target target) {
         Document query = doc("project", projectId)
                 .append("range", range2Doc(Range.student(studentId)))
@@ -54,22 +71,18 @@ public class ScoreLevelService {
         }
     }
 
-    public Map<String, Double> getScoreLevelRate(String projectId, Range range, Target target) {
+    @SuppressWarnings("unchecked")
+    public List<Document> getScoreLevelRate(String projectId, Range range, Target target) {
 
         Document query = doc("project", projectId)
                 .append("range", range2Doc(range)).append("target", target2Doc(target));
 
-        Document doc = scoreDatabase.getCollection("score_level_rate").find(query).first();
+        Document doc = scoreDatabase.getCollection("score_level_map").find(query).first();
 
         if (doc != null) {
-            Document d = (Document) doc.get("scoreLevelRate");
-            Map<String, Double> result = new HashMap<>();
-            for (String scoreLevel : d.keySet()) {
-                result.put(scoreLevel, d.getDouble(scoreLevel));
-            }
-            return result;
+            return (List<Document>) doc.get("scoreLevels");
         } else {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
     }
 }
