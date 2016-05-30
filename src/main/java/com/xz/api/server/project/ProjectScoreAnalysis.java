@@ -8,6 +8,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,12 @@ public class ProjectScoreAnalysis implements Server {
     ScoreLevelService scoreLevelService;
 
     @Autowired
+    PassAndUnPassService passAndUnPassService;
+
+    @Autowired
+    RankPositionService rankPositionService;
+
+    @Autowired
     TargetService targetService;
 
     @Autowired
@@ -83,7 +90,8 @@ public class ProjectScoreAnalysis implements Server {
             Range range = Range.school(schoolId);
             Target target = targetService.getTarget(projectId, subjectId);
             Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
-                    studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService);
+                    studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
+                    passAndUnPassService, rankPositionService);
             schoolMap.put("schoolName", schoolName);
 
             schoolStats.add(schoolMap);
@@ -98,7 +106,7 @@ public class ProjectScoreAnalysis implements Server {
         Target target = targetService.getTarget(projectId, subjectId);
 
         return getScoreAnalysisStatInfo(projectId, range, target, studentService, minMaxScoreService,
-                averageService, stdDeviationService, scoreLevelService);
+                averageService, stdDeviationService, scoreLevelService, passAndUnPassService, rankPositionService);
     }
 
     public static Map<String, Object> getScoreAnalysisStatInfo(String projectId, Range range, Target target,
@@ -106,7 +114,9 @@ public class ProjectScoreAnalysis implements Server {
                                                                MinMaxScoreService minMaxScoreService,
                                                                AverageService averageService,
                                                                StdDeviationService stdDeviationService,
-                                                               ScoreLevelService scoreLevelService) {
+                                                               ScoreLevelService scoreLevelService,
+                                                               PassAndUnPassService passAndUnPassService,
+                                                               RankPositionService rankPositionService) {
         Map<String, Object> statMap = new HashMap<>();
 
         // 考生人数
@@ -129,10 +139,20 @@ public class ProjectScoreAnalysis implements Server {
         statMap.put("stdDeviation", stdDeviation);
 
         // 三率
-        Map<String, Double> scoreLevelRate = scoreLevelService.getScoreLevelRate(projectId, range, target);
-        for (String levelName : scoreLevelRate.keySet()) {
-            statMap.put(levelName, scoreLevelRate.get(levelName));
+        List<Document> scoreLevelRate = scoreLevelService.getScoreLevelRate(projectId, range, target);
+        for (Document document : scoreLevelRate) {
+            statMap.put(document.getString("scoreLevel"), document);
         }
+
+        // 全科及格率与不及格率
+        double[] passAndUnPass = passAndUnPassService.getAllSubjectPassAndUnPass(projectId, range);
+        statMap.put("allPassRate", passAndUnPass[0]);
+        statMap.put("allFailRate", passAndUnPass[1]);
+
+        // 中位数
+        List<Document> rankPositions = rankPositionService.getRankPositions(projectId, range, target);
+        rankPositions.sort((o1, o2) -> o1.getDouble("position").compareTo(o2.getDouble("position")));
+        statMap.put("rankPositions", rankPositions);
 
         statMap.put("target", target);
         return statMap;

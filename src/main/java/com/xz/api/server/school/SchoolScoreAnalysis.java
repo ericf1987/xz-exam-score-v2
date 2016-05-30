@@ -51,7 +51,13 @@ public class SchoolScoreAnalysis implements Server {
     StdDeviationService stdDeviationService;
 
     @Autowired
+    PassAndUnPassService passAndUnPassService;
+
+    @Autowired
     ScoreLevelService scoreLevelService;
+
+    @Autowired
+    RankPositionService rankPositionService;
 
     @Autowired
     TargetService targetService;
@@ -80,7 +86,8 @@ public class SchoolScoreAnalysis implements Server {
             Range range = Range.clazz(classId);
             Target target = targetService.getTarget(projectId, subjectId);
             Map<String, Object> schoolMap = ProjectScoreAnalysis.getScoreAnalysisStatInfo(projectId, range, target,
-                    studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService);
+                    studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
+                    passAndUnPassService, rankPositionService);
             schoolMap.put("className", name);
 
             classStats.add(schoolMap);
@@ -95,6 +102,6 @@ public class SchoolScoreAnalysis implements Server {
         Target target = targetService.getTarget(projectId, subjectId);
 
         return ProjectScoreAnalysis.getScoreAnalysisStatInfo(projectId, range, target, studentService, minMaxScoreService,
-                averageService, stdDeviationService, scoreLevelService);
+                averageService, stdDeviationService, scoreLevelService, passAndUnPassService, rankPositionService);
     }
 }
