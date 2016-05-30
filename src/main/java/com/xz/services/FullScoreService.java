@@ -1,5 +1,6 @@
 package com.xz.services;
 
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Target;
 import com.xz.util.Mongo;
@@ -24,6 +25,9 @@ public class FullScoreService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    SimpleCache cache;
+
     /**
      * 查询满分。其中题目满分在 quest_list，其他满分在 full_score
      *
@@ -41,26 +45,32 @@ public class FullScoreService {
     }
 
     private double getSubjectProjectFullScore(String projectId, Target target) {
-        Document query = doc("project", projectId).append("target", Mongo.target2Doc(target));
-        Document document = scoreDatabase.getCollection("full_score").find(query).first();
+        String cacheKey = "subject_project_fullscore:" + projectId + ":" + target;
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append("target", Mongo.target2Doc(target));
+            Document document = scoreDatabase.getCollection("full_score").find(query).first();
 
-        if (document != null) {
-            return document.getDouble("fullScore");
-        } else {
-            // LOG.warn("没有找到满分值: " + query.toJson());
-            return 0;
-        }
+            if (document != null) {
+                return document.getDouble("fullScore");
+            } else {
+                // LOG.warn("没有找到满分值: " + query.toJson());
+                return 0d;
+            }
+        });
     }
 
     private double getQuestFullScore(String projectId, String questId) {
-        Document query = doc("project", projectId).append("questId", questId);
-        Document document = scoreDatabase.getCollection("quest_list").find(query).first();
+        String cacheKey = "quest_fullscore:" + projectId + ":" + questId;
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append("questId", questId);
+            Document document = scoreDatabase.getCollection("quest_list").find(query).first();
 
-        if (document != null) {
-            return document.getDouble("score");
-        } else {
-            LOG.warn("没有找到满分值: " + query.toJson());
-            return 0;
-        }
+            if (document != null) {
+                return document.getDouble("score");
+            } else {
+                LOG.warn("没有找到满分值: " + query.toJson());
+                return 0d;
+            }
+        });
     }
 }

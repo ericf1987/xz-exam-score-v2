@@ -5,6 +5,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Value;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.WITHOUT_INNER_ID;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.SubjectUtil.isCombinedSubject;
 
@@ -156,6 +158,27 @@ public class StudentService {
             studentLists.forEach((Consumer<Document>) doc -> studentIds.add(doc.getString("student")));
 
             return studentIds;
+        });
+    }
+
+    /**
+     * 查询学生列表
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     *
+     * @return 学生ID列表
+     */
+    public List<Document> getStudentList(String projectId, Range range) {
+        String cacheKey = "student_list_range:" + projectId + ":" + range;
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("student_list");
+            Document query = new Document("project", projectId).append(range.getName(), range.getId());
+
+            FindIterable<Document> studentLists = collection.find(query)
+                    .projection(WITHOUT_INNER_ID.append("subjects", 0));
+            return new ArrayList<>(MongoUtils.toList(studentLists));
         });
     }
 

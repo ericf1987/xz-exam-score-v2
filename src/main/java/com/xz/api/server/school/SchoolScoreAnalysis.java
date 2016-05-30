@@ -6,19 +6,18 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
-import com.xz.api.server.project.ProjectScoreAnalysis;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.xz.api.server.project.ProjectScoreAnalysis.getScoreAnalysisStatInfo;
 
 /**
  * 学校成绩-分数分析
@@ -32,8 +31,6 @@ import java.util.Map;
 })
 @Service
 public class SchoolScoreAnalysis implements Server {
-
-    public static Logger LOG = LoggerFactory.getLogger(SchoolScoreAnalysis.class);
 
     @Autowired
     ClassService classService;
@@ -71,7 +68,7 @@ public class SchoolScoreAnalysis implements Server {
         List<Map<String, Object>> classStats = getClassStats(projectId, subjectId, schoolId);
         Map<String, Object> schoolStats = getSchoolTotalStats(projectId, subjectId, schoolId);
 
-        return Result.success().set("schoolStats", schoolStats).set("classStats", classStats);
+        return Result.success().set("schools", schoolStats).set("classes", classStats);
     }
 
     // 获取学校班级分数分析统计
@@ -85,7 +82,7 @@ public class SchoolScoreAnalysis implements Server {
 
             Range range = Range.clazz(classId);
             Target target = targetService.getTarget(projectId, subjectId);
-            Map<String, Object> schoolMap = ProjectScoreAnalysis.getScoreAnalysisStatInfo(projectId, range, target,
+            Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
                     studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
                     passAndUnPassService, rankPositionService);
             schoolMap.put("className", name);
@@ -93,6 +90,7 @@ public class SchoolScoreAnalysis implements Server {
             classStats.add(schoolMap);
         }
 
+        classStats.sort((o1, o2) -> ((String) o1.get("className")).compareTo(((String) o2.get("className"))));
         return classStats;
     }
 
@@ -101,7 +99,8 @@ public class SchoolScoreAnalysis implements Server {
         Range range = Range.school(schoolId);
         Target target = targetService.getTarget(projectId, subjectId);
 
-        return ProjectScoreAnalysis.getScoreAnalysisStatInfo(projectId, range, target, studentService, minMaxScoreService,
-                averageService, stdDeviationService, scoreLevelService, passAndUnPassService, rankPositionService);
+        return getScoreAnalysisStatInfo(projectId, range, target,
+                studentService, minMaxScoreService, averageService, stdDeviationService,
+                scoreLevelService, passAndUnPassService, rankPositionService);
     }
 }

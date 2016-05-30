@@ -13,8 +13,6 @@ import com.xz.services.RangeService;
 import com.xz.services.ScoreSegmentService;
 import com.xz.services.TargetService;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +33,6 @@ import java.util.Map;
 })
 @Service
 public class SchoolScoreSegment implements Server {
-
-    public static Logger LOG = LoggerFactory.getLogger(SchoolScoreSegment.class);
 
     @Autowired
     ClassService classService;
@@ -59,12 +55,11 @@ public class SchoolScoreSegment implements Server {
         List<Map<String, Object>> classSegments = getClassScoreSegments(projectId, subjectId, schoolId);
         List<Map<String, Object>> schoolSegments = getSchoolTotalScoreSegments(projectId, subjectId, schoolId);
 
-        return Result.success().set("schoolSegments", schoolSegments)
-                .set("classSegments", classSegments);
+        return Result.success().set("schools", schoolSegments).set("classes", classSegments);
     }
 
     private List<Map<String, Object>> getClassScoreSegments(String projectId, String subjectId, String schoolId) {
-        List<Map<String, Object>> schoolSegments = new ArrayList<>();
+        List<Map<String, Object>> classSegments = new ArrayList<>();
 
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
@@ -78,10 +73,11 @@ public class SchoolScoreSegment implements Server {
 
             map.put("scoreSegments", scoreSegments);
             map.put("className", name);
-            schoolSegments.add(map);
+            classSegments.add(map);
         }
 
-        return schoolSegments;
+        classSegments.sort((o1, o2) -> ((String) o1.get("className")).compareTo(((String) o2.get("className"))));
+        return classSegments;
     }
 
     private List<Map<String, Object>> getSchoolTotalScoreSegments(String projectId, String subjectId, String schoolId) {
