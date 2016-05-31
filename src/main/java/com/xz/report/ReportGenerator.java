@@ -1,13 +1,10 @@
 package com.xz.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
-import com.xz.report.sheet.SheetGenerator;
-import com.xz.report.sheet.SheetInfo;
-import com.xz.report.sheet.SheetManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * (description)
@@ -18,15 +15,7 @@ import java.io.InputStream;
 public abstract class ReportGenerator {
 
     @Autowired
-    ReportManager reportManager;
-
-    @Autowired
     SheetManager sheetManager;
-
-    @PostConstruct
-    public void init() {
-        reportManager.registerReport(this);
-    }
 
     /**
      * 生成并保存报表文件
@@ -35,29 +24,29 @@ public abstract class ReportGenerator {
      * @param savePath  保存路径
      */
     public void generate(String projectId, String savePath) {
-        if (!this.getClass().isAnnotationPresent(ReportInfo.class)) {
-            return;
-        }
+        List<SheetTask> sheetTasks = getSheetTasks(projectId);
 
-        ReportInfo reportInfo = this.getClass().getAnnotation(ReportInfo.class);
-        SheetInfo[] sheetInfos = reportInfo.sheets();
-
-        InputStream stream = getClass().getResourceAsStream("report-templates/default.xlsx");
+        InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
         ExcelWriter excelWriter = new ExcelWriter(stream);
         excelWriter.clearSheets();
 
-        for (SheetInfo sheetInfo : sheetInfos) {
-            excelWriter.openOrCreateSheet(sheetInfo.name());
-            SheetGenerator sheetGenerator = sheetManager.getSheetGenerator(sheetInfo.type());
+        for (SheetTask sheetTask : sheetTasks) {
+            excelWriter.openOrCreateSheet(sheetTask.getTitle());
+            SheetGenerator sheetGenerator = sheetManager.getSheetGenerator(sheetTask.getGeneratorClass());
             if (sheetGenerator != null) {
-                sheetGenerator.generate(projectId, excelWriter);
+                sheetGenerator.generate(projectId, excelWriter, sheetTask);
             }
         }
 
         excelWriter.save(savePath);
     }
 
-    public ReportInfo getInfo() {
-        return this.getClass().getAnnotation(ReportInfo.class);
-    }
+    /**
+     * 规划这个 Excel 文件有多少个 Sheet，为每个 Sheet 创建一个 SheetTask 对象
+     *
+     * @param projectId 项目ID
+     *
+     * @return SheetTask 列表
+     */
+    protected abstract List<SheetTask> getSheetTasks(String projectId);
 }

@@ -75,7 +75,7 @@ public class SubjectService {
         });
     }
 
-    public static Object getSubjectName(String subjectId) {
+    public static String getSubjectName(String subjectId) {
         return SUBJECT_NAMES.get(subjectId);
     }
 }
