@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<report-config>
+    <report-set id="default">
+        <report-category name="总体成绩分析">
+            <report-category name="基础分析">
+                <report name="分数分析" class="com.xz.report.total.TotalBasicScoreReport"/>
+            </report-category>
+        </report-category>
+    </report-set>
+</report-config>
