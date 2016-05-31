@@ -8,23 +8,25 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
-import com.xz.services.RangeService;
+import com.xz.services.ClassService;
+import com.xz.services.RankService;
 import com.xz.services.StudentService;
-import com.xz.services.TargetService;
+import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author by fengye on 2016/5/27.
  */
-@ReceiverInfo(taskType = "rank_position")
+@ReceiverInfo(taskType = "rank_segment")
 @Component
-public class RankSegmentTask extends Receiver{
+public class RankSegmentTask extends Receiver {
 
     //分段
     public static final double[] PIECE_WISE = new double[]{
@@ -36,77 +38,116 @@ public class RankSegmentTask extends Receiver{
     };
 
     @Autowired
-    RangeService rangeService;
-
-    @Autowired
-    TargetService targetService;
-
-    @Autowired
     MongoDatabase scoreDataBase;
 
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    RankService rankService;
+
+    @Autowired
+    ClassService classService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
+        //1.获取该学校下面的所有班级
+        //2.查询每个班级的的所有学生
+        //3.家算出学生在学校的排名和排名段
+        //4.在该学生班级和排名段单元格数据+1
         String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
-        MongoCollection<Document> scoreCol = scoreDataBase.getCollection("score_map");
-        MongoCollection<Document> totalScoreCol = scoreDataBase.getCollection("total_score");
+
+        MongoCollection<Document> scoreMapCol = scoreDataBase.getCollection("score_map");
         MongoCollection<Document> rankSegmentCol = scoreDataBase.getCollection("rank_segment");
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
-        //1.获取分数，关联每个学生的ID，查询total_score表查询到每个学生的分数
+        List<Document> classDocs = classService.listClasses(projectId, range.getId());
+        //System.out.println(classDocs);
+        for (Document doc : classDocs) {
+            //查询出每个班级在每个分段中的学生数，并算出占总班级的比率
+            String classId = doc.getString("class");
 
-        for(String studentId : studentIds){
-            Range studentRange = Range.student(studentId);
-            Document studentQuery = new Document("project", projectId).
-                    append("range", studentRange).
-                    append("target", target);
-            Document totalScoreDoc = totalScoreCol.find(studentQuery).first();
-            //获取某次班级学校的总分
-            double totalScore = totalScoreDoc.getDouble("totalScore");
-            //2.根据分数取得score_map表中的排名
+            //查询出班级的总人数
             Document query = new Document("project", projectId).
-                    append("range", range).
-                    append("target", target);
-            Document scoreMap = scoreCol.find(query).first();
-            List<Document> scoreMapDoc = (List<Document>)scoreMap.get("scoreMap");
-            int count = scoreMap.getInteger("count");
-            //按照分数排序
-            Collections.sort(scoreMapDoc, (Document d1, Document d2) ->{
-                return d2.getDouble("score").compareTo(d1.getDouble("score"));
-            });
+                    append("range", Mongo.range2Doc(Range.clazz(classId))).
+                    append("target", Mongo.target2Doc(target));
+            int count = scoreMapCol.find(query).first().getInteger("count");
+            Map<String, List<Document>> resultMap = generateSectionRate(count, Range.clazz(classId), range, projectId, target);
 
-            List<Document> rankSegments = new ArrayList<Document>();
-
-            //排名分布率
-            for(int i = 0;i < PIECE_WISE.length;i++){
-                //根据总分，分段，和所有明细分数，算出每个分段内的人数占
-                double countInPiece = count * PIECE_WISE[i];
-                double rate = sortByScore(totalScore, scoreMapDoc, countInPiece, count);
-                Document rankSegment = new Document("rankPercent", PIECE_WISE[i]).append("rate", rate);
-                rankSegments.add(rankSegment);
-            }
-
-            rankSegmentCol.deleteMany(query);
-            rankSegmentCol.updateOne(
-                    query,
-                    MongoUtils.$push("rankSegments", rankSegments),
+            Document condition = new Document("project", projectId).
+                    append("range", Mongo.range2Doc(Range.clazz(classId))).
+                    append("target", Mongo.target2Doc(target));
+            rankSegmentCol.deleteMany(condition);
+            rankSegmentCol.updateMany(
+                    condition,
+                    MongoUtils.$set("rankSegments", resultMap.get("rankSegments")),
                     MongoUtils.UPSERT
             );
         }
+
     }
 
-    private double sortByScore(double totalScore, List<Document> scoreMap, double piece, int count) {
-        int countInPiece = 0;
-        for(Document d : scoreMap){
-            countInPiece += d.getInteger("count");
-            if(countInPiece >= Double.valueOf(count * piece).intValue()){
-                return countInPiece / count;
+    private Map<String, List<Document>> generateSectionRate(int count, Range range, Range schoolRange, String projectId, Target target) {
+        List<Document> docs = listBySection(PIECE_WISE);
+        Map<String, List<Document>> classSectionRate = new LinkedHashMap<String, List<Document>>();
+        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        for(String studentId : studentIds){
+            //获取学生在学校的排名
+            int rank = rankService.getRank(projectId, schoolRange, target, studentId);
+            double section = getSection(rank, count, PIECE_WISE);
+            //System.out.println("当前学生的排名段-->" + section);
+            //对每个分段的人数进行累加
+            addCount(section, docs);
+        }
+        //计算出每个分段的人数占班级总数的比率
+        calculateRates(count, docs);
+        classSectionRate.put("rankSegments", docs);
+        return classSectionRate;
+    }
+
+    private List<Document> listBySection(double[] pieceWise) {
+        List<Document> items = new ArrayList<Document>();
+        for(int i = 0; i < pieceWise.length; i++){
+            items.add(new Document("rankPercent", pieceWise[i]));
+        }
+        return items;
+    }
+
+    private void calculateRates(int count, List<Document> docs) {
+        for(Document doc : docs){
+            if(doc.getInteger("rate") != null){
+                int num = doc.getInteger("rate");
+                doc.put("rate", Double.valueOf(num) / Double.valueOf(count));
+            }else{
+                doc.put("rate", 0);
             }
         }
-        return countInPiece / count;
     }
+
+    private void addCount(double section, List<Document> docs) {
+        for(Document doc : docs){
+            if(doc.getDouble("rankPercent") == section){
+                if(doc.getInteger("rate") != null){
+                    int num = doc.getInteger("rate");
+                    doc.put("rate", num + 1);
+                }else{
+                    doc.append("rate", 0);
+                }
+            }
+        }
+    }
+
+    private double getSection(int rank, int count, double[] PIECE_WISE){
+        double rate = Double.valueOf(rank) / Double.valueOf(count);
+        for(int i = 0; i < PIECE_WISE.length; i++){
+            if(rate > PIECE_WISE[i]){
+                continue;
+            }else{
+                return PIECE_WISE[i];
+            }
+        }
+        return 0;
+    }
+
 
 }

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author by fengye on 2016/5/27.
  */
-@TaskDispatcherInfo(taskType = "rank_segment", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "rank_segment", dependentTaskType = "score_map")
 @Component
 public class RankSegmentDispatcher extends TaskDispatcher{
     static final Logger LOG = LoggerFactory.getLogger(RankSegmentDispatcher.class);
@@ -30,7 +30,7 @@ public class RankSegmentDispatcher extends TaskDispatcher{
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL);
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST, Target.SUBJECT, Target.PROJECT);
 
         int counter = 0;
