@@ -1,15 +1,17 @@
 package com.xz.api.server.sys;
 
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.api.annotation.*;
 import com.xz.api.server.Server;
+import com.xz.services.CityService;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Function(description = "查询行政区域", parameters = {
         @Parameter(name = "parent", type = Type.String, description = "上级区域ID", required = false, defaultValue = "000000")
@@ -22,18 +24,22 @@ import java.util.Map;
 @Component
 public class QueryCity implements Server {
 
+    @Autowired
+    CityService cityService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String parent = param.getString("parent");
+        List<Document> items = cityService.listItems(parent);
 
-        List<Map<String, Object>> items = new ArrayList<>();
-
-        Map<String, Object> item = new HashMap<>();
-        item.put("id", "430000");
-        item.put("parent", parent);
-        item.put("name", "湖南");
-        items.add(item);
-
-        return Result.success().set("items", items);
+        return Result.success().set("items",
+                CollectionUtils.convertList(items, document -> {
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("id", document.getString("id"));
+                    map.put("parent", document.getString("parent_id"));
+                    map.put("name", document.getString("name"));
+                    map.put("selectable", document.getString("selectable"));
+                    return map;
+                }));
     }
 }
