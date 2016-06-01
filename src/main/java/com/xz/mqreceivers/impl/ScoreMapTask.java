@@ -11,6 +11,8 @@ import com.xz.services.ScoreService;
 import com.xz.services.StudentService;
 import com.xz.util.Mongo;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @ReceiverInfo(taskType = "score_map")
 @Component
 public class ScoreMapTask extends Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(ScoreMapTask.class);
 
     @Autowired
     ScoreService scoreService;
@@ -43,16 +47,15 @@ public class ScoreMapTask extends Receiver {
 
         List<String> studentIds = studentService.getStudentList(projectId, range, target);
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
-        Document query = doc("project", projectId)
-                .append("range", Mongo.range2Doc(range))
-                .append("target", Mongo.target2Doc(target));
+        Document query = Mongo.query(projectId, range, target);
 
         // 删除旧记录
         collection.deleteMany(query);
 
         // 保存新记录
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
-        collection.insertOne(doc(query).append("scoreMap", scoreCountList).append("count", studentIds.size()));
+        Document document = doc(query).append("scoreMap", scoreCountList).append("count", studentIds.size());
+        collection.insertOne(document);
     }
 
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {

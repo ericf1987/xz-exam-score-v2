@@ -16,8 +16,7 @@ import java.util.*;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
- * (description)
- * created at 16/05/13
+ * 查询排名和排名等级
  *
  * @author yiding_he
  */

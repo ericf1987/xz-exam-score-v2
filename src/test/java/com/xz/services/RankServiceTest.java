@@ -17,6 +17,9 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     RankService rankService;
 
+    @Autowired
+    StudentService studentService;
+
     @Test
     public void testGetRank() throws Exception {
         System.out.println("rank of 99: " +
@@ -25,10 +28,16 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetRank2() throws Exception {
-        int rank = rankService.getRank(PROJECT_ID,
-                Range.clazz("SCHOOL_002_CLASS_04"), Target.subject("003"), "SCHOOL_006_CLASS_04_05");
+        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        Range range = Range.school("7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52");
+        Target target = Target.quest("573c49e62d560287556b8a76");
 
-        System.out.println(rank);
+        int rank = rankService.getRank(projectId,
+                range, target, "c740e974-c281-4c19-9f1b-82103c691563");
+
+        int studentCount = studentService.getStudentCount(projectId, range, target);
+
+        System.out.println(rank + ", " + studentCount);
     }
 
     @Test

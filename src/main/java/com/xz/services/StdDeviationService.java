@@ -25,6 +25,15 @@ public class StdDeviationService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    /**
+     * 查询标准差
+     *
+     * @param projectId 项目ID
+     * @param range     范围（不能是单个学生）
+     * @param target    目标
+     *
+     * @return 标准差
+     */
     public double getStdDeviation(String projectId, Range range, Target target) {
         Document query = query(projectId, range, target);
         Document document = scoreDatabase.getCollection("std_deviation").find(query).first();

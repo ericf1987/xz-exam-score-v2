@@ -20,7 +20,8 @@ public class TargetServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryTargets() throws Exception {
-        List<Target> targets = targetService.queryTargets("FAKE_PROJECT_1");
+        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        List<Target> targets = targetService.queryTargets(projectId, Target.QUEST);
         targets.forEach(System.out::println);
     }
 }
