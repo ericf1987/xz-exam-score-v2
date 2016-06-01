@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.xz.ajiaedu.common.lang.NumberUtil.toPercent;
 import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
 
 /**
@@ -83,13 +84,13 @@ public class TotalBasicScoreSheet extends SheetGenerator {
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Good));
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Pass));
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Fail));
-        excelWriter.set(rowindex, column.incrementAndGet(), rowData.get("allPassRate"));
-        excelWriter.set(rowindex, column.incrementAndGet(), rowData.get("allFailRate"));
+        excelWriter.set(rowindex, column.incrementAndGet(), toPercent((Double) rowData.get("allPassRate")));
+        excelWriter.set(rowindex, column.incrementAndGet(), toPercent((Double) rowData.get("allFailRate")));
     }
 
     private Object getRate(Map<String, Object> rowData, ScoreLevel scoreLevel) {
         Document document = (Document) rowData.get(scoreLevel.name());
-        return document == null ? 0 : document.get("rate");
+        return document == null ? 0 : toPercent((Double) document.get("rate"));
     }
 
     // 填充表头
