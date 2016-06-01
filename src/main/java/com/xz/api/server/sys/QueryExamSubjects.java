@@ -4,6 +4,9 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.api.annotation.*;
 import com.xz.api.server.Server;
+import com.xz.bean.Range;
+import com.xz.services.RangeService;
+import com.xz.services.StudentService;
 import com.xz.services.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,9 @@ import static com.xz.services.SubjectService.getSubjectName;
 
 @Function(description = "根据考试项目ID查询考试科目列表", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
-}, result = @ResultInfo(listProperties =
+}, result = @ResultInfo(properties = {
+        @Property(name = "totals", type = Type.Pojo, description = "科目总信息"),
+},listProperties =
 @ListProperty(name = "subjects", description = "考试科目列表", properties = {
         @Property(name = "subjectId", type = Type.String, description = "科目id"),
         @Property(name = "subjectName", type = Type.String, description = "科目名称")
@@ -35,22 +40,47 @@ public class QueryExamSubjects implements Server {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    StudentService studentService;
+
+    @Autowired
+    RangeService rangeService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         List<Map<String, String>> examSubjects = new ArrayList<>();
+        Range range = rangeService.queryProvinceRange(projectId);
 
+        // 科目信息
         List<String> subjectIds = subjectService.querySubjects(projectId);
-        examSubjects.addAll(subjectIds.stream().map(this::getSubjectInfo).collect(Collectors.toList()));
+        examSubjects.addAll(subjectIds.stream().map(subjectId ->
+                getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));
 
-        return Result.success().set("subjects", examSubjects);
+        // 总体信息
+        Map<String, String> projectInfo = getProjectInfo(projectId, range);
+        return Result.success().set("subjects", examSubjects).set("totals", projectInfo);
     }
 
-    private Map<String, String> getSubjectInfo(String subjectId) {
+    private Map<String, String> getSubjectInfo(String projectId, String subjectId, Range range) {
         Map<String, String> subjectInfo = new HashMap<>();
 
         subjectInfo.put("subjectId", subjectId);
-        subjectInfo.put("subjectName", getSubjectName(subjectId).toString());
+        subjectInfo.put("subjectName", getSubjectName(subjectId));
+
+        int studentCount = studentService.getStudentCount(projectId, subjectId, range);
+        subjectInfo.put("studentCount", String.valueOf(studentCount));
+
         return subjectInfo;
+    }
+
+    private Map<String, String> getProjectInfo(String projectId, Range range) {
+        Map<String, String> projectInfo = new HashMap<>();
+
+        projectInfo.put("projectId", projectId);
+        int studentCount = studentService.getStudentCount(projectId, range);
+        projectInfo.put("studentCount", String.valueOf(studentCount));
+
+        return projectInfo;
     }
 }

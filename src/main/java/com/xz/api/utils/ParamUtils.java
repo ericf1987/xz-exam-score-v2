@@ -92,6 +92,10 @@ public class ParamUtils {
     // 处理可能被定义为数组的参数值
     private static void processArrayParameter(Param param, String parameterName,
                                               String parameterValue, Parameter funcParam) {
+        if (StringUtil.isBlank(parameterValue)) {
+            return;
+        }
+
         if (funcParam.type() == Type.StringArray) {
             param.setParameter(parameterName, parameterValue.split(","));
 

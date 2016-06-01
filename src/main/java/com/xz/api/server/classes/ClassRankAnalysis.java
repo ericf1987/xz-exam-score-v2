@@ -10,6 +10,8 @@ import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +32,9 @@ import java.util.Map;
         @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)
 })
 @Service
-public class ClassRankAnalysis implements Server{
+public class ClassRankAnalysis implements Server {
+
+    public static Logger LOG = LoggerFactory.getLogger(ClassRankAnalysis.class);
 
     @Autowired
     StudentService studentService;
@@ -66,6 +70,9 @@ public class ClassRankAnalysis implements Server{
             map.put("studentId", studentId);
             map.put("studentName", studentName);
 
+            long time = System.currentTimeMillis();
+            LOG.debug("------------------------- 开始进行学生：{}排名分析 -------------------------", studentId);
+
             // 项目排行分析
             Map<String, Object> projectRankMap = getRankAnalysisMap(
                     projectId, Target.project(projectId), schoolId, classId, studentId);
@@ -76,6 +83,8 @@ public class ClassRankAnalysis implements Server{
             map.put("subjectRankStat", subjectRankList);
 
             rankstats.add(map);
+
+            LOG.debug("------------------------- 完成学生：{}排名分析,总用时:{} -------------------------", studentId, System.currentTimeMillis() - time);
         }
 
         rankstats.sort((o1, o2) -> {
@@ -97,7 +106,7 @@ public class ClassRankAnalysis implements Server{
             Map<String, Object> rankAnalysisMap = getRankAnalysisMap(
                     projectId, Target.subject(subjectId), schoolId, classId, studentId);
             rankAnalysisMap.put("subjectId", subjectId);
-            rankAnalysisMap.put("subjectName", SubjectService.getSubjectName(subjectId).toString());
+            rankAnalysisMap.put("subjectName", SubjectService.getSubjectName(subjectId));
             subjectRankList.add(rankAnalysisMap);
         }
 
