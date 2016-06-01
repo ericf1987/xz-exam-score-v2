@@ -33,7 +33,7 @@ public class SchoolService {
      * @param projectId 考试项目id
      * @param schoolId  学校id
      *
-     * @return  学校名称
+     * @return 学校名称
      */
     public String queryExamSchoolName(String projectId, String schoolId) {
         Document examSchool = queryExamSchool(projectId, schoolId);
@@ -50,7 +50,7 @@ public class SchoolService {
      * @param projectId 考试项目id
      * @param schoolId  学校id
      *
-     * @return  考试学校
+     * @return 考试学校
      */
     public Document queryExamSchool(String projectId, String schoolId) {
         String cacheKey = "school_info:" + projectId + ":" + schoolId;
@@ -68,7 +68,7 @@ public class SchoolService {
      * @param projectId 考试项目id
      * @param area      地区编码
      *
-     * @return  考试学校列表
+     * @return 考试学校列表
      */
     public List<Document> getProjectSchools(String projectId, String area) {
         String cacheKey = "school_list:" + projectId + ":" + area;
@@ -86,6 +86,17 @@ public class SchoolService {
                     .find($and(ands)).projection(WITHOUT_INNER_ID)));
             return result;
         });
+    }
+
+    /**
+     * 查询考试学校列表
+     *
+     * @param projectId 考试项目id
+     *
+     * @return 考试学校列表
+     */
+    public List<Document> getProjectSchools(String projectId) {
+        return getProjectSchools(projectId, "");
     }
 
 

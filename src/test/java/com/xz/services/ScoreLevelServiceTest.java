@@ -23,8 +23,8 @@ public class ScoreLevelServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetScoreLevelRate() throws Exception {
         List<Document> documents = scoreLevelService.getScoreLevelRate(
-                "430200-89c9dc7481cd47a69d85af3f0808e0c4",
-                Range.clazz("e6e04686-f06e-42a8-b504-d55ed5ddd898"), Target.subject("003"));
+                PROJECT_ID,
+                Range.province("430000"), Target.project(PROJECT_ID));
 
         for (Document document : documents) {
             System.out.println(document.toJson());

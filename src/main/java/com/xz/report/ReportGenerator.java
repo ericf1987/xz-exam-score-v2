@@ -1,6 +1,8 @@
 package com.xz.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
@@ -14,6 +16,8 @@ import java.util.List;
  */
 public abstract class ReportGenerator {
 
+    static final Logger LOG = LoggerFactory.getLogger(ReportGenerator.class);
+
     @Autowired
     SheetManager sheetManager;
 
@@ -24,21 +28,27 @@ public abstract class ReportGenerator {
      * @param savePath  保存路径
      */
     public void generate(String projectId, String savePath) {
-        List<SheetTask> sheetTasks = getSheetTasks(projectId);
+        try {
+            List<SheetTask> sheetTasks = getSheetTasks(projectId);
 
-        InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
-        ExcelWriter excelWriter = new ExcelWriter(stream);
-        excelWriter.clearSheets();
+            InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
+            ExcelWriter excelWriter = new ExcelWriter(stream);
+            excelWriter.clearSheets();
 
-        for (SheetTask sheetTask : sheetTasks) {
-            excelWriter.openOrCreateSheet(sheetTask.getTitle());
-            SheetGenerator sheetGenerator = sheetManager.getSheetGenerator(sheetTask.getGeneratorClass());
-            if (sheetGenerator != null) {
-                sheetGenerator.generate(projectId, excelWriter, sheetTask);
+            for (SheetTask sheetTask : sheetTasks) {
+                excelWriter.openOrCreateSheet(sheetTask.getTitle());
+                SheetGenerator sheetGenerator = sheetManager.getSheetGenerator(sheetTask.getGeneratorClass());
+                if (sheetGenerator != null) {
+                    sheetGenerator.generate(projectId, excelWriter, sheetTask);
+                }
             }
+
+            excelWriter.save(savePath);
+        } catch (Exception e) {
+            LOG.error("生成报表失败", e);
         }
 
-        excelWriter.save(savePath);
+        LOG.info("生成报表 " + this.getClass() + " 结束。");
     }
 
     /**

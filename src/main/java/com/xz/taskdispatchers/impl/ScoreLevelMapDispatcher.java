@@ -31,7 +31,7 @@ public class ScoreLevelMapDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
+                projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
 
         List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.PROJECT);
 

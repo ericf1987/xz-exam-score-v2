@@ -46,11 +46,16 @@ public class PassAndUnPassService {
             ).first();
 
             if (document != null) {
-                return new double[]{document.getDouble("allPassRate"), document.getDouble("allFailRate")};
+                return new double[]{getDouble(document, "allPassRate"), getDouble(document, "allFailRate")};
             } else {
                 LOG.error("找不到全科及格率与不及格率, project={}, range={}", projectId, range);
                 return new double[]{0, 0};
             }
         });
+    }
+
+    private Double getDouble(Document document, String allPassRate) {
+        Double d = document.getDouble(allPassRate);
+        return d == null ? 0d : d;
     }
 }
