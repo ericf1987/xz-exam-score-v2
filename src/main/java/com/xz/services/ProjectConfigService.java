@@ -103,6 +103,10 @@ public class ProjectConfigService {
             projectConfig.setScoreLevels(defaultConfig.getScoreLevels());
         }
 
+        if (projectConfig.getRankSegmentCount() == 0) {
+            projectConfig.setRankSegmentCount(defaultConfig.getRankSegmentCount());
+        }
+
         return projectConfig;
     }
 }

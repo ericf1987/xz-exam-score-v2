@@ -26,9 +26,22 @@ public class ProjectConfig implements Serializable {
     private Map<String, Double> rankLevels = new HashMap<>();
 
     /**
+     * 排名分段的数量
+     */
+    private int rankSegmentCount;
+
+    /**
      * 得分等级配置
      */
     private Map<String, Double> scoreLevels = new HashMap<>();
+
+    public int getRankSegmentCount() {
+        return rankSegmentCount;
+    }
+
+    public void setRankSegmentCount(int rankSegmentCount) {
+        this.rankSegmentCount = rankSegmentCount;
+    }
 
     public Map<String, Double> getScoreLevels() {
         return scoreLevels;
