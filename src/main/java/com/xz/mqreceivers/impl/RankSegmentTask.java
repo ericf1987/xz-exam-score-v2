@@ -107,13 +107,15 @@ public class RankSegmentTask extends Receiver {
     private List<Document> listBySection(double[] pieceWise, int size) {
         List<Document> items = new ArrayList<Document>();
         for (int i = 0; i < pieceWise.length; i++) {
-            items.add(new Document("rankPercent", pieceWise[i]).append("rate", 0).append("count", size));
+            items.add(new Document("rankPercent", pieceWise[i]).append("rate", 0).append("count", 0));
         }
         return items;
     }
 
     private void calculateRates(int classCount, List<Document> docs) {
         for (Document doc : docs) {
+            //将addCount中统计的人数添加到count节点
+            doc.put("count", doc.getInteger("rate"));
             if (doc.getInteger("rate") != null) {
                 int num = doc.getInteger("rate");
                 doc.put("rate", Double.valueOf(num) / Double.valueOf(classCount));
