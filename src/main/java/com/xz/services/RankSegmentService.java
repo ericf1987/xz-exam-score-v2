@@ -47,6 +47,7 @@ public class RankSegmentService {
             minPercent = maxPercent;
             maxPercent = (int) (rankPercent * 100);
             totalRate += rate;
+            String title = minPercent + "-" + maxPercent;
 
             map.put("minPercent", minPercent);
             map.put("maxPercent", maxPercent);
@@ -54,6 +55,7 @@ public class RankSegmentService {
             map.put("rate", rate);
             map.put("rankPercent", rankPercent);
             map.put("totalRate", totalRate);
+            map.put("title", title);
 
             rankStats.add(map);
         }
