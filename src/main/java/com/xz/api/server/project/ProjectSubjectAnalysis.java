@@ -124,7 +124,7 @@ public class ProjectSubjectAnalysis implements Server {
             Target target = Target.subject(subject);
 
             map.put("subjectId", subject);
-            map.put("subjectName", SubjectService.getSubjectName(subject).toString());
+            map.put("subjectName", SubjectService.getSubjectName(subject));
 
             double fullScore = fullScoreService.getFullScore(projectId, target);
 
