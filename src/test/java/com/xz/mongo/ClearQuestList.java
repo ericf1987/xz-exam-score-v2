@@ -24,7 +24,7 @@ public class ClearQuestList extends XzExamScoreV2ApplicationTests {
     @Test
     public void testClearQuestList() throws Exception {
 
-        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+        String projectId = "430200-8a9be9fc2e1842a4b9b4894eee1f5f73";
         MongoCollection<Document> c = scoreDatabase.getCollection("quest_list");
 
         FindIterable<Document> documents =
