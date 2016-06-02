@@ -1,13 +1,16 @@
 package com.xz.services;
 
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.report.Keys;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
+import com.xz.util.CollectionUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -73,16 +76,29 @@ public class ScoreLevelService {
 
     @SuppressWarnings("unchecked")
     public List<Document> getScoreLevelRate(String projectId, Range range, Target target) {
-
         Document query = doc("project", projectId)
                 .append("range", range2Doc(range)).append("target", target2Doc(target));
 
         Document doc = scoreDatabase.getCollection("score_level_map").find(query).first();
-
+        List<Document> scoreLevels;
         if (doc != null) {
-            return (List<Document>) doc.get("scoreLevels");
+            scoreLevels = (List<Document>) doc.get("scoreLevels");
         } else {
-            return Collections.emptyList();
+            scoreLevels = Collections.emptyList();
         }
+
+        Map<String, Document> levelMap = CollectionUtil.toMap(scoreLevels, docm -> docm.getString("scoreLevel"));
+        List<Document> fullScoreLevels = new ArrayList<>();
+
+        for (Keys.ScoreLevel scoreLevel : Keys.ScoreLevel.values()) {
+            if (!levelMap.containsKey(scoreLevel.name())) {
+                fullScoreLevels.add(
+                        doc("scoreLevel", scoreLevel.name()).append("count", 0).append("rate", 0));
+            } else {
+                fullScoreLevels.add(levelMap.get(scoreLevel.name()));
+            }
+        }
+
+        return fullScoreLevels;
     }
 }
