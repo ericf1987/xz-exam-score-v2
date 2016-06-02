@@ -72,6 +72,7 @@ public class ScoreSegmentService {
             }
             map.put("startScoreSegment", startScoreSegment);
             map.put("endScoreSegment", endScoreSegment);
+            map.put("title", startScoreSegment + "-" + endScoreSegment);
 
             int count = 0;
             Document scoreSegment = segmentMap.get(String.valueOf(startScoreSegment));
