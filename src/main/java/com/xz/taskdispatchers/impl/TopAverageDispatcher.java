@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Created by fengye on 2016/5/25.
  */
-@TaskDispatcherInfo(taskType = "top_average", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "top_average", dependentTaskType = "score_map")
 @Component
 public class TopAverageDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(TopAverageDispatcher.class);
@@ -31,16 +31,16 @@ public class TopAverageDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
         List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL);
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE);
         List<Target> targets = targetService.queryTargets(projectId,
-                Target.SUBJECT, Target.PROJECT);
+                Target.QUEST, Target.SUBJECT, Target.PROJECT);
         int counter = 0;
         //统计班级和学校的科目和考试
-        for(Range range : ranges){
-            for(Target target : targets){
+        for (Range range : ranges) {
+            for (Target target : targets) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
-                if(counter % 100 == 0){
+                if (counter % 100 == 0) {
                     LOG.info("为项目 " + projectId + " 的 top_average 统计发布了 " + counter + " 个任务");
                 }
             }

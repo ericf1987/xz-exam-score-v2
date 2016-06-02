@@ -110,7 +110,7 @@ public class RankSegmentTask extends Receiver {
     }
 
     private Map<String, List<Document>> generateSectionRate(int rangeCount, Range currentRange, Range range, String projectId, Target target) {
-        Map<String, List<Document>> classSectionRate = new LinkedHashMap<String, List<Document>>();
+        Map<String, List<Document>> sectionRate = new LinkedHashMap<String, List<Document>>();
         List<String> studentIds = studentService.getStudentList(projectId, currentRange, target);
         int size = studentIds.size();
         List<Document> docs = listBySection(PIECE_WISE, size);
@@ -124,8 +124,8 @@ public class RankSegmentTask extends Receiver {
         }
         //计算出每个分段的人数占总数的比率
         calculateRates(size, docs);
-        classSectionRate.put("rankSegments", docs);
-        return classSectionRate;
+        sectionRate.put("rankSegments", docs);
+        return sectionRate;
     }
 
     private List<Document> listBySection(double[] pieceWise, int size) {

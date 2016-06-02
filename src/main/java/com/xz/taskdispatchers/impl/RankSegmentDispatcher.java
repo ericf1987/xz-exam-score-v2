@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author by fengye on 2016/5/27.
  */
-@TaskDispatcherInfo(taskType = "rank_segment", dependentTaskType = "score_map")
+@TaskDispatcherInfo(taskType = "rank_segment", dependentTaskType = "rank_level")
 @Component
 public class RankSegmentDispatcher extends TaskDispatcher{
     static final Logger LOG = LoggerFactory.getLogger(RankSegmentDispatcher.class);

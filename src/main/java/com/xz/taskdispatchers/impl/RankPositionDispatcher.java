@@ -17,9 +17,9 @@ import java.util.List;
 /**
  * @author by fengye on 2016/5/27.
  */
-@TaskDispatcherInfo(taskType = "rank_position", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "rank_position", dependentTaskType = "rank_level")
 @Component
-public class RankPositionDispatcher extends TaskDispatcher{
+public class RankPositionDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(RankPositionDispatcher.class);
 
     @Autowired
@@ -30,15 +30,15 @@ public class RankPositionDispatcher extends TaskDispatcher{
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST, Target.SUBJECT, Target.PROJECT);
 
         int counter = 0;
-        for(Range range : ranges){
-            for(Target target : targets){
-                dispatchTask(createTask(projectId,aggregationId).setRange(range).setTarget(target));
+        for (Range range : ranges) {
+            for (Target target : targets) {
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
-                if(counter % 1000 == 0){
+                if (counter % 1000 == 0) {
                     LOG.info("为项目 " + projectId + " 的 rank_position 统计发布了 " + counter + " 个任务");
                 }
             }
