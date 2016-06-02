@@ -10,6 +10,7 @@ import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.ClassService;
 import com.xz.services.RankService;
+import com.xz.services.SchoolService;
 import com.xz.services.StudentService;
 import com.xz.util.Mongo;
 import org.bson.Document;
@@ -49,6 +50,9 @@ public class RankSegmentTask extends Receiver {
     @Autowired
     ClassService classService;
 
+    @Autowired
+    SchoolService schoolService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         //1.获取该学校下面的所有班级
@@ -61,19 +65,39 @@ public class RankSegmentTask extends Receiver {
 
         MongoCollection<Document> rankSegmentCol = scoreDataBase.getCollection("rank_segment");
 
-        //计算学校的人数
-        int schoolCount = studentService.getStudentCount(projectId, range, target);
+        //计算当前范围的人数
+        int rangeCount = studentService.getStudentCount(projectId, range, target);
 
-        List<Document> classDocs = classService.listClasses(projectId, range.getId());
+        List<Document> docs = new ArrayList<Document>();
 
-        for (Document doc : classDocs) {
+        String rangeName = range.getName();
+
+        //学校范围或联考范围判断
+        if(rangeName.equals("school")){
+            docs = classService.listClasses(projectId, range.getId());
+        }else{
+            docs = schoolService.getProjectSchools(projectId, range.getId());
+        }
+
+        for (Document doc : docs) {
             //查询出每个班级在每个分段中的学生数，并算出占总班级的比率
-            String classId = doc.getString("class");
+            String id = "";
+            Range currentRange;
+            if(rangeName.equals("school")){
+                id = doc.getString("class");
+                currentRange = Range.clazz(id);
+            }else{
+                id = doc.getString("school");
+                currentRange = Range.school(id);
+            }
 
-            Map<String, List<Document>> resultMap = generateSectionRate(schoolCount, Range.clazz(classId), range, projectId, target);
+            Map<String, List<Document>> resultMap = generateSectionRate(
+                    rangeCount, currentRange,
+                    range, projectId, target
+            );
 
             Document condition = new Document("project", projectId).
-                    append("range", Mongo.range2Doc(Range.clazz(classId))).
+                    append("range", Mongo.range2Doc(currentRange)).
                     append("target", Mongo.target2Doc(target));
             rankSegmentCol.deleteMany(condition);
             rankSegmentCol.updateMany(
@@ -85,20 +109,20 @@ public class RankSegmentTask extends Receiver {
 
     }
 
-    private Map<String, List<Document>> generateSectionRate(int schoolCount, Range range, Range schoolRange, String projectId, Target target) {
+    private Map<String, List<Document>> generateSectionRate(int rangeCount, Range currentRange, Range range, String projectId, Target target) {
         Map<String, List<Document>> classSectionRate = new LinkedHashMap<String, List<Document>>();
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        List<String> studentIds = studentService.getStudentList(projectId, currentRange, target);
         int size = studentIds.size();
         List<Document> docs = listBySection(PIECE_WISE, size);
         for (String studentId : studentIds) {
-            //获取学生在学校的排名
-            int rank = rankService.getRank(projectId, schoolRange, target, studentId);
+            //获取学生在当前范围的排名
+            int rank = rankService.getRank(projectId, range, target, studentId);
             //获取该排名所在的分段
-            double section = getSection(rank, schoolCount, PIECE_WISE);
+            double section = getSection(rank, rangeCount, PIECE_WISE);
             //对每个分段的人数进行累加
             addCount(section, docs);
         }
-        //计算出每个分段的人数占班级总数的比率
+        //计算出每个分段的人数占总数的比率
         calculateRates(size, docs);
         classSectionRate.put("rankSegments", docs);
         return classSectionRate;

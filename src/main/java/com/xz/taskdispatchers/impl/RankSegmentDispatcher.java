@@ -30,7 +30,7 @@ public class RankSegmentDispatcher extends TaskDispatcher{
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL, Range.PROVINCE);
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST, Target.SUBJECT, Target.PROJECT);
 
         int counter = 0;
