@@ -65,9 +65,9 @@ public class TopAverageTask extends Receiver{
         }
         top_averageCol.deleteMany(query);
         //查询该平均分统计项是否存在
-        top_averageCol.updateOne(
+        top_averageCol.updateMany(
                 query,
-                MongoUtils.$push("topAverages", resultList),
+                MongoUtils.$set("topAverages", resultList),
                 MongoUtils.UPSERT
         );
 

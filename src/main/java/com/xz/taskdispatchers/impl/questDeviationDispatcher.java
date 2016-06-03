@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author by fengye on 2016/5/27.
  */
-@TaskDispatcherInfo(taskType = "quest_deviation", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "quest_deviation", dependentTaskType = "rank_level")
 @Component
 public class QuestDeviationDispatcher extends TaskDispatcher {
 
@@ -31,7 +31,7 @@ public class QuestDeviationDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST);
 
         int counter = 0;
