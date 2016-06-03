@@ -93,7 +93,7 @@ public class ScoreLevelService {
         for (Keys.ScoreLevel scoreLevel : Keys.ScoreLevel.values()) {
             if (!levelMap.containsKey(scoreLevel.name())) {
                 fullScoreLevels.add(
-                        doc("scoreLevel", scoreLevel.name()).append("count", 0).append("rate", 0));
+                        doc("scoreLevel", scoreLevel.name()).append("count", 0).append("rate", 0.0));
             } else {
                 fullScoreLevels.add(levelMap.get(scoreLevel.name()));
             }

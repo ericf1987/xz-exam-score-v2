@@ -3,6 +3,7 @@ package com.xz.services;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
+import com.xz.util.DoubleUtils;
 import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,9 @@ public class RankSegmentService {
             map.put("minPercent", minPercent);
             map.put("maxPercent", maxPercent);
             map.put("count", count);
-            map.put("rate", rate);
+            map.put("rate", DoubleUtils.round(rate, true));
             map.put("rankPercent", rankPercent);
-            map.put("totalRate", totalRate);
+            map.put("totalRate", DoubleUtils.round(totalRate, true));
             map.put("title", title);
 
             rankStats.add(map);

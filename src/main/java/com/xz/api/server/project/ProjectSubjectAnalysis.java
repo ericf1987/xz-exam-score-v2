@@ -10,6 +10,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,7 +114,7 @@ public class ProjectSubjectAnalysis implements Server {
 
         // 总分平均分
         double totalAvg = averageService.getAverage(projectId, range, Target.project(projectId));
-        subjectAnalysisMap.put("totalAvg", totalAvg);
+        subjectAnalysisMap.put("totalAvg", DoubleUtils.round(totalAvg));
 
         // 科目分析
         Map<String, Document> subjectRateMap = subjectRateService.querySubjectRateMap(projectId, range);
@@ -130,15 +131,15 @@ public class ProjectSubjectAnalysis implements Server {
 
             // 科目平均分与得分率
             double subjectAvg = averageService.getAverage(projectId, range, target);
-            map.put("subjectAvg", subjectAvg);
-            map.put("subjectRate", fullScore == 0 ? 0 : subjectAvg / fullScore);
+            map.put("subjectAvg", DoubleUtils.round(subjectAvg));
+            map.put("subjectRate", DoubleUtils.round(fullScore == 0 ? 0 : subjectAvg / fullScore, true));
 
             // 科目T值
-            map.put("tScore", tScoreService.queryTScore(projectId, target, range));
+            map.put("tScore", DoubleUtils.round(tScoreService.queryTScore(projectId, target, range)));
 
             // 科目贡献度
             Document subjectRate = subjectRateMap.get(subject);
-            map.put("subjectRate", subjectRate == null ? 0 : subjectRate.getDouble("rate"));
+            map.put("subjectRate", DoubleUtils.round(subjectRate == null ? 0 : subjectRate.getDouble("rate")));
             subjectList.add(map);
         }
 

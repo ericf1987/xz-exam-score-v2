@@ -57,6 +57,9 @@ public class SchoolScoreAnalysis implements Server {
     RankPositionService rankPositionService;
 
     @Autowired
+    OverAverageService overAverageService;
+
+    @Autowired
     TargetService targetService;
 
     @Override
@@ -84,7 +87,7 @@ public class SchoolScoreAnalysis implements Server {
             Target target = targetService.getTarget(projectId, subjectId);
             Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
                     studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
-                    passAndUnPassService, rankPositionService);
+                    passAndUnPassService, rankPositionService, overAverageService);
             schoolMap.put("className", name);
 
             classStats.add(schoolMap);
@@ -101,6 +104,6 @@ public class SchoolScoreAnalysis implements Server {
 
         return getScoreAnalysisStatInfo(projectId, range, target,
                 studentService, minMaxScoreService, averageService, stdDeviationService,
-                scoreLevelService, passAndUnPassService, rankPositionService);
+                scoreLevelService, passAndUnPassService, rankPositionService, overAverageService);
     }
 }

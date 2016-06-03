@@ -10,6 +10,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,9 @@ public class ProjectScoreAnalysis implements Server {
     RankPositionService rankPositionService;
 
     @Autowired
+    OverAverageService overAverageService;
+
+    @Autowired
     TargetService targetService;
 
     @Autowired
@@ -93,7 +97,7 @@ public class ProjectScoreAnalysis implements Server {
             Target target = targetService.getTarget(projectId, subjectId);
             Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
                     studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
-                    passAndUnPassService, rankPositionService);
+                    passAndUnPassService, rankPositionService, overAverageService);
             schoolMap.put("schoolName", schoolName);
 
             schoolStats.add(schoolMap);
@@ -107,8 +111,9 @@ public class ProjectScoreAnalysis implements Server {
         Range range = rangeService.queryProvinceRange(projectId);
         Target target = targetService.getTarget(projectId, subjectId);
 
-        return getScoreAnalysisStatInfo(projectId, range, target, studentService, minMaxScoreService,
-                averageService, stdDeviationService, scoreLevelService, passAndUnPassService, rankPositionService);
+        return getScoreAnalysisStatInfo(projectId, range, target, studentService,
+                minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
+                passAndUnPassService, rankPositionService, overAverageService);
     }
 
     public static Map<String, Object> getScoreAnalysisStatInfo(String projectId, Range range, Target target,
@@ -118,7 +123,8 @@ public class ProjectScoreAnalysis implements Server {
                                                                StdDeviationService stdDeviationService,
                                                                ScoreLevelService scoreLevelService,
                                                                PassAndUnPassService passAndUnPassService,
-                                                               RankPositionService rankPositionService) {
+                                                               RankPositionService rankPositionService,
+                                                               OverAverageService overAverageService) {
         Map<String, Object> statMap = new HashMap<>();
 
         // 考生人数
@@ -134,25 +140,33 @@ public class ProjectScoreAnalysis implements Server {
 
         // 平均分
         double avgScore = averageService.getAverage(projectId, range, target);
-        statMap.put("avgScore", avgScore);
+        statMap.put("avgScore", DoubleUtils.round(avgScore));
+
+        // 超均率
+        double overAverage = overAverageService.getOverAverage(projectId, range, target);
+        statMap.put("overAverage", DoubleUtils.round(overAverage, true));
 
         // 标准差
         double stdDeviation = stdDeviationService.getStdDeviation(projectId, range, target);
-        statMap.put("stdDeviation", stdDeviation);
+        statMap.put("stdDeviation", DoubleUtils.round(stdDeviation));
 
         // 三率
         List<Document> scoreLevelRate = scoreLevelService.getScoreLevelRate(projectId, range, target);
         for (Document document : scoreLevelRate) {
+            document.put("rate", DoubleUtils.round(document.getDouble("rate"), true));
             statMap.put(document.getString("scoreLevel"), document);
         }
 
         // 全科及格率与不及格率
         double[] passAndUnPass = passAndUnPassService.getAllSubjectPassAndUnPass(projectId, range);
-        statMap.put("allPassRate", passAndUnPass[0]);
-        statMap.put("allFailRate", passAndUnPass[1]);
+        statMap.put("allPassRate", DoubleUtils.round(passAndUnPass[0], true));
+        statMap.put("allFailRate", DoubleUtils.round(passAndUnPass[1], true));
 
         // 中位数
         List<Document> rankPositions = rankPositionService.getRankPositions(projectId, range, target);
+        for (Document rankPosition : rankPositions) {
+            rankPosition.put("score", DoubleUtils.round(rankPosition.getDouble("score")));
+        }
         rankPositions.sort((o1, o2) -> o1.getDouble("position").compareTo(o2.getDouble("position")));
         statMap.put("rankPositions", rankPositions);
 

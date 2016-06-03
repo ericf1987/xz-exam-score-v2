@@ -7,6 +7,7 @@ import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.util.CollectionUtil;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,7 @@ public class ScoreSegmentService {
                 count = scoreSegment.getInteger("count");
             }
             map.put("count", count);
-            map.put("countRate", studentCount == 0 ? 0 : count * 1.0 / studentCount);
+            map.put("countRate", DoubleUtils.round(studentCount == 0 ? 0 : count * 1.0 / studentCount, true));
             scoreSegmentList.add(map);
         }
 
