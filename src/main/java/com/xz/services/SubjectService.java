@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * (description)
@@ -77,5 +77,19 @@ public class SubjectService {
 
     public static String getSubjectName(String subjectId) {
         return SUBJECT_NAMES.get(subjectId);
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    /**
+     * 保存项目的科目列表
+     *
+     * @param projectId 项目ID
+     * @param subjects  科目列表
+     */
+    public void saveProjectSubjects(String projectId, List<String> subjects) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
+        Document query = doc("project", projectId);
+        c.updateOne(query, $set("subjects", subjects), UPSERT);
     }
 }

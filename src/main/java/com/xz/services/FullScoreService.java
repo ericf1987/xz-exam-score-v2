@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * 查询项目/科目/题目的满分值
@@ -38,14 +38,14 @@ public class FullScoreService {
      */
     public double getFullScore(String projectId, Target target) {
         if (target.match(Target.QUEST)) {
-            return getQuestFullScore(projectId, target.getId().toString());
+            return getQuestFullScore(projectId, target);
         } else {
             return getSubjectProjectFullScore(projectId, target);
         }
     }
 
     private double getSubjectProjectFullScore(String projectId, Target target) {
-        String cacheKey = "subject_project_fullscore:" + projectId + ":" + target;
+        String cacheKey = "fullscore:" + projectId + ":" + target;
         return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("target", Mongo.target2Doc(target));
             Document document = scoreDatabase.getCollection("full_score").find(query).first();
@@ -59,8 +59,10 @@ public class FullScoreService {
         });
     }
 
-    private double getQuestFullScore(String projectId, String questId) {
-        String cacheKey = "quest_fullscore:" + projectId + ":" + questId;
+    private double getQuestFullScore(String projectId, Target target) {
+        String cacheKey = "fullscore:" + projectId + ":" + target;
+        String questId = target.getId().toString();
+
         return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("questId", questId);
             Document document = scoreDatabase.getCollection("quest_list").find(query).first();
@@ -72,5 +74,33 @@ public class FullScoreService {
                 return 0d;
             }
         });
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    /**
+     * 保存科目或题目的满分
+     *
+     * @param projectId 项目ID
+     * @param target    科目或题目
+     * @param fullScore 满分
+     */
+    public void saveFullScore(String projectId, Target target, double fullScore) {
+
+        // 1. 更新数据库
+        if (target.match(Target.QUEST)) {
+            String questId = target.getId().toString();
+            scoreDatabase.getCollection("quest_list").updateOne(
+                    doc("project", projectId).append("questId", questId),
+                    $set("score", fullScore), UPSERT);
+        } else {
+            scoreDatabase.getCollection("full_score").updateOne(
+                    doc("project", projectId).append("target", target),
+                    $set("fullScore", fullScore), UPSERT);
+        }
+
+        // 2. 删除缓存
+        String cacheKey = "fullscore:" + projectId + ":" + target;
+        cache.delete(cacheKey);
     }
 }

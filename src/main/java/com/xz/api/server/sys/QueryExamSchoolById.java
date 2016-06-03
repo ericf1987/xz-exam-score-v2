@@ -33,7 +33,7 @@ public class QueryExamSchoolById implements Server {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
 
-        Document examSchool = schoolService.queryExamSchool(projectId, schoolId);
+        Document examSchool = schoolService.findSchool(projectId, schoolId);
         if (examSchool == null) {
             return Result.fail("找不到指定的学校");
         }

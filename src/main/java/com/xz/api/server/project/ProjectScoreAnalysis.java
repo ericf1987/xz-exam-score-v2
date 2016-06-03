@@ -3,7 +3,9 @@ package com.xz.api.server.project;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
-import com.xz.api.annotation.*;
+import com.xz.api.annotation.Function;
+import com.xz.api.annotation.Parameter;
+import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -81,7 +83,7 @@ public class ProjectScoreAnalysis implements Server {
         List<Map<String, Object>> schoolStats = new ArrayList<>();
 
         for (String schoolId : schoolIds) {
-            String schoolName = schoolService.queryExamSchoolName(projectId, schoolId);
+            String schoolName = schoolService.getSchoolName(projectId, schoolId);
             if (StringUtil.isBlank(schoolName)) {
                 LOG.warn("找不到学校:'{}'的考试记录", schoolId);
                 return null;

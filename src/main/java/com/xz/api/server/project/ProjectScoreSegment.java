@@ -66,7 +66,7 @@ public class ProjectScoreSegment implements Server {
         List<Map<String, Object>> schoolSegments = new ArrayList<>();
 
         for (String schoolId : schoolIds) {
-            String schoolName = schoolService.queryExamSchoolName(projectId, schoolId);
+            String schoolName = schoolService.getSchoolName(projectId, schoolId);
             if (StringUtil.isBlank(schoolName)) {
                 LOG.warn("找不到学校:'{}'的考试记录", schoolId);
                 return null;

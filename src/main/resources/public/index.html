@@ -7,6 +7,16 @@
 <body>
 
 <fieldset>
+    <legend>导入项目</legend>
+    <form action="project/import" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">开始导入</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>统计项目</legend>
     <form action="aggr/start/project">
         <p>项目ID：<input type="text" name="project"/></p>

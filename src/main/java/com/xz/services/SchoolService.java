@@ -1,7 +1,9 @@
 package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.beans.user.School;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +37,8 @@ public class SchoolService {
      *
      * @return 学校名称
      */
-    public String queryExamSchoolName(String projectId, String schoolId) {
-        Document examSchool = queryExamSchool(projectId, schoolId);
+    public String getSchoolName(String projectId, String schoolId) {
+        Document examSchool = findSchool(projectId, schoolId);
         if (examSchool == null) {
             return "";
         }
@@ -52,7 +54,7 @@ public class SchoolService {
      *
      * @return 考试学校
      */
-    public Document queryExamSchool(String projectId, String schoolId) {
+    public Document findSchool(String projectId, String schoolId) {
         String cacheKey = "school_info:" + projectId + ":" + schoolId;
 
         return cache.get(cacheKey, () -> {
@@ -99,5 +101,22 @@ public class SchoolService {
         return getProjectSchools(projectId, "");
     }
 
+    //////////////////////////////////////////////////////////////
 
+    public void saveProjectSchool(String projectId, School school) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
+        Document query = doc("project", projectId).append("school", school.getId());
+
+        Document update = doc("name", school.getName())
+                .append("area", school.getArea())
+                .append("city", school.getCity())
+                .append("province", school.getProvince());
+
+        c.updateOne(query, $set(update), UPSERT);
+    }
+
+    public void clearProjectSchool(String projectId) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
+        c.deleteMany(doc("project", projectId));
+    }
 }

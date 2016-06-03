@@ -43,9 +43,19 @@ public class InterfaceClient {
         try {
             HttpRequest httpRequest = createHttpRequest(functionName, param);
             JSONObject response = JSON.parseObject(httpRequest.request());
-            return parseResponse(response);
+
+            Result result = parseResponse(response);
+            checkResult(result);
+
+            return result;
         } catch (IOException e) {
             throw new InterfaceException(e);
+        }
+    }
+
+    private void checkResult(Result result) {
+        if (!result.isSuccess()) {
+            throw new InterfaceServerException(result.getMessage());
         }
     }
 
