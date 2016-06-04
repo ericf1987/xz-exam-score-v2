@@ -205,4 +205,14 @@ public class StudentService {
             return students.find(doc("student", studentId).append("project", projectId)).first();
         });
     }
+
+    public void saveProjectClassStudents(String projectId, String classId, List<Document> classStudents) {
+        MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+
+        students.deleteMany(doc("project", projectId).append("class", classId));
+        students.insertMany(classStudents);
+
+        String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
+        simpleCache.delete(cacheKey);
+    }
 }
