@@ -47,7 +47,7 @@ public class TotalScoreTask extends Receiver {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
 
-        // aggregateStudentTotalScore(projectId, target);
+        aggregateStudentTotalScore(projectId, target);
 
         for (String rangeName : AGGR_RANGE_NAMES) {
             aggregateFromTotalScore(projectId, target, rangeName);
