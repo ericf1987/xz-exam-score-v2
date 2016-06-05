@@ -3,7 +3,6 @@ package com.xz.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.beans.user.School;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,16 +102,16 @@ public class SchoolService {
 
     //////////////////////////////////////////////////////////////
 
-    public void saveProjectSchool(String projectId, School school) {
+    /**
+     * 保存项目学校列表（会删除旧数据）
+     *
+     * @param projectId  项目ID
+     * @param schoolList 学校列表
+     */
+    public void saveProjectSchool(String projectId, List<Document> schoolList) {
         MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
-        Document query = doc("project", projectId).append("school", school.getId());
-
-        Document update = doc("name", school.getName())
-                .append("area", school.getArea())
-                .append("city", school.getCity())
-                .append("province", school.getProvince());
-
-        c.updateOne(query, $set(update), UPSERT);
+        c.deleteMany(doc("project", projectId));
+        c.insertMany(schoolList);
     }
 
     public void clearProjectSchool(String projectId) {

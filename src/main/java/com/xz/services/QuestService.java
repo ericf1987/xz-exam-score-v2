@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.bson.Document;
@@ -66,6 +67,20 @@ public class QuestService {
         return MongoUtils.toList(
                 scoreDatabase.getCollection("quest_list").find(
                         doc("project", projectId).append("isObjective", isObjective)));
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    /**
+     * 更新项目中的所有题目记录（会删除旧的记录）
+     *
+     * @param projectId 项目ID
+     * @param quests    题目列表
+     */
+    public void saveProjectQuests(String projectId, List<Document> quests) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+        collection.deleteMany(doc("project", projectId));
+        collection.insertMany(quests);
     }
 
 }
