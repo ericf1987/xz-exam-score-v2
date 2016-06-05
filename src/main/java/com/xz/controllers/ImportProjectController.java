@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 湘潭联考：430300-672a0ed23d9148e5a2a31c8bf1e08e62
@@ -39,6 +37,15 @@ public class ImportProjectController {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    ProvinceService provinceService;
+
+    @Autowired
+    CityService cityService;
+
+    @Autowired
+    AreaService areaService;
 
     @Autowired
     SchoolService schoolService;
@@ -163,6 +170,7 @@ public class ImportProjectController {
         }
     }
 
+    // 导入学校和区市省
     private void importSchools(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 学校信息...");
         Param param = new Param().setParameter("projectId", projectId);
@@ -170,6 +178,9 @@ public class ImportProjectController {
         JSONArray jsonArray = result.get("schools");
 
         List<Document> schoolList = new ArrayList<>();  // 存入 project_list
+        Set<String> areas = new HashSet<>();
+        Set<String> cities = new HashSet<>();
+        Set<String> provinces = new HashSet<>();
 
         jsonArray.forEach(o -> {
             JSONObject schoolObj = (JSONObject) o;
@@ -181,12 +192,20 @@ public class ImportProjectController {
             schoolDoc.put("city", schoolObj.getString("city"));
             schoolDoc.put("province", schoolObj.getString("province"));
 
+            areas.add(schoolObj.getString("area"));
+            cities.add(schoolObj.getString("city"));
+            provinces.add(schoolObj.getString("province"));
+
             schoolList.add(schoolDoc);
         });
 
         context.put("schools", schoolList);  // 导入班级时要用到
+
         schoolService.saveProjectSchool(projectId, schoolList);
         projectService.updateProjectSchools(projectId, schoolList);
+        provinceService.saveProjectProvince(projectId, provinces.iterator().next());
+        cityService.saveProjectCities(projectId, cities);
+        areaService.saveProjectAreas(projectId, areas);
     }
 
     private void importQuests(String projectId) {

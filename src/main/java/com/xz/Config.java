@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 
 import javax.servlet.MultipartConfigElement;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
@@ -25,11 +27,8 @@ public class Config {
     @Value("${redis.port}")
     private int redisPort;
 
-    @Value("${mongo.host}")
-    private String mongoHost;
-
-    @Value("${mongo.port}")
-    private int mongoPort;
+    @Value("${mongo.hosts}")
+    private String mongoHosts;
 
     @Value("${multipart.maxFileSize}")
     private String maxFileSize;
@@ -44,9 +43,20 @@ public class Config {
 
     @Bean
     public MongoClient mongoClient() throws Exception {
-        ServerAddress serverAddress = new ServerAddress(mongoHost, mongoPort);
+        String[] split = mongoHosts.split(",");
+        List<ServerAddress> seeds = new ArrayList<>();
+
+        for (String s : split) {
+            if (s == null || s.length() == 0 || !s.contains(":")) {
+                continue;
+            }
+
+            String[] host_port = s.split(":");
+            seeds.add(new ServerAddress(host_port[0], Integer.parseInt(host_port[1])));
+        }
+
         MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
-        return new MongoClient(serverAddress, options);
+        return new MongoClient(seeds, options);
     }
 
     @Bean
