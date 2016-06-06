@@ -40,6 +40,11 @@ public class DoubleUtils {
      * @return 保留X位小数的数值
      */
     public static Double round(double doubleValue, boolean percent) {
+
+        if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+            return 0d;
+        }
+
         BigDecimal b = new BigDecimal(doubleValue);
         return b.setScale(percent ? 4 : 2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }

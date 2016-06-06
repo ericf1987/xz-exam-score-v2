@@ -37,7 +37,6 @@ public class TotalBasicRankReport extends ReportGenerator {
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }
-        System.out.println("任务列表-->" + tasks.toString());
         return tasks;
     }
 }

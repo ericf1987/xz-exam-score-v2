@@ -163,7 +163,9 @@ public class ProjectScoreAnalysis implements Server {
         statMap.put("allFailRate", DoubleUtils.round(passAndUnPass[1], true));
 
         // 中位数
-        List<Document> rankPositions = rankPositionService.getRankPositions(projectId, range, target);
+        // 注意这里是从缓存中取出来的，所以不可以直接操作里面的内容，必须拷贝一份
+        List<Document> rankPositions = new ArrayList<>(rankPositionService.getRankPositions(projectId, range, target));
+
         for (Document rankPosition : rankPositions) {
             rankPosition.put("score", DoubleUtils.round(rankPosition.getDouble("score")));
         }
