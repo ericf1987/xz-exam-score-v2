@@ -8,6 +8,7 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +28,15 @@ public class TotalBasicRankSheet extends SheetGenerator {
 
     @Autowired
     SchoolService schoolService;
+
+    //分段
+    public static final double[] PIECE_WISE = new double[]{
+            0.05, 0.1, 0.15, 0.2,
+            0.25, 0.3, 0.35, 0.4,
+            0.45, 0.5, 0.55, 0.6,
+            0.65, 0.7, 0.75, 0.8,
+            0.85, 0.9, 0.95, 1.0
+    };
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
@@ -72,23 +82,8 @@ public class TotalBasicRankSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
         excelWriter.set(0, column.incrementAndGet(), "实考人数");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前5%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前10%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前15%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前20%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前25%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前35%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前40%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前45%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前50%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前55%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前60%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前65%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前70%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前75%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前80%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前85%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前90%");
-        excelWriter.set(0, column.incrementAndGet(), "总排名前95%");
+        for(double d : PIECE_WISE){
+            excelWriter.set(0, column.incrementAndGet(), "总排名前" + DoubleUtils.toPercent(d));
+        }
     }
 }

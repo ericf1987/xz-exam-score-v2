@@ -5,6 +5,8 @@
             <report-category name="基础分析">
                 <report name="分数分析" class="com.xz.report.total.TotalBasicScoreReport"/>
                 <report name="排名统计" class="com.xz.report.total.TotalBasicRankReport"/>
+                <report name="分数段统计" class="com.xz.report.total.TotalBasicScoreSegmentReport"/>
+                <report name="学科分析" class="com.xz.report.total.TotalBasicSubjectReport"/>
             </report-category>
         </report-category>
     </report-set>
