@@ -12,7 +12,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 public class XzExamScoreV2ApplicationTests {
 
-    public static final String PROJECT_ID = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
+    public static final String PROJECT_ID = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
 
     static {
         System.setProperty("socksProxyHost", "127.0.0.1");

@@ -4,10 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
+import com.xz.util.Mongo;
+import com.xz.util.SubjectUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
 
@@ -77,8 +78,6 @@ public class ScoreService {
 
         if (isQueryQuestScore(range, target)) {
             return getQuestScore(projectId, range.getId(), target.getId().toString());
-        } else if (isQueryCombinedSubjectScore(projectId, target)) {
-            return getCombinedSubjectScore(projectId, range, target);
         } else {
             return getTotalScore(projectId, range, target);
         }
@@ -95,14 +94,6 @@ public class ScoreService {
      */
     public double getSubjectScore(String projectId, String studentId, String subjectId) {
         return getScore(projectId, Range.student(studentId), Target.subject(subjectId));
-    }
-
-    private boolean isQueryCombinedSubjectScore(String projectId, Target target) {
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-
-        return projectConfig.isCombineCategorySubjects()
-                && target.match(Target.SUBJECT)
-                && StringUtil.isOneOf(target.getId().toString(), "004005006", "007008009");
     }
 
     private boolean isQueryQuestScore(Range range, Target target) {
@@ -122,12 +113,9 @@ public class ScoreService {
         });
     }
 
-    private double getCombinedSubjectScore(String projectId, Range range, Target target) {
-        return getTotalScore("total_score_combined", projectId, range, target);
-    }
-
     private double getTotalScore(String projectId, Range range, Target target) {
-        return getTotalScore("total_score", projectId, range, target);
+        String collectionName = getTotalScoreCollection(projectId, target);
+        return getTotalScore(collectionName, projectId, range, target);
     }
 
     private double getTotalScore(String collection, String projectId, Range range, Target target) {
@@ -163,6 +151,25 @@ public class ScoreService {
         }
 
         return result;
+    }
 
+    public void saveTotalScore(String projectId, Range range, Range parent, Target target, double score) {
+        String collectionName = getTotalScoreCollection(projectId, target);
+        Document query = Mongo.query(projectId, range, target);
+
+        scoreDatabase.getCollection(collectionName).updateOne(query,
+                $set(doc("totalScore", score).append("parent", range2Doc(parent))), UPSERT);
+
+        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+        cache.delete(cacheKey);
+    }
+
+    public String getTotalScoreCollection(String projectId, Target target) {
+        ProjectConfig config = projectConfigService.getProjectConfig(projectId);
+        if (config.isCombineCategorySubjects() && SubjectUtil.isCombinedSubject(target)) {
+            return "total_score_combined";
+        } else {
+            return "total_score";
+        }
     }
 }

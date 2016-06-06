@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -29,9 +31,9 @@ public class CityService {
     /**
      * 查询指定父节点的子节点列表
      *
-     * @param parent    父节点id
+     * @param parent 父节点id
      *
-     * @return  子节点列表
+     * @return 子节点列表
      */
     public List<Document> listItems(String parent) {
         String cacheKey = "cities_of:" + parent;
@@ -50,9 +52,9 @@ public class CityService {
     /**
      * 查询指定地市信息
      *
-     * @param id    地市id
+     * @param id 地市id
      *
-     * @return  地市信息
+     * @return 地市信息
      */
     public Document findCity(String id) {
         String cacheKey = "city_by_id:" + id;
@@ -68,12 +70,28 @@ public class CityService {
     /**
      * 查询指定地市名称
      *
-     * @param id    地市id
+     * @param id 地市id
      *
-     * @return  地市名称
+     * @return 地市名称
      */
     public String getCityName(String id) {
         Document city = findCity(id);
         return city == null ? "" : city.getString("name");
+    }
+
+    /**
+     * 保存项目所属城市列表
+     *
+     * @param projectId 项目
+     * @param cities    城市列表
+     */
+    public void saveProjectCities(String projectId, Collection<String> cities) {
+        List<Document> documents = cities.stream()
+                .map(city -> doc("project", projectId).append("city", city))
+                .collect(Collectors.toList());
+
+        MongoCollection<Document> c = scoreDatabase.getCollection("city_list");
+        c.deleteMany(doc("project", projectId));
+        c.insertMany(documents);
     }
 }

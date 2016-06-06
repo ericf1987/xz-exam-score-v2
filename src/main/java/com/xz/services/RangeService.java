@@ -29,6 +29,15 @@ public class RangeService {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    StudentService studentService;
+
+    @Autowired
+    ClassService classService;
+
+    @Autowired
+    SchoolService schoolService;
+
     /**
      * 查询指定项目的省份范围
      *
@@ -103,5 +112,25 @@ public class RangeService {
                 classIds.add(new Range(rangeName, document.getString(rangeName))));
 
         return classIds;
+    }
+
+    // 查询上一级的 range
+    public Range getParentRange(String projectId, Range range) {
+        if (range.match(Range.STUDENT)) {
+            Document d = studentService.findStudent(projectId, range.getId());
+            return d == null ? null : Range.clazz(d.getString("class"));
+        } else if (range.match(Range.CLASS)) {
+            Document d = classService.findClass(projectId, range.getId());
+            return d == null ? null : Range.school(d.getString("school"));
+        } else if (range.match(Range.SCHOOL)) {
+            Document d = schoolService.findSchool(projectId, range.getId());
+            return d == null ? null : Range.area(d.getString("area"));
+        } else if (range.match(Range.AREA)) {
+            return Range.city(range.getId().substring(0, 4) + "00");
+        } else if (range.match(Range.CITY)) {
+            return Range.province(range.getId().substring(0, 2) + "0000");
+        } else {
+            return null;
+        }
     }
 }

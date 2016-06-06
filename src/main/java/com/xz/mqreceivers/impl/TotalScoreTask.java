@@ -4,24 +4,40 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
-import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
-import com.xz.util.Mongo;
+import com.xz.services.RangeService;
+import com.xz.services.ScoreService;
+import com.xz.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.target2Doc;
 
 @Component
 @ReceiverInfo(taskType = "total_score")
 public class TotalScoreTask extends Receiver {
+
+    public static final String[] AGGR_RANGE_NAMES = {
+            Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE
+    };
+
+    @Autowired
+    RangeService rangeService;
+
+    @Autowired
+    ScoreService scoreService;
+
+    @Autowired
+    StudentService studentService;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -30,60 +46,81 @@ public class TotalScoreTask extends Receiver {
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
-        Range range = aggrTask.getRange();
 
-        Document match = new Document("project", projectId);
-        match.append(target.getName(), target.getId());
-        match.append(range.getName(), range.getId());
+        aggregateStudentTotalScore(projectId, target);
 
-        if (target.getName().equals(Target.SUBJECT_OBJECTIVE)) {
-            fixMatchObjective(match, target);
+        for (String rangeName : AGGR_RANGE_NAMES) {
+            aggregateFromTotalScore(projectId, target, rangeName);
         }
-
-        saveAggregate(projectId, match, aggrTask);
     }
 
-    @SuppressWarnings("unchecked")
-    private void fixMatchObjective(Document match, Target target) {
-        SubjectObjective id = target.getId(SubjectObjective.class);
-        match.remove(target.getName());
-        match.append("subject", id.getSubject()).append("isObjective", id.isObjective());
-    }
-
-    private void saveAggregate(String projectId, Document match, AggrTask aggrTask) {
-
-        Object totalScoreValue = getTotalScoreValue(match);
-        if (totalScoreValue == null) {
-            return;
+    private void aggregateStudentTotalScore(String projectId, Target target) {
+        List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
+        if (!target.match(Target.QUEST)) {
+            aggregateFromSocre(projectId, studentRanges, target);
         }
-
-        Range range = aggrTask.getRange();
-        Target target = aggrTask.getTarget();
-
-        Document query = Mongo.query(projectId, range, target);
-
-        MongoCollection<Document> totalScoreCollection = scoreDatabase.getCollection("total_score");
-        totalScoreCollection.updateOne(query, $set("totalScore", totalScoreValue), UPSERT);
     }
 
-    private Object getTotalScoreValue(Document match) {
+    private void aggregateFromTotalScore(
+            String projectId, Target target, String aggrRangeName) {
+
+        String collectionName = scoreService.getTotalScoreCollection(projectId, target);
+        List<Range> aggrRanges = rangeService.queryRanges(projectId, aggrRangeName);
+
+        for (Range aggrRange : aggrRanges) {
+            aggregateFromTotalScore(projectId, collectionName, target, aggrRange);
+        }
+    }
+
+    private void aggregateFromTotalScore(
+            String projectId, String collectionName, Target target, Range aggrRange) {
+
+        Range parent = rangeService.getParentRange(projectId, aggrRange);
+
+        Document match = doc("project", projectId)
+                .append("parent", range2Doc(aggrRange))
+                .append("target", target2Doc(target));
+
+        Document group = doc("_id", null).append("totalScore", doc("$sum", "$totalScore"));
+
+        AggregateIterable<Document> aggregate = scoreDatabase
+                .getCollection(collectionName)
+                .aggregate(Arrays.asList($match(match), $group(group)));
+
+        Document aggregateResult = aggregate.first();
+        if (aggregateResult != null) {
+            Double score = aggregateResult.getDouble("totalScore");
+            scoreService.saveTotalScore(projectId, aggrRange, parent, target, score);
+        }
+    }
+
+    // 统计单个学生的科目/知识点/项目/能力层级等总分
+    private void aggregateFromSocre(String projectId, List<Range> studentRanges, Target target) {
         Document group = new Document()
                 .append("_id", null)
                 .append("totalScore", new Document("$sum", "$score"));
 
-        AggregateIterable<Document> aggregate = scoreDatabase.getCollection("score")
-                .aggregate(Arrays.asList(
-                        new Document("$match", match),
-                        new Document("$group", group)
-                ));
-        Document aggregateResult = aggregate.first();
+        MongoCollection<Document> c = scoreDatabase.getCollection("score");
 
-        // 如果缺考则会导致 aggregate() 没有返回值
-        if (aggregateResult == null) {
-            return null;
+        for (Range studentRange : studentRanges) {
+            String studentId = studentRange.getId();
+            Document student = studentService.findStudent(projectId, studentId);
+            String classId = student.getString("class");
+
+            AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
+                    doc("$match", doc("project", projectId)
+                            .append("student", studentId)
+                            .append(target.getName(), target.getId())),
+                    doc("$group", group)
+            ));
+            Document aggregateResult = aggregate.first();
+
+            // 如果缺考则会导致 aggregate() 没有返回值
+            if (aggregateResult != null) {
+                Double score = aggregateResult.getDouble("totalScore");
+                scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score);
+            }
         }
-
-        return aggregateResult.get("totalScore");
     }
 
 }

@@ -4,15 +4,12 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
-import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -62,17 +59,21 @@ public class ProjectService {
     public void saveProject(ExamProject project) {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", project.getId());
-        Document update = doc("name", project.getName()).append("grade", project.getGrade());
+
+        Document update = doc("name", project.getName())
+                .append("grade", project.getGrade())
+                .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"));
+
         c.updateOne(query, $set(update), UPSERT);
     }
 
     /**
-     * 保存学校列表
+     * 更新项目学校列表（如果项目记录未创建则不做任何操作）
      *
      * @param projectId  项目ID
      * @param schoolList 学校列表（name 和 school 属性）
      */
-    public void saveProjectSchools(String projectId, List<Document> schoolList) {
+    public void updateProjectSchools(String projectId, List<Document> schoolList) {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
         c.updateOne(query, $set("schools", schoolList));

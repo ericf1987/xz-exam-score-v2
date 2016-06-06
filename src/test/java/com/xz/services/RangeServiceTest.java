@@ -21,7 +21,7 @@ public class RangeServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testQueryRanges() throws Exception {
         List<Range> ranges = rangeService.queryRanges(
-                "430200-89c9dc7481cd47a69d85af3f0808e0c4", Range.CLASS, Range.SCHOOL);
+                PROJECT_ID, Range.CLASS, Range.SCHOOL);
         ranges.forEach(System.out::println);
     }
 

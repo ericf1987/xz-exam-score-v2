@@ -95,7 +95,7 @@ public class FullScoreService {
                     $set("score", fullScore), UPSERT);
         } else {
             scoreDatabase.getCollection("full_score").updateOne(
-                    doc("project", projectId).append("target", target),
+                    doc("project", projectId).append("target", Mongo.target2Doc(target)),
                     $set("fullScore", fullScore), UPSERT);
         }
 
