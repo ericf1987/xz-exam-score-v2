@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +22,10 @@ public class ProvinceService {
     public void saveProjectProvince(String projectId, String province) {
         scoreDatabase.getCollection("province_list").updateOne(
                 doc("project", projectId), $set("province", province), UPSERT);
+    }
+
+    public String getProjectProvince(String projectId) {
+        Document document = scoreDatabase.getCollection("province_list").find(doc("project", projectId)).first();
+        return document == null ? null : document.getString("province");
     }
 }

@@ -78,6 +78,15 @@ public class RankService {
     }
 
     /**
+     * 删除指定项目的排名统计结果（为了重新统计排名）
+     *
+     * @param projectId 项目ID
+     */
+    public void deleteRanks(String projectId) {
+        scoreDatabase.getCollection("score_map").deleteMany(doc("project", projectId));
+    }
+
+    /**
      * 查询考生分数的排名等级
      *
      * @param projectId 项目ID

@@ -99,6 +99,26 @@ public class Target {
         return this;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Target target = (Target) o;
+
+        if (!name.equals(target.name)) return false;
+        return id.equals(target.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Target{" +
@@ -109,5 +129,17 @@ public class Target {
 
     public boolean match(String target) {
         return Objects.equals(target, this.name);
+    }
+
+    public static Target parse(Document target) {
+        Object id = target.get("id");
+
+        if (id instanceof Document) {
+            Document idDoc = (Document) id;
+            SubjectObjective _id = new SubjectObjective(idDoc.getString("subject"), idDoc.getBoolean("objective"));
+            id = _id;
+        }
+
+        return new Target(target.getString("name"), id);
     }
 }

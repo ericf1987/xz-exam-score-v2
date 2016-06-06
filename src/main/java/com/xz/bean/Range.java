@@ -78,6 +78,26 @@ public class Range {
         return Objects.equals(this.name, range);
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Range range = (Range) o;
+
+        if (!name.equals(range.name)) return false;
+        return id.equals(range.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Range{" +

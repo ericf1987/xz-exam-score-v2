@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -13,6 +14,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +82,38 @@ public class ScoreService {
             return getQuestScore(projectId, range.getId(), target.getId().toString());
         } else {
             return getTotalScore(projectId, range, target);
+        }
+    }
+
+    /**
+     * 查询一个学生在指定项目中的指定目标名称的分数
+     *
+     * @param projectId  项目ID
+     * @param studentId  学生ID
+     * @param targetName 目标名称
+     *
+     * @return 分数列表
+     */
+    public List<Document> getStudentScores(String projectId, String studentId, String targetName) {
+
+        if (targetName.equals(Target.QUEST)) {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId).append("student", studentId);
+            return MongoUtils.toList(collection.find(query));
+
+        } else {
+
+            MongoCollection<Document> collection;
+            List<Document> result = new ArrayList<>();
+            Document query = doc("project", projectId).append("range", range2Doc(Range.student(studentId)));
+
+            collection = scoreDatabase.getCollection("total_score");
+            result.addAll(MongoUtils.toList(collection.find(query)));
+
+            collection = scoreDatabase.getCollection("total_score_combined");
+            result.addAll(MongoUtils.toList(collection.find(query)));
+
+            return result;
         }
     }
 

@@ -1,8 +1,10 @@
 package com.xz.report.total;
 
+import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
+import com.xz.report.classes.ReportGeneratorInfo;
 import com.xz.services.SubjectService;
 import com.xz.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.util.List;
  * @author yiding_he
  */
 @Component
+@ReportGeneratorInfo(range = Range.PROVINCE)
 public class TotalBasicScoreReport extends ReportGenerator {
 
     @Autowired
