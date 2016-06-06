@@ -98,7 +98,7 @@ public class RankPositionTask extends Receiver {
         int counter = 0;
 
         for (Document item : scoreMap) {
-            counter += item.getInteger("count");
+            counter += ((Number) item.get("count")).intValue();
             if (counter >= index) {
                 return item.getDouble("score");
             }

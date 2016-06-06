@@ -27,7 +27,7 @@ public class ScoreMapDispatcher extends TaskDispatcher {
 
         // 对哪些范围进行排名
         List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
+                Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
 
         // 对哪些分数进行排名
         List<Target> targets = targetService.queryTargets(projectId,
@@ -40,8 +40,8 @@ public class ScoreMapDispatcher extends TaskDispatcher {
             targets.add(Target.subject("007008009"));   // 文综
         }
 
-        for (Range range : ranges) {
-            for (Target target : targets) {
+        for (Target target : targets) {
+            for (Range range : ranges) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
             }
         }

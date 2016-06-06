@@ -2,6 +2,7 @@ package com.xz.mqreceivers.impl;
 
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class ScoreMapTaskTest extends XzExamScoreV2ApplicationTests {
     public void testRunTask() throws Exception {
         scoreMapTask.runTask(
                 new AggrTask(PROJECT_ID, "aaaa", "score_map")
-                        .setRange(Range.student("071158b5-493a-4f39-8fd9-a419a62b58d8")));
+                        .setRange(Range.clazz("46d626b6-9250-4a63-9191-e790ed67a789"))
+                        .setTarget(Target.project(PROJECT_ID)));
     }
 }
