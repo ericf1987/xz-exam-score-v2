@@ -4,12 +4,16 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
+import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
