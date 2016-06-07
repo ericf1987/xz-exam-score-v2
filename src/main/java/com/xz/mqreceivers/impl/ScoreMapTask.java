@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * 生成排名记录
@@ -49,13 +49,8 @@ public class ScoreMapTask extends Receiver {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
         Document query = Mongo.query(projectId, range, target);
 
-        // 删除旧记录
-        collection.deleteMany(query);
-
-        // 保存新记录
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
-        Document document = doc(query).append("scoreMap", scoreCountList).append("count", studentIds.size());
-        collection.insertOne(document);
+        collection.updateOne(query, $set(doc("scoreMap", scoreCountList).append("count", studentIds.size())), UPSERT);
     }
 
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {

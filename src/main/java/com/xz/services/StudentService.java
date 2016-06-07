@@ -125,6 +125,23 @@ public class StudentService {
     }
 
     /**
+     * 查询学生列表（非缓存）
+     *
+     * @param projectId 项目ID
+     * @param range     范围（可选，null 表示整个项目）
+     *
+     * @return 学生列表
+     */
+    public FindIterable<Document> getProjectStudentList(String projectId, Range range) {
+        MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+        Document query = doc("project", projectId);
+        if (range != null) {
+            query.append(range.getName(), range.getId());
+        }
+        return students.find(query);
+    }
+
+    /**
      * 查询学生列表
      *
      * @param projectId 项目ID

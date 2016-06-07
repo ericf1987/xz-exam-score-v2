@@ -5,9 +5,14 @@ import com.xz.AppException;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.xml.XmlNode;
 import com.xz.ajiaedu.common.xml.XmlNodeReader;
+import com.xz.bean.Range;
+import com.xz.report.classes.ReportGeneratorInfo;
+import com.xz.services.ProvinceService;
+import com.xz.services.RangeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,6 +20,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +46,12 @@ public class ReportManager implements ApplicationContextAware {
 
     @Value("${report.generator.savepath}")
     private String savePath;
+
+    @Autowired
+    ProvinceService provinceService;
+
+    @Autowired
+    RangeService rangeService;
 
     private XmlNode reportConfig;
 
@@ -98,18 +111,19 @@ public class ReportManager implements ApplicationContextAware {
         List<ReportTask> reportTasks = new ArrayList<>();
 
         try {
-            iterateReportSet(reportSet, "", reportTasks);
+            iterateReportSet(projectId, reportSet, "", reportTasks);
         } catch (Exception e) {
             throw new AppException(e);
         }
         return reportTasks;
     }
 
-    private void iterateReportSet(XmlNode node, String category, List<ReportTask> reportTasks) throws Exception {
+    private void iterateReportSet(
+            String projectId, XmlNode node, String category, List<ReportTask> reportTasks) throws Exception {
 
         if (node.getTagName().equals("report-category")) {
             for (XmlNode child : node.getChildren()) {
-                iterateReportSet(child, category + "/" + node.getString("name"), reportTasks);
+                iterateReportSet(projectId, child, category + "/" + node.getString("name"), reportTasks);
             }
 
         } else if (node.getTagName().equals("report")) {
@@ -118,14 +132,40 @@ public class ReportManager implements ApplicationContextAware {
             ReportGenerator reportGenerator = (ReportGenerator)
                     this.applicationContext.getBean(Class.forName(node.getString("class")));
 
-            reportTasks.add(new ReportTask(reportGenerator, category, filename));
+            reportTasks.addAll(createReportTasks(projectId, category, filename, reportGenerator));
 
         } else {
             for (XmlNode child : node.getChildren()) {
-                iterateReportSet(child, category, reportTasks);
+                iterateReportSet(projectId, child, category, reportTasks);
             }
 
         }
+    }
+
+    private Collection<ReportTask> createReportTasks(
+            String projectId, String category, String filename, ReportGenerator reportGenerator) {
+
+        ReportGeneratorInfo info = reportGenerator.getReportGeneratorInfo();
+        if (info == null || info.range().equals(Range.PROVINCE)) {
+            return Collections.singletonList(new ReportTask(
+                    reportGenerator, category, filename,
+                    Range.province(provinceService.getProjectProvince(projectId))));
+        }
+
+        String reportRangeName = info.range();
+        List<Range> ranges = rangeService.queryRanges(projectId, reportRangeName);
+        List<ReportTask> reportTasks = new ArrayList<>();
+
+        for (Range range : ranges) {
+            String path = getRangePath(range);
+            reportTasks.add(new ReportTask(reportGenerator, category, path + "/" + filename, range));
+        }
+
+        return reportTasks;
+    }
+
+    private String getRangePath(Range range) {
+        return range.getName() + "/" + range.getId();
     }
 
     /**

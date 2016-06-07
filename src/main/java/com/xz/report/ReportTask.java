@@ -1,5 +1,7 @@
 package com.xz.report;
 
+import com.xz.bean.Range;
+
 /**
  * (description)
  * created at 16/05/31
@@ -14,10 +16,21 @@ public class ReportTask {
 
     private String filename;
 
-    public ReportTask(ReportGenerator reportGenerator, String category, String filename) {
+    private Range range;
+
+    public ReportTask(ReportGenerator reportGenerator, String category, String filename, Range range) {
         this.reportGenerator = reportGenerator;
         this.category = category;
         this.filename = filename;
+        this.range = range;
+    }
+
+    public Range getRange() {
+        return range;
+    }
+
+    public void setRange(Range range) {
+        this.range = range;
     }
 
     public ReportGenerator getReportGenerator() {
@@ -42,5 +55,15 @@ public class ReportTask {
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    @Override
+    public String toString() {
+        return "ReportTask{" +
+                "reportGenerator=" + reportGenerator.getClass().getSimpleName() +
+                ", category='" + category + '\'' +
+                ", filename='" + filename + '\'' +
+                ", range=" + range +
+                '}';
     }
 }

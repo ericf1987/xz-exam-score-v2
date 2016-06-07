@@ -1,6 +1,6 @@
 package com.xz.services;
 
-import com.mongodb.client.MongoCollection;
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.SubjectObjective;
@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.bean.Target.SUBJECT_OBJECTIVE;
 
 @SuppressWarnings("unchecked")
@@ -30,6 +28,9 @@ public class TargetService {
 
     @Autowired
     SubjectService subjectService;
+
+    @Autowired
+    SimpleCache cache;
 
     public Target getTarget (String projectId, String subjectId) {
         if (StringUtil.isNotBlank(subjectId)) {
@@ -63,14 +64,18 @@ public class TargetService {
     }
 
     private List<Target> querySubjectObjectives(String projectId) {
-        List<Target> result = new ArrayList<>();
+        String cacheKey = "project_subject_objectives:" + projectId;
 
-        subjectService.querySubjects(projectId).forEach(subjectId -> {
-            result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, true)));
-            result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, false)));
+        return cache.get(cacheKey, () -> {
+            List<Target> result = new ArrayList<>();
+
+            subjectService.querySubjects(projectId).forEach(subjectId -> {
+                result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, true)));
+                result.add(new Target(SUBJECT_OBJECTIVE, new SubjectObjective(subjectId, false)));
+            });
+
+            return new ArrayList<>(result);
         });
-
-        return result;
     }
 
     private List<Target> querySubjects(String projectId) {
@@ -80,16 +85,19 @@ public class TargetService {
     }
 
     private List<Target> queryQuests(String projectId) {
-        ArrayList<Target> quests = new ArrayList<>();
-        Document query = doc("project", projectId);
-        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
-        collection.find(query).forEach((Consumer<Document>) document -> {
-            String questId = document.getString("questId");
-            quests.add(new Target(Target.QUEST, questId));
+        String cacheKey = "project_quest_target_list:" + projectId;
+
+        return cache.get(cacheKey, () -> {
+            List<Document> questDocs = questService.getQuests(projectId);
+
+            List<Target> targets = questDocs.stream()
+                    .map(doc -> Target.quest(doc.getString("questId")))
+                    .collect(Collectors.toList());
+
+            return new ArrayList<>(targets);
         });
 
-        return quests;
     }
 
     /**

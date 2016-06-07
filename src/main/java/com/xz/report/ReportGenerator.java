@@ -1,6 +1,7 @@
 package com.xz.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
+import com.xz.report.classes.ReportGeneratorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,4 +60,8 @@ public abstract class ReportGenerator {
      * @return SheetTask 列表
      */
     protected abstract List<SheetTask> getSheetTasks(String projectId);
+
+    public ReportGeneratorInfo getReportGeneratorInfo() {
+        return this.getClass().getAnnotation(ReportGeneratorInfo.class);
+    }
 }
