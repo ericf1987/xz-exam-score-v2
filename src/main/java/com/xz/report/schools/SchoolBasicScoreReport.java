@@ -1,12 +1,14 @@
 package com.xz.report.schools;
 
+import com.xz.bean.Range;
 import com.xz.bean.Target;
+import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
-import com.xz.report.total.TotalBasicScoreReport;
-import com.xz.report.total.TotalBasicScoreSheet;
+import com.xz.report.classes.ReportGeneratorInfo;
 import com.xz.services.SubjectService;
 import com.xz.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,9 @@ import java.util.List;
  *
  * @author yiding_he
  */
-public class SchoolBasicScoreReport extends TotalBasicScoreReport {
+@ReportGeneratorInfo(range=Range.SCHOOL)
+@Component
+public class SchoolBasicScoreReport extends ReportGenerator {
     @Autowired
     TargetService targetService;
 
@@ -25,23 +29,22 @@ public class SchoolBasicScoreReport extends TotalBasicScoreReport {
     SubjectService subjectService;
 
     @Override
-    protected List<SheetTask> getSheetTasks(String projectId) {
-        //统计学校班级所有学科分数分析
-        List<SheetTask> tasks = new ArrayList<SheetTask>();
+    protected List<SheetTask> getSheetTasks(String projectId, Range range) {
+        List<SheetTask> tasks = new ArrayList<>();
+
         SheetTask projectTask = new SheetTask("全部科目", SchoolBasicScoreSheet.class);
         projectTask.put("target", Target.project(projectId));
         tasks.add(projectTask);
 
-        //查询当前考试下的所有科目
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
-        for(Target subject : subjects){
-            String subjectName = subjectService.getSubjectName(subject.getId().toString());
-            //每个科目进行一次处理
-            projectTask.put(subjectName, SchoolBasicScoreSheet.class);
+        for (Target subject : subjects) {
+            String subjectName = SubjectService.getSubjectName(subject.getId().toString());
+            projectTask = new SheetTask(subjectName, SchoolBasicScoreSheet.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }
 
         return tasks;
     }
+
 }

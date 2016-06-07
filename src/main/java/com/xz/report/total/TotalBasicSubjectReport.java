@@ -1,5 +1,6 @@
 package com.xz.report.total;
 
+import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
@@ -14,7 +15,7 @@ import java.util.List;
 @Component
 public class TotalBasicSubjectReport extends ReportGenerator{
     @Override
-    protected List<SheetTask> getSheetTasks(String projectId) {
+    protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
 
         SheetTask projectTask = new SheetTask("全部科目", TotalBasicSubjectSheet.class);

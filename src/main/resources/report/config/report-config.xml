@@ -12,6 +12,9 @@
         <report-category name="学校成绩分析">
             <report-category name="基础分析">
                 <report name="分数分析" class="com.xz.report.schools.SchoolBasicScoreReport"/>
+                <report name="排名统计" class="com.xz.report.schools.SchoolBasicRankReport"/>
+                <report name="分数段统计" class="com.xz.report.schools.SchoolBasicScoreSegmentReport"/>
+                <report name="学科分析" class="com.xz.report.schools.SchoolBasicSubjectReport"/>
             </report-category>
         </report-category>
     </report-set>
