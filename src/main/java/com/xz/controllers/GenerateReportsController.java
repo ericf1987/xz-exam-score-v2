@@ -23,7 +23,7 @@ public class GenerateReportsController {
     ReportService reportService;
 
     @ResponseBody
-    @RequestMapping(value = "all", method = RequestMethod.POST)
+    @RequestMapping(value = "all")
     public Result generateReports(@RequestParam("project") String projectId) {
 
         reportService.generateReports(projectId);
