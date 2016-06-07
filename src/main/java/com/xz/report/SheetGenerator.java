@@ -14,6 +14,7 @@ public abstract class SheetGenerator {
      *
      * @param projectId   项目ID
      * @param excelWriter Excel 写入对象
+     * @param sheetTask   任务对象（包含 range 和 target）
      */
     public void generate(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         generateSheet(projectId, excelWriter, sheetTask);

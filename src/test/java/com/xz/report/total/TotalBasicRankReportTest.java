@@ -1,6 +1,7 @@
 package com.xz.report.total;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.bean.Range;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,6 +18,6 @@ public class TotalBasicRankReportTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateReport() throws Exception {
-        report.generate(PROJECT_ID, "target/report.xlsx");
+        report.generate(PROJECT_ID, Range.province("430000"), "target/report.xlsx");
     }
 }

@@ -30,7 +30,7 @@ public class TotalBasicScoreReport extends ReportGenerator {
     SubjectService subjectService;
 
     @Override
-    protected List<SheetTask> getSheetTasks(String projectId) {
+    protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
 
         SheetTask projectTask = new SheetTask("全部科目", TotalBasicScoreSheet.class);
