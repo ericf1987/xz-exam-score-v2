@@ -9,5 +9,10 @@
                 <report name="学科分析" class="com.xz.report.total.TotalBasicSubjectReport"/>
             </report-category>
         </report-category>
+        <report-category name="学校成绩分析">
+            <report-category name="基础分析">
+                <report name="分数分析" class="com.xz.report.schools.SchoolBasicScoreReport"/>
+            </report-category>
+        </report-category>
     </report-set>
 </report-config>

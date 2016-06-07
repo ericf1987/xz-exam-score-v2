@@ -82,13 +82,9 @@ public class TopAverageTask extends Receiver{
     }
 
     private List<Document> getPercent(List<Document> scoreMaps, double v, int count) {
-        //排序
-        List<Document> result = new ArrayList<Document>();
-        Collections.sort(scoreMaps, (Document d1, Document d2) -> {
-            return d2.getDouble("score").compareTo(d1.getDouble("score"));
-        });
 
-        //System.out.println("排序后数据集合大小：" + scoreMaps.size() + ",排序后数据集合数据：" + scoreMaps.toString());
+        //排序
+        Collections.sort(scoreMaps, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
 
         int requireCount = Double.valueOf(count * v).intValue();
         //如果元素总数小于1
@@ -97,13 +93,13 @@ public class TopAverageTask extends Receiver{
         }
 
         int currentCount = 0;
+        List<Document> result;
         for(int i = 0; i < scoreMaps.size(); i++){
             currentCount += scoreMaps.get(i).getInteger("count");
             if(currentCount > requireCount){
                 Document doc = scoreMaps.get(i);
                 doc.put("count", doc.getInteger("count") - (currentCount - requireCount));
                 result = scoreMaps.subList(0, i);
-                //System.out.println("结果数据集合大小" + result.size() + ",结果数据：" + result.toString());
                 return result;
             }
         }

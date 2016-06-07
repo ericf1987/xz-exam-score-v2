@@ -52,7 +52,6 @@ public class OverAverageService {
             if (document != null) {
                 return document.getDouble("overAverage");
             } else {
-                LOG.error("找不到超均率, project={}, range={}, target={}", projectId, range, target);
                 return 0d;
             }
         });

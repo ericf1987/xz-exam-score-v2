@@ -11,6 +11,8 @@ import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 @ReceiverInfo(taskType = "rank_position")
 @Component
 public class RankPositionTask extends Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(RankPositionTask.class);
 
     @Autowired
     RangeService rangeService;
@@ -62,7 +66,7 @@ public class RankPositionTask extends Receiver {
         //获取总人数
         int count = scoreMapDoc.getInteger("count");
         if (count == 0) {
-            throw new IllegalStateException("没有排名信息：" + query.toJson());
+            LOG.error("没有排名信息：" + query.toJson());
         }
 
         //获取总分表中的scoreMap节点

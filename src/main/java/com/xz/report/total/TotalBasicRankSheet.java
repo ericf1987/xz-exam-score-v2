@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -55,9 +54,6 @@ public class TotalBasicRankSheet extends SheetGenerator {
 
         //设置表头
         setupHeader(excelWriter);
-        System.out.println("result.getData-->" + result.getData().toString());
-
-        System.out.println("result.getList-->" + result.getList("schools", null).toString());
         fillSchoolData(result.getList("schools", null), excelWriter);
     }
 

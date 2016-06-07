@@ -1,6 +1,7 @@
 package com.xz.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
+import com.xz.bean.Range;
 import com.xz.report.classes.ReportGeneratorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,17 +27,19 @@ public abstract class ReportGenerator {
      * 生成并保存报表文件
      *
      * @param projectId 项目ID
+     * @param range     相关的范围
      * @param savePath  保存路径
      */
-    public void generate(String projectId, String savePath) {
+    public void generate(String projectId, Range range, String savePath) {
         try {
-            List<SheetTask> sheetTasks = getSheetTasks(projectId);
+            List<SheetTask> sheetTasks = getSheetTasks(projectId, range);
 
             InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
             ExcelWriter excelWriter = new ExcelWriter(stream);
             excelWriter.clearSheets();
 
             for (SheetTask sheetTask : sheetTasks) {
+                sheetTask.setRange(range);
                 excelWriter.openOrCreateSheet(sheetTask.getTitle());
                 SheetGenerator sheetGenerator = sheetManager.getSheetGenerator(sheetTask.getGeneratorClass());
                 if (sheetGenerator != null) {
@@ -56,10 +59,11 @@ public abstract class ReportGenerator {
      * 规划这个 Excel 文件有多少个 Sheet，为每个 Sheet 创建一个 SheetTask 对象
      *
      * @param projectId 项目ID
+     * @param range
      *
      * @return SheetTask 列表
      */
-    protected abstract List<SheetTask> getSheetTasks(String projectId);
+    protected abstract List<SheetTask> getSheetTasks(String projectId, Range range);
 
     public ReportGeneratorInfo getReportGeneratorInfo() {
         return this.getClass().getAnnotation(ReportGeneratorInfo.class);
