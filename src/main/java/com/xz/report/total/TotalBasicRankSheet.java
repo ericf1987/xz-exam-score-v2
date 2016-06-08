@@ -62,6 +62,7 @@ public class TotalBasicRankSheet extends SheetGenerator {
         int row = 1;
         for (Map<String, Object> schoolMap : school) {
             fillRow(schoolMap, excelWriter, row);
+            row++;
         }
     }
 
