@@ -116,15 +116,17 @@ public class ProjectScoreAnalysis implements Server {
                 passAndUnPassService, rankPositionService, overAverageService);
     }
 
-    public static Map<String, Object> getScoreAnalysisStatInfo(String projectId, Range range, Target target,
-                                                               StudentService studentService,
-                                                               MinMaxScoreService minMaxScoreService,
-                                                               AverageService averageService,
-                                                               StdDeviationService stdDeviationService,
-                                                               ScoreLevelService scoreLevelService,
-                                                               PassAndUnPassService passAndUnPassService,
-                                                               RankPositionService rankPositionService,
-                                                               OverAverageService overAverageService) {
+    public static Map<String, Object> getScoreAnalysisStatInfo(
+            String projectId, Range range, Target target,
+            StudentService studentService,
+            MinMaxScoreService minMaxScoreService,
+            AverageService averageService,
+            StdDeviationService stdDeviationService,
+            ScoreLevelService scoreLevelService,
+            PassAndUnPassService passAndUnPassService,
+            RankPositionService rankPositionService,
+            OverAverageService overAverageService) {
+
         Map<String, Object> statMap = new HashMap<>();
 
         // 考生人数

@@ -26,7 +26,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
  *
  * @author yiding_he
  */
-@ReceiverInfo(taskType = "minmax")
+@ReceiverInfo(taskType = "score_minmax")
 @Component
 public class MinMaxTask extends Receiver {
 
@@ -66,9 +66,7 @@ public class MinMaxTask extends Receiver {
         List<String> studentIds = studentService.getStudentList(projectId, subjectId, range);
 
         if (studentIds.isEmpty()) {
-            LOG.info("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);
-        } else {
-            LOG.info("找到{}个学生，计算最大最小分数{}", studentIds.size(), target);
+            LOG.error("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);
         }
         return studentIds;
     }
