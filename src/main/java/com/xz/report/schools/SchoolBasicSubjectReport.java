@@ -15,7 +15,7 @@ import java.util.List;
  * @author by fengye on 2016/6/7.
  */
 @Component
-@ReportGeneratorInfo(range= Range.PROVINCE)
+@ReportGeneratorInfo(range= Range.SCHOOL)
 public class SchoolBasicSubjectReport extends ReportGenerator{
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {

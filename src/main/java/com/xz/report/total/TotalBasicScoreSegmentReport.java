@@ -4,6 +4,7 @@ import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
+import com.xz.report.classes.ReportGeneratorInfo;
 import com.xz.services.SubjectService;
 import com.xz.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.List;
  * 总体/基础/分数段统计
  */
 @Component
+@ReportGeneratorInfo(range = Range.PROVINCE)
 public class TotalBasicScoreSegmentReport extends ReportGenerator {
 
     @Autowired
