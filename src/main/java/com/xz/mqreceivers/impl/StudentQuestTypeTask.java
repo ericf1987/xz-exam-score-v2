@@ -1,18 +1,22 @@
 package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.QuestService;
 import com.xz.services.ScoreService;
+import com.xz.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 @Component
 @ReceiverInfo(taskType = "student_quest_type_score")
@@ -27,21 +31,49 @@ public class StudentQuestTypeTask extends Receiver {
     @Autowired
     QuestService questService;
 
+    @Autowired
+    StudentService studentService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         String studentId = aggrTask.getRange().getId();
 
+        // 查询考生所有题目成绩
+        Document studentDoc = studentService.findStudent(projectId, studentId);
         FindIterable<Document> scores = scoreService.getStudentQuestScores(projectId, studentId);
-        Map<String, Double> questionTypeScores = new HashMap<>();
+        Map<String, Double> questTypeScores = new HashMap<>();
 
+        // 对题型进行归类，分数累加
         for (Document score : scores) {
             String questNo = score.getString("questNo");
             String subject = score.getString("subject");
+            double scoreValue = score.getDouble("score");
 
             Document quest = questService.findQuest(projectId, subject, questNo);
-            String questionTypeId = quest.getString("questionTypeId");
+            String questTypeId = quest.getString("questionTypeId");
 
+            if (!questTypeScores.containsKey(questTypeId)) {
+                questTypeScores.put(questTypeId, scoreValue);
+            } else {
+                questTypeScores.put(questTypeId, questTypeScores.get(questTypeId) + scoreValue);
+            }
+        }
+
+        // 保存考生题型得分
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_score");
+
+        for (String questTypeId : questTypeScores.keySet()) {
+            Document query = doc("project", projectId).append("student", studentId).append("questType", questTypeId);
+
+            Document update = doc("score", questTypeScores.get(questTypeId))
+                    .append("class", studentDoc.getString("class"))
+                    .append("school", studentDoc.getString("school"))
+                    .append("area", studentDoc.getString("area"))
+                    .append("city", studentDoc.getString("city"))
+                    .append("province", studentDoc.getString("province"));
+
+            collection.updateOne(query, $set(update), UPSERT);
         }
     }
 }
