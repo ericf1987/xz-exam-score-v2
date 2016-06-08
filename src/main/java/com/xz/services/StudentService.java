@@ -111,20 +111,6 @@ public class StudentService {
     }
 
     /**
-     * 查询学生列表
-     *
-     * @param projectId 项目ID
-     * @param target    目标
-     * @param range     范围
-     *
-     * @return 学生ID列表
-     */
-    public List<String> getStudentList(String projectId, Range range, Target target) {
-        String subjectId = targetService.getTargetSubjectId(projectId, target);
-        return getStudentList(projectId, subjectId, range);
-    }
-
-    /**
      * 查询学生列表（非缓存）
      *
      * @param projectId 项目ID
@@ -145,12 +131,29 @@ public class StudentService {
      * 查询学生列表
      *
      * @param projectId 项目ID
+     * @param target    目标
+     * @param range     范围
+     *
+     * @return 学生ID列表
+     */
+    public List<String> getStudentIds(String projectId, Range range, Target target) {
+        String cacheKey = "student_id_list:" + projectId + ":" + range + ":" + target;
+        return simpleCache.get(cacheKey, () -> {
+            String subjectId = targetService.getTargetSubjectId(projectId, target);
+            return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
+        });
+    }
+
+    /**
+     * 查询学生列表
+     *
+     * @param projectId 项目ID
      * @param subjectId 科目ID
      * @param range     范围
      *
      * @return 学生ID列表
      */
-    public List<String> getStudentList(String projectId, String subjectId, Range range) {
+    public List<String> getStudentIds(String projectId, String subjectId, Range range) {
 
         final Value<String> subjectIdValue = Value.of(subjectId);  // needs to be final
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);

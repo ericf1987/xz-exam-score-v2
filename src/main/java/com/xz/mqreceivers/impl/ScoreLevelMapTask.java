@@ -42,7 +42,7 @@ public class ScoreLevelMapTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        List<String> studentList = studentService.getStudentList(projectId, range, target);
+        List<String> studentList = studentService.getStudentIds(projectId, range, target);
         Map<String, AtomicInteger> counters = new HashMap<>();
 
         // 计算各得分等级人数

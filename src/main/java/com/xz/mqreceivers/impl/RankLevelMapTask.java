@@ -58,7 +58,7 @@ public class RankLevelMapTask extends Receiver {
 
         // List{rankLevel -> count}
         List<Document> rankLevelMap = new ArrayList<>();
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
         String lastRankLevel = projectConfig.getLastRankLevel();
 
         for (String studentId : studentIds) {

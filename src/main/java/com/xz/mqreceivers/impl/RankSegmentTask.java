@@ -2,7 +2,6 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
@@ -12,7 +11,6 @@ import com.xz.services.ClassService;
 import com.xz.services.RankService;
 import com.xz.services.SchoolService;
 import com.xz.services.StudentService;
-import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +19,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.util.Mongo.query;
 
 /**
  * @author by fengye on 2016/5/27.
@@ -68,25 +70,25 @@ public class RankSegmentTask extends Receiver {
         //计算当前范围的人数
         int rangeCount = studentService.getStudentCount(projectId, range, target);
 
-        List<Document> docs = new ArrayList<Document>();
+        List<Document> docs;
 
         String rangeName = range.getName();
 
         //学校范围或联考范围判断
-        if(rangeName.equals("school")){
+        if (rangeName.equals("school")) {
             docs = classService.listClasses(projectId, range.getId());
-        }else{
+        } else {
             docs = schoolService.getProjectSchools(projectId, range.getId());
         }
 
         for (Document doc : docs) {
             //查询出每个班级在每个分段中的学生数，并算出占总班级的比率
-            String id = "";
+            String id;
             Range currentRange;
-            if(rangeName.equals("school")){
+            if (rangeName.equals("school")) {
                 id = doc.getString("class");
                 currentRange = Range.clazz(id);
-            }else{
+            } else {
                 id = doc.getString("school");
                 currentRange = Range.school(id);
             }
@@ -96,35 +98,40 @@ public class RankSegmentTask extends Receiver {
                     range, projectId, target
             );
 
-            Document condition = new Document("project", projectId).
-                    append("range", Mongo.range2Doc(currentRange)).
-                    append("target", Mongo.target2Doc(target));
-            rankSegmentCol.deleteMany(condition);
             rankSegmentCol.updateMany(
-                    condition,
-                    MongoUtils.$set("rankSegments", resultMap.get("rankSegments")),
-                    MongoUtils.UPSERT
+                    query(projectId, currentRange, target),
+                    $set("rankSegments", resultMap.get("rankSegments")),
+                    UPSERT
             );
         }
 
     }
 
-    private Map<String, List<Document>> generateSectionRate(int rangeCount, Range currentRange, Range range, String projectId, Target target) {
+    private Map<String, List<Document>> generateSectionRate(
+            int rangeCount, Range currentRange, Range range, String projectId, Target target) {
+
         Map<String, List<Document>> sectionRate = new LinkedHashMap<String, List<Document>>();
-        List<String> studentIds = studentService.getStudentList(projectId, currentRange, target);
-        int size = studentIds.size();
-        List<Document> docs = listBySection(PIECE_WISE, size);
-        for (String studentId : studentIds) {
-            //获取学生在当前范围的排名
-            int rank = rankService.getRank(projectId, range, target, studentId);
-            //获取该排名所在的分段
-            double section = getSection(rank, rangeCount, PIECE_WISE);
-            //对每个分段的人数进行累加
-            addCount(section, docs);
+        List<String> studentIds = studentService.getStudentIds(projectId, currentRange, target);
+        int studentCount = studentIds.size();
+
+        if (studentCount == 0) {
+            throw new IllegalStateException(
+                    "学生列表为空，project=" + projectId + ", range=" + currentRange + ", target=" + target);
         }
+
+        List<Document> rankSegmentMap = listBySection(PIECE_WISE, studentCount);
+
+        for (String studentId : studentIds) {
+            int rank = rankService.getRank(projectId, range, target, studentId);
+            double section = getSection(rank, rangeCount, PIECE_WISE);
+
+            //对每个分段的人数进行累加
+            addCount(section, rankSegmentMap);
+        }
+
         //计算出每个分段的人数占总数的比率
-        calculateRates(size, docs);
-        sectionRate.put("rankSegments", docs);
+        calculateRates(studentCount, rankSegmentMap);
+        sectionRate.put("rankSegments", rankSegmentMap);
         return sectionRate;
     }
 

@@ -40,7 +40,7 @@ public class StdDeviationTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
         double average = averageService.getAverage(projectId, range, target);
         double delta = 0;
 

@@ -38,7 +38,7 @@ public class ScoreSegmentTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
 
         ScoreSegmentCounter scoreSegments = getScoreSegments(projectId, target, studentIds);
         saveScoreSegments(projectId, range, target, scoreSegments);

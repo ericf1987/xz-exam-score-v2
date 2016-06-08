@@ -45,7 +45,7 @@ public class ScoreMapTask extends Receiver {
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
 
-        List<String> studentIds = studentService.getStudentList(projectId, range, target);
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
         Document query = Mongo.query(projectId, range, target);
 

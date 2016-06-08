@@ -1,5 +1,6 @@
 package com.xz.services;
 
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -35,6 +36,9 @@ public class RankService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    SimpleCache cache;
+
     /**
      * 查询排名
      *
@@ -46,8 +50,12 @@ public class RankService {
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, String studentId) {
-        double score = scoreService.getScore(projectId, Range.student(studentId), target);
-        return getRank(projectId, range, target, score);
+        String cacheKey = "student_rank:" + projectId + ":" + range + ":" + target + ":" + studentId;
+
+        return cache.get(cacheKey, () -> {
+            double score = scoreService.getScore(projectId, Range.student(studentId), target);
+            return getRank(projectId, range, target, score);
+        });
     }
 
     /**

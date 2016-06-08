@@ -63,7 +63,7 @@ public class MinMaxTask extends Receiver {
     }
 
     private List<String> queryStudentList(String projectId, Target target, Range range, String subjectId) {
-        List<String> studentIds = studentService.getStudentList(projectId, subjectId, range);
+        List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);
 
         if (studentIds.isEmpty()) {
             LOG.error("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);

@@ -43,7 +43,7 @@ public class AllSubjectPassRateTask extends Receiver {
         Range range = aggrTask.getRange();
 
         List<String> subjectIds = subjectService.querySubjects(projectId);
-        List<String> studentList = studentService.getStudentList(projectId, range, Target.project(projectId));
+        List<String> studentList = studentService.getStudentIds(projectId, range, Target.project(projectId));
 
         // 计算全科及格和不及格人数
         CounterMap<String> passCounter = new CounterMap<>();
