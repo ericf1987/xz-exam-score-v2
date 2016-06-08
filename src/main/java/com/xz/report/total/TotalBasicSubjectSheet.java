@@ -63,6 +63,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         int row = 2;
         for(Map<String, Object> school : schools){
             fillRow(school, excelWriter, row);
+            row++;
         }
     }
 
