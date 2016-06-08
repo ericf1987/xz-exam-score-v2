@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.alibaba.fastjson.JSON;
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
@@ -115,6 +116,11 @@ public class ScoreService {
 
             return result;
         }
+    }
+
+    public FindIterable<Document> getStudentQuestScores(String projectId, String studentId) {
+        Document query = doc("project", projectId).append("student", studentId);
+        return scoreDatabase.getCollection("score").find(query);
     }
 
     /**

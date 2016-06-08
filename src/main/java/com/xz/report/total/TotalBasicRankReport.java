@@ -28,7 +28,7 @@ public class TotalBasicRankReport extends ReportGenerator {
         List<SheetTask> tasks = new ArrayList<SheetTask>();
 
         SheetTask projectTask = new SheetTask("全部科目", TotalBasicRankSheet.class);
-        projectTask.put("target", Target.project(projectId));
+        projectTask.setTarget(Target.project(projectId));
         tasks.add(projectTask);
 
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);

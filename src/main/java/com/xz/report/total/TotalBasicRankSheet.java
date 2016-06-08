@@ -39,7 +39,7 @@ public class TotalBasicRankSheet extends SheetGenerator {
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
-        Target target = sheetTask.get("target");
+        Target target = sheetTask.getTarget();
         String subjectId = target.match(Target.PROJECT) ? null : target.getId().toString();
 
         //获取所有联考学校的ID

@@ -83,4 +83,13 @@ public class QuestService {
         collection.insertMany(quests);
     }
 
+    public Document findQuest(String projectId, String subject, String questNo) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+
+        Document query = doc("project", projectId)
+                .append("subject", subject)
+                .append("questNo", questNo);
+
+        return collection.find(query).first();
+    }
 }
