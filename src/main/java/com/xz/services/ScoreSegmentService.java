@@ -85,6 +85,8 @@ public class ScoreSegmentService {
             scoreSegmentList.add(map);
         }
 
+        scoreSegmentList.sort((o1, o2) -> ((Integer) (o2.get("startScoreSegment")))
+                .compareTo((Integer) (o1.get("startScoreSegment"))));
         return scoreSegmentList;
     }
 
