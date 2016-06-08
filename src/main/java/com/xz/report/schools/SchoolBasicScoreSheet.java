@@ -36,9 +36,14 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
     @Autowired
     SchoolService schoolService;
 
-    public static String[] COLUMNS = new String[]{
+    public static String[] COLUMNS_TOTAL = new String[]{
         "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
         "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"
+    };
+
+    public static String[] COLUMNS = new String[]{
+            "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
+            "优率", "良率", "合格率", "不及格率", "中位数"
     };
 
     @Override
@@ -57,27 +62,31 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         Result result = schoolScoreAnalysis.execute(param);
 
         //System.out.println("学校分数分析-->" + result.getData());
-        setupHeader(excelWriter);
-        fillSchoolData(result.get("schools"),excelWriter);
-        fillClassData(result.getList("classes", null),excelWriter);
+        if(null == subjectId){
+            setupHeader(excelWriter, COLUMNS_TOTAL);
+        }else{
+            setupHeader(excelWriter, COLUMNS);
+        }
+        fillSchoolData(result.get("schools"),excelWriter,subjectId);
+        fillClassData(result.getList("classes", null),excelWriter,subjectId);
     }
 
-    private void setupHeader(ExcelWriter excelWriter) {
+    private void setupHeader(ExcelWriter excelWriter, String[] COLUMNS) {
         AtomicInteger column = new AtomicInteger(-1);
         for(String c : COLUMNS){
             excelWriter.set(0, column.incrementAndGet(), c);
         }
     }
 
-    private void fillSchoolData(Map<String, Object> school, ExcelWriter excelWriter) {
+    private void fillSchoolData(Map<String, Object> school, ExcelWriter excelWriter, String subjectId) {
         school.put("className", "总体");
-        fillRow(school, excelWriter, 1);
+        fillRow(school, excelWriter, 1, subjectId);
     }
 
-    private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter) {
+    private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter, String subjectId) {
         int row = 2;
         for(Map<String, Object> classMap : classes){
-            fillRow(classMap, excelWriter, row);
+            fillRow(classMap, excelWriter, row, subjectId);
             row++;
         }
     }
@@ -89,7 +98,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
 /*    "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
             "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"*/
-    private void fillRow(Map<String, Object> classMap, ExcelWriter excelWriter, int row) {
+    private void fillRow(Map<String, Object> classMap, ExcelWriter excelWriter, int row, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), classMap.get("className"));
         excelWriter.set(row, column.incrementAndGet(), classMap.get("studentCount"));
@@ -101,7 +110,9 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Good));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Pass));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Fail));
-        excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allPassRate")));
-        excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allFailRate")));
+        if(null == subjectId){
+            excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allPassRate")));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allFailRate")));
+        }
     }
 }
