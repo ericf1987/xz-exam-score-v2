@@ -18,6 +18,6 @@ public class TotalBasicRankReportTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateReport() throws Exception {
-        report.generate(PROJECT_ID, Range.province("430000"), "target/report.xlsx");
+        report.generate(PROJECT_ID, Range.province("430000"), "target/total_basic_rank_report.xlsx");
     }
 }

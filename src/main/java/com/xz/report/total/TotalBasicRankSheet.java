@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class TotalBasicRankSheet extends SheetGenerator {
+
     @Autowired
     ProjectRankStat projectRankStat;
 
@@ -78,7 +79,7 @@ public class TotalBasicRankSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
         excelWriter.set(0, column.incrementAndGet(), "实考人数");
-        for(double d : PIECE_WISE){
+        for (double d : PIECE_WISE) {
             excelWriter.set(0, column.incrementAndGet(), "总排名前" + DoubleUtils.toPercent(d));
         }
     }

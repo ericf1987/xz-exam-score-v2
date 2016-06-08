@@ -6,7 +6,6 @@ import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SubjectService;
 import com.xz.services.TargetService;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +17,7 @@ import java.util.List;
  */
 @Component
 public class TotalBasicScoreSegmentReport extends ReportGenerator {
+
     @Autowired
     TargetService targetService;
 
