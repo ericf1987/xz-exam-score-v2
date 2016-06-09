@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Created by fengye on 2016/5/25.
+ * 尖子生情况统计
  */
 @TaskDispatcherInfo(taskType = "top_average", dependentTaskType = "score_map")
 @Component
 public class TopAverageDispatcher extends TaskDispatcher {
+
     static final Logger LOG = LoggerFactory.getLogger(TopAverageDispatcher.class);
 
     @Autowired
@@ -30,10 +31,10 @@ public class TopAverageDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL, Range.PROVINCE);
-        List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.PROJECT);
+
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
+        List<Target> targets = targetService.queryTargets(projectId, Target.QUEST, Target.SUBJECT, Target.PROJECT);
+
         int counter = 0;
         //统计班级和学校的科目和考试
         for (Range range : ranges) {

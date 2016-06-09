@@ -196,10 +196,13 @@ public class ScoreService {
     public void saveTotalScore(String projectId, Range range, Range parent, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
+        Document update = doc("totalScore", score);
 
-        scoreDatabase.getCollection(collectionName).updateOne(query,
-                $set(doc("totalScore", score).append("parent", range2Doc(parent))), UPSERT);
+        if (parent != null) {
+            update.append("parent", range2Doc(parent));
+        }
 
+        scoreDatabase.getCollection(collectionName).updateOne(query, $set(update), UPSERT);
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
     }

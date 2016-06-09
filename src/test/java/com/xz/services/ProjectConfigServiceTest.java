@@ -76,7 +76,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         projectConfigService.saveProjectConfig(config);
     }
 
-    // 石峰中学配置
+    // 十九中配置
     private void save19SchoolConfig() {
         ProjectConfig config = new ProjectConfig();
         config.setProjectId("430200-89c9dc7481cd47a69d85af3f0808e0c4");

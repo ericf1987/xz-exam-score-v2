@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@TaskDispatcherInfo(taskType = "rank_level", dependentTaskType = "rank")
+@TaskDispatcherInfo(taskType = "rank_level", dependentTaskType = "score_map")
 public class RankLevelDispatcher extends TaskDispatcher {
 
     @Autowired
