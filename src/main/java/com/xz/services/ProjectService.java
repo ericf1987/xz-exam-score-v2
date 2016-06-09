@@ -37,7 +37,7 @@ public class ProjectService {
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
      *
-     * @return  考试项目列表
+     * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
         String cacheKey = "school_projects:" + schoolId + ":" + examMonth;
@@ -81,5 +81,14 @@ public class ProjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
         c.updateOne(query, $set("schools", schoolList));
+    }
+
+    /**
+     * 查询所有项目信息
+     *
+     * @return 所有项目
+     */
+    public List<Document> queryProjects() {
+        return toList(scoreDatabase.getCollection("project_list").find(doc()));
     }
 }

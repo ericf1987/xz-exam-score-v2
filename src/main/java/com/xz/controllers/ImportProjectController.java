@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.Value;
 import com.xz.api.Param;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
@@ -251,16 +252,20 @@ public class ImportProjectController {
 
         JSONArray jsonArray = result.get("result");
         List<String> subjects = new ArrayList<>();
+        Value<Double> projectFullScore = Value.of(0d);
+
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
             Double fullScore = subjectObj.getDouble("totalScore");
 
+            projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);
-            fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);
+            fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
-        subjectService.saveProjectSubjects(projectId, subjects);
+        subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
+        fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
     }
 
     private void importProjectInfo(String projectId, Context context) {

@@ -5,7 +5,6 @@
     <title>A佳在线报表</title>
 </head>
 <body>
-
 <fieldset>
     <legend>导入项目</legend>
     <form action="project/import" method="post">
@@ -59,8 +58,9 @@
 </fieldset>
 
 <fieldset>
-    <legend>上传基础数据文件</legend>
-    <form action="upload-exam-data" method="post" enctype="multipart/form-data">
+    <legend>上传导出的成绩文件</legend>
+    <form action="upload-exam-score" method="post" enctype="multipart/form-data">
+        <p>项目ID：<input type="text" name="project"/></p>
         <p>数据文件zip包：<input type="file" name="file"></p>
         <input type="submit" value="提交"/>
     </form>
