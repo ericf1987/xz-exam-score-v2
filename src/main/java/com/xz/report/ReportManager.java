@@ -78,6 +78,7 @@ public class ReportManager implements ApplicationContextAware {
                     String filePath = reportTask.getCategory() + "/" + reportTask.getFilename() + ".xlsx";
                     String saveFilePath = getSaveFilePath(projectId, savePath, filePath);
                     reportTask.getReportGenerator().generate(projectId, reportTask.getRange(), saveFilePath);
+                    System.out.println("reportTask-->" + reportTask.getClass().getName() + "filePath-->" + reportTask.getFilename());
                 } catch (Exception e) {
                     LOG.error("生成报表失败", e);
                 }

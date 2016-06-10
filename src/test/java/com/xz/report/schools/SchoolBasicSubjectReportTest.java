@@ -16,6 +16,6 @@ public class SchoolBasicSubjectReportTest extends XzExamScoreV2ApplicationTests 
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        schoolBasicSubjectReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("002e02d6-c036-4780-85d4-e54e3f1fbf9f"), "target/school-basic-subject.xlsx");
+        schoolBasicSubjectReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), "target/school-basic-subject.xlsx");
     }
 }

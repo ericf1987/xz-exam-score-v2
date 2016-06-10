@@ -44,9 +44,10 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         Range schoolRange = sheetTask.getRange();
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
-                setParameter("schoolIds", schoolRange.getId());
+                setParameter("schoolId", schoolRange.getId());
 
         Result result = schoolRankStat.execute(param);
+        //System.out.println("学校排名统计,考试科目-->" + subjectId);
         //System.out.println("学校排名统计-->" + result.getData());
         setupHeader(excelWriter);
         fillClassData(result.getList("classes", null), excelWriter);

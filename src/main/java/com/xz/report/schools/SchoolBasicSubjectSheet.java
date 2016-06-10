@@ -35,7 +35,7 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
 
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
-                .setParameter("schoolIds", schoolRanges.getId());
+                .setParameter("schoolId", schoolRanges.getId());
 
         Result result = schoolSubjectAnalysis.execute(param);
         //System.out.println("学校学科分析-->" + result.getData());

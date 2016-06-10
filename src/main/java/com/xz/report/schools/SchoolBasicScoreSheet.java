@@ -38,12 +38,12 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
     public static String[] COLUMNS_TOTAL = new String[]{
         "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
-        "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"
+        "优率", "良率", "合格率", "不及格率", "超均率", "全科及格率", "全科不及格率", "中位数"
     };
 
     public static String[] COLUMNS = new String[]{
-            "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
-            "优率", "良率", "合格率", "不及格率", "中位数"
+        "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
+        "优率", "良率", "合格率", "不及格率", "超均率", "中位数"
     };
 
     @Override
@@ -52,16 +52,17 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         String subjectId = target.match(Target.PROJECT) ? null : target.getId().toString();
 
         Range schoolRange = sheetTask.getRange();
+        System.out.println(schoolRange);
 /*        List<String> classIds = classService.listClasses(projectId, schoolRange.getId().toString()).
                 stream().map(d -> d.getString("class")).collect(Collectors.toList());*/
 
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
-                setParameter("schoolIds", schoolRange.getId().toString());
+                setParameter("schoolId", schoolRange.getId().toString());
 
         Result result = schoolScoreAnalysis.execute(param);
 
-        //System.out.println("学校分数分析-->" + result.getData());
+        System.out.println("学校分数分析-->" + result.getData());
         if(null == subjectId){
             setupHeader(excelWriter, COLUMNS_TOTAL);
         }else{
@@ -110,6 +111,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Good));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Pass));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Fail));
+        excelWriter.set(row, column.incrementAndGet(), classMap.get("overAverage"));
         if(null == subjectId){
             excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allPassRate")));
             excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allFailRate")));
