@@ -1,6 +1,7 @@
 package com.xz.api.server.sys;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
 import com.xz.api.annotation.*;
 import com.xz.api.server.Server;
@@ -26,13 +27,15 @@ import static com.xz.services.SubjectService.getSubjectName;
  */
 
 @Function(description = "根据考试项目ID查询考试科目列表", parameters = {
-        @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
+        @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = false),
 }, result = @ResultInfo(properties = {
         @Property(name = "totals", type = Type.Pojo, description = "科目总信息"),
 },listProperties =
 @ListProperty(name = "subjects", description = "考试科目列表", properties = {
         @Property(name = "subjectId", type = Type.String, description = "科目id"),
-        @Property(name = "subjectName", type = Type.String, description = "科目名称")
+        @Property(name = "subjectName", type = Type.String, description = "科目名称"),
+        @Property(name = "studentCount", type = Type.Integer, description = "考生人数")
 })))
 @Service
 public class QueryExamSubjects implements Server {
@@ -49,8 +52,15 @@ public class QueryExamSubjects implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
+        String schoolId = param.getString("schoolId");
         List<Map<String, String>> examSubjects = new ArrayList<>();
-        Range range = rangeService.queryProvinceRange(projectId);
+
+        Range range;
+        if (StringUtil.isNotBlank(schoolId)) {
+            range = Range.school(schoolId);
+        } else {
+            range = rangeService.queryProvinceRange(projectId);
+        }
 
         // 科目信息
         List<String> subjectIds = subjectService.querySubjects(projectId);
