@@ -7,7 +7,6 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +84,14 @@ public class Param implements Serializable {
 
         for (String key : parameters.keySet()) {
             String[] values = parameters.get(key);
-            sb.append(key).append(':').append(Arrays.toString(values)).append(',');
+
+            String strParamterValue = "";
+            for (String paramterValue : values) {
+                strParamterValue += paramterValue.trim() + ",";
+            }
+            strParamterValue = StringUtils.removeEnd(strParamterValue, ",");
+
+            sb.append(key).append(':').append("[").append(strParamterValue).append("]").append(',');
         }
 
         if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',') {
