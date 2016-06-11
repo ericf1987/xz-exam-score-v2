@@ -3,9 +3,11 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.FullScoreService;
 import com.xz.services.QuestTypeScoreService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class QuestTypeScoreAverageTask extends Receiver {
     QuestTypeScoreService questTypeScoreService;
 
     @Autowired
+    FullScoreService fullScoreService;
+
+    @Autowired
     MongoDatabase scoreDatabase;
 
     @Override
@@ -46,12 +51,16 @@ public class QuestTypeScoreAverageTask extends Receiver {
         )).forEach((Consumer<Document>) document -> {
             String questType = ((Document) document.get("_id")).getString("questType");
             double average = document.getDouble("average");
+            double fullScore = fullScoreService.getFullScore(projectId, Target.questType(questType));
+            double rate = average / fullScore;
 
             Document query = doc("project", projectId)
                     .append("range", range2Doc(range))
                     .append("questType", target2Doc(questType(questType)));
 
-            dstCollection.updateOne(query, $set("average", average), UPSERT);
+            Document update = doc("average", average).append("rate", rate);
+
+            dstCollection.updateOne(query, $set(update), UPSERT);
         });
     }
 }

@@ -90,7 +90,7 @@ public class FullScoreTask extends Receiver {
         MongoCollection<Document> fullScores = scoreDatabase.getCollection("full_score");
 
         questList.aggregate(Arrays.asList(
-                $match("project", projectId),
+                $match(doc("project", projectId).append("questionTypeId", $ne(null))),
                 $group(doc("_id", doc("questType", "$questionTypeId"))
                         .append("fullScore", doc("$sum", "$score")))
 
@@ -100,7 +100,7 @@ public class FullScoreTask extends Receiver {
 
             fullScores.updateOne(
                     doc("project", projectId).append("target", target2Doc(Target.questType(questType))),
-                    doc("fullScore", fullScore), UPSERT);
+                    $set("fullScore", fullScore), UPSERT);
         });
 
     }
