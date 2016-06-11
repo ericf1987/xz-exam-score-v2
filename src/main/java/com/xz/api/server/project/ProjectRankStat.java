@@ -68,7 +68,7 @@ public class ProjectRankStat implements Server {
             String schoolName = schoolService.getSchoolName(projectId, schoolId);
             if (StringUtil.isBlank(schoolName)) {
                 LOG.warn("找不到学校:'{}'的考试记录", schoolId);
-                return null;
+                continue;
             }
             Map<String, Object> map = new HashMap<>();
             map.put("schoolName", schoolName);
