@@ -19,8 +19,8 @@ import java.util.Map;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 @Component
-@ReceiverInfo(taskType = "student_quest_type_score")
-public class StudentQuestTypeTask extends Receiver {
+@ReceiverInfo(taskType = "quest_type_score")
+public class QuestTypeScoreTask extends Receiver {
 
     @Autowired
     MongoDatabase scoreDatabase;

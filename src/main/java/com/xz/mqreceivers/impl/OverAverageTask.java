@@ -49,6 +49,7 @@ public class OverAverageTask extends Receiver {
     }
 
     private void processClassOverAverage(AggrTask aggrTask) {
+        Target target = aggrTask.getTarget();
         String classId = aggrTask.getRange().getId();
         String projectId = aggrTask.getProjectId();
 
@@ -59,22 +60,22 @@ public class OverAverageTask extends Receiver {
         double schoolAvg = averageService.getAverage(projectId, Range.school(schoolId), Target.project(projectId));
         double overAverage = (classAvg - schoolAvg) / schoolAvg;
 
-        saveOverAverage(projectId, Range.clazz(classId), Target.project(projectId), overAverage);
+        saveOverAverage(projectId, Range.clazz(classId), target, overAverage);
     }
 
     private void processSchoolOverAverage(AggrTask aggrTask) {
+        Target target = aggrTask.getTarget();
         String schoolId = aggrTask.getRange().getId();
         String projectId = aggrTask.getProjectId();
 
         Document schoolDoc = schoolService.findSchool(projectId, schoolId);
         String province = schoolDoc.getString("province");
 
-        Target project = Target.project(projectId);
-        double schoolAvg = averageService.getAverage(projectId, Range.school(schoolId), project);
-        double provinceAvg = averageService.getAverage(projectId, Range.province(province), project);
+        double schoolAvg = averageService.getAverage(projectId, Range.school(schoolId), target);
+        double provinceAvg = averageService.getAverage(projectId, Range.province(province), target);
         double overAverage = (schoolAvg - provinceAvg) / provinceAvg;
 
-        saveOverAverage(projectId, Range.school(schoolId), project, overAverage);
+        saveOverAverage(projectId, Range.school(schoolId), target, overAverage);
     }
 
     private void saveOverAverage(String projectId, Range range, Target target, double overAverage) {

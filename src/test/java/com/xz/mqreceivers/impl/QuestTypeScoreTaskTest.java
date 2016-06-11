@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author yiding_he
  */
-public class StudentQuestTypeTaskTest extends XzExamScoreV2ApplicationTests {
+public class QuestTypeScoreTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
-    StudentQuestTypeTask task;
+    QuestTypeScoreTask task;
 
     @Test
     public void testRunTask() throws Exception {

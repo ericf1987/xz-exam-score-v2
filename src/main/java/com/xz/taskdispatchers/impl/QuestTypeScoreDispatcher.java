@@ -14,8 +14,8 @@ import java.util.List;
  * 统计单个学生题型得分
  */
 @Component
-@TaskDispatcherInfo(taskType = "student_quest_type_score")
-public class StudentQuestTypeDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "quest_type_score")
+public class QuestTypeScoreDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;
