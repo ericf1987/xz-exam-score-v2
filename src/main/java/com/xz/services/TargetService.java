@@ -27,12 +27,15 @@ public class TargetService {
     QuestService questService;
 
     @Autowired
+    QuestTypeService questTypeService;
+
+    @Autowired
     SubjectService subjectService;
 
     @Autowired
     SimpleCache cache;
 
-    public Target getTarget (String projectId, String subjectId) {
+    public Target getTarget(String projectId, String subjectId) {
         if (StringUtil.isNotBlank(subjectId)) {
             return Target.subject(subjectId);
         } else {
@@ -56,11 +59,23 @@ public class TargetService {
             targetList.addAll(queryQuests(projectId));
         }
 
+        if (targetNameList.contains(Target.QUEST_TYPE)) {
+            targetList.addAll(queryQuestTypes(projectId));
+        }
+
         if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
             targetList.addAll(querySubjectObjectives(projectId));
         }
 
         return targetList;
+    }
+
+    private List<Target> queryQuestTypes(String projectId) {
+        List<String> questTypes = questTypeService.getQuestTypeList(projectId);
+
+        return questTypes.stream()
+                .map(Target::questType)
+                .collect(Collectors.toList());
     }
 
     private List<Target> querySubjectObjectives(String projectId) {
