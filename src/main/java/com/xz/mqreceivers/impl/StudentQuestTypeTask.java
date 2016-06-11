@@ -53,6 +53,11 @@ public class StudentQuestTypeTask extends Receiver {
             Document quest = questService.findQuest(projectId, subject, questNo);
             String questTypeId = quest.getString("questionTypeId");
 
+            // 有的科目可能因为没有录入题目而导致该属性为空。
+            if (questTypeId == null) {
+                continue;
+            }
+
             if (!questTypeScores.containsKey(questTypeId)) {
                 questTypeScores.put(questTypeId, scoreValue);
             } else {
