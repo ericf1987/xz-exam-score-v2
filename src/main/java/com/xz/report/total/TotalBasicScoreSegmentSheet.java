@@ -27,6 +27,10 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
     @Autowired
     SchoolService schoolService;
 
+    public static final String[] SECONDARY_HEADER = new String[]{
+            "人数","占比"
+    };
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
@@ -36,14 +40,14 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
                 map(d -> d.getString("school")).collect(Collectors.toList());
 
         Param param = new Param().setParameter("projectId", projectId).
-                setParameter("subjectid", subjectId).
+                setParameter("subjectId", subjectId).
                 setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
 
         Result result = projectScoreSegment.execute(param);
         //System.out.println("总体分数段分析data-->" + result.getData());
-        //System.out.println("schools-->" + result.getList("schools", null));
         setupHeader(excelWriter, result.get("totals"));
-        //fillProviceData(result.get("totals"), excelWriter);
+        setupSecondaryHeader(excelWriter, result.get("totals"));
+        fillProviceData(result.get("totals"), excelWriter);
         fillSchoolData(result.getList("schools", null), excelWriter);
     }
 
@@ -53,12 +57,24 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         //excelWriter.set(0, column.incrementAndGet(), "实考人数");
         for(Map<String, Object> m : list){
             excelWriter.set(0, column.incrementAndGet(), m.get("title"));
+            column.incrementAndGet();
+            excelWriter.mergeCells(0, column.get() - 1, 0, column.get());
+        }
+    }
+
+    private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> schools){
+        AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(1, column.incrementAndGet(), "学校名称");
+        excelWriter.mergeCells(0, 0, 1, 0);
+        for (Map<String, Object> school :schools){
+            excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
+            excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
         }
     }
 
     //填充报表数据
     private void fillSchoolData(List<Map<String, Object>> schools, ExcelWriter excelWriter) {
-        int row = 2;
+        int row = 3;
         for(Map<String, Object> m : schools){
             fillRow(m, excelWriter, row);
             row++;
@@ -66,9 +82,14 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
     }
 
     //填充汇总数据
-    private void fillProviceData(List<Map<String, Object>> total, ExcelWriter excelWriter) {
-/*        total.put("schoolName", "总体");
-        fillRow(total, excelWriter, 1);*/
+    private void fillProviceData(List<Map<String, Object>> totals, ExcelWriter excelWriter) {
+        int row = 2;
+        AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(row, column.incrementAndGet(), "总体");
+        for(Map<String, Object> total : totals){
+            excelWriter.set(row, column.incrementAndGet(), total.get("count"));
+            excelWriter.set(row, column.incrementAndGet(), total.get("countRate"));
+        }
     }
 
     private void fillRow(Map<String, Object> school, ExcelWriter excelWriter, int row) {
@@ -78,6 +99,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), schoolName);
         for(Map<String, Object> item : scoreSegment){
             excelWriter.set(row, column.incrementAndGet(), item.get("count"));
+            excelWriter.set(row, column.incrementAndGet(), item.get("countRate"));
         }
     }
 

@@ -38,7 +38,7 @@ public class SchoolBasicScoreReportTest extends XzExamScoreV2ApplicationTests {
         String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
 
 
-        //schoolBasicScoreReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), "target/school-basic-score.xlsx");
+        schoolBasicScoreReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), "target/school-basic-score.xlsx");
 //        int studentCount = studentService.getStudentCount("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), Target.subject("003"));
         double overAverage = overAverageService.getOverAverage(projectId, classRange, subjectTarget);
 

@@ -48,7 +48,7 @@ public class SchoolBasicRankSheet extends SheetGenerator {
 
         Result result = schoolRankStat.execute(param);
         //System.out.println("学校排名统计,考试科目-->" + subjectId);
-        //System.out.println("学校排名统计-->" + result.getData());
+        System.out.println("学校排名统计-->" + result.getData());
         setupHeader(excelWriter);
         fillClassData(result.getList("classes", null), excelWriter);
     }
@@ -77,6 +77,12 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "实考人数");
         for(double d : PIECE_WISE){
             excelWriter.set(0, column.incrementAndGet(), "学校总排名前" + DoubleUtils.toPercent(d));
+            column.incrementAndGet();
+            excelWriter.mergeCells(0, column.get() - 1, 0, column.get());
         }
+    }
+
+    private void setupSecondaryHeader(ExcelWriter excelWriter){
+
     }
 }
