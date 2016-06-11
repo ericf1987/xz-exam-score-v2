@@ -13,9 +13,9 @@ import java.util.List;
 /**
  * 非学生的题型得分（平均分）统计
  */
-@TaskDispatcherInfo(taskType = "nonstu_quest_type_score", dependentTaskType = "student_quest_type_score")
+@TaskDispatcherInfo(taskType = "quest_type_score_average", dependentTaskType = "quest_type_score")
 @Component
-public class NonStuQuestTypeDispatcher extends TaskDispatcher {
+public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
 
     @Autowired
     RangeService rangeService;

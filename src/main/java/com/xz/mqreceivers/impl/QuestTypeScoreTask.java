@@ -3,9 +3,11 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.FullScoreService;
 import com.xz.services.QuestService;
 import com.xz.services.ScoreService;
 import com.xz.services.StudentService;
@@ -19,14 +21,17 @@ import java.util.Map;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 @Component
-@ReceiverInfo(taskType = "student_quest_type_score")
-public class StudentQuestTypeTask extends Receiver {
+@ReceiverInfo(taskType = "quest_type_score")
+public class QuestTypeScoreTask extends Receiver {
 
     @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
     ScoreService scoreService;
+
+    @Autowired
+    FullScoreService fullScoreService;
 
     @Autowired
     QuestService questService;
@@ -53,6 +58,11 @@ public class StudentQuestTypeTask extends Receiver {
             Document quest = questService.findQuest(projectId, subject, questNo);
             String questTypeId = quest.getString("questionTypeId");
 
+            // 有的科目可能因为没有录入题目而导致该属性为空。
+            if (questTypeId == null) {
+                continue;
+            }
+
             if (!questTypeScores.containsKey(questTypeId)) {
                 questTypeScores.put(questTypeId, scoreValue);
             } else {
@@ -65,8 +75,12 @@ public class StudentQuestTypeTask extends Receiver {
 
         for (String questTypeId : questTypeScores.keySet()) {
             Document query = doc("project", projectId).append("student", studentId).append("questType", questTypeId);
+            double score = questTypeScores.get(questTypeId);
+            double fullScore = fullScoreService.getFullScore(projectId, Target.questType(questTypeId));
+            double rate = score / fullScore;
 
-            Document update = doc("score", questTypeScores.get(questTypeId))
+            Document update = doc("score", score)
+                    .append("rate", rate)
                     .append("class", studentDoc.getString("class"))
                     .append("school", studentDoc.getString("school"))
                     .append("area", studentDoc.getString("area"))
