@@ -87,6 +87,19 @@ public class ScoreService {
     }
 
     /**
+     * 查询指定判断题的任意一个分数
+     *
+     * @param projectId 项目ID
+     * @param questId   题目ID
+     *
+     * @return 分数记录
+     */
+    public Document findOneJudgeQuestScore(String projectId, String questId) {
+        Document query = doc("project", projectId).append("quest", questId).append("answer", $ne("*"));
+        return scoreDatabase.getCollection("score").find(query).first();
+    }
+
+    /**
      * 查询一个学生在指定项目中的指定目标名称的分数
      *
      * @param projectId  项目ID
