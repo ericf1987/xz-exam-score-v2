@@ -37,7 +37,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
         Result result = projectSubjectAnalysis.execute(param);
-        System.out.println("学科分析data-->" + result.getData());
+        //System.out.println("学科分析data-->" + result.getData());
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillProvinceData(result.get("totals"), excelWriter);
