@@ -107,7 +107,7 @@ public class ProjectObjectiveAnalysis implements Server {
 
         List<Map<String, Object>> list = new ArrayList<>();
         for (Document quest : quests) {
-            Map<String, Object> map = new HashMap<>(quest);
+            Map<String, Object> map = new HashMap<>();
             String questId = quest.getString("questId");
             List<String> items = quest.get("items", List.class);
             Map<String, Document> optionMap = optionMapService.getOptionMap(projectId, questId, range);
