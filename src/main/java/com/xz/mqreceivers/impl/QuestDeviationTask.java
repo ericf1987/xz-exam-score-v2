@@ -7,6 +7,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.FullScoreService;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
@@ -36,6 +37,9 @@ public class QuestDeviationTask extends Receiver {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    FullScoreService fullScoreService;
+
     public static final double DEVIATION_RATE = 0.27d;
 
     @Override
@@ -58,10 +62,14 @@ public class QuestDeviationTask extends Receiver {
         Document oneScoreMap = scoreMapCol.find(query).first();
         int count = oneScoreMap.getInteger("count");
         //排名27%所占的人数
-        double rankCount = count * DEVIATION_RATE;
-        double score = getScore(oneScoreMap);
+        int rankCount = Double.valueOf(count * DEVIATION_RATE).intValue();
+        //题目总分
+        double score = fullScoreService.getFullScore(projectId, target);
+
+        //double score = getScore(oneScoreMap);
         double subScore = getSubScoreByRate(oneScoreMap, rankCount);
         double deviation = subScore / score;
+        //System.out.println("题目ID：" + target.getId() + ",题目区分度--->" + deviation);
 
         questDeviationCol.deleteMany(query);
         questDeviationCol.updateMany(
@@ -73,14 +81,14 @@ public class QuestDeviationTask extends Receiver {
         );
     }
 
-    private double getSubScoreByRate(Document oneScoreMap, double rankCount) {
+    private double getSubScoreByRate(Document oneScoreMap, int rankCount) {
         List<Document> scoreMap = (List<Document>) oneScoreMap.get("scoreMap");
         double top = average(scoreMap, rankCount, false);
         double bottom = average(scoreMap, rankCount, true);
         return top - bottom;
     }
 
-    private double average(List<Document> scoreMap, double rankCount, boolean asc) {
+    private double average(List<Document> scoreMap, int rankCount, boolean asc) {
         int count = 0;
         double sum = 0;
         if (asc) {
@@ -97,21 +105,22 @@ public class QuestDeviationTask extends Receiver {
         for (Document d : scoreMap) {
             count += d.getInteger("count");
             sum += d.getDouble("score") * d.getInteger("count");
-            if (count >= Double.valueOf(rankCount).intValue()) {
-                count = count - d.getInteger("count") + 1;
-                sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score");
-                return sum / count;
+            if (count >= rankCount) {
+                int offset = rankCount - (count - d.getInteger("count"));
+                count = count + offset;
+                sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score") * offset;
+                return count == 0 ? 0d : sum / (double) count;
             }
         }
-        return sum / count;
+        return count == 0 ? 0d : sum / (double) count;
     }
 
-    private double getScore(Document oneScoreMap) {
+/*    private double getScore(Document oneScoreMap) {
         double score = 0;
         List<Document> scoreMap = (List<Document>) oneScoreMap.get("scoreMap");
         for (Document d : scoreMap) {
             score += d.getDouble("score") * d.getInteger("count");
         }
         return score;
-    }
+    }*/
 }
