@@ -56,7 +56,7 @@ public class PrepareDataService {
      *
      * @param projectId 项目ID
      */
-    private void prepareFixQuestOptions(String projectId) {
+    public void prepareFixQuestOptions(String projectId) {
         List<Document> quests = questService.getQuestsByQuestType(projectId, JUDGE_QUEST);
 
         for (Document quest : quests) {

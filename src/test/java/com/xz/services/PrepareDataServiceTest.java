@@ -29,4 +29,9 @@ public class PrepareDataServiceTest extends XzExamScoreV2ApplicationTests {
     public void testPrepareStudentList() throws Exception {
 
     }
+
+    @Test
+    public void testPrepareFixQuestOptions() throws Exception {
+        prepareDataService.prepareFixQuestOptions(PROJECT_ID);
+    }
 }

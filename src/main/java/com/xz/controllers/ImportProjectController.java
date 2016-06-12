@@ -235,6 +235,7 @@ public class ImportProjectController {
             questDoc.put("standardAnswer", questObj.getString("answer"));
             questDoc.put("points", questObj.get("points"));
             questDoc.put("items", questObj.get("items"));
+            questDoc.put("answer", questObj.get("answer"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
 
