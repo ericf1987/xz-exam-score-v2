@@ -37,6 +37,10 @@ public class SchoolBasicRankSheet extends SheetGenerator {
             0.85, 0.9, 0.95, 1.0
     };
 
+    public static final String[] SECONDARY_HEADER = new String[]{
+            "人数", "占比", "累计"
+    };
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
@@ -48,13 +52,14 @@ public class SchoolBasicRankSheet extends SheetGenerator {
 
         Result result = schoolRankStat.execute(param);
         //System.out.println("学校排名统计,考试科目-->" + subjectId);
-        System.out.println("学校排名统计-->" + result.getData());
+        //System.out.println("学校排名统计-->" + result.getData());
         setupHeader(excelWriter);
+        setupSecondaryHeader(excelWriter);
         fillClassData(result.getList("classes", null), excelWriter);
     }
 
     private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter) {
-        int row = 1;
+        int row = 2;
         for (Map<String, Object> clazz : classes) {
             fillRow(clazz, excelWriter, row);
             row++;
@@ -63,11 +68,18 @@ public class SchoolBasicRankSheet extends SheetGenerator {
 
     private void fillRow(Map<String, Object> clazz, ExcelWriter excelWriter, int rowIndex) {
         AtomicInteger column = new AtomicInteger(-1);
+        int studentCount = (int)clazz.get("studentCount");
         excelWriter.set(rowIndex, column.incrementAndGet(), clazz.get("className"));
         excelWriter.set(rowIndex, column.incrementAndGet(), clazz.get("studentCount"));
         List<Map<String, Object>> rankStat = (List<Map<String, Object>>) clazz.get("rankStat");
+        int accCount = 0;
         for (Map<String, Object> r : rankStat) {
             excelWriter.set(rowIndex, column.incrementAndGet(), r.get("count"));
+            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent((double)r.get("rate")));
+            int count = (int)r.get("count");
+            accCount += count;
+            double accRate = (double)accCount / (double)studentCount;
+            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent(accRate));
         }
     }
 
@@ -78,11 +90,21 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         for(double d : PIECE_WISE){
             excelWriter.set(0, column.incrementAndGet(), "学校总排名前" + DoubleUtils.toPercent(d));
             column.incrementAndGet();
-            excelWriter.mergeCells(0, column.get() - 1, 0, column.get());
+            column.incrementAndGet();
+            excelWriter.mergeCells(0, column.get() - 2, 0, column.get());
         }
     }
 
     private void setupSecondaryHeader(ExcelWriter excelWriter){
-
+        AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(1, column.incrementAndGet(), "班级名称");
+        excelWriter.set(1, column.incrementAndGet(), "实考人数");
+        excelWriter.mergeCells(0, 0, 1, 0);
+        excelWriter.mergeCells(0, 1, 1, 1);
+        for(double d : PIECE_WISE){
+            excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
+            excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
+            excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[2]);
+        }
     }
 }
