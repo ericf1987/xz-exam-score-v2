@@ -112,7 +112,7 @@ public class ProjectSubjectiveAnalysis implements Server {
             // 试题平均得分/得分率
             Target target = Target.quest(questId);
             double average = averageService.getAverage(projectId, range, target);
-            map.put("average", average);
+            map.put("average", DoubleUtils.round(average));
             map.put("rate", DoubleUtils.round(score == 0 ? 0 : average / score, true));
 
             map.put("questNo", quest.getString("questNo"));
