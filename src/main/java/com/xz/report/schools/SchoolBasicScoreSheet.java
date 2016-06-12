@@ -37,13 +37,17 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
     SchoolService schoolService;
 
     public static String[] COLUMNS_TOTAL = new String[]{
-        "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
-        "优率", "良率", "合格率", "不及格率", "超均率", "全科及格率", "全科不及格率", "中位数"
+            "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
+            "优率", "良率", "合格率", "不及格率", "超均率", "全科及格率", "全科不及格率"
     };
 
     public static String[] COLUMNS = new String[]{
-        "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
-        "优率", "良率", "合格率", "不及格率", "超均率", "中位数"
+            "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
+            "优率", "良率", "合格率", "不及格率", "超均率"
+    };
+
+    public static final String[] RANK_POSITION = new String[]{
+            "1/4位", "中位", "3/4位"
     };
 
     @Override
@@ -52,7 +56,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         String subjectId = target.match(Target.PROJECT) ? null : target.getId().toString();
 
         Range schoolRange = sheetTask.getRange();
-        System.out.println(schoolRange);
+        //System.out.println(schoolRange);
 /*        List<String> classIds = classService.listClasses(projectId, schoolRange.getId().toString()).
                 stream().map(d -> d.getString("class")).collect(Collectors.toList());*/
 
@@ -62,31 +66,46 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
         Result result = schoolScoreAnalysis.execute(param);
 
-        System.out.println("学校分数分析-->" + result.getData());
-        if(null == subjectId){
+        //System.out.println("学校分数分析-->" + result.getData());
+        if (null == subjectId) {
             setupHeader(excelWriter, COLUMNS_TOTAL);
-        }else{
+            setupSecondaryHeader(excelWriter, COLUMNS_TOTAL);
+        } else {
             setupHeader(excelWriter, COLUMNS);
+            setupSecondaryHeader(excelWriter, COLUMNS);
         }
-        fillSchoolData(result.get("schools"),excelWriter,subjectId);
-        fillClassData(result.getList("classes", null),excelWriter,subjectId);
+        fillSchoolData(result.get("schools"), excelWriter, subjectId);
+        fillClassData(result.getList("classes", null), excelWriter, subjectId);
     }
 
     private void setupHeader(ExcelWriter excelWriter, String[] COLUMNS) {
         AtomicInteger column = new AtomicInteger(-1);
-        for(String c : COLUMNS){
+        for (String c : COLUMNS) {
             excelWriter.set(0, column.incrementAndGet(), c);
         }
+        excelWriter.set(0, column.incrementAndGet(), "中位数");
+        excelWriter.mergeCells(0, column.get(), 0, column.get() + 2);
+    }
+
+    private void setupSecondaryHeader(ExcelWriter excelWriter, String[] COLUMNS) {
+        AtomicInteger column = new AtomicInteger(-1);
+        for (int index = 0; index < COLUMNS.length; index++) {
+            excelWriter.set(1, column.incrementAndGet(), COLUMNS[index]);
+            excelWriter.mergeCells(0, index, 1, index);
+        }
+        excelWriter.set(1, column.incrementAndGet(), RANK_POSITION[0]);
+        excelWriter.set(1, column.incrementAndGet(), RANK_POSITION[1]);
+        excelWriter.set(1, column.incrementAndGet(), RANK_POSITION[2]);
     }
 
     private void fillSchoolData(Map<String, Object> school, ExcelWriter excelWriter, String subjectId) {
         school.put("className", "总体");
-        fillRow(school, excelWriter, 1, subjectId);
+        fillRow(school, excelWriter, 2, subjectId);
     }
 
     private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter, String subjectId) {
-        int row = 2;
-        for(Map<String, Object> classMap : classes){
+        int row = 3;
+        for (Map<String, Object> classMap : classes) {
             fillRow(classMap, excelWriter, row, subjectId);
             row++;
         }
@@ -97,8 +116,8 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         return document == null ? 0 : toPercent((Double) document.get("rate"));
     }
 
-/*    "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
-            "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"*/
+    /*    "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
+                "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"*/
     private void fillRow(Map<String, Object> classMap, ExcelWriter excelWriter, int row, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), classMap.get("className"));
@@ -112,9 +131,13 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Pass));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Fail));
         excelWriter.set(row, column.incrementAndGet(), classMap.get("overAverage"));
-        if(null == subjectId){
-            excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allPassRate")));
-            excelWriter.set(row, column.incrementAndGet(), toPercent((Double)classMap.get("allFailRate")));
+        if (null == subjectId) {
+            excelWriter.set(row, column.incrementAndGet(), toPercent((Double) classMap.get("allPassRate")));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((Double) classMap.get("allFailRate")));
+        }
+        List<Document> rankPositions = (List<Document>)classMap.get("rankPositions");
+        for(Document rankPosition : rankPositions){
+            excelWriter.set(row, column.incrementAndGet(), rankPosition.get("score"));
         }
     }
 }
