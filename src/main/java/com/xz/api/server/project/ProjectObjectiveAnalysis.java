@@ -130,7 +130,8 @@ public class ProjectObjectiveAnalysis implements Server {
 
             map.put("questNo", quest.getString("questNo"));
             map.put("score", DocumentUtils.getDouble(quest, "score", 0));
-            map.put("standardAnswer", quest.getString("standardAnswer"));
+            String standardAnswer = quest.getString("standardAnswer");
+            map.put("standardAnswer", standardAnswer == null ? "" : standardAnswer.trim());
             list.add(map);
         }
 
