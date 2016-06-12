@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -50,6 +51,12 @@ public class QuestService {
                         doc("project", projectId).append("subject", subjectId)));
     }
 
+    public List<Document> getQuestsByQuestType(String projectId, String questType) {
+        return MongoUtils.toList(scoreDatabase.getCollection("quest_list").find(
+                doc("project", projectId).append("questType", questType)
+        ));
+    }
+
     public List<Document> getQuests(String projectId) {
         return MongoUtils.toList(
                 scoreDatabase.getCollection("quest_list").find(doc("project", projectId)));
@@ -84,8 +91,6 @@ public class QuestService {
     }
 
     public Document findQuest(String projectId, String subject, String questNo) {
-
-
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
         Document query = doc("project", projectId)
@@ -93,5 +98,10 @@ public class QuestService {
                 .append("questNo", questNo);
 
         return collection.find(query).first();
+    }
+
+    public void saveQuestItems(String projectId, String questId, List<String> items) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+        collection.updateMany(doc("project", projectId).append("questId", questId), $set("items", items));
     }
 }

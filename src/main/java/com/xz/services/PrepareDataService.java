@@ -6,6 +6,8 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.Converter;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +26,64 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 @Service
 public class PrepareDataService {
 
+    static final Logger LOG = LoggerFactory.getLogger(PrepareDataService.class);
+
+    public static final String JUDGE_QUEST = "2";  // 判断题题型
+
     @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
     QuestTypeService questTypeService;
 
+    @Autowired
+    QuestService questService;
+
+    @Autowired
+    ScoreService scoreService;
+
     public void prepare(String projectId) {
+        LOG.info("统计学生数量...");
         prepareStudentList(projectId);
+        LOG.info("统计题型...");
         prepareQuestTypeList(projectId);
+        LOG.info("统计判断题选项...");
+        prepareFixQuestOptions(projectId);
+    }
+
+    /**
+     * 补完客观题（主要指选择题）的选项
+     *
+     * @param projectId 项目ID
+     */
+    private void prepareFixQuestOptions(String projectId) {
+        List<Document> quests = questService.getQuestsByQuestType(projectId, JUDGE_QUEST);
+
+        for (Document quest : quests) {
+            String questId = quest.getString("questId");
+            Document score = scoreService.findOneJudgeQuestScore(projectId, questId);
+            if (score == null) {
+                continue;
+            }
+
+            List<String> items;
+            String studentAnswer = score.getString("answer");
+
+            switch (studentAnswer) {
+                case "A":
+                case "B":
+                    items = Arrays.asList("A", "B");
+                    break;
+                case "T":
+                case "F":
+                    items = Arrays.asList("T", "F");
+                    break;
+                default:
+                    throw new IllegalStateException("无法识别的判断题答案: " + score.toJson());
+            }
+
+            questService.saveQuestItems(projectId, questId, items);
+        }
     }
 
     /**

@@ -66,6 +66,9 @@ public class ImportProjectController {
     @Autowired
     FullScoreService fullScoreService;
 
+    @Autowired
+    PrepareDataService prepareDataService;
+
     @RequestMapping(value = "import", method = RequestMethod.POST)
     @ResponseBody
     public Result importProject(
@@ -94,6 +97,9 @@ public class ImportProjectController {
         if (type == null || type.equals("") || type.equals("student")) {
             importStudents(projectId, context);
         }
+
+        LOG.info("正在准备数据...");
+        prepareDataService.prepare(projectId);
 
         LOG.info("项目 " + projectId + " 基本信息导入完毕。");
         return Result.success();
@@ -228,6 +234,7 @@ public class ImportProjectController {
             questDoc.put("score", questObj.getDoubleValue("score"));
             questDoc.put("standardAnswer", questObj.getString("answer"));
             questDoc.put("points", questObj.get("points"));
+            questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
 
@@ -241,7 +248,7 @@ public class ImportProjectController {
         if (questType == null) {
             return null;
         } else {
-            return "0".equals(questType) || "1".equals(questType);
+            return "0".equals(questType) || "1".equals(questType) || "2".equals(questType);
         }
     }
 
