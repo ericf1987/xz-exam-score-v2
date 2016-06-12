@@ -1,11 +1,11 @@
 package com.xz.services;
 
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.report.Keys;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import com.xz.util.CollectionUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,7 +87,7 @@ public class ScoreLevelService {
             scoreLevels = Collections.emptyList();
         }
 
-        Map<String, Document> levelMap = CollectionUtil.toMap(scoreLevels, docm -> docm.getString("scoreLevel"));
+        Map<String, Document> levelMap = CollectionUtils.toMap(scoreLevels, docm -> docm.getString("scoreLevel"));
         List<Document> fullScoreLevels = new ArrayList<>();
 
         for (Keys.ScoreLevel scoreLevel : Keys.ScoreLevel.values()) {

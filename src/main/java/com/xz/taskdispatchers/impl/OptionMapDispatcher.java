@@ -19,7 +19,7 @@ import java.util.List;
  * @author yiding_he
  */
 @Component
-@TaskDispatcherInfo(taskType = "option_map", dependentTaskType = "student_list")
+@TaskDispatcherInfo(taskType = "option_map")
 public class OptionMapDispatcher extends TaskDispatcher {
 
     @Autowired

@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
@@ -71,10 +72,10 @@ public class TargetService {
     }
 
     private List<Target> queryQuestTypes(String projectId) {
-        List<String> questTypes = questTypeService.getQuestTypeList(projectId);
+        List<QuestType> questTypes = questTypeService.getQuestTypeList(projectId);
 
         return questTypes.stream()
-                .map(Target::questType)
+                .map(questType -> Target.questType(questType.getId()))
                 .collect(Collectors.toList());
     }
 

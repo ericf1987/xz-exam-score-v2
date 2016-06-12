@@ -3,8 +3,8 @@ package com.xz.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.bean.Range;
-import com.xz.util.CollectionUtil;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class SubjectRateService {
         String cacheKey = "subject_rate_map:" + projectId + ":" + range;
         return cache.get(cacheKey, () -> {
             List<Document> subjectRates = querySubjectRate(projectId, range);
-            return new HashMap<>(CollectionUtil.toMap(subjectRates,
+            return new HashMap<>(CollectionUtils.toMap(subjectRates,
                     subjectRate -> subjectRate.getString("subject")));
         });
     }

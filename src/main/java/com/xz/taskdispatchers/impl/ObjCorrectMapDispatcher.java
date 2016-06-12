@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@TaskDispatcherInfo(taskType = "obj_correct_map", dependentTaskType = "student_list")
+@TaskDispatcherInfo(taskType = "obj_correct_map")
 public class ObjCorrectMapDispatcher extends TaskDispatcher {
 
     @Autowired

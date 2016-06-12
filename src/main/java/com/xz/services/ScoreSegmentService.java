@@ -3,10 +3,10 @@ package com.xz.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import com.xz.util.CollectionUtil;
 import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class ScoreSegmentService {
     public List<Map<String, Object>> queryFullScoreSegment(String projectId, Target target, Range range) {
         List<Map<String, Object>> scoreSegmentList = new ArrayList<>();
         List<Document> scoreSegments = getScoreSegment(projectId, range, target);
-        Map<String, Document> segmentMap = CollectionUtil.toMap(
+        Map<String, Document> segmentMap = CollectionUtils.toMap(
                 scoreSegments, scoreSegment -> DocumentUtils.getString(scoreSegment, "segment", ""));
         int studentCount = studentService.getStudentCount(projectId, range, target);
         double fullScore = fullScoreService.getFullScore(projectId, target);

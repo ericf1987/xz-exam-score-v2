@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.ajiaedu.common.beans.dic.QuestType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +20,7 @@ public class QuestTypeServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetQuestTypeList() throws Exception {
-        List<String> questTypeList = questTypeService.getQuestTypeList(PROJECT_ID);
-        System.out.println(questTypeList);
+        List<QuestType> questTypeList = questTypeService.getQuestTypeList(PROJECT_ID);
+        questTypeList.forEach(System.out::println);
     }
 }
