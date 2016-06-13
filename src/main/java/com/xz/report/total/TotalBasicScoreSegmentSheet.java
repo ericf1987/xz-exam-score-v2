@@ -44,7 +44,6 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
                 setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
 
         Result result = projectScoreSegment.execute(param);
-        //System.out.println("总体分数段分析data-->" + result.getData());
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillProviceData(result.get("totals"), excelWriter);
@@ -54,7 +53,6 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> list) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
-        //excelWriter.set(0, column.incrementAndGet(), "实考人数");
         for(Map<String, Object> m : list){
             excelWriter.set(0, column.incrementAndGet(), m.get("title"));
             column.incrementAndGet();

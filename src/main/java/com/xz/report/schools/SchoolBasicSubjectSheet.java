@@ -43,7 +43,6 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
                 .setParameter("schoolId", schoolRanges.getId());
 
         Result result = schoolSubjectAnalysis.execute(param);
-        //System.out.println("学校学科分析-->" + result.getData());
 
         //设置表头
         setupHeader(excelWriter, result.get("schools"));

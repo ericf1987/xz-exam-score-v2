@@ -49,7 +49,7 @@ public class ReportTask {
         this.category = category;
     }
 
-    public String getFilename() {
+    public String getFilePathWithRange() {
         return filename;
     }
 

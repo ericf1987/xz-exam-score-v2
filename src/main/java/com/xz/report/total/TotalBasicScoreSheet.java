@@ -61,7 +61,6 @@ public class TotalBasicScoreSheet extends SheetGenerator {
 
         Result result = projectScoreAnalysis.execute(param);
 
-        //System.out.println(result.getData());
         setupHeader(excelWriter, subjectId);
         setupSecondaryHeader(excelWriter, subjectId);
         fillProvinceData(result.get("totals"), excelWriter, subjectId);

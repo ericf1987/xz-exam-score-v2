@@ -10,6 +10,8 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
+
+    static final Logger LOG = LoggerFactory.getLogger(SchoolBasicScoreSegmentSheet.class);
+
     @Autowired
     SchoolScoreSegment schoolScoreSegment;
 
@@ -43,7 +48,6 @@ public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
 
         Result result = schoolScoreSegment.execute(param);
 
-        System.out.println("学校分数段统计-->" + result.getData());
         setupHeader(excelWriter, result.get("schools"));
         setupSecondaryHeader(excelWriter, result.get("schools"));
         fillSchoolData(result.get("schools"),excelWriter);

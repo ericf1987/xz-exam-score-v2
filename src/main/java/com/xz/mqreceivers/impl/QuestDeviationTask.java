@@ -69,7 +69,6 @@ public class QuestDeviationTask extends Receiver {
         //double score = getScore(oneScoreMap);
         double subScore = getSubScoreByRate(oneScoreMap, rankCount);
         double deviation = subScore / score;
-        //System.out.println("题目ID：" + target.getId() + ",题目区分度--->" + deviation);
 
         questDeviationCol.deleteMany(query);
         questDeviationCol.updateMany(

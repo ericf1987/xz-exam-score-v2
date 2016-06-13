@@ -56,9 +56,6 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         String subjectId = target.match(Target.PROJECT) ? null : target.getId().toString();
 
         Range schoolRange = sheetTask.getRange();
-        //System.out.println(schoolRange);
-/*        List<String> classIds = classService.listClasses(projectId, schoolRange.getId().toString()).
-                stream().map(d -> d.getString("class")).collect(Collectors.toList());*/
 
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
@@ -66,7 +63,6 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
         Result result = schoolScoreAnalysis.execute(param);
 
-        //System.out.println("学校分数分析-->" + result.getData());
         if (null == subjectId) {
             setupHeader(excelWriter, COLUMNS_TOTAL);
             setupSecondaryHeader(excelWriter, COLUMNS_TOTAL);

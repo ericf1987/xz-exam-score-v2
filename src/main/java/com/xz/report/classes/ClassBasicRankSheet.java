@@ -5,7 +5,6 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.api.server.classes.ClassRankAnalysis;
 import com.xz.bean.Range;
-import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.ClassService;
@@ -44,7 +43,6 @@ public class ClassBasicRankSheet extends SheetGenerator {
                 setParameter("classId", classRange.getId());
 
         Result result = classRankAnalysis.execute(param);
-        //System.out.println("班级排名统计-->" + result.getData());
         setupHeader(excelWriter, result.getList("rankstats", null));
         setupSecondaryHeader(excelWriter, result.getList("rankstats", null));
         fillStudentData(excelWriter, result.getList("rankstats", null));
