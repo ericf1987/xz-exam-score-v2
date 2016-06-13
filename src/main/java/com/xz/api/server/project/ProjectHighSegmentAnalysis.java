@@ -120,7 +120,7 @@ public class ProjectHighSegmentAnalysis implements Server {
         // 总分分析
         Map<String, Object> projectInfo = new HashMap<>();
         double topAverage = topAverageService.getTopAverage(projectId, Target.project(projectId), range, percent);
-        projectInfo.put("average", topAverage);
+        projectInfo.put("average", DoubleUtils.round(topAverage));
         projectInfo.put("subjectId", "000");
         projectInfo.put("subjectName", "总体");
         list.add(projectInfo);
