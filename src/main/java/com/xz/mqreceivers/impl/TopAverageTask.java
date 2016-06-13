@@ -53,13 +53,15 @@ public class TopAverageTask extends Receiver{
         List<Document> resultList = new ArrayList<Document>();
         //对不同百分率进行便利查询
         for(double d : arr){
-            //总人数
+/*            //总人数
             int count = scoreMap.getInteger("count").intValue();
             List<Document> items = getPercent((List<Document>) scoreMap.get("scoreMap"), d, count);
             //获取总分
             double sum = getSum(items);
             //计算平均分
-            double aver = Double.valueOf(sum / count);
+            double aver = Double.valueOf(sum / count);*/
+            int count = scoreMap.getInteger("count").intValue();
+            double aver = getAverage((List<Document>)scoreMap.get("scoreMap"), d, count);
             Document result = new Document("average", aver).append("percent", d);
             resultList.add(result);
         }
@@ -79,6 +81,32 @@ public class TopAverageTask extends Receiver{
             sum += d.getDouble("score");
         }
         return sum;
+    }
+
+    private double getAverage(List<Document> scoreMaps, double v, int count){
+        //排序
+        int cnt = 0;
+        double sum = 0;
+        Collections.sort(scoreMaps, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
+        int requireCount = Double.valueOf(count * v).intValue();
+
+        if(requireCount == 0){
+            return 0d;
+        }else if(requireCount > 0 && requireCount <= 1){
+            return scoreMaps.get(0).getDouble("score");
+        }else{
+            for(Document d : scoreMaps){
+                cnt += d.getInteger("count");
+                sum += d.getDouble("score") * d.getInteger("count");
+                if(cnt >= requireCount){
+                    cnt = cnt - d.getInteger("count");
+                    int offset = requireCount - cnt;
+                    sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score") * offset;
+                    return requireCount == 0 ? 0d : sum / (double) requireCount;
+                }
+            }
+            return requireCount == 0 ? 0d : sum / (double) requireCount;
+        }
     }
 
     private List<Document> getPercent(List<Document> scoreMaps, double v, int count) {
