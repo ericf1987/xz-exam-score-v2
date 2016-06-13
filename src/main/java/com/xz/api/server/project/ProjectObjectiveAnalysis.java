@@ -118,7 +118,7 @@ public class ProjectObjectiveAnalysis implements Server {
 
             // 试题选项选率
             if (items != null) {
-                for (String itemName : optionMap.keySet()) {
+                for (String itemName : items) {
                     Map<String, Object> itemNameStat = getOptionValue(optionMap, itemName.trim());
                     map.put(itemName, itemNameStat);
                 }
@@ -144,7 +144,7 @@ public class ProjectObjectiveAnalysis implements Server {
         if (document == null) {
             map.put("count", 0);
             map.put("rate", 0);
-            map.put("answer", "*");
+            map.put("answer", key);
         } else {
             map.put("count", document.getInteger("count"));
             map.put("rate", DoubleUtils.round(document.getDouble("rate"), true));
