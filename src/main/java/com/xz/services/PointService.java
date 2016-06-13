@@ -25,6 +25,7 @@ public class PointService {
 
     public List<Point> getPoints(String projectId, String subjectId) {
         String cacheKey = "points:" + projectId + ":" + subjectId;
+
         return Collections.emptyList();
     }
 }

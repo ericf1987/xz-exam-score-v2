@@ -17,9 +17,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
-import static com.xz.bean.Target.questType;
 import static com.xz.util.Mongo.range2Doc;
-import static com.xz.util.Mongo.target2Doc;
 
 @Component
 @ReceiverInfo(taskType = "quest_type_score_average")
@@ -56,7 +54,7 @@ public class QuestTypeScoreAverageTask extends Receiver {
 
             Document query = doc("project", projectId)
                     .append("range", range2Doc(range))
-                    .append("questType", target2Doc(questType(questType)));
+                    .append("questType", questType);
 
             Document update = doc("average", average).append("rate", rate);
 

@@ -86,7 +86,8 @@ public class ImportProjectController {
             importSubjects(projectId);
         }
         if (type == null || type.equals("") || type.equals("quest")) {
-            importQuests(projectId);
+            importQuests(projectId, context);
+            importPoints(projectId, context);
         }
         if (type == null || type.equals("") || type.equals("school") || type.equals("class") || type.equals("student")) {
             importSchools(projectId, context);
@@ -105,6 +106,20 @@ public class ImportProjectController {
         return Result.success();
     }
 
+    // 导入考试知识点
+    @SuppressWarnings("unchecked")
+    private void importPoints(String projectId, Context context) {
+        List<Document> projectQuests = context.get("quests");
+        Set<String> pointIds = new HashSet<>();
+
+        for (Document quest : projectQuests) {
+            Map<String, String> points = (Map<String, String>) quest.get("points");
+
+        }
+
+    }
+
+    // 导入考试班级
     private void importClasses(String projectId, Context context) {
         List<Document> classes = new ArrayList<>();
         List<Document> schools = context.get("schools");
@@ -143,6 +158,7 @@ public class ImportProjectController {
         context.put("classes", classes);
     }
 
+    // 导入考生列表
     private void importStudents(String projectId, Context context) {
         List<Document> classes = context.get("classes");
         int classCount = classes.size();
@@ -215,7 +231,8 @@ public class ImportProjectController {
         areaService.saveProjectAreas(projectId, areas);
     }
 
-    private void importQuests(String projectId) {
+    // 导入考题信息
+    private void importQuests(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 考题信息...");
         Param param = new Param().setParameter("projectId", projectId);
         Result result = interfaceClient.request("QueryQuestionByProject", param);
@@ -242,6 +259,7 @@ public class ImportProjectController {
             projectQuests.add(questDoc);
         });
 
+        context.put("quests", projectQuests);
         questService.saveProjectQuests(projectId, projectQuests);
     }
 

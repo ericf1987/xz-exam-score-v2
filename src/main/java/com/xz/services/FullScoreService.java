@@ -40,11 +40,11 @@ public class FullScoreService {
         if (target.match(Target.QUEST)) {
             return getQuestFullScore(projectId, target);
         } else {
-            return getSubjectProjectFullScore(projectId, target);
+            return getNonQuestFullScore(projectId, target);
         }
     }
 
-    private double getSubjectProjectFullScore(String projectId, Target target) {
+    private double getNonQuestFullScore(String projectId, Target target) {
         String cacheKey = "fullscore:" + projectId + ":" + target;
         return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("target", Mongo.target2Doc(target));
