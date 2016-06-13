@@ -2,7 +2,6 @@ package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Target;
-import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
@@ -18,9 +17,6 @@ import java.util.List;
 public class TotalScoreTaskDispatcher extends TaskDispatcher {
 
     static final Logger LOG = LoggerFactory.getLogger(TotalScoreTaskDispatcher.class);
-
-    @Autowired
-    RangeService rangeService;
 
     @Autowired
     TargetService targetService;

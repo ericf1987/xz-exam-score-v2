@@ -57,7 +57,7 @@ public class TotalScoreTask extends Receiver {
     private void aggregateStudentTotalScore(String projectId, Target target) {
         List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
         if (!target.match(Target.QUEST)) {
-            aggregateFromSocre(projectId, studentRanges, target);
+            aggregateFromScore(projectId, studentRanges, target);
         }
     }
 
@@ -72,6 +72,7 @@ public class TotalScoreTask extends Receiver {
         }
     }
 
+    // 统计非学生的总分
     private void aggregateFromTotalScore(
             String projectId, String collectionName, Target target, Range aggrRange) {
 
@@ -90,12 +91,12 @@ public class TotalScoreTask extends Receiver {
         Document aggregateResult = aggregate.first();
         if (aggregateResult != null) {
             Double score = aggregateResult.getDouble("totalScore");
-            scoreService.saveTotalScore(projectId, aggrRange, parent, target, score);
+            scoreService.saveTotalScore(projectId, aggrRange, parent, target, score, null);
         }
     }
 
     // 统计单个学生的科目/知识点/项目/能力层级等总分
-    private void aggregateFromSocre(String projectId, List<Range> studentRanges, Target target) {
+    private void aggregateFromScore(String projectId, List<Range> studentRanges, Target target) {
         Document group = new Document()
                 .append("_id", null)
                 .append("totalScore", new Document("$sum", "$score"));
@@ -118,7 +119,10 @@ public class TotalScoreTask extends Receiver {
             // 如果缺考则会导致 aggregate() 没有返回值
             if (aggregateResult != null) {
                 Double score = aggregateResult.getDouble("totalScore");
-                scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score);
+                Document extra = doc("class", student.get("class")).append("school", student.get("school"))
+                        .append("area", student.get("area")).append("city", student.get("city"))
+                        .append("province", student.get("province"));
+                scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score, extra);
             }
         }
     }

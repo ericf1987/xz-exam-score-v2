@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.util.Mongo.range2Doc;
+import static com.xz.util.Mongo.target2Doc;
 
 /**
  * 查询排名和排名等级
@@ -69,20 +71,24 @@ public class RankService {
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, double score) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
-        Document id = Mongo.query(projectId, range, target);
 
-        AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
-                $match(id), $unwind("$scoreMap"), $match("scoreMap.score", $gt(score)),
-                $group(doc("_id", null).append("count", $sum("$scoreMap.count")))
-        ));
+        String cacheKey = "score_rank:" + projectId + ":" + range + ":" + target + ":" + score;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
+            Document id = Mongo.query(projectId, range, target);
 
-        Document document = aggregate.first();
-        if (document == null) {
-            return 1;
-        }
+            AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
+                    $match(id), $unwind("$scoreMap"), $match("scoreMap.score", $gt(score)),
+                    $group(doc("_id", null).append("count", $sum("$scoreMap.count")))
+            ));
 
-        return document.getInteger("count") + 1;
+            Document document = aggregate.first();
+            if (document == null) {
+                return 1;
+            }
+
+            return document.getInteger("count") + 1;
+        });
     }
 
     /**
@@ -126,5 +132,19 @@ public class RankService {
                 "project=" + projectId + ", range=" + range + ", target=" + target +
                 ", student=" + studentId + ", rank=" + rank + ", levels=" + rankingLevels +
                 ", studentCount=" + studentCount);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Document> getScoreMap(String projectId, Range range, Target target) {
+
+        Document doc = scoreDatabase.getCollection("score_map").find(
+                doc("project", projectId).append("range", range2Doc(range)).append("target", target2Doc(target))
+        ).first();
+
+        if (doc == null) {
+            return Collections.emptyList();
+        } else {
+            return (List<Document>) doc.get("scoreMap");
+        }
     }
 }
