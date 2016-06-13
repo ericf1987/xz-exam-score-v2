@@ -12,6 +12,8 @@ import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 @ReceiverInfo(taskType = "quest_deviation")
 @Component
 public class QuestDeviationTask extends Receiver {
+    static final Logger LOG = LoggerFactory.getLogger(QuestDeviationTask.class);
 
     @Autowired
     RangeService rangeService;
@@ -84,6 +87,7 @@ public class QuestDeviationTask extends Receiver {
         List<Document> scoreMap = (List<Document>) oneScoreMap.get("scoreMap");
         double top = average(scoreMap, rankCount, false);
         double bottom = average(scoreMap, rankCount, true);
+        //return Math.abs(top - bottom);
         return top - bottom;
     }
 
@@ -95,31 +99,24 @@ public class QuestDeviationTask extends Receiver {
             Collections.sort(scoreMap, (Document d1, Document d2) -> {
                 return d1.getDouble("score").compareTo(d2.getDouble("score"));
             });
+            //LOG.debug("排名人数-->{}, 从低到高-->{}", rankCount, scoreMap.toString());
         } else {
             //从高到低
             Collections.sort(scoreMap, (Document d1, Document d2) -> {
                 return d2.getDouble("score").compareTo(d1.getDouble("score"));
             });
+            //LOG.debug("排名人数-->{}, 从高到低-->{}", rankCount, scoreMap.toString());
         }
         for (Document d : scoreMap) {
             count += d.getInteger("count");
             sum += d.getDouble("score") * d.getInteger("count");
             if (count >= rankCount) {
-                int offset = rankCount - (count - d.getInteger("count"));
-                count = count + offset;
+                count = count - d.getInteger("count");
+                int offset = rankCount - count;
                 sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score") * offset;
-                return count == 0 ? 0d : sum / (double) count;
+                return rankCount == 0 ? 0d : sum / (double) rankCount;
             }
         }
-        return count == 0 ? 0d : sum / (double) count;
+        return rankCount == 0 ? 0d : sum / (double) rankCount;
     }
-
-/*    private double getScore(Document oneScoreMap) {
-        double score = 0;
-        List<Document> scoreMap = (List<Document>) oneScoreMap.get("scoreMap");
-        for (Document d : scoreMap) {
-            score += d.getDouble("score") * d.getInteger("count");
-        }
-        return score;
-    }*/
 }
