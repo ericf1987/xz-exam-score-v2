@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.util.Mongo.range2Doc;
 
 @Service
 public class QuestTypeScoreService {
@@ -33,7 +34,7 @@ public class QuestTypeScoreService {
 
     private double getNonStudentQuestTypeScore(String projectId, Range range, String questTypeId) {
         Document doc = scoreDatabase.getCollection("quest_type_score_average").find(
-                doc("project", projectId).append("range", range).append("questType", questTypeId)
+                doc("project", projectId).append("range", range2Doc(range)).append("questType", questTypeId)
         ).first();
 
         return doc != null ? doc.getDouble("average") : 0d;
