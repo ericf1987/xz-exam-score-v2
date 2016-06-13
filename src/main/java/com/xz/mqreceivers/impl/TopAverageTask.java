@@ -53,13 +53,6 @@ public class TopAverageTask extends Receiver{
         List<Document> resultList = new ArrayList<Document>();
         //对不同百分率进行便利查询
         for(double d : arr){
-/*            //总人数
-            int count = scoreMap.getInteger("count").intValue();
-            List<Document> items = getPercent((List<Document>) scoreMap.get("scoreMap"), d, count);
-            //获取总分
-            double sum = getSum(items);
-            //计算平均分
-            double aver = Double.valueOf(sum / count);*/
             int count = scoreMap.getInteger("count").intValue();
             double aver = getAverage((List<Document>)scoreMap.get("scoreMap"), d, count);
             Document result = new Document("average", aver).append("percent", d);
@@ -72,15 +65,6 @@ public class TopAverageTask extends Receiver{
                 MongoUtils.$set("topAverages", resultList),
                 MongoUtils.UPSERT
         );
-
-    }
-
-    private double getSum(List<Document> items) {
-        double sum = 0d;
-        for(Document d : items){
-            sum += d.getDouble("score");
-        }
-        return sum;
     }
 
     private double getAverage(List<Document> scoreMaps, double v, int count){
@@ -107,31 +91,6 @@ public class TopAverageTask extends Receiver{
             }
             return requireCount == 0 ? 0d : sum / (double) requireCount;
         }
-    }
-
-    private List<Document> getPercent(List<Document> scoreMaps, double v, int count) {
-
-        //排序
-        Collections.sort(scoreMaps, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
-
-        int requireCount = Double.valueOf(count * v).intValue();
-        //如果元素总数小于1
-        if(requireCount <= 1){
-            return scoreMaps;
-        }
-
-        int currentCount = 0;
-        List<Document> result;
-        for(int i = 0; i < scoreMaps.size(); i++){
-            currentCount += scoreMaps.get(i).getInteger("count");
-            if(currentCount > requireCount){
-                Document doc = scoreMaps.get(i);
-                doc.put("count", doc.getInteger("count") - (currentCount - requireCount));
-                result = scoreMaps.subList(0, i);
-                return result;
-            }
-        }
-        return scoreMaps;
     }
 
 }
