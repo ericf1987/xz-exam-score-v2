@@ -63,7 +63,9 @@ public class QueryExamSubjects implements Server {
         }
 
         // 科目信息
-        List<String> subjectIds = subjectService.querySubjects(projectId);
+        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjectIds.sort(String::compareTo);
+
         examSubjects.addAll(subjectIds.stream().map(subjectId ->
                 getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));
 
