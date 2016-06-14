@@ -131,6 +131,14 @@ public class ScoreService {
         }
     }
 
+    /**
+     * 查询指定学生的所有分数记录
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     *
+     * @return 分数记录
+     */
     public FindIterable<Document> getStudentQuestScores(String projectId, String studentId) {
         Document query = doc("project", projectId).append("student", studentId);
         return scoreDatabase.getCollection("score").find(query);

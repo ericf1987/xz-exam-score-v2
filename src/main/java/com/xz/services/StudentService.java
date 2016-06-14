@@ -113,18 +113,27 @@ public class StudentService {
     /**
      * 查询学生列表（非缓存）
      *
-     * @param projectId 项目ID
-     * @param range     范围（可选，null 表示整个项目）
+     * @param projectId       项目ID
+     * @param range           范围（可选，null 表示整个项目）
+     * @param maxStudentCount 最多查询多少个学生（调试用，<=0 表示不限）
      *
      * @return 学生列表
      */
-    public FindIterable<Document> getProjectStudentList(String projectId, Range range) {
+    public FindIterable<Document> getProjectStudentList(String projectId, Range range, int maxStudentCount) {
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+
         Document query = doc("project", projectId);
         if (range != null) {
             query.append(range.getName(), range.getId());
         }
-        return students.find(query);
+
+        FindIterable<Document> findIterable = students.find(query);
+
+        if (maxStudentCount > 0) {
+            findIterable.limit(maxStudentCount);
+        }
+
+        return findIterable;
     }
 
     /**
