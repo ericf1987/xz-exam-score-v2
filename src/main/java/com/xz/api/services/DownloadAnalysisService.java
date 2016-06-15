@@ -50,17 +50,20 @@ public class DownloadAnalysisService {
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
             pathList.addAll(category);
         }
-        String pathUrl = createZipFiles(pathList, zipFileName);
-        return Result.success().set("downloadUrl", pathUrl);
+        Map<String, Object> resultMap = createZipFiles(pathList, zipFileName);
+        return Result.success().set("downloadInfo", resultMap);
     }
 
-    public String createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
+    public Map<String, Object> createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
         File file = new File(downloadPath + zipFileName);
+        Map<String, Object> resultMap = new HashMap<>();
+        List<String> failureList = new ArrayList<>();
         try {
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
             FileInputStream fis;
             for (Map<String, String> filePath : pathList) {
                 if(!new File(filePath.get("srcFile")).exists()){
+                    failureList.add(filePath.get("zipFile"));
                     continue;
                 }
                 fis = new FileInputStream(filePath.get("srcFile"));
@@ -77,7 +80,11 @@ public class DownloadAnalysisService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return file.getPath();
+        //压缩文件下载路径
+        resultMap.put("downloadURL", file.getParent());
+        //不存在的文件列表
+        resultMap.put("failureList", failureList);
+        return resultMap;
     }
 
     private Map<String, String> getOneFileCategory(String srcFile, String zipFile, String srcFileName){
