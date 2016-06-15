@@ -6,8 +6,9 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
-import com.xz.api.services.DownloadAnalysisService;
+import com.xz.services.DownloadAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author by fengye on 2016/6/14.
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
         @Parameter(name = "fileParam", type = Type.StringArray, description = "文件参数", required = false),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = false)
 })
+@Service
 public class DownLoadAnalysis implements Server{
 
     @Autowired
@@ -28,8 +30,6 @@ public class DownLoadAnalysis implements Server{
         String schoolId = param.getString("schoolId");
         String[] schoolIds = param.getStringValues("schoolIds");
 
-        Result result = downloadAnalysisService.generateZipFiles(projectId, schoolId, schoolIds);
-
-        return result;
+        return downloadAnalysisService.generateZipFiles(projectId, schoolId, schoolIds);
     }
 }
