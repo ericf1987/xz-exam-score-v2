@@ -2,15 +2,9 @@ package com.xz.api.services;
 
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.services.ClassService;
-import com.xz.services.SchoolService;
+import com.xz.services.DownloadAnalysisService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * @author by fengye on 2016/6/14.
