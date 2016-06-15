@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class TotalBasicSubjectSheet extends SheetGenerator {
+
     @Autowired
     ProjectSubjectAnalysis projectSubjectAnalysis;
 
@@ -40,24 +41,28 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillProvinceData(result.get("totals"), excelWriter);
-        fillSchoolData(result.getList("schools", null),excelWriter);
+        fillSchoolData(result.getList("schools", null), excelWriter);
     }
 
     private void fillProvinceData(Map<String, Object> totals, ExcelWriter excelWriter) {
         fillRow(totals, excelWriter, 2);
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> totals, ExcelWriter excelWriter, int row) {
         AtomicInteger column = new AtomicInteger(-1);
-        if(row == 2){
+
+        if (row == 2) {
             excelWriter.set(row, column.incrementAndGet(), "总体");
-        }else{
+        } else {
             excelWriter.set(row, column.incrementAndGet(), totals.get("schoolName"));
         }
+
         excelWriter.set(row, column.incrementAndGet(), totals.get("studentCount"));
         excelWriter.set(row, column.incrementAndGet(), totals.get("totalAvg"));
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>)totals.get("subjects");
-        for(Map<String, Object> subject : subjects){
+
+        List<Map<String, Object>> subjects = (List<Map<String, Object>>) totals.get("subjects");
+        for (Map<String, Object> subject : subjects) {
             excelWriter.set(row, column.incrementAndGet(), subject.get("subjectAvg"));
             excelWriter.set(row, column.incrementAndGet(), subject.get("subjectRate"));
             excelWriter.set(row, column.incrementAndGet(), subject.get("tScore"));
@@ -66,20 +71,22 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
 
     private void fillSchoolData(List<Map<String, Object>> schools, ExcelWriter excelWriter) {
         int row = 3;
-        for(Map<String, Object> school : schools){
+        for (Map<String, Object> school : schools) {
             fillRow(school, excelWriter, row);
             row++;
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setupHeader(ExcelWriter excelWriter, Map<String, Object> para) {
         //获取totals节点的学科信息
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
         excelWriter.set(0, column.incrementAndGet(), "实考人数");
         excelWriter.set(0, column.incrementAndGet(), "总平均分");
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>)para.get("subjects");
-        for(Map subject : subjects){
+        List<Map<String, Object>> subjects = (List<Map<String, Object>>) para.get("subjects");
+
+        for (Map subject : subjects) {
             excelWriter.set(0, column.incrementAndGet(), subject.get("subjectName").toString());
             column.incrementAndGet();
             column.incrementAndGet();
@@ -87,6 +94,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setupSecondaryHeader(ExcelWriter excelWriter, Map<String, Object> schools) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "学校名称");

@@ -83,6 +83,7 @@ public class TotalBasicScoreSheet extends SheetGenerator {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> rowData, ExcelWriter excelWriter, int rowindex, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(rowindex, column.incrementAndGet(), rowData.get("schoolName"));

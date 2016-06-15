@@ -1,7 +1,5 @@
 package com.xz.controllers;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.io.FileUtils;
@@ -52,6 +50,7 @@ public class ZipScoreUploadController {
     @RequestMapping(value = "/import-exam-score", method = RequestMethod.POST)
     @ResponseBody
     public Result uploadExamScore(
+            @RequestParam("project") String project,
             @RequestParam MultipartFile file) throws Exception {
 
         String filename = UUID.randomUUID().toString() + ".zip";
@@ -61,18 +60,9 @@ public class ZipScoreUploadController {
         LOG.info("保存 zip 到 " + saveFile.getAbsolutePath());
 
         ZipFileReader zipFileReader = new ZipFileReader(saveFile);
-        com.xz.ajiaedu.common.lang.Value<String> project = com.xz.ajiaedu.common.lang.Value.of(null);
-        zipFileReader.readZipEntries("project.json", entry -> readProjectInfo(zipFileReader, project, entry));
-        zipFileReader.readZipEntries("score.json", entry -> readScore(project.get(), zipFileReader, entry));
+        zipFileReader.readZipEntries("score.json", entry -> readScore(project, zipFileReader, entry));
 
         return Result.success();
-    }
-
-    private void readProjectInfo(ZipFileReader zipFileReader, com.xz.ajiaedu.common.lang.Value<String> project, ZipEntry entry) {
-        zipFileReader.readEntryByLine(entry, "UTF-8", line -> {
-            JSONObject jsonObject = JSON.parseObject(line);
-            project.set(jsonObject.getString("project"));
-        });
     }
 
     private void readScore(String project, ZipFileReader zipFileReader, ZipEntry entry) {
