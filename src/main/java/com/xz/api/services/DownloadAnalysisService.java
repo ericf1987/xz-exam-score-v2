@@ -4,6 +4,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.services.*;
+import com.xz.util.ParamUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +41,11 @@ public class DownloadAnalysisService {
     @Autowired
     ClassService classService;
 
-    public static final int SIZE = 2048;
-
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
-        List<Map<String, String>> pathList = new ArrayList<Map<String, String>>();
+        String[] paths = ParamUtils.getFileName(filePath);
+        List<Map<String, String>> pathList = new ArrayList<>();
         String zipFileName = schoolService.findSchool(projectId, schoolId).getString("name") + "-考试分析报表.zip";
-        for (String path : filePath) {
+        for (String path : paths) {
             String[] param = path.split("-");
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
             pathList.addAll(category);
@@ -56,15 +56,17 @@ public class DownloadAnalysisService {
 
     public String createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
         File file = new File(downloadPath + zipFileName);
-        byte[] b = new byte[SIZE];
         try {
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
             FileInputStream fis;
             for (Map<String, String> filePath : pathList) {
+                if(!new File(filePath.get("srcFile")).exists()){
+                    continue;
+                }
                 fis = new FileInputStream(filePath.get("srcFile"));
                 ZipEntry entity = new ZipEntry(filePath.get("zipFile"));
                 out.putNextEntry(entity);
-                int temp = 0;
+                int temp;
                 while((temp = fis.read()) != -1){
                     out.write(temp);
                 }
@@ -79,7 +81,7 @@ public class DownloadAnalysisService {
     }
 
     private Map<String, String> getOneFileCategory(String srcFile, String zipFile, String srcFileName){
-        Map<String, String> para = new HashMap<String, String>();
+        Map<String, String> para = new HashMap<>();
         para.put("srcFile", srcFile);
         para.put("zipFile", zipFile);
         para.put("srcFileName", srcFileName);
@@ -91,12 +93,12 @@ public class DownloadAnalysisService {
         //源文件路径和压缩文件路径
         String srcFile, zipFile;
         String part0 = param[0];
-        String filename = param[2] + ".xlsx";
-        String filePath = "";
-        List<Map<String, String>> fileCategory = new ArrayList<Map<String, String>>();
+        String filename = param[2];
+        String filePath;
+        List<Map<String, String>> fileCategory = new ArrayList<>();
         if (part0.startsWith("总体")) {
-            srcFile = getSaveFilePath(projectId, savePath, StringUtil.joinPaths(param) + ".xlsx");
-            zipFile = StringUtil.joinPaths(param) + ".xlsx";
+            srcFile = getSaveFilePath(projectId, savePath, StringUtil.joinPaths(param));
+            zipFile = StringUtil.joinPaths(param);
             fileCategory.add(getOneFileCategory(srcFile,zipFile,filename));
         } else if (part0.startsWith("学校")) {
             Document school = schoolService.findSchool(projectId, schoolId);
