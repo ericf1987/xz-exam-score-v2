@@ -7,7 +7,6 @@ import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
 import com.xz.api.services.DownloadAnalysisService;
-import com.xz.util.ParamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -27,7 +26,10 @@ public class DownLoadAnalysis implements Server{
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
-        String[] fileParam = param.getStringValues("fileParam");
-        return downloadAnalysisService.generateZipFiles(projectId, schoolId, fileParam);
+        String[] schoolIds = param.getStringValues("schoolIds");
+
+        Result result = downloadAnalysisService.generateZipFiles(projectId, schoolId, schoolIds);
+
+        return result;
     }
 }

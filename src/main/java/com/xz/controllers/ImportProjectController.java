@@ -103,7 +103,7 @@ public class ImportProjectController {
         prepareDataService.prepare(projectId);
 
         LOG.info("项目 " + projectId + " 基本信息导入完毕。");
-        return Result.success();
+        return Result.success().set("questCount", context.get("questCount"));
     }
 
     // 导入考试知识点
@@ -239,6 +239,8 @@ public class ImportProjectController {
         List<Document> projectQuests = new ArrayList<>();
 
         JSONArray jsonArray = result.get("quests");
+        context.put("questCount", jsonArray.size());
+
         jsonArray.forEach(o -> {
             JSONObject questObj = (JSONObject) o;
             Document questDoc = new Document();
@@ -284,6 +286,10 @@ public class ImportProjectController {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
             Double fullScore = subjectObj.getDouble("totalScore");
+
+            if (fullScore == null) {
+                throw new IllegalStateException("科目'" + subjectId + "'没有总分: " + jsonArray);
+            }
 
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);

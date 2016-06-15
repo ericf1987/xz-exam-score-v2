@@ -9,6 +9,7 @@ import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.RankService;
+import com.xz.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,9 @@ public class TopStudentListTask extends Receiver {
 
     @Autowired
     RankService rankService;
+
+    @Autowired
+    StudentService studentService;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -96,8 +100,13 @@ public class TopStudentListTask extends Receiver {
             }
 
             int rank = rankMap.get(totalScore);
+            String studentId = ((Document) document.get("range")).getString("id");
+            Document student = studentService.findStudent(projectId, studentId);
+
             topStudentsList.insertOne(doc(query)
-                    .append("student", ((Document) document.get("range")).getString("id"))
+                    .append("student", studentId)
+                    .append("class", student.getString("class"))
+                    .append("school", student.getString("school"))
                     .append("score", totalScore).append("rank", rank));
         });
     }

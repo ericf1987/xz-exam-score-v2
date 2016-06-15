@@ -64,7 +64,8 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "学校名称");
         excelWriter.mergeCells(0, 0, 1, 0);
-        for (Map<String, Object> school :schools){
+
+        for (int i = 0; i < schools.size(); i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
         }
@@ -90,6 +91,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> school, ExcelWriter excelWriter, int row) {
         AtomicInteger column = new AtomicInteger(-1);
         String schoolName = school.get("schoolName").toString();

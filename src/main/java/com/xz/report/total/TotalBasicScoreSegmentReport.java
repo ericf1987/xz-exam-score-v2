@@ -23,12 +23,9 @@ public class TotalBasicScoreSegmentReport extends ReportGenerator {
     @Autowired
     TargetService targetService;
 
-    @Autowired
-    SubjectService subjectService;
-
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
-        List<SheetTask> tasks = new ArrayList<SheetTask>();
+        List<SheetTask> tasks = new ArrayList<>();
 
         SheetTask projectTask = new SheetTask("全部科目", TotalBasicScoreSegmentSheet.class);
         projectTask.put("target", Target.project(projectId));
@@ -36,7 +33,7 @@ public class TotalBasicScoreSegmentReport extends ReportGenerator {
 
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
-            String subjectName = subjectService.getSubjectName(subject.getId().toString());
+            String subjectName = SubjectService.getSubjectName(subject.getId().toString());
             projectTask = new SheetTask(subjectName, TotalBasicScoreSegmentSheet.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);

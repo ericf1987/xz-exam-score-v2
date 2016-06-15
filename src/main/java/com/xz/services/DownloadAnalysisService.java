@@ -1,4 +1,4 @@
-package com.xz.api.services;
+package com.xz.services;
 
 import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.lang.Result;
