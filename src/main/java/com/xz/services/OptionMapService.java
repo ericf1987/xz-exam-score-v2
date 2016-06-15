@@ -60,6 +60,7 @@ public class OptionMapService {
      *
      * @return 试题区分度
      */
+    @SuppressWarnings("unchecked")
     public List<Document> getOptionList(String projectId, String questId, Range range) {
         String cacheKey = "option_lists:" + projectId + ":" + questId + ":" + range;
         return cache.get(cacheKey, () -> {

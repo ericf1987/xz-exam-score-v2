@@ -4,7 +4,6 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.bean.Range;
-import com.xz.bean.Target;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.xz.util.Mongo.range2Doc;
-import static com.xz.util.Mongo.target2Doc;
 
 /**
  * 试题区分度
