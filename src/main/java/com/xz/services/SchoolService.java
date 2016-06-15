@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -60,6 +61,22 @@ public class SchoolService {
 
             Document query = doc("project", projectId).append("school", schoolId);
             return scoreDatabase.getCollection("school_list").find(query).projection(WITHOUT_INNER_ID).first();
+        });
+    }
+
+    /**
+     * 查询考试学校id列表
+     *
+     * @param projectId 考试项目id
+     * @param area      地区编码
+     *
+     * @return 考试学校列表
+     */
+    public List<String> getProjectSchoolIds(String projectId, String area) {
+        String cacheKey = "school_id_list:" + projectId + ":" + area;
+        return cache.get(cacheKey, () -> {
+            return new ArrayList<>(getProjectSchools(projectId, area).stream().map(
+                    document -> document.getString("school")).collect(Collectors.toList()));
         });
     }
 
