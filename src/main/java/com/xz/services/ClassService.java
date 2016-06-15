@@ -29,6 +29,23 @@ public class ClassService {
     @Autowired
     SimpleCache cache;
 
+    /**
+     * 查询考试班级名称
+     *
+     * @param projectId 考试项目id
+     * @param classId   班级id
+     *
+     * @return 学校名称
+     */
+    public String getClassName(String projectId, String classId) {
+        Document examClass = findClass(projectId, classId);
+        if (examClass == null) {
+            return "";
+        }
+
+        return examClass.getString("name");
+    }
+
     public Document findClass(String projectId, String classId) {
         String cacheKey = "class:" + projectId + ":" + classId;
 
