@@ -41,7 +41,7 @@ public class TScoreService {
      * @return T分值
      */
     public double queryTScore(String projectId, Target target, Range range) {
-        String cacheKey = "t_score_value:" + projectId + ":" + range;
+        String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("t_score");
             Document document = collection.find(
@@ -72,7 +72,7 @@ public class TScoreService {
         scoreDatabase.getCollection("t_score").updateOne(
                 query(projectId, range, target), $set("tScore", tscore), UPSERT);
 
-        String cacheKey = "t_score_value:" + projectId + ":" + range;
+        String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
     }
 }
