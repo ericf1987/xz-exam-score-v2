@@ -132,14 +132,14 @@ public class ProjectSubjectAnalysis implements Server {
             // 科目平均分与得分率
             double subjectAvg = averageService.getAverage(projectId, range, target);
             map.put("subjectAvg", DoubleUtils.round(subjectAvg));
-            map.put("subjectRate", DoubleUtils.round(fullScore == 0 ? 0 : subjectAvg / fullScore, true));
+            map.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : subjectAvg / fullScore, true));
 
             // 科目T值
             map.put("tScore", DoubleUtils.round(tScoreService.queryTScore(projectId, target, range)));
 
             // 科目贡献度
             Document subjectRate = subjectRateMap.get(subject);
-            map.put("subjectRate", DoubleUtils.round(subjectRate == null ? 0 : subjectRate.getDouble("rate")));
+            map.put("subjectRate", DoubleUtils.round(subjectRate == null ? 0 : subjectRate.getDouble("rate"), true));
             subjectList.add(map);
         }
 
