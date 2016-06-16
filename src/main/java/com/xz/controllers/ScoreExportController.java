@@ -3,7 +3,9 @@ package com.xz.controllers;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.Value;
+import com.xz.api.Param;
 import com.xz.bean.Range;
+import com.xz.intclient.InterfaceClient;
 import com.xz.score.bean.Score;
 import com.xz.score.creator.ScoreDataPackCreator;
 import com.xz.services.OSSService;
@@ -48,6 +50,9 @@ public class ScoreExportController {
     ProvinceService provinceService;
 
     @Autowired
+    InterfaceClient interfaceClient;
+
+    @Autowired
     OSSService ossService;
 
     @RequestMapping(value = "export-score-to-oss", method = RequestMethod.POST)
@@ -55,12 +60,17 @@ public class ScoreExportController {
     public Result exportScore(@RequestParam("project") String projectId) {
         try {
             String filePath = "score-archives/" + UUID.randomUUID().toString() + ".zip";
+
             LOG.info("对项目 " + projectId + " 开始进行打包...");
             createPack(projectId, filePath);        // 创建成绩包文件
+
             LOG.info("对项目 " + projectId + " 打包完毕，大小 " + new File(filePath).length() + "，开始上传...");
             uploadPack(projectId, filePath);        // 上传成绩包文件
-            LOG.info("对项目 " + projectId + " 打包上传完毕。");
-            notifyInterface(projectId, filePath);   // 通知业务接口导入成绩
+
+            LOG.info("对项目 " + projectId + " 打包上传完毕，接口正在导入...");
+            notifyInterface(filePath);              // 通知业务接口导入成绩
+
+            LOG.info("项目导出完毕。");
             return Result.success();
         } catch (IOException e) {
             return Result.fail(e.getMessage());
@@ -71,8 +81,9 @@ public class ScoreExportController {
         ossService.uploadFile(filePath, "webmarking-score-pack/" + projectId + ".zip");
     }
 
-    private void notifyInterface(String projectId, String filePath) {
-
+    private void notifyInterface(String filePath) {
+        Param param = new Param().setParameter("ossPath", filePath);
+        interfaceClient.request("ImportExamScoreFromOSS", param);
     }
 
     public void createPack(String projectId, String filePath) throws IOException {

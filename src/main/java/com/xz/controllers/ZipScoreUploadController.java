@@ -59,10 +59,14 @@ public class ZipScoreUploadController {
 
         LOG.info("保存 zip 到 " + saveFile.getAbsolutePath());
 
-        ZipFileReader zipFileReader = new ZipFileReader(saveFile);
-        zipFileReader.readZipEntries("score.json", entry -> readScore(project, zipFileReader, entry));
+        importScoreFile(project, saveFile);
 
         return Result.success();
+    }
+
+    public void importScoreFile(String project, File saveFile) {
+        ZipFileReader zipFileReader = new ZipFileReader(saveFile);
+        zipFileReader.readZipEntries("score.json", entry -> readScore(project, zipFileReader, entry));
     }
 
     private void readScore(String project, ZipFileReader zipFileReader, ZipEntry entry) {

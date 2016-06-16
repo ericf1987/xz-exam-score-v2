@@ -4,14 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 通过代码解析相应的报表名称
+ *
  * @author by fengye on 2016/6/15.
  */
-public class ParamUtils {
+public class ReportNameMappings {
+
     public static final Map<String, String> PRIMARY_CLASSIFY_CODE_MAP = new HashMap<>();
+
     public static final Map<String, String> SECONDARY_CLASSIFY_CODE_MAP = new HashMap<>();
+
     public static final Map<String, String> FILE_NAME_CODE_MAP = new HashMap<>();
 
-    static{
+    static {
         PRIMARY_CLASSIFY_CODE_MAP.put("100", "总体成绩分析");
         PRIMARY_CLASSIFY_CODE_MAP.put("101", "学校成绩分析");
         PRIMARY_CLASSIFY_CODE_MAP.put("102", "班级成绩分析");
@@ -40,24 +45,14 @@ public class ParamUtils {
         FILE_NAME_CODE_MAP.put("317", "S-P试卷诊断.xlsx");
     }
 
-    public static String[] getFileName(String[] code){
+    public static String[] getFileName(String[] code) {
         String[] fileNames = new String[3];
-        for(int i = 0;i < code.length;i++){
+        for (int i = 0; i < code.length; i++) {
             String[] param = code[i].split("-");
             fileNames[i] = PRIMARY_CLASSIFY_CODE_MAP.get(param[0]) + "-"
                     + SECONDARY_CLASSIFY_CODE_MAP.get(param[1]) + "-"
                     + FILE_NAME_CODE_MAP.get(param[2]);
         }
         return fileNames;
-    }
-
-    public static void main(String[] args) {
-        String[] s = new String[]{
-                "100-200-300","100-200-301","100-200-302"
-        };
-        String[] result = getFileName(s);
-        for(String ss : result){
-            System.out.println(ss);
-        }
     }
 }

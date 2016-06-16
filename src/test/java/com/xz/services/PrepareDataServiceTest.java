@@ -27,7 +27,8 @@ public class PrepareDataServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testPrepareStudentList() throws Exception {
-
+        String project = "430500-6539f2f49f74411a8a1beb232a0cedf1";
+        prepareDataService.prepareStudentList(project);
     }
 
     @Test

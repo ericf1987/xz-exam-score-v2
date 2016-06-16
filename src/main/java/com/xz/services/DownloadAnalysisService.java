@@ -3,8 +3,7 @@ package com.xz.services;
 import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.services.*;
-import com.xz.util.ParamUtils;
+import com.xz.util.ReportNameMappings;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +41,7 @@ public class DownloadAnalysisService {
     ClassService classService;
 
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
-        String[] paths = ParamUtils.getFileName(filePath);
+        String[] paths = ReportNameMappings.getFileName(filePath);
         List<Map<String, String>> pathList = new ArrayList<>();
         String zipFileName = schoolService.findSchool(projectId, schoolId).getString("name") + "-考试分析报表.zip";
         for (String path : paths) {
