@@ -103,7 +103,7 @@ public class ProjectSubjectiveAnalysis implements Server {
     public static List<Map<String, Object>> getSubjectiveAnalysis(String projectId, String subjectId, Range range,
                                                                  QuestService questService,
                                                                  AverageService averageService) {
-        List<Document> quests = new ArrayList<>(questService.getQuests(projectId, subjectId, true));
+        List<Document> quests = new ArrayList<>(questService.getQuests(projectId, subjectId, false));
         Collections.sort(quests, QUEST_NO_COMPARATOR);
 
         List<Map<String, Object>> list = new ArrayList<>();

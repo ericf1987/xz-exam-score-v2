@@ -15,5 +15,7 @@ public class TotalBasicSubjectReportTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetSheetTask() throws Exception{
         totalBasicSubjectReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.province("430000"), "target/total-basic-subject.xlsx");
+/*        double tscore = (58.12d - 63.63d) / 104.93d * 10 + 50;
+        System.out.println(tscore);*/
     }
 }
