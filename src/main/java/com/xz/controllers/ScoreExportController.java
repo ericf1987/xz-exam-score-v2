@@ -65,10 +65,10 @@ public class ScoreExportController {
             createPack(projectId, filePath);        // 创建成绩包文件
 
             LOG.info("对项目 " + projectId + " 打包完毕，大小 " + new File(filePath).length() + "，开始上传...");
-            uploadPack(projectId, filePath);        // 上传成绩包文件
+            String ossPath = uploadPack(projectId, filePath);        // 上传成绩包文件
 
             LOG.info("对项目 " + projectId + " 打包上传完毕，接口正在导入...");
-            notifyInterface(filePath);              // 通知业务接口导入成绩
+            notifyInterface(ossPath);              // 通知业务接口导入成绩
 
             LOG.info("项目导出完毕。");
             return Result.success();
@@ -77,12 +77,14 @@ public class ScoreExportController {
         }
     }
 
-    private void uploadPack(String projectId, String filePath) {
-        ossService.uploadFile(filePath, "webmarking-score-pack/" + projectId + ".zip");
+    private String uploadPack(String projectId, String filePath) {
+        String ossPath = "webmarking-score-pack/" + projectId + ".zip";
+        ossService.uploadFile(filePath, ossPath);
+        return ossPath;
     }
 
-    private void notifyInterface(String filePath) {
-        Param param = new Param().setParameter("ossPath", filePath);
+    private void notifyInterface(String ossPath) {
+        Param param = new Param().setParameter("ossPath", ossPath);
         interfaceClient.request("ImportExamScoreFromOSS", param);
     }
 

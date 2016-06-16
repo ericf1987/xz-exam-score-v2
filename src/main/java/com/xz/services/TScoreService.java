@@ -11,8 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.xz.util.Mongo.range2Doc;
-import static com.xz.util.Mongo.target2Doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.util.Mongo.*;
 
 /**
  * T分值相关
@@ -37,7 +38,7 @@ public class TScoreService {
      * @param target    目标
      * @param range     范围
      *
-     * @return  T分值
+     * @return T分值
      */
     public double queryTScore(String projectId, Target target, Range range) {
         String cacheKey = "t_score_value:" + projectId + ":" + range;
@@ -56,5 +57,22 @@ public class TScoreService {
                 return 0d;
             }
         });
+    }
+
+    /**
+     * 保存T分值
+     *
+     * @param projectId 考试项目id
+     * @param target    目标
+     * @param range     范围
+     * @param tscore    T分值
+     */
+    public void saveTScore(String projectId, Target target, Range range, double tscore) {
+
+        scoreDatabase.getCollection("t_score").updateOne(
+                query(projectId, range, target), $set("tScore", tscore), UPSERT);
+
+        String cacheKey = "t_score_value:" + projectId + ":" + range;
+        cache.delete(cacheKey);
     }
 }

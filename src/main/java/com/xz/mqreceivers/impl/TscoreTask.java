@@ -9,12 +9,9 @@ import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.AverageService;
 import com.xz.services.RangeService;
 import com.xz.services.StdDeviationService;
+import com.xz.services.TScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
-import static com.xz.util.Mongo.query;
 
 @ReceiverInfo(taskType = "t_score")
 @Component
@@ -32,6 +29,9 @@ public class TscoreTask extends Receiver {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    TScoreService tScoreService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -45,7 +45,6 @@ public class TscoreTask extends Receiver {
         double targetAverage = averageService.getAverage(projectId, range, target);
         double tscore = (targetAverage - provinceAverage) / provinceStdDeviation * 10 + 50;
 
-        scoreDatabase.getCollection("t_score").updateOne(
-                query(projectId, range, target), $set("tScore", tscore), UPSERT);
+        tScoreService.saveTScore(projectId, target, range, tscore);
     }
 }

@@ -287,8 +287,10 @@ public class ImportProjectController {
             String subjectId = subjectObj.getString("subjectId");
             Double fullScore = subjectObj.getDouble("totalScore");
 
+            // 科目没有录入或没有答题卡
             if (fullScore == null) {
-                throw new IllegalStateException("科目'" + subjectId + "'没有总分: " + jsonArray);
+                LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
+                return;
             }
 
             projectFullScore.set(projectFullScore.get() + fullScore);
