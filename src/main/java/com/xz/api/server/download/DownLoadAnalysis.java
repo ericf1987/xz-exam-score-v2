@@ -28,8 +28,8 @@ public class DownLoadAnalysis implements Server{
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
-        String[] schoolIds = param.getStringValues("schoolIds");
+        String[] fileParam = param.getStringValues("fileParam");
 
-        return downloadAnalysisService.generateZipFiles(projectId, schoolId, schoolIds);
+        return downloadAnalysisService.generateZipFiles(projectId, schoolId, fileParam);
     }
 }
