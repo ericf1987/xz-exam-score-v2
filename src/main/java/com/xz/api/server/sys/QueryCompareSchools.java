@@ -20,7 +20,7 @@ import java.util.*;
 @Function(description = "查询系统推荐的默认对比学校", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
-        @Parameter(name = "limit", type = Type.Integer, description = "获取的学校数量", required = false, defaultValue = "10")
+        @Parameter(name = "limit", type = Type.Integer, description = "获取的学校数量", required = false, defaultValue = "8")
 })
 @Service
 public class QueryCompareSchools implements Server {

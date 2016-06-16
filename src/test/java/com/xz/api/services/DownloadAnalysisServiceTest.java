@@ -3,6 +3,7 @@ package com.xz.api.services;
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.services.ClassService;
+import com.xz.services.DownloadAnalysisService;
 import com.xz.services.SchoolService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -32,6 +32,23 @@ public class ProjectService {
     SimpleCache cache;
 
     /**
+     * 通过考试项目id查询考试项目
+     *
+     * @param projectId  考试项目id
+     *
+     * @return 考试项目信息
+     */
+    public Document queryProjectById(String projectId) {
+        String cacheKey = "project_info:" + projectId;
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId);
+
+            MongoCollection<Document> collection = scoreDatabase.getCollection("project_list");
+            return collection.find(query).projection(WITHOUT_INNER_ID.append("schools", 0)).first();
+        });
+    }
+
+    /**
      * 查询指定学校的考试项目
      *
      * @param schoolId  学校id
