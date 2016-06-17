@@ -43,12 +43,6 @@ public class TotalPaperSubjectiveSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
         Result result = projectSubjectiveAnalysis.execute(param);
-        //LOG.debug("主观题统计-->{}", result.getData());
-        //System.out.println("主观题统计-->{}" + result.getData());
-/*        setupHeader(excelWriter, result.get("totals"));
-        setupSecondaryHeader(excelWriter, result.get("totals"));
-        fillProvinceData(result.get("totals"), excelWriter);
-        fillSchoolData(result.getList("schools", null),excelWriter);*/
         setupHeader(excelWriter, result.get("schools"));
         setupSecondaryHeader(excelWriter,result.get("schools"));
         fillData(excelWriter, result);
