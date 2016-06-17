@@ -30,6 +30,9 @@ public class Config {
     @Value("${mongo.hosts}")
     private String mongoHosts;
 
+    @Value("${scanner.db.addr}")
+    private String scannerMongoAddr;
+
     @Value("${multipart.maxFileSize}")
     private String maxFileSize;
 
@@ -57,6 +60,12 @@ public class Config {
 
         MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
         return new MongoClient(seeds, options);
+    }
+
+    @Bean
+    public MongoClient scannerMongoClient() throws Exception {
+        String[] split = scannerMongoAddr.split(":");
+        return new MongoClient(split[0], Integer.parseInt(split[1]));
     }
 
     @Bean
