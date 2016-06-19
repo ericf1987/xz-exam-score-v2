@@ -16,6 +16,6 @@ public class TotalTopStudentHScoreSheetsTest extends XzExamScoreV2ApplicationTes
 
     @Test
     public void testGenerateSheet() throws Exception {
-        totalTopStudentHScoreReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.province("430000"), "target/total-top-student-high-score.xlsx");
+        totalTopStudentHScoreReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.province("430000"), "target/total-top-student.xlsx");
     }
 }

@@ -22,9 +22,6 @@ public class TotalPaperQuestTypeReport extends ReportGenerator{
     @Autowired
     TargetService targetService;
 
-    @Autowired
-    SubjectService subjectService;
-
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
