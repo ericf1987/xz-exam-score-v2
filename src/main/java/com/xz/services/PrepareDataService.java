@@ -92,6 +92,7 @@ public class PrepareDataService {
      * @param projectId 项目ID
      */
     public void prepareQuestTypeList(String projectId) {
+
         Converter<QuestType, Document> questType2Doc = questType ->
                 doc("project", projectId)
                         .append("subject", questType.getSubjectId())
@@ -100,10 +101,14 @@ public class PrepareDataService {
 
         List<QuestType> questTypeList = questTypeService.getQuestTypeList(projectId);
         List<Document> questTypeDocs = convertList(questTypeList, questType2Doc);
-
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
+
         collection.deleteMany(doc("project", projectId));
-        collection.insertMany(questTypeDocs);
+        if (questTypeList.isEmpty()) {
+            LOG.error("项目 {} 没有题型信息", projectId);
+        } else {
+            collection.insertMany(questTypeDocs);
+        }
     }
 
     /**

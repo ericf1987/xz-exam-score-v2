@@ -30,6 +30,9 @@ public class AggregationService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    PrepareDataService prepareDataService;
+
     /**
      * 开始对项目执行统计
      *
@@ -56,24 +59,32 @@ public class AggregationService {
 
     private void runAggregation0(String projectId) {
         String aggregationId = UUID.randomUUID().toString();
-        LOG.info("开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
+        LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
+
+        prepare(projectId, aggregationId);
+
         List<TaskDispatcher> dispatcherList;
         int round = 1;
 
         do {
             dispatcherList = createDispatchers(aggregationId);
-            LOG.info("对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
+            LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
 
             runDispatchers(projectId, aggregationId, dispatcherList);
-            LOG.info("对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);
+            LOG.info("----对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);
 
             waitForTaskCompletion(aggregationId);
-            LOG.info("对项目{}的第{}轮统计(ID={})任务执行完毕。", projectId, round, aggregationId);
+            LOG.info("----对项目{}的第{}轮统计(ID={})任务执行完毕。", projectId, round, aggregationId);
 
             round += 1;
         } while (!dispatcherList.isEmpty());
 
-        LOG.info(" ==> 对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
+        LOG.info("====对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
+    }
+
+    private void prepare(String projectId, String aggregationId) {
+        LOG.info("----对项目{}准备开始统计(ID={})", projectId, aggregationId);
+        prepareDataService.prepare(projectId);
     }
 
     // 等待本轮统计
