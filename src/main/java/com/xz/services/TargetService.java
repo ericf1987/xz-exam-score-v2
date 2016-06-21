@@ -136,13 +136,22 @@ public class TargetService {
             case Target.SUBJECT_OBJECTIVE:
                 return target.getId(SubjectObjective.class).getSubject();
 
+            case Target.QUEST_TYPE:
+                String questTypeId = target.getId().toString();
+                QuestType questType = questTypeService.getQuestType(projectId, questTypeId);
+                if (questType != null) {
+                    return questType.getSubjectId();
+                } else {
+                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                }
+
             case Target.QUEST:
                 String questId = target.getId().toString();
                 Document quest = questService.findQuest(projectId, questId);
                 if (quest != null) {
                     return quest.getString("subject");
                 } else {
-                    throw new IllegalArgumentException("Target not found: " + target);
+                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
         }
 

@@ -70,6 +70,7 @@ public class ZipScoreUploadController {
     }
 
     private void readScore(String project, ZipFileReader zipFileReader, ZipEntry entry) {
+        LOG.info("读取文件 " + entry.getName() + " ...");
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");
         zipFileReader.readEntryByLine(entry, "UTF-8", line -> readScoreLine(project, line, collection));
     }

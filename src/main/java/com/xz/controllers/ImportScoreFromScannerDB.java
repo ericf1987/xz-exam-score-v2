@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * (description)
  * created at 16/06/16
@@ -29,8 +32,19 @@ public class ImportScoreFromScannerDB {
      */
     @RequestMapping(value = "/import-score-from-scanner-db", method = RequestMethod.POST)
     @ResponseBody
-    public Result impotScoreFromScannerDB(@RequestParam("project") String project) {
+    public Result importScoreFromScannerDB(@RequestParam("project") String project) {
         Document projectDoc = scannerDBService.findProject(project);
+        if (projectDoc == null) {
+            return Result.fail("没有找到项目" + project);
+        }
+
+        Document subjectCodes = (Document) projectDoc.get("subjectcodes");
+        List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
+
+        for (String subjectId : subjectIds) {
+            scannerDBService.importSubjectScore(project, subjectId);
+        }
+
         return Result.success();
     }
 }

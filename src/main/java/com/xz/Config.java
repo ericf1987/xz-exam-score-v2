@@ -44,9 +44,8 @@ public class Config {
         return new Redis(redisHost, redisPort, 5);
     }
 
-    @Bean
-    public MongoClient mongoClient() throws Exception {
-        String[] split = mongoHosts.split(",");
+    private List<ServerAddress> readServerAddress(String serverAddress) {
+        String[] split = serverAddress.split(",");
         List<ServerAddress> seeds = new ArrayList<>();
 
         for (String s : split) {
@@ -57,15 +56,21 @@ public class Config {
             String[] host_port = s.split(":");
             seeds.add(new ServerAddress(host_port[0], Integer.parseInt(host_port[1])));
         }
+        return seeds;
+    }
 
+    @Bean
+    public MongoClient mongoClient() throws Exception {
+        List<ServerAddress> seeds = readServerAddress(mongoHosts);
         MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
         return new MongoClient(seeds, options);
     }
 
     @Bean
     public MongoClient scannerMongoClient() throws Exception {
-        String[] split = scannerMongoAddr.split(":");
-        return new MongoClient(split[0], Integer.parseInt(split[1]));
+        List<ServerAddress> seeds = readServerAddress(scannerMongoAddr);
+        MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
+        return new MongoClient(seeds, options);
     }
 
     @Bean
