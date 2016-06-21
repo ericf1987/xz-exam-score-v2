@@ -146,4 +146,18 @@ public class TopStudentListService {
             return new ArrayList<>(MongoUtils.toList(collection.find(query).projection(projection)));
         });
     }
+
+    /**
+     * 查询尖子生中排名最后一位
+     * @param projectId 项目ID
+     * @param range     排名范围
+     * @param target    排名目标
+     */
+    public Document getTopStudentLastOne(String projectId, Range range, Target target){
+        String cacheKey = "top_student_last_one:" + projectId + ":" + range + ":" + target;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
+            return collection.find(query(projectId, range, target)).sort(doc("rank", -1)).first();
+        });
+    }
 }
