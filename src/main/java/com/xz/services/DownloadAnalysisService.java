@@ -80,7 +80,7 @@ public class DownloadAnalysisService {
             e.printStackTrace();
         }
         //压缩文件下载路径
-        resultMap.put("downloadURL", file.getParent());
+        resultMap.put("downloadURL", file.getPath());
         //不存在的文件列表
         resultMap.put("failureList", failureList);
         return resultMap;

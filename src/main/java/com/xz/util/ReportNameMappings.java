@@ -1,6 +1,8 @@
 package com.xz.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,13 +48,14 @@ public class ReportNameMappings {
     }
 
     public static String[] getFileName(String[] code) {
-        String[] fileNames = new String[3];
-        for (int i = 0; i < code.length; i++) {
-            String[] param = code[i].split("-");
-            fileNames[i] = PRIMARY_CLASSIFY_CODE_MAP.get(param[0]) + "-"
+        List<String> fileNames = new ArrayList<>();
+        for (String aCode : code) {
+            String[] param = aCode.split("-");
+            String filename = PRIMARY_CLASSIFY_CODE_MAP.get(param[0]) + "-"
                     + SECONDARY_CLASSIFY_CODE_MAP.get(param[1]) + "-"
                     + FILE_NAME_CODE_MAP.get(param[2]);
+            fileNames.add(filename);
         }
-        return fileNames;
+        return fileNames.toArray(new String[fileNames.size()]);
     }
 }
