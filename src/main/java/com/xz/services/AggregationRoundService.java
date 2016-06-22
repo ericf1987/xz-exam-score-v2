@@ -118,6 +118,7 @@ public class AggregationRoundService {
         return aggrTask;
     }
 
+    // 记录任务队列长度（每三秒钟记录一次）
     private void logTaskQueueSize(long size) {
         if (System.currentTimeMillis() - lastQueueSizeLogTime > 3000) {
             lastQueueSizeLogTime = System.currentTimeMillis();
@@ -125,9 +126,10 @@ public class AggregationRoundService {
         }
     }
 
+    // 等待本轮统计完成
     public void waitForRoundCompletion(String aggregationId) {
         Redis.RedisHash hash = redis.getHash(taskCounterKey + ":" + aggregationId);
-        while (!allValuesAreZero(aggregationId, hash)) {
+        while (!allValuesAreZero(hash)) {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -137,7 +139,7 @@ public class AggregationRoundService {
         LOG.info("统计 {} 本轮完成。", aggregationId);
     }
 
-    private boolean allValuesAreZero(String aggregationId, Redis.RedisHash hash) {
+    private boolean allValuesAreZero(Redis.RedisHash hash) {
         for (String key : hash.keys()) {
             if (!hash.get(key).equals("0")) {
                 return false;

@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.bean.ProjectStatus;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.slf4j.Logger;
@@ -8,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 处理统计任务的进度和轮次安排
@@ -33,6 +33,14 @@ public class AggregationService {
     @Autowired
     PrepareDataService prepareDataService;
 
+    @Autowired
+    ProjectStatusService projectStatusService;
+
+    @Autowired
+    ImportProjectService importProjectService;
+
+    private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
+
     /**
      * 开始对项目执行统计
      *
@@ -42,9 +50,15 @@ public class AggregationService {
     public void startAggregation(final String projectId, boolean async) {
         Runnable runnable = () -> {
             try {
+                runningProjects.add(projectId);
+                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationStarted);
                 runAggregation0(projectId);
             } catch (Exception e) {
-                LOG.error("分发任务失败", e);
+                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationFailed);
+                LOG.error("执行统计失败", e);
+            } finally {
+                runningProjects.remove(projectId);
+                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationCompleted);
             }
         };
 
@@ -83,6 +97,17 @@ public class AggregationService {
     }
 
     private void beforeAggregation(String projectId, String aggregationId) {
+
+        ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
+
+        if (projectStatus == ProjectStatus.Empty) {
+            LOG.info("----开始导入项目{}", projectId);
+            projectStatusService.setProjectStatus(projectId, ProjectStatus.Importing);
+            importProjectService.importProject(projectId);
+            projectStatusService.setProjectStatus(projectId, ProjectStatus.Imported);
+        }
+
+
         LOG.info("----对项目{}准备开始统计(ID={})", projectId, aggregationId);
         prepareDataService.prepare(projectId);
     }
@@ -112,5 +137,9 @@ public class AggregationService {
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
             dispatcher.dispatch(context);
         }
+    }
+
+    public boolean isAggregationRunning(String projectId) {
+        return runningProjects.contains(projectId);
     }
 }

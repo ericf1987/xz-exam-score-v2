@@ -62,11 +62,9 @@ public class AggregationTaskController {
     @ResponseBody
     public Result startAggregation(@RequestParam("project") String projectId) {
 
-        ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
-        if (projectStatus == ProjectStatus.Empty) {
-
+        if (aggregationService.isAggregationRunning(projectId)) {
+            return Result.fail("项目 " + projectId + " 正在统计当中");
         }
-
 
         aggregationService.startAggregation(projectId, true);
         return Result.success("项目 " + projectId + " 已经开始统计。");
@@ -75,7 +73,8 @@ public class AggregationTaskController {
     @RequestMapping("/project/status")
     @ResponseBody
     public Result getProjectStatus(@RequestParam("project") String projectId) {
+        boolean running = aggregationService.isAggregationRunning(projectId);
         ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
-        return Result.success().set("status", projectStatus.name());
+        return Result.success().set("running", running).set("status", projectStatus.name());
     }
 }

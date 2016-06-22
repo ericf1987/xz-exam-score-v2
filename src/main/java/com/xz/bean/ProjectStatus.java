@@ -14,6 +14,11 @@ public enum ProjectStatus {
     Empty,
 
     /**
+     * 正在导入
+     */
+    Importing,
+
+    /**
      * 项目信息已经导入，但尚未进行任何统计
      */
     Imported,
