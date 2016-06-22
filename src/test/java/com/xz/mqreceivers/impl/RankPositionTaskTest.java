@@ -20,7 +20,7 @@ public class RankPositionTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRankPosition() throws Exception {
-        rankPositionTask.runTask(new AggrTask(PROJECT_ID, "111", "rank_position")
-                .setRange(Range.province("430000")).setTarget(Target.subject("001")));
+        rankPositionTask.runTask(new AggrTask("431100-903288f61a5547f1a08a7e20420c4e9e", "111", "rank_position")
+                .setRange(Range.clazz("8918be00-4a5c-4f0d-bb3d-8ffa706a1891")).setTarget(Target.subject("001")));
     }
 }

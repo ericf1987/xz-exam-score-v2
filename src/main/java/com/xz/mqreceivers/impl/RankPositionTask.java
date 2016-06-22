@@ -73,7 +73,10 @@ public class RankPositionTask extends Receiver {
         List<Document> scoreMap = (List<Document>) scoreMapDoc.get("scoreMap");
 
         for (String s : POSITIONS) {
-            double score = getScoreAtIndex(scoreMap, count, parsePosition(s));
+            //获取中位数对应的排名位置
+            int[] indexs = getRankPosition(count, parsePosition(s));
+            //获取排名位置对应的分数，取平均值
+            double score = getRankPositionScore(scoreMap, indexs);
             Document position = new Document("position", parsePosition(s)).append("score", score);
             positions.add(position);
         }
@@ -87,28 +90,31 @@ public class RankPositionTask extends Receiver {
         return Double.valueOf(arr[0]) / Double.valueOf(arr[1]);
     }
 
-    private double getScoreAtIndex(List<Document> scoreMap, int count, double rate) {
-
-        // 按照分数倒排 map 元素
+    private double getRankPositionScore(List<Document> scoreMap, int[] indexs) {
+        // 按照分数从高到低排序
         Collections.sort(scoreMap, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
-
-        // 极端情况下取一个人
-        int index = Double.valueOf(count * rate).intValue();
-        if (index <= 1) {
-            return scoreMap.get(0).getDouble("score");
-        }
-
-        double score = 0;
-        int counter = 0;
-
-        for (Document item : scoreMap) {
-            counter += ((Number) item.get("count")).intValue();
-            if (counter >= index) {
-                return item.getDouble("score");
+        double sum = 0;
+        for(int index : indexs){
+            if (index <= 0) {
+                return 0;
             }
-            score = item.getDouble("score");
+            int counter = 0;
+            for (Document item : scoreMap) {
+                counter += item.getInteger("count");
+                if (counter >= index) {
+                    sum += item.getDouble("score");
+                    break;
+                }
+            }
         }
+        return sum / 2;
+    }
 
-        return score;
+    private int[] getRankPosition(int count, double rate){
+        double r = (count + 1) * rate;
+        return new int[]{
+                Double.valueOf(Math.ceil(r)).intValue(),
+                Double.valueOf(Math.floor(r)).intValue()
+        };
     }
 }
