@@ -32,7 +32,7 @@ public class QueryProjectById implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
 
-        Document document = projectService.queryProjectById(projectId);
+        Document document = projectService.findProject(projectId);
         if (document == null) {
             return Result.fail("找不到指定的考试项目");
         }

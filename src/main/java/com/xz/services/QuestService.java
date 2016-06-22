@@ -91,13 +91,17 @@ public class QuestService {
     }
 
     public Document findQuest(String projectId, String subject, String questNo) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+        String cacheKey = "quest_by_no:" + projectId + ":" + subject + ":" + questNo;
 
-        Document query = doc("project", projectId)
-                .append("subject", subject)
-                .append("questNo", questNo);
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
-        return collection.find(query).first();
+            Document query = doc("project", projectId)
+                    .append("subject", subject)
+                    .append("questNo", questNo);
+
+            return collection.find(query).first();
+        });
     }
 
     public void saveQuestItems(String projectId, String questId, List<String> items) {

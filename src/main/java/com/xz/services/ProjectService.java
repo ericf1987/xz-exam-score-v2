@@ -38,7 +38,7 @@ public class ProjectService {
      *
      * @return 考试项目信息
      */
-    public Document queryProjectById(String projectId) {
+    public Document findProject(String projectId) {
         String cacheKey = "project_info:" + projectId;
         return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId);

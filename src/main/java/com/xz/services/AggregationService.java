@@ -61,7 +61,7 @@ public class AggregationService {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
-        prepare(projectId, aggregationId);
+        beforeAggregation(projectId, aggregationId);
 
         List<TaskDispatcher> dispatcherList;
         int round = 1;
@@ -82,7 +82,7 @@ public class AggregationService {
         LOG.info("====对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
     }
 
-    private void prepare(String projectId, String aggregationId) {
+    private void beforeAggregation(String projectId, String aggregationId) {
         LOG.info("----对项目{}准备开始统计(ID={})", projectId, aggregationId);
         prepareDataService.prepare(projectId);
     }

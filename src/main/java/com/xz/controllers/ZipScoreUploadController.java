@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -55,10 +56,14 @@ public class ZipScoreUploadController {
 
         String filename = UUID.randomUUID().toString() + ".zip";
         File saveFile = FileUtils.getOrCreateFile(zipSaveLocation, filename);
-        file.transferTo(saveFile);
 
         LOG.info("保存 zip 到 " + saveFile.getAbsolutePath());
+        file.transferTo(saveFile);
 
+        LOG.info("删除旧成绩记录");
+        scoreDatabase.getCollection("score").deleteMany(doc("project", project));
+
+        LOG.info("导入新成绩记录");
         importScoreFile(project, saveFile);
 
         return Result.success();
@@ -71,11 +76,12 @@ public class ZipScoreUploadController {
 
     private void readScore(String project, ZipFileReader zipFileReader, ZipEntry entry) {
         LOG.info("读取文件 " + entry.getName() + " ...");
+        AtomicInteger counter = new AtomicInteger();
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");
-        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readScoreLine(project, line, collection));
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readScoreLine(project, line, collection, counter));
     }
 
-    private void readScoreLine(String project, String line, MongoCollection<Document> collection) {
+    private void readScoreLine(String project, String line, MongoCollection<Document> collection, AtomicInteger counter) {
         Document scoreDoc = Document.parse(line);
 
         // 查询题目
@@ -100,13 +106,11 @@ public class ZipScoreUploadController {
         scoreDoc.put("city", school.get("city"));
         scoreDoc.put("province", school.get("province"));
 
-        // 保存成绩记录
-        Document query = doc("project", scoreDoc.get("project"))
-                .append("student", scoreDoc.get("student"))
-                .append("subject", scoreDoc.get("subject"))
-                .append("questNo", scoreDoc.get("questNo"));
-
-        collection.deleteMany(query);
+        // 保存
         collection.insertOne(scoreDoc);
+
+        if (counter.incrementAndGet() % 10000 == 0) {
+            LOG.info("已保存 " + counter.get() + "条成绩明细");
+        }
     }
 }
