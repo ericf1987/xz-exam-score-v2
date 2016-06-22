@@ -109,6 +109,7 @@ public class ProjectObjectiveAnalysis implements Server {
         for (Document quest : quests) {
             Map<String, Object> map = new HashMap<>();
             String questId = quest.getString("questId");
+            String standardAnswer = quest.getString("standardAnswer");
             List<String> items = quest.get("items", List.class);
             Map<String, Document> optionMap = optionMapService.getOptionMap(projectId, questId, range);
 
@@ -117,20 +118,21 @@ public class ProjectObjectiveAnalysis implements Server {
             map.put("questDeviation", DoubleUtils.round(questDeviation));
 
             // 试题选项选率
+            List<Map<String, Object>> itemStats = new ArrayList<>();
             if (items != null) {
                 for (String itemName : items) {
-                    Map<String, Object> itemNameStat = getOptionValue(optionMap, itemName.trim());
-                    map.put(itemName, itemNameStat);
+                    Map<String, Object> itemNameStat = getOptionValue(optionMap, itemName.trim(), standardAnswer);
+                    itemStats.add(itemNameStat);
                 }
             }
+            map.put("items", itemStats);
 
             // 不选率
-            Map<String, Object> unSelect = getOptionValue(optionMap, "*");
+            Map<String, Object> unSelect = getOptionValue(optionMap, "*", standardAnswer);
             map.put("unSelect", unSelect);
 
             map.put("questNo", quest.getString("questNo"));
             map.put("score", DocumentUtils.getDouble(quest, "score", 0));
-            String standardAnswer = quest.getString("standardAnswer");
             map.put("standardAnswer", standardAnswer == null ? "" : standardAnswer.trim());
             list.add(map);
         }
@@ -138,17 +140,21 @@ public class ProjectObjectiveAnalysis implements Server {
         return list;
     }
 
-    private static Map<String, Object> getOptionValue(Map<String, Document> optionMap, String key) {
+    private static Map<String, Object> getOptionValue(
+            Map<String, Document> optionMap, String key, String standardAnswer) {
         Map<String, Object> map = new HashMap<>();
         Document document = optionMap.get(key);
+        boolean isRigth = Objects.equals(key, standardAnswer);
         if (document == null) {
             map.put("count", 0);
             map.put("rate", 0);
             map.put("answer", key);
+            map.put("isRigth", isRigth);
         } else {
             map.put("count", document.getInteger("count"));
             map.put("rate", DoubleUtils.round(document.getDouble("rate"), true));
-            map.put("answer", document.getString("answer"));
+            map.put("answer", key);
+            map.put("isRigth", isRigth);
         }
 
         return map;
