@@ -27,7 +27,8 @@ public class ProjectStatusService {
         if (project == null) {
             return ProjectStatus.Empty;
         } else {
-            return ProjectStatus.valueOf(redis.get(getStatusKey(projectId)));
+            String statusName = redis.get(getStatusKey(projectId));
+            return statusName == null ? ProjectStatus.ProjectImported : ProjectStatus.valueOf(statusName);
         }
     }
 

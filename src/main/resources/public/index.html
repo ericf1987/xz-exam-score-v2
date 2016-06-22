@@ -38,6 +38,8 @@
     <legend>统计项目</legend>
     <form action="aggr/start/project" method="post">
         <p>项目ID：<input type="text" name="project"/></p>
+        <p><label><input type="checkbox" name="data-ready" value="true" checked="checked"> 数据已经准备好</label></p>
+        <p><label><input type="checkbox" name="generate-report" value="true">是否生成报表文件</label></p>
         <p>
             <button type="submit">开始统计</button>
         </p>

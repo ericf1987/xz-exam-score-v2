@@ -58,15 +58,28 @@ public class AggregationTaskController {
         return Result.success("项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。");
     }
 
+    /**
+     * 开始统计项目
+     *
+     * @param projectId 项目ID
+     * @param dataReady 数据是否已经存在，如果为 false 则会尝试重新导入整个项目信息
+     */
     @RequestMapping(value = "/start/project", method = RequestMethod.POST)
     @ResponseBody
-    public Result startAggregation(@RequestParam("project") String projectId) {
+    public Result startAggregation(
+            @RequestParam("project") String projectId,
+            @RequestParam(value = "data-ready", required = false, defaultValue = "true") String dataReady,
+            @RequestParam(value = "generate-report", required = false, defaultValue = "false") String generateReport
+    ) {
 
         if (aggregationService.isAggregationRunning(projectId)) {
             return Result.fail("项目 " + projectId + " 正在统计当中");
         }
 
-        aggregationService.startAggregation(projectId, true);
+        Boolean isDataReady = Boolean.valueOf(dataReady);
+        Boolean isGenerateReport = Boolean.valueOf(generateReport);
+
+        aggregationService.startAggregation(projectId, true, isDataReady, isGenerateReport);
         return Result.success("项目 " + projectId + " 已经开始统计。");
     }
 

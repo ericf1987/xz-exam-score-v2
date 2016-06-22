@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.bean.ProjectStatus;
+import com.xz.scanner.ScannerDBService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.xz.bean.ProjectStatus.*;
 
 /**
  * 处理统计任务的进度和轮次安排
@@ -39,26 +42,53 @@ public class AggregationService {
     @Autowired
     ImportProjectService importProjectService;
 
+    @Autowired
+    ScannerDBService scannerDBService;
+
+    @Autowired
+    ReportService reportService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * 开始对项目执行统计
      *
-     * @param projectId 项目ID
-     * @param async     是否另起线程执行
+     * @param projectId        项目ID
+     * @param async            是否另起线程执行
+     * @param dataReady        项目数据是否已经准备好，只需要统计。如果为 false，则尝试重新导入整个项目数据
+     * @param isGenerateReport 是否要生成报表文件
      */
-    public void startAggregation(final String projectId, boolean async) {
+    public void startAggregation(
+            String projectId, boolean async, boolean dataReady, Boolean isGenerateReport) {
+
         Runnable runnable = () -> {
             try {
                 runningProjects.add(projectId);
-                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationStarted);
-                runAggregation0(projectId);
+                projectStatusService.setProjectStatus(projectId, AggregationStarted);
+
+                String aggregationId = UUID.randomUUID().toString();
+
+                // 数据导入
+                if (!dataReady) {
+                    beforeAggregation(projectId, aggregationId);
+                }
+
+                // 统计成绩
+                runAggregation0(projectId, dataReady);
+
+                // 生成报表
+                if (isGenerateReport) {
+                    projectStatusService.setProjectStatus(projectId, ReportGenerating);
+                    reportService.generateReports(projectId);
+                    projectStatusService.setProjectStatus(projectId, ReportGenerated);
+                }
+
             } catch (Exception e) {
-                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationFailed);
+                projectStatusService.setProjectStatus(projectId, AggregationFailed);
                 LOG.error("执行统计失败", e);
             } finally {
                 runningProjects.remove(projectId);
-                projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationCompleted);
+                projectStatusService.setProjectStatus(projectId, AggregationCompleted);
             }
         };
 
@@ -71,11 +101,13 @@ public class AggregationService {
         }
     }
 
-    private void runAggregation0(String projectId) {
+    private void runAggregation0(String projectId, boolean dataReady) {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
-        beforeAggregation(projectId, aggregationId);
+        if (!dataReady) {
+            beforeAggregation(projectId, aggregationId);
+        }
 
         List<TaskDispatcher> dispatcherList;
         int round = 1;
@@ -102,11 +134,14 @@ public class AggregationService {
 
         if (projectStatus == ProjectStatus.Empty) {
             LOG.info("----开始导入项目{}", projectId);
-            projectStatusService.setProjectStatus(projectId, ProjectStatus.Importing);
+            projectStatusService.setProjectStatus(projectId, ProjectImporting);
             importProjectService.importProject(projectId);
-            projectStatusService.setProjectStatus(projectId, ProjectStatus.Imported);
+            projectStatusService.setProjectStatus(projectId, ProjectImported);
         }
 
+        projectStatusService.setProjectStatus(projectId, ScoreImporting);
+        scannerDBService.importProjectScore(projectId);
+        projectStatusService.setProjectStatus(projectId, ScoreImported);
 
         LOG.info("----对项目{}准备开始统计(ID={})", projectId, aggregationId);
         prepareDataService.prepare(projectId);

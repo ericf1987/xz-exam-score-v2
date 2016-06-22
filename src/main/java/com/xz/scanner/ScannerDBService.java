@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -44,6 +45,27 @@ public class ScannerDBService {
     public Document findProject(String project) {
         return scannerMongoClient.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
+    }
+
+    /**
+     * 从网阅数据库中导入成绩
+     *
+     * @param project 项目ID
+     */
+    public void importProjectScore(String project) {
+
+        Document projectDoc = findProject(project);
+        if (projectDoc == null) {
+            LOG.error("没有找到项目" + project);
+            return;
+        }
+
+        Document subjectCodes = (Document) projectDoc.get("subjectcodes");
+        List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
+
+        for (String subjectId : subjectIds) {
+            importSubjectScore(project, subjectId);
+        }
     }
 
     /**
