@@ -44,6 +44,11 @@ public enum ProjectStatus {
     AggregationCompleted,
 
     /**
+     * 最近一次的项目统计失败
+     */
+    AggregationFailed,
+
+    /**
      * 正在生成报表
      */
     ReportGenerating,
@@ -51,10 +56,5 @@ public enum ProjectStatus {
     /**
      * 报表已经生成
      */
-    ReportGenerated,
-
-    /**
-     * 最近一次的项目统计失败
-     */
-    AggregationFailed
+    ReportGenerated
 }

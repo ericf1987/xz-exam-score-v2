@@ -79,7 +79,7 @@ public class AggregationService {
                 // 生成报表
                 if (isGenerateReport) {
                     projectStatusService.setProjectStatus(projectId, ReportGenerating);
-                    reportService.generateReports(projectId);
+                    reportService.generateReports(projectId, false);
                     projectStatusService.setProjectStatus(projectId, ReportGenerated);
                 }
 

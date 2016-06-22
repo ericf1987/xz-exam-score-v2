@@ -61,8 +61,9 @@ public class AggregationTaskController {
     /**
      * 开始统计项目
      *
-     * @param projectId 项目ID
-     * @param dataReady 数据是否已经存在，如果为 false 则会尝试重新导入整个项目信息
+     * @param projectId      项目ID
+     * @param dataReady      数据是否已经存在，如果为 false 则会尝试重新导入整个项目信息
+     * @param generateReport 是否要生成报表 Excel 文件
      */
     @RequestMapping(value = "/start/project", method = RequestMethod.POST)
     @ResponseBody

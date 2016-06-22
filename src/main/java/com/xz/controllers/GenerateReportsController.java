@@ -5,7 +5,6 @@ import com.xz.services.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,7 +25,7 @@ public class GenerateReportsController {
     @RequestMapping(value = "all")
     public Result generateReports(@RequestParam("project") String projectId) {
 
-        reportService.generateReports(projectId);
+        reportService.generateReports(projectId, true);
 
         return Result.success();
     }

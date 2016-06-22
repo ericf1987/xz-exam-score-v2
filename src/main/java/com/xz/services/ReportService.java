@@ -16,7 +16,7 @@ public class ReportService {
     @Autowired
     ReportManager reportManager;
 
-    public void generateReports(String projectId) {
-        reportManager.generateReports(projectId);
+    public void generateReports(String projectId, boolean async) {
+        reportManager.generateReports(projectId, async);
     }
 }

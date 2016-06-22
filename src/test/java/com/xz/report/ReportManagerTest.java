@@ -17,6 +17,6 @@ public class ReportManagerTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateReports() throws Exception {
-        reportManager.generateReports(PROJECT_ID);
+        reportManager.generateReports(PROJECT_ID, true);
     }
 }

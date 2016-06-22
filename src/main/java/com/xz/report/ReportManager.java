@@ -65,9 +65,10 @@ public class ReportManager implements ApplicationContextAware {
      *
      * @param projectId 项目ID
      */
-    public void generateReports(final String projectId) {
+    public void generateReports(final String projectId, boolean async) {
 
         List<ReportTask> reportTasks = createReportGenerators(projectId);
+        ThreadPoolExecutor pool = async ? executionPool : newBlockingThreadPoolExecutor(10, 10, 100);
 
         for (final ReportTask reportTask : reportTasks) {
             Runnable runnable = () -> {
@@ -83,18 +84,22 @@ public class ReportManager implements ApplicationContextAware {
                 }
             };
 
-            executionPool.submit(runnable);
+            pool.submit(runnable);
         }
 
-        // 单元测试会同步等待直到报表生成完毕
-        if (System.getProperty("unit_testing") != null) {
+        // 满足条件情况下会等待报表生成完毕
+        if (isUnitTesting() || !async) {
             try {
-                executionPool.shutdown();
-                executionPool.awaitTermination(1, TimeUnit.DAYS);
+                pool.shutdown();
+                pool.awaitTermination(1, TimeUnit.DAYS);
             } catch (InterruptedException e) {
                 throw new AppException(e);
             }
         }
+    }
+
+    private boolean isUnitTesting() {
+        return System.getProperty("unit_testing") != null;
     }
 
     private List<ReportTask> createReportGenerators(String projectId) {
