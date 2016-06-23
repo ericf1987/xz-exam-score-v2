@@ -26,6 +26,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 /**
  * @author by fengye on 2016/5/29.
  */
+@SuppressWarnings("unchecked")
 @ReceiverInfo(taskType = "quest_deviation")
 @Component
 public class QuestDeviationTask extends Receiver {
@@ -73,7 +74,7 @@ public class QuestDeviationTask extends Receiver {
         Document oneScoreMap = scoreMapCol.find(query).first();
         int count = oneScoreMap.getInteger("count");
         //排名27%所占的人数
-        int rankCount = Double.valueOf(count * DEVIATION_RATE).intValue();
+        int rankCount = (int) Math.ceil(count * DEVIATION_RATE);
         //题目总分
         double score = fullScoreService.getFullScore(projectId, target);
 
@@ -104,15 +105,11 @@ public class QuestDeviationTask extends Receiver {
         double sum = 0;
         if (asc) {
             //从低到高
-            Collections.sort(scoreMap, (Document d1, Document d2) -> {
-                return d1.getDouble("score").compareTo(d2.getDouble("score"));
-            });
+            Collections.sort(scoreMap, (Document d1, Document d2) -> d1.getDouble("score").compareTo(d2.getDouble("score")));
             //LOG.debug("排名人数-->{}, 从低到高-->{}", rankCount, scoreMap.toString());
         } else {
             //从高到低
-            Collections.sort(scoreMap, (Document d1, Document d2) -> {
-                return d2.getDouble("score").compareTo(d1.getDouble("score"));
-            });
+            Collections.sort(scoreMap, (Document d1, Document d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
             //LOG.debug("排名人数-->{}, 从高到低-->{}", rankCount, scoreMap.toString());
         }
         for (Document d : scoreMap) {
