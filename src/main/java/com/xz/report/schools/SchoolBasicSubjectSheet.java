@@ -64,6 +64,7 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
         fillRow(school, excelWriter, 2);
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> clazz, ExcelWriter excelWriter, int row) {
         AtomicInteger column = new AtomicInteger(-1);
         if (row == 2) {
@@ -81,6 +82,7 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setupHeader(ExcelWriter excelWriter, Map<String, Object> para) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "班级名称");
@@ -95,6 +97,7 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setupSecondaryHeader(ExcelWriter excelWriter, Map<String, Object> schools) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "班级名称");
@@ -104,7 +107,7 @@ public class SchoolBasicSubjectSheet extends SheetGenerator {
         excelWriter.mergeCells(0, 1, 1, 1);
         excelWriter.mergeCells(0, 2, 1, 2);
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) schools.get("subjects");
-        for (Map<String, Object> subject : subjects) {
+        for (int i = 0; i < subjects.size(); i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[2]);

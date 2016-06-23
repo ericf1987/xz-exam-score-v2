@@ -7,6 +7,7 @@ import com.xz.api.server.project.ProjectSubjectAnalysis;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +65,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) totals.get("subjects");
         for (Map<String, Object> subject : subjects) {
             excelWriter.set(row, column.incrementAndGet(), subject.get("subjectAvg"));
-            excelWriter.set(row, column.incrementAndGet(), subject.get("subjectRate"));
+            excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent((double) subject.get("subjectRate")));
             excelWriter.set(row, column.incrementAndGet(), subject.get("tScore"));
         }
     }
@@ -104,7 +105,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         excelWriter.mergeCells(0, 1, 1, 1);
         excelWriter.mergeCells(0, 2, 1, 2);
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) schools.get("subjects");
-        for (Map<String, Object> subject : subjects) {
+        for (int i = 0; i < subjects.size(); i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[2]);

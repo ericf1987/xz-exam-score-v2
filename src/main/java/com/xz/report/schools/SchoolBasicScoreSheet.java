@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.xz.ajiaedu.common.lang.NumberUtil.toPercent;
 import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
+import static com.xz.util.DoubleUtils.toPercent;
 
 /**
  * @author by fengye on 2016/6/6.
@@ -59,7 +59,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
-                setParameter("schoolId", schoolRange.getId().toString());
+                setParameter("schoolId", schoolRange.getId());
 
         Result result = schoolScoreAnalysis.execute(param);
 
@@ -114,6 +114,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
 
     /*    "班级名称", "实考人数", "最高分", "最低分", "平均分", "标准差",
                 "优率", "良率", "合格率", "不及格率", "全科及格率", "全科不及格率", "中位数"*/
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> classMap, ExcelWriter excelWriter, int row, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), classMap.get("className"));
@@ -126,7 +127,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Good));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Pass));
         excelWriter.set(row, column.incrementAndGet(), getRate(classMap, Fail));
-        excelWriter.set(row, column.incrementAndGet(), classMap.get("overAverage"));
+        excelWriter.set(row, column.incrementAndGet(), toPercent((Double) classMap.get("overAverage")));
         if (null == subjectId) {
             excelWriter.set(row, column.incrementAndGet(), toPercent((Double) classMap.get("allPassRate")));
             excelWriter.set(row, column.incrementAndGet(), toPercent((Double) classMap.get("allFailRate")));

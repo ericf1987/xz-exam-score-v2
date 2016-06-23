@@ -33,7 +33,6 @@ public class TotalTopStudentHScoreSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId).setParameter("percent", 0.3d)
                 .setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
         Result result = projectHighSegmentAnalysis.execute(param);
-        //System.out.println("高分统计-->" + result.getData());
         setupHeader(excelWriter, result.get("totals"));
         fillTotalData(excelWriter, result.get("totals"));
         fillData(excelWriter, result.get("schools"));

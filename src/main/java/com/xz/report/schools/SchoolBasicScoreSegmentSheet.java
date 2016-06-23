@@ -10,8 +10,6 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.xz.util.DoubleUtils.toPercent;
+
 /**
  * @author by fengye on 2016/6/7.
  */
 @Component
 public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
-
-    static final Logger LOG = LoggerFactory.getLogger(SchoolBasicScoreSegmentSheet.class);
 
     @Autowired
     SchoolScoreSegment schoolScoreSegment;
@@ -34,7 +32,7 @@ public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
     SchoolService schoolService;
 
     public static final String[] SECONDARY_HEADER = new String[]{
-            "人数","占比"
+            "人数", "占比"
     };
 
     @Override
@@ -50,14 +48,14 @@ public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
 
         setupHeader(excelWriter, result.get("schools"));
         setupSecondaryHeader(excelWriter, result.get("schools"));
-        fillSchoolData(result.get("schools"),excelWriter);
-        fillClassData(result.getList("classes", null),excelWriter);
+        fillSchoolData(result.get("schools"), excelWriter);
+        fillClassData(result.getList("classes", null), excelWriter);
     }
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> schools) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "班级名称");
-        for (Map<String, Object> school : schools){
+        for (Map<String, Object> school : schools) {
             excelWriter.set(0, column.incrementAndGet(), school.get("title"));
             column.incrementAndGet();
             excelWriter.mergeCells(0, column.get() - 1, 0, column.get());
@@ -65,11 +63,11 @@ public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
         }
     }
 
-    private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> schools){
+    private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> schools) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "班级名称");
         excelWriter.mergeCells(0, 0, 1, 0);
-        for (Map<String, Object> school :schools){
+        for (int i = 0; i < schools.size(); i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
         }
@@ -79,26 +77,27 @@ public class SchoolBasicScoreSegmentSheet extends SheetGenerator {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "总数");
-        for(Map<String, Object> school : schools){
+        for (Map<String, Object> school : schools) {
             excelWriter.set(row, column.incrementAndGet(), school.get("count"));
-            excelWriter.set(row, column.incrementAndGet(), school.get("countRate"));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((double) school.get("countRate")));
         }
     }
 
     private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter) {
         int row = 3;
-        for(Map<String, Object> clazz : classes){
+        for (Map<String, Object> clazz : classes) {
             fillRows(clazz, excelWriter, row);
             row++;
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRows(Map<String, Object> clazz, ExcelWriter excelWriter, int row) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), clazz.get("className"));
-        for(Map<String, Object> scoreSegment : (List<Map<String, Object>>)clazz.get("scoreSegments")) {
+        for (Map<String, Object> scoreSegment : (List<Map<String, Object>>) clazz.get("scoreSegments")) {
             excelWriter.set(row, column.incrementAndGet(), scoreSegment.get("count"));
-            excelWriter.set(row, column.incrementAndGet(), scoreSegment.get("countRate"));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((double) scoreSegment.get("countRate")));
         }
     }
 

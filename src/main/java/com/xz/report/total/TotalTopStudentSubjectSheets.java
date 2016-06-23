@@ -6,7 +6,6 @@ import com.xz.api.Param;
 import com.xz.api.server.project.ProjectTopStudentQuestTypeStat;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
-import com.xz.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,12 +28,11 @@ public class TotalTopStudentSubjectSheets extends SheetGenerator {
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Param param = new Param().setParameter("projectId", projectId).setParameter("rankSegment", RANKSEGMENTS);
         Result result = projectTopStudentQuestTypeStat.execute(param);
-        System.out.println("尖子生试题分析统计-->" + result.getData());
-        setupHeader(excelWriter, result.get("topStudents"));
+        setupHeader(excelWriter);
         fillData(excelWriter, result.get("topStudents"));
     }
 
-    private void setupHeader(ExcelWriter excelWriter, Object topStudents) {
+    private void setupHeader(ExcelWriter excelWriter) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "尖子生");
         excelWriter.set(0, column.incrementAndGet(), "所属学校");
@@ -42,5 +40,6 @@ public class TotalTopStudentSubjectSheets extends SheetGenerator {
     }
 
     private void fillData(ExcelWriter excelWriter, Object topStudents) {
+        //// TODO: 2016/6/23
     }
 }

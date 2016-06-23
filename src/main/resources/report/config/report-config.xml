@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <report-config>
     <report-set id="default">
+
         <report-category name="总体成绩分析" range="province">
             <report-category name="基础分析">
                 <report name="分数分析" class="com.xz.report.total.TotalBasicScoreReport"/>
@@ -8,7 +9,17 @@
                 <report name="分数段统计" class="com.xz.report.total.TotalBasicScoreSegmentReport"/>
                 <report name="学科分析" class="com.xz.report.total.TotalBasicSubjectReport"/>
             </report-category>
+            <report-category name="试卷分析">
+                <report name="试卷题型分析" class="com.xz.report.total.TotalPaperQuestTypeReport"/>
+                <report name="客观题分析" class="com.xz.report.total.TotalPaperObjectiveReport"/>
+                <report name="主观题分析" class="com.xz.report.total.TotalPaperSubjectiveReport"/>
+            </report-category>
+            <report-category name="尖子生情况">
+                <report name="尖子生统计" class="com.xz.report.total.TotalTopStudentReport"/>
+                <report name="高分段竞争力分析" class="com.xz.report.total.TotalTopStudentHScoreReport"/>
+            </report-category>
         </report-category>
+
         <report-category name="学校成绩分析" range="school">
             <report-category name="基础分析">
                 <report name="分数分析" class="com.xz.report.schools.SchoolBasicScoreReport"/>
@@ -16,11 +27,20 @@
                 <report name="分数段统计" class="com.xz.report.schools.SchoolBasicScoreSegmentReport"/>
                 <report name="学科分析" class="com.xz.report.schools.SchoolBasicSubjectReport"/>
             </report-category>
+            <report-category name="试卷分析">
+                <report name="客观题分析" class="com.xz.report.schools.SchoolPaperObjectiveReport"/>
+                <report name="主观题分析" class="com.xz.report.schools.SchoolPaperSubjectiveReport"/>
+            </report-category>
+            <report-category name="尖子生情况">
+                <report name="尖子生统计" class="com.xz.report.schools.SchoolTopStudentReport"/>
+            </report-category>
         </report-category>
+
         <report-category name="班级成绩分析" range="class">
             <report-category name="基础分析">
                 <report name="排名统计" class="com.xz.report.classes.ClassBasicRankReport"/>
             </report-category>
         </report-category>
+
     </report-set>
 </report-config>

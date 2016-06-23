@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2016/6/17.
  */
+@SuppressWarnings("unchecked")
 @Component
 public class TotalPaperQuestTypeSheets extends SheetGenerator {
     @Autowired

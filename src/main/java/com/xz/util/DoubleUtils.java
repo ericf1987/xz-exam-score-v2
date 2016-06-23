@@ -11,13 +11,17 @@ import java.text.DecimalFormat;
 public class DoubleUtils {
 
     private static DecimalFormat FORMAT = new DecimalFormat("0.00");
+    private static DecimalFormat FORMAT_PECISION = new DecimalFormat("0.000000");
 
     public static String toPercent(double value) {
         if (!isValidNumber(value)) {
             return "0%";
         }
-
-        return FORMAT.format(value * 100) + "%";
+        if(value < 0.0001d && value > 0){
+            return FORMAT_PECISION.format(value * 100) + "%";
+        }else{
+            return FORMAT.format(value * 100) + "%";
+        }
     }
 
     /**

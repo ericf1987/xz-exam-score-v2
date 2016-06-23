@@ -3,11 +3,9 @@ package com.xz.report.schools;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
-import com.xz.api.server.project.ProjectTopStudentQuestTypeStat;
 import com.xz.api.server.school.SchoolTopStudentStat;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
-import com.xz.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
