@@ -152,7 +152,8 @@ public class ImportProjectService {
             LOG.info("导入班级 " + classId + " 的考生信息(" + index + "/" + classCount + ")...");
 
             List<Document> classStudents = new ArrayList<>();
-            Param param = new Param().setParameter("projectId", projectId).setParameter("classId", classId);
+            Param param = new Param().setParameter("projectId", projectId)
+                    .setParameter("classId", classId);
             Result result = interfaceClient.request("QueryClassExamStudent", param);
 
             JSONArray students = result.get("examStudents");
@@ -178,7 +179,7 @@ public class ImportProjectService {
     // 导入学校和区市省
     private void importSchools(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 学校信息...");
-        Param param = new Param().setParameter("projectId", projectId);
+        Param param = new Param().setParameter("projectId", projectId).setParameter("needStudentCount", false);
         Result result = interfaceClient.request("QueryExamSchoolByProject", param);
         JSONArray jsonArray = result.get("schools");
 
