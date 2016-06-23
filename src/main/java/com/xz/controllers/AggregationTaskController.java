@@ -62,6 +62,7 @@ public class AggregationTaskController {
      * 开始统计项目
      *
      * @param projectId      项目ID
+     * @param recalculate    是否要重新计算成绩，如果为 true 则会重新导入题目信息；如果 dataReady 为 false 则忽略本参数
      * @param dataReady      数据是否已经存在，如果为 false 则会尝试重新导入整个项目信息
      * @param generateReport 是否要生成报表 Excel 文件
      */
@@ -69,6 +70,7 @@ public class AggregationTaskController {
     @ResponseBody
     public Result startAggregation(
             @RequestParam("project") String projectId,
+            @RequestParam(value = "recalculate-score", required = false, defaultValue = "false") String recalculate,
             @RequestParam(value = "data-ready", required = false, defaultValue = "true") String dataReady,
             @RequestParam(value = "generate-report", required = false, defaultValue = "false") String generateReport
     ) {
@@ -77,10 +79,11 @@ public class AggregationTaskController {
             return Result.fail("项目 " + projectId + " 正在统计当中");
         }
 
+        Boolean isRecalculate = Boolean.valueOf(recalculate);
         Boolean isDataReady = Boolean.valueOf(dataReady);
         Boolean isGenerateReport = Boolean.valueOf(generateReport);
 
-        aggregationService.startAggregation(projectId, true, isDataReady, isGenerateReport);
+        aggregationService.startAggregation(projectId, true, isRecalculate, isDataReady, isGenerateReport);
         return Result.success("项目 " + projectId + " 已经开始统计。");
     }
 

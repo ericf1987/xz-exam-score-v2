@@ -70,7 +70,7 @@ public class ImportProjectService {
         // 下面的导入顺序不能变更，否则可能造成数据错误
         importProjectInfo(projectId, context);
         importSubjects(projectId);
-        importQuests(projectId, context);
+        importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPoints(projectId, context);
         importSchools(projectId, context);
         importClasses(projectId, context);
@@ -79,6 +79,13 @@ public class ImportProjectService {
         LOG.info("正在准备数据...");
         prepareDataService.prepare(projectId);
         return context;
+    }
+
+    // 仅导入题目数据，用于修改标答后的重新算分
+    // 注意如果 importQuests() 方法对 context 参数进行了读取操作，则本方法可能会失效，因为
+    // 传过去的是一个空的 Context。
+    public void importProjectQuest(String projectId) {
+        importQuests(projectId, new Context());
     }
 
     // 导入考试知识点
@@ -292,5 +299,4 @@ public class ImportProjectService {
         context.put("project", project);
         projectService.saveProject(project);
     }
-
 }

@@ -55,11 +55,13 @@ public class AggregationService {
      *
      * @param projectId        项目ID
      * @param async            是否另起线程执行
+     * @param recalculate      是否要重新计算成绩，如果为 true 则会重新导入题目信息；如果 dataReady 为 false 则忽略本参数
      * @param dataReady        项目数据是否已经准备好，只需要统计。如果为 false，则尝试重新导入整个项目数据
      * @param isGenerateReport 是否要生成报表文件
      */
     public void startAggregation(
-            String projectId, boolean async, boolean dataReady, Boolean isGenerateReport) {
+            String projectId, boolean async,
+            boolean recalculate, boolean dataReady, Boolean isGenerateReport) {
 
         Runnable runnable = () -> {
             try {
@@ -71,6 +73,8 @@ public class AggregationService {
                 // 数据导入
                 if (!dataReady) {
                     beforeAggregation(projectId, aggregationId);
+                } else if (recalculate) {
+                    reimportScoreFromScanner(projectId);
                 }
 
                 // 统计成绩
@@ -126,6 +130,18 @@ public class AggregationService {
         } while (!dispatcherList.isEmpty());
 
         LOG.info("====对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
+    }
+
+    private void reimportScoreFromScanner(String projectId) {
+        LOG.info("----开始导入项目{}", projectId);
+
+        projectStatusService.setProjectStatus(projectId, ProjectImporting);
+        importProjectService.importProjectQuest(projectId);
+        projectStatusService.setProjectStatus(projectId, ProjectImported);
+
+        projectStatusService.setProjectStatus(projectId, ScoreImporting);
+        scannerDBService.importProjectScore(projectId);
+        projectStatusService.setProjectStatus(projectId, ScoreImported);
     }
 
     private void beforeAggregation(String projectId, String aggregationId) {
