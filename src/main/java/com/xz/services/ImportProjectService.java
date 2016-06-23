@@ -113,7 +113,9 @@ public class ImportProjectService {
 
             LOG.info("导入学校 " + schoolId + "(" + school.getString("name") + ") 班级信息...");
 
-            Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId);
+            Param param = new Param().setParameter("projectId", projectId)
+                    .setParameter("schoolId", schoolId).setParameter("needStudentCount", false);
+
             Result result = interfaceClient.request("QueryExamClassByProject", param);
             JSONArray jsonArray = result.get("classes");
 
