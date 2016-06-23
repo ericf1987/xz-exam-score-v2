@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.xz.util.DoubleUtils.toPercent;
+
 /**
  * @author by fengye on 2016/6/6.
  */
@@ -87,7 +89,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), "总体");
         for(Map<String, Object> total : totals){
             excelWriter.set(row, column.incrementAndGet(), total.get("count"));
-            excelWriter.set(row, column.incrementAndGet(), total.get("countRate"));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((double)total.get("countRate")));
         }
     }
 
@@ -99,7 +101,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), schoolName);
         for(Map<String, Object> item : scoreSegment){
             excelWriter.set(row, column.incrementAndGet(), item.get("count"));
-            excelWriter.set(row, column.incrementAndGet(), item.get("countRate"));
+            excelWriter.set(row, column.incrementAndGet(), toPercent((double)item.get("countRate")));
         }
     }
 

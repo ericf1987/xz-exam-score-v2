@@ -13,10 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -37,7 +34,7 @@ public class DownloadAnalysisService {
     private String savePath;
 
     @Autowired
-    @Value("${zip.download.location}")
+    @Value("${report.zip.location}")
     private String downloadPath;
 
     @Autowired
@@ -50,7 +47,7 @@ public class DownloadAnalysisService {
         //根据文件参数获取文件路径
         String[] paths = ReportNameMappings.getFileName(filePath);
         List<Map<String, String>> pathList = new ArrayList<>();
-        //压缩文件名称
+        //压缩文件名称（学校名称-考试分析报表）
         String zipFileName = schoolService.findSchool(projectId, schoolId).getString("name") + "-考试分析报表.zip";
         for (String path : paths) {
             String[] param = path.split("-");
@@ -59,10 +56,11 @@ public class DownloadAnalysisService {
         }
         System.out.println(pathList.toString());
         Map<String, Object> resultMap = createZipFiles(pathList, zipFileName);
-        //System.out.println(resultMap);
+        System.out.println(resultMap.toString());
         return Result.success().set("downloadInfo", resultMap);
     }
 
+    //将文件列表中的文件添置至压缩包
     public Map<String, Object> createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
         File file = new File(downloadPath + zipFileName);
         Map<String, Object> resultMap = new HashMap<>();
@@ -71,8 +69,7 @@ public class DownloadAnalysisService {
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
             FileInputStream fis;
             for (Map<String, String> filePath : pathList) {
-                if(!new File(filePath.get("srcFile")).exists()){
-//                    failureList.add(removeExt(filePath.get("zipFile")));
+                if (!new File(filePath.get("srcFile")).exists()) {
                     failureList.add(filePath.get("zipFile"));
                     continue;
                 }
@@ -80,7 +77,7 @@ public class DownloadAnalysisService {
                 ZipEntry entity = new ZipEntry(filePath.get("zipFile"));
                 out.putNextEntry(entity);
                 int temp;
-                while((temp = fis.read()) != -1){
+                while ((temp = fis.read()) != -1) {
                     out.write(temp);
                 }
                 fis.close();
@@ -92,9 +89,9 @@ public class DownloadAnalysisService {
         }
         //判断压缩文件中是否有文件条目
         int size = getZipSize(downloadPath + zipFileName);
-        if(size != 0){
+        if (size != 0) {
             resultMap.put("downloadURL", downloadURL + zipFileName);
-        }else{
+        } else {
             resultMap.put("downloadURL", "");
         }
         //不存在的文件列表
@@ -102,13 +99,7 @@ public class DownloadAnalysisService {
         return resultMap;
     }
 
-/*
-    private String removeExt(String fileName){
-        return fileName.substring(0,fileName.lastIndexOf("."));
-    }
-*/
-
-    private int getZipSize(String fileName){
+    private int getZipSize(String fileName) {
         try {
             ZipFile zipFile = new ZipFile(fileName);
             return zipFile.size();
@@ -118,7 +109,7 @@ public class DownloadAnalysisService {
         }
     }
 
-    private Map<String, String> getOneFileCategory(String srcFile, String zipFile, String srcFileName){
+    private Map<String, String> getOneFileCategory(String srcFile, String zipFile, String srcFileName) {
         Map<String, String> para = new HashMap<>();
         para.put("srcFile", srcFile);
         para.put("zipFile", zipFile);
@@ -137,7 +128,7 @@ public class DownloadAnalysisService {
         if (part0.startsWith("总体")) {
             srcFile = getSaveFilePath(projectId, savePath, StringUtil.joinPaths(param));
             zipFile = StringUtil.joinPaths(param);
-            fileCategory.add(getOneFileCategory(srcFile,zipFile,filename));
+            fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
         } else if (part0.startsWith("学校")) {
             Document school = schoolService.findSchool(projectId, schoolId);
             filePath = StringUtil.joinPaths(
@@ -147,7 +138,7 @@ public class DownloadAnalysisService {
             zipFile = StringUtil.joinPaths(
                     param[0], school.getString("name"), param[1], filename
             );
-            fileCategory.add(getOneFileCategory(srcFile,zipFile,filename));
+            fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
         } else if (part0.startsWith("班级")) {
             List<Document> classes = classService.listClasses(projectId, schoolId);
             for (Document d : classes) {
@@ -159,7 +150,7 @@ public class DownloadAnalysisService {
                         param[0], d.getString("name"), param[1], filename
 
                 );
-                fileCategory.add(getOneFileCategory(srcFile,zipFile,filename));
+                fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
             }
         }
         return fileCategory;
@@ -167,10 +158,14 @@ public class DownloadAnalysisService {
 
     private String getSaveFilePath(String projectId, String savePath, String filePath) {
         String md5 = MD5.digest(projectId);
-
         return StringUtil.joinPaths(savePath,
-                md5.substring(0, 2), md5.substring(2, 4), projectId , filePath);
+                md5.substring(0, 2), md5.substring(2, 4), projectId, filePath);
     }
 
+    public String getZipFilePrefix(String fileName) {
+        UUID uuid = UUID.randomUUID();
+        String md5 = MD5.digest(uuid.toString());
+        return StringUtil.joinPaths(md5.substring(0, 2), md5.substring(2, 4), fileName);
+    }
 
 }

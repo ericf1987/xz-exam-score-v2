@@ -64,19 +64,20 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void fillRow(Map<String, Object> clazz, ExcelWriter excelWriter, int rowIndex) {
         AtomicInteger column = new AtomicInteger(-1);
-        int studentCount = (int)clazz.get("studentCount");
+        int studentCount = (int) clazz.get("studentCount");
         excelWriter.set(rowIndex, column.incrementAndGet(), clazz.get("className"));
         excelWriter.set(rowIndex, column.incrementAndGet(), clazz.get("studentCount"));
         List<Map<String, Object>> rankStat = (List<Map<String, Object>>) clazz.get("rankStat");
         int accCount = 0;
         for (Map<String, Object> r : rankStat) {
             excelWriter.set(rowIndex, column.incrementAndGet(), r.get("count"));
-            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent((double)r.get("rate")));
-            int count = (int)r.get("count");
+            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent((double) r.get("rate")));
+            int count = (int) r.get("count");
             accCount += count;
-            double accRate = (double)accCount / (double)studentCount;
+            double accRate = (double) accCount / (double) studentCount;
             excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent(accRate));
         }
     }
@@ -85,7 +86,7 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "班级名称");
         excelWriter.set(0, column.incrementAndGet(), "实考人数");
-        for(double d : PIECE_WISE){
+        for (double d : PIECE_WISE) {
             excelWriter.set(0, column.incrementAndGet(), "学校总排名前" + DoubleUtils.toPercent(d));
             column.incrementAndGet();
             column.incrementAndGet();
@@ -93,13 +94,13 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         }
     }
 
-    private void setupSecondaryHeader(ExcelWriter excelWriter){
+    private void setupSecondaryHeader(ExcelWriter excelWriter) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "班级名称");
         excelWriter.set(1, column.incrementAndGet(), "实考人数");
         excelWriter.mergeCells(0, 0, 1, 0);
         excelWriter.mergeCells(0, 1, 1, 1);
-        for(double d : PIECE_WISE){
+        for (int i = 0; i < PIECE_WISE.length; i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[2]);

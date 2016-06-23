@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.xz.ajiaedu.common.lang.NumberUtil.toPercent;
 import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
+import static com.xz.util.DoubleUtils.toPercent;
 
 /**
  * (description)
@@ -37,8 +37,8 @@ public class TotalBasicScoreSheet extends SheetGenerator {
     SchoolService schoolService;
 
     public static final String[] HEADER = new String[]{
-            "学校名称","实考人数","最高分","最低分","平均分",
-            "标准差","优率","良率","及格率","不及格率",
+            "学校名称", "实考人数", "最高分", "最低分", "平均分",
+            "标准差", "优率", "良率", "及格率", "不及格率",
             "超均率"
     };
 
@@ -96,13 +96,13 @@ public class TotalBasicScoreSheet extends SheetGenerator {
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Good));
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Pass));
         excelWriter.set(rowindex, column.incrementAndGet(), getRate(rowData, Fail));
-        excelWriter.set(rowindex, column.incrementAndGet(), rowData.get("overAverage"));
-        if(null == subjectId){
+        excelWriter.set(rowindex, column.incrementAndGet(), toPercent((Double) rowData.get("overAverage")));
+        if (null == subjectId) {
             excelWriter.set(rowindex, column.incrementAndGet(), toPercent((Double) rowData.get("allPassRate")));
             excelWriter.set(rowindex, column.incrementAndGet(), toPercent((Double) rowData.get("allFailRate")));
         }
-        List<Document> rankPositions = (List<Document>)rowData.get("rankPositions");
-        for(Document rankPosition : rankPositions){
+        List<Document> rankPositions = (List<Document>) rowData.get("rankPositions");
+        for (Document rankPosition : rankPositions) {
             excelWriter.set(rowindex, column.incrementAndGet(), rankPosition.get("score"));
         }
 
@@ -116,10 +116,10 @@ public class TotalBasicScoreSheet extends SheetGenerator {
     // 填充表头
     private void setupHeader(ExcelWriter excelWriter, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
-        for(String s : HEADER){
+        for (String s : HEADER) {
             excelWriter.set(0, column.incrementAndGet(), s);
         }
-        if(null == subjectId){
+        if (null == subjectId) {
             excelWriter.set(0, column.incrementAndGet(), "全科及格率");
             excelWriter.set(0, column.incrementAndGet(), "全科不及格率");
         }
@@ -127,13 +127,13 @@ public class TotalBasicScoreSheet extends SheetGenerator {
         excelWriter.mergeCells(0, column.get(), 0, column.get() + 2);
     }
 
-    private void setupSecondaryHeader(ExcelWriter excelWriter, String subjectId){
+    private void setupSecondaryHeader(ExcelWriter excelWriter, String subjectId) {
         AtomicInteger column = new AtomicInteger(-1);
-        for(int index = 0;index < HEADER.length;index++){
+        for (int index = 0; index < HEADER.length; index++) {
             excelWriter.set(1, column.incrementAndGet(), HEADER[index]);
             excelWriter.mergeCells(0, index, 1, index);
         }
-        if(null == subjectId){
+        if (null == subjectId) {
             excelWriter.set(1, column.incrementAndGet(), "全科及格率");
             excelWriter.set(1, column.incrementAndGet(), "全科不及格率");
             excelWriter.mergeCells(0, column.get() - 1, 1, column.get() - 1);

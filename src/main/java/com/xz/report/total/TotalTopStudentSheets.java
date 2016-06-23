@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author by fengye on 2016/6/19.
  */
+@SuppressWarnings("unchecked")
 @Component
 public class TotalTopStudentSheets extends SheetGenerator {
 
@@ -40,10 +41,8 @@ public class TotalTopStudentSheets extends SheetGenerator {
         //查询尖子生表总人数
         Document doc = topStudentListService.getTopStudentLastOne(projectId, sheetTask.getRange(), sheetTask.getTarget());
         String[] rankSegment = new String[]{"1", doc.get("rank").toString()};
-        System.out.println("排名最后的尖子生名次为：" + doc.get("rank").toString());
         Param param = new Param().setParameter("projectId", projectId).setParameter("rankSegment", rankSegment);
         Result result = projectTopStudentStat.execute(param);
-        System.out.println("尖子生统计-->" + result.getData());
         setupHeader(excelWriter, result.get("topStudents"));
         setupSecondaryHeader(excelWriter, result.get("topStudents"));
         fillData(excelWriter, result.get("topStudents"));

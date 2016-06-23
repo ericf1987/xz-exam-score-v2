@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2016/6/3.
  */
+@SuppressWarnings("unchecked")
 @Component
 public class TotalBasicRankSheet extends SheetGenerator {
 
@@ -73,17 +74,17 @@ public class TotalBasicRankSheet extends SheetGenerator {
 
     private void fillRow(Map<String, Object> ranks, ExcelWriter excelWriter, int rowIndex) {
         AtomicInteger column = new AtomicInteger(-1);
-        int studentCount = (int)ranks.get("studentCount");
+        int studentCount = (int) ranks.get("studentCount");
         excelWriter.set(rowIndex, column.incrementAndGet(), ranks.get("schoolName"));
         excelWriter.set(rowIndex, column.incrementAndGet(), studentCount);
         List<Map<String, Object>> rankStat = (List<Map<String, Object>>) ranks.get("rankStat");
         int accCount = 0;
         for (Map<String, Object> r : rankStat) {
             excelWriter.set(rowIndex, column.incrementAndGet(), r.get("count"));
-            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent((double)r.get("rate")));
-            int count = (int)r.get("count");
+            excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent((double) r.get("rate")));
+            int count = (int) r.get("count");
             accCount += count;
-            double accRate = (double)accCount / (double)studentCount;
+            double accRate = (double) accCount / (double) studentCount;
             excelWriter.set(rowIndex, column.incrementAndGet(), DoubleUtils.toPercent(accRate));
         }
     }
@@ -100,13 +101,13 @@ public class TotalBasicRankSheet extends SheetGenerator {
         }
     }
 
-    private void setupSecondaryHeader(ExcelWriter excelWriter){
+    private void setupSecondaryHeader(ExcelWriter excelWriter) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "学校名称");
         excelWriter.set(1, column.incrementAndGet(), "实考人数");
         excelWriter.mergeCells(0, 0, 1, 0);
         excelWriter.mergeCells(0, 1, 1, 1);
-        for(double d : PIECE_WISE){
+        for (int i = 0; i < PIECE_WISE.length; i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_HEADER[2]);
