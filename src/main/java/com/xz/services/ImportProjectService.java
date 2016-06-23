@@ -240,11 +240,21 @@ public class ImportProjectService {
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
 
+            fixQuest(questDoc);
+
             projectQuests.add(questDoc);
         });
 
         context.put("quests", projectQuests);
         questService.saveProjectQuests(projectId, projectQuests);
+    }
+
+    private void fixQuest(Document questDoc) {
+
+        if (questDoc.getString("questId") == null) {
+            questDoc.put("questId", UUID.randomUUID().toString().replace("-", ""));
+        }
+
     }
 
     private Boolean isObjective(String questType) {

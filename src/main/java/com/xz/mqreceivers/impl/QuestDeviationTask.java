@@ -29,6 +29,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 @ReceiverInfo(taskType = "quest_deviation")
 @Component
 public class QuestDeviationTask extends Receiver {
+
     static final Logger LOG = LoggerFactory.getLogger(QuestDeviationTask.class);
 
     @Autowired
@@ -53,6 +54,13 @@ public class QuestDeviationTask extends Receiver {
         String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
         Target target = aggrTask.getTarget();
+
+        // 无效的任务
+        if (target == null || target.getId() == null) {
+            LOG.error("Invalid target: " + target);
+            return;
+        }
+
         String questId = target.getId().toString();
 
         Document query = new Document("project", projectId).
