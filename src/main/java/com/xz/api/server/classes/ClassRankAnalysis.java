@@ -9,6 +9,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +124,7 @@ public class ClassRankAnalysis implements Server {
         // 学生得分/得分率
         double score = scoreService.getScore(projectId, Range.student(studentId), target);
         rankMaps.put("score", score);
-        rankMaps.put("scoreRate", fullScore == 0 ? 0 : score / fullScore);
+        rankMaps.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
 
         // 学生在班级排名
         int rankClassIndex = rankService.getRank(projectId, Range.clazz(classId), target, score);
@@ -135,13 +136,13 @@ public class ClassRankAnalysis implements Server {
 
         // 班级平均分/得分率
         double classAvg = averageService.getAverage(projectId, Range.clazz(classId), target);
-        rankMaps.put("classAvg", classAvg);
-        rankMaps.put("classAvgRate", fullScore == 0 ? 0 : classAvg / fullScore);
+        rankMaps.put("classAvg", DoubleUtils.round(classAvg));
+        rankMaps.put("classAvgRate", DoubleUtils.round(fullScore == 0 ? 0 : classAvg / fullScore, true));
 
         // 学校平均分/得分率
         double schoolAvg = averageService.getAverage(projectId, Range.school(schoolId), target);
-        rankMaps.put("schoolAvg", schoolAvg);
-        rankMaps.put("schoolAvgRate", fullScore == 0 ? 0 : schoolAvg / fullScore);
+        rankMaps.put("schoolAvg", DoubleUtils.round(schoolAvg));
+        rankMaps.put("schoolAvgRate", DoubleUtils.round(fullScore == 0 ? 0 : schoolAvg / fullScore, true));
 
         return rankMaps;
     }
