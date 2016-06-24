@@ -54,7 +54,6 @@ public class DownloadAnalysisService {
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
             pathList.addAll(category);
         }
-        System.out.println(pathList.toString());
         Map<String, Object> resultMap = createZipFiles(pathList, zipFileName);
         System.out.println(resultMap.toString());
         return Result.success().set("downloadInfo", resultMap);
@@ -62,7 +61,8 @@ public class DownloadAnalysisService {
 
     //将文件列表中的文件添置至压缩包
     public Map<String, Object> createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
-        File file = new File(downloadPath + zipFileName);
+        String directory = downloadPath + zipFileName;
+        File file = new File(directory);
         Map<String, Object> resultMap = new HashMap<>();
         List<String> failureList = new ArrayList<>();
         try {
@@ -88,9 +88,9 @@ public class DownloadAnalysisService {
             e.printStackTrace();
         }
         //判断压缩文件中是否有文件条目
-        int size = getZipSize(downloadPath + zipFileName);
+        int size = getZipSize(directory);
         if (size != 0) {
-            resultMap.put("downloadURL", downloadURL + zipFileName);
+            resultMap.put("downloadURL", zipFileName);
         } else {
             resultMap.put("downloadURL", "");
         }
@@ -162,10 +162,10 @@ public class DownloadAnalysisService {
                 md5.substring(0, 2), md5.substring(2, 4), projectId, filePath);
     }
 
-    public String getZipFilePrefix(String fileName) {
+    public String getZipFilePrefix() {
         UUID uuid = UUID.randomUUID();
         String md5 = MD5.digest(uuid.toString());
-        return StringUtil.joinPaths(md5.substring(0, 2), md5.substring(2, 4), fileName);
+        return StringUtil.joinPaths(md5.substring(0, 2), md5.substring(2, 4));
     }
 
 }

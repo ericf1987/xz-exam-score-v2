@@ -30,8 +30,8 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
             "102-200-300","102-200-301","102-200-302",
             "102-201-300","102-201-301","102-201-302",
         };
-        Result result = downloadAnalysisService.generateZipFiles("430300-672a0ed23d9148e5a2a31c8bf1e08e62",
-                "11b66fc2-8a76-41c2-a1b3-5011523c7e47", arr);
+        Result result = downloadAnalysisService.generateZipFiles("431100-903288f61a5547f1a08a7e20420c4e9e",
+                "03cd1f9c-b418-41ca-b3b8-9eb3af60ac3e", arr);
         System.out.println(result.getData());
     }
 }
