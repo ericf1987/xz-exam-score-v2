@@ -18,6 +18,9 @@
                 <report name="尖子生统计" class="com.xz.report.total.TotalTopStudentReport"/>
                 <report name="高分段竞争力分析" class="com.xz.report.total.TotalTopStudentHScoreReport"/>
             </report-category>
+            <report-category name="基础数据">
+                <report name="基础数据统计" class="com.xz.report.total.TotalBasicDataReport"/>
+            </report-category>
         </report-category>
 
         <report-category name="学校成绩分析" range="school">
@@ -34,11 +37,17 @@
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class="com.xz.report.schools.SchoolTopStudentReport"/>
             </report-category>
+            <report-category name="基础数据">
+                <report name="基础数据统计" class="com.xz.report.schools.SchoolBasicDataReport"/>
+            </report-category>
         </report-category>
 
         <report-category name="班级成绩分析" range="class">
             <report-category name="基础分析">
-                <report name="排名统计" class="com.xz.report.classes.ClassBasicRankReport"/>
+                <report name="分数排名统计" class="com.xz.report.classes.ClassBasicRankReport"/>
+            </report-category>
+            <report-category name="基础数据">
+                <report name="基础数据统计" class="com.xz.report.classes.ClassBasicDataReport"/>
             </report-category>
         </report-category>
 

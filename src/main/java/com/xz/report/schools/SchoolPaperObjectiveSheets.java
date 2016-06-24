@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/19.
+ * 学校成绩分析/试卷分析/客观题分析
  */
 @Component
 public class SchoolPaperObjectiveSheets extends SheetGenerator{

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/3.
+ * 总体成绩分析/基础分析/排名统计
  */
 @SuppressWarnings("unchecked")
 @Component

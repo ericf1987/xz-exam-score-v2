@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/15.
+ * 总体成绩分析/试卷分析/主观题分析
  */
 @Component
 public class TotalPaperSubjectiveSheets extends SheetGenerator {

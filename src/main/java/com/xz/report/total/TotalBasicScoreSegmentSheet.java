@@ -20,6 +20,7 @@ import static com.xz.util.DoubleUtils.toPercent;
 
 /**
  * @author by fengye on 2016/6/6.
+ * 总体成绩分析/基础分析/分数段统计
  */
 @Component
 public class TotalBasicScoreSegmentSheet extends SheetGenerator {

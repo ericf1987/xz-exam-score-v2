@@ -19,7 +19,7 @@ public class Test {
 
     public static void main(String[] args) {
 
-        List<Teacher> teachers = new ArrayList<>();
+/*        List<Teacher> teachers = new ArrayList<>();
         List<Student> students = new ArrayList<>();
         List<Teacher> nonStudentTeachers = new ArrayList<>(teachers);
 
@@ -30,6 +30,10 @@ public class Test {
 
         nonStudentTeachers.removeIf(isMarked);
 
-        Map<String, Teacher> teacherMap = new HashMap<>();
+        Map<String, Teacher> teacherMap = new HashMap<>();*/
+        System.out.println(Math.floor(13.75));
+        System.out.println((int)Math.ceil(13.75));
+        System.out.println(Double.valueOf(13.75).intValue());
+        System.out.println((double)11 / 2.1);
     }
 }
