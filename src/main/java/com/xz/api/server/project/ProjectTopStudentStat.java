@@ -91,7 +91,7 @@ public class ProjectTopStudentStat implements Server {
         List<Document> topStudentList =
                 topStudentListService.getTopStudentList(projectId, range, target, minIndex, maxIndex);
         for (Document document : topStudentList) {
-            Map<String, Object> map = new HashMap<>(document);
+            Map<String, Object> map = new HashMap<>();
             String studentId = document.getString("student");
             double totalScore = DocumentUtils.getDouble(document, "score", 0);
             int rank = DocumentUtils.getInt(document, "rank", 0);
@@ -125,7 +125,7 @@ public class ProjectTopStudentStat implements Server {
             list.add(projectInfo);
 
             // 科目统计
-            subjectStat(projectId, subjectIds, scoreService, rankService, studentId, list);
+            subjectStat(projectId, subjectIds, scoreService, rankService, studentId, list, range);
 
             map.put("subjects", list);
             topStudents.add(map);
@@ -137,7 +137,7 @@ public class ProjectTopStudentStat implements Server {
 
     private static void subjectStat(String projectId, List<String> subjectIds,
                                     ScoreService scoreService, RankService rankService,
-                                    String studentId, List<Map<String, Object>> list) {
+                                    String studentId, List<Map<String, Object>> list, Range range) {
         // 各科分析
         for (String subjectId : subjectIds) {
             Map<String, Object> subjectInfo = new HashMap<>();
@@ -149,7 +149,7 @@ public class ProjectTopStudentStat implements Server {
             subjectInfo.put("score", score);
 
             // 科目排名
-            int rankIndex = rankService.getRank(projectId, _range, _target, score);
+            int rankIndex = rankService.getRank(projectId, range, _target, score);
             subjectInfo.put("rankIndex", rankIndex);
 
             subjectInfo.put("subjectId", subjectId);
