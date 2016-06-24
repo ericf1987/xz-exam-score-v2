@@ -9,6 +9,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.util.Map;
 
 import static com.xz.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
 import static com.xz.api.server.project.ProjectTopStudentQuestTypeStat.getTopStudentQuestTypeStat;
+import static com.xz.api.server.project.ProjectTopStudentQuestTypeStat.initRankSegment;
 
 /**
  * 学校成绩-尖子试卷题型分析
@@ -28,7 +30,7 @@ import static com.xz.api.server.project.ProjectTopStudentQuestTypeStat.getTopStu
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
-        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段", required = true)
+        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段,默认为第一分数段", required = false)
 })
 @Service
 public class SchoolTopStudentQuestTypeStat implements Server {
@@ -63,6 +65,10 @@ public class SchoolTopStudentQuestTypeStat implements Server {
 
         Range range = Range.school(schoolId);
         Target target = Target.project(projectId);
+
+        if (ArrayUtils.isEmpty(rankSegment)) {
+            rankSegment = initRankSegment(projectId, range, topStudentListService);
+        }
 
         List<Map<String, Object>> schoolQuestTypeAnalysis = getQuestTypeAnalysis(projectId, subjectId, range,
                 questTypeService, fullScoreService, questTypeScoreService);

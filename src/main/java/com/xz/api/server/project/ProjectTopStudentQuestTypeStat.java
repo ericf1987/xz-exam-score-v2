@@ -10,6 +10,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ import static com.xz.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAna
 @Function(description = "总体成绩-尖子生试卷题型分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
-        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段", required = true)
+        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段,默认为第一分数段", required = false)
 })
 @Service
 public class ProjectTopStudentQuestTypeStat implements Server {
@@ -73,6 +74,10 @@ public class ProjectTopStudentQuestTypeStat implements Server {
         Range range = rangeService.queryProvinceRange(projectId);
         Target target = Target.project(projectId);
 
+        if (ArrayUtils.isEmpty(rankSegment)) {
+            rankSegment = initRankSegment(projectId, range, topStudentListService);
+        }
+
         List<Map<String, Object>> totalQuestTypeAnalysis = getQuestTypeAnalysis(projectId, subjectId, range,
                 questTypeService, fullScoreService, questTypeScoreService);
 
@@ -81,6 +86,18 @@ public class ProjectTopStudentQuestTypeStat implements Server {
                 questTypeService, fullScoreService, questTypeScoreService);
 
         return Result.success().set("totals", totalQuestTypeAnalysis).set("topStudents", topStudents);
+    }
+
+    // 初始化排名分数段
+    public static String[] initRankSegment(String projectId, Range range, TopStudentListService topStudentListService) {
+        List<Map<String, Object>> topStudentRankSegment = topStudentListService.getTopStudentRankSegment(projectId, range);
+        if (topStudentRankSegment.isEmpty()) {
+            return new String[]{"0", "0"};
+        } else {
+            Map<String, Object> rankSegmentMap = topStudentRankSegment.get(0);
+            return new String[]{String.valueOf(rankSegmentMap.get("startIndex")),
+                    String.valueOf(rankSegmentMap.get("endIndex"))};
+        }
     }
 
     // 尖子生题型统计
