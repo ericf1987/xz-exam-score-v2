@@ -78,7 +78,7 @@ public class AggregationService {
                 }
 
                 // 统计成绩
-                runAggregation0(projectId, dataReady);
+                runAggregation0(projectId);
 
                 // 生成报表
                 if (isGenerateReport) {
@@ -105,13 +105,9 @@ public class AggregationService {
         }
     }
 
-    private void runAggregation0(String projectId, boolean dataReady) {
+    private void runAggregation0(String projectId) {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
-
-        if (!dataReady) {
-            beforeAggregation(projectId, aggregationId);
-        }
 
         List<TaskDispatcher> dispatcherList;
         int round = 1;
