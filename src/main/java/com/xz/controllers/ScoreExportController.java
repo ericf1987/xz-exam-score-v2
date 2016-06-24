@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
- * (description)
+ * 导出成绩到 OSS
  * created at 16/06/14
  *
  * @author yiding_he
@@ -55,9 +55,20 @@ public class ScoreExportController {
     @Autowired
     OSSService ossService;
 
+    /**
+     * 导出成绩到阿里云
+     *
+     * @param projectId  项目ID
+     * @param onlyExport 是否只导出，不通知阿里云导入（调试用）
+     *
+     * @return 操作结果
+     */
     @RequestMapping(value = "export-score-to-oss", method = RequestMethod.POST)
     @ResponseBody
-    public Result exportScore(@RequestParam("project") String projectId) {
+    public Result exportScore(
+            @RequestParam("project") String projectId,
+            @RequestParam(value = "onlyExport", required = false, defaultValue = "true") boolean onlyExport
+    ) {
         try {
             String filePath = "score-archives/" + UUID.randomUUID().toString() + ".zip";
 
@@ -67,8 +78,11 @@ public class ScoreExportController {
             LOG.info("对项目 " + projectId + " 打包完毕，大小 " + new File(filePath).length() + "，开始上传...");
             String ossPath = uploadPack(projectId, filePath);        // 上传成绩包文件
 
-            LOG.info("对项目 " + projectId + " 打包上传完毕，接口正在导入...");
-            notifyInterface(ossPath);              // 通知业务接口导入成绩
+
+            if (!onlyExport) {
+                LOG.info("对项目 " + projectId + " 打包上传完毕，接口正在导入...");
+                notifyInterface(ossPath);              // 通知业务接口导入成绩
+            }
 
             LOG.info("项目导出完毕。");
             return Result.success();
