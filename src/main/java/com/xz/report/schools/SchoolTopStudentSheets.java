@@ -7,6 +7,8 @@ import com.xz.api.server.school.SchoolTopStudentStat;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.services.TopStudentListService;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +30,8 @@ public class SchoolTopStudentSheets extends SheetGenerator {
     @Autowired
     SchoolService schoolService;
 
-    public static final String[] RANKSEGMENTS = new String[]{
-            "1", "50"
-    };
+    @Autowired
+    TopStudentListService topStudentListService;
 
     public static final String[] SECONDARY_COLUMN = new String[]{
             "成绩", "总体排名"
@@ -38,10 +39,13 @@ public class SchoolTopStudentSheets extends SheetGenerator {
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
+        //查询尖子生表总人数
+        Document doc = topStudentListService.getTopStudentLastOne(projectId, sheetTask.getRange(), sheetTask.getTarget());
+        String[] rankSegment = new String[]{"1", doc.get("rank").toString()};
         Param param = new Param()
                 .setParameter("projectId", projectId)
                 .setParameter("schoolId", sheetTask.getRange().getId())
-                .setParameter("rankSegment", RANKSEGMENTS);
+                .setParameter("rankSegment", rankSegment);
         Result result = schoolTopStudentStat.execute(param);
         System.out.println("学校尖子生统计-->" + result.getData());
         setupHeader(excelWriter, result.get("topStudents"));

@@ -16,6 +16,6 @@ public class TotalTopStudentSubjectSheetsTest extends XzExamScoreV2ApplicationTe
 
     @Test
     public void testGenerateSheet() throws Exception {
-        totalTopStudentSubjectReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.province("430000"), "target/total-top-student-subjective.xlsx");
+        totalTopStudentSubjectReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.province("430000"), "target/total-top-student-subjective.xlsx");
     }
 }

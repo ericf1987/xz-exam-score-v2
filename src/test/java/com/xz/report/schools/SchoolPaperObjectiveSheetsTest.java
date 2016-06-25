@@ -17,6 +17,6 @@ public class SchoolPaperObjectiveSheetsTest extends XzExamScoreV2ApplicationTest
 
     @Test
     public void testGenerateSheet() throws Exception {
-        schoolPaperObjectiveReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), "target/school-paper-objective.xlsx");
+        schoolPaperObjectiveReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.school("b49b8e85-f390-4e09-a709-8ab1175b0c68"), "target/school-paper-objective.xlsx");
     }
 }

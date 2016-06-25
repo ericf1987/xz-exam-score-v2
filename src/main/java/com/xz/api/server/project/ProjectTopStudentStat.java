@@ -149,7 +149,9 @@ public class ProjectTopStudentStat implements Server {
             subjectInfo.put("score", score);
 
             // 科目排名
-            int rankIndex = rankService.getRank(projectId, range, _target, score);
+            //int rankIndex = rankService.getRank(projectId, _range, _target, score);
+            // 获取学生在当前range下的科目排名
+            int rankIndex = rankService.getRank(projectId, range, _target, studentId);
             subjectInfo.put("rankIndex", rankIndex);
 
             subjectInfo.put("subjectId", subjectId);

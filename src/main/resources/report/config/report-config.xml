@@ -31,11 +31,13 @@
                 <report name="学科分析" class="com.xz.report.schools.SchoolBasicSubjectReport"/>
             </report-category>
             <report-category name="试卷分析">
+                <report name="试卷题型分析" class="com.xz.report.schools.SchoolPaperQuestTypeReport"/>
                 <report name="客观题分析" class="com.xz.report.schools.SchoolPaperObjectiveReport"/>
                 <report name="主观题分析" class="com.xz.report.schools.SchoolPaperSubjectiveReport"/>
             </report-category>
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class="com.xz.report.schools.SchoolTopStudentReport"/>
+                <report name="高分段竞争力分析" class="com.xz.report.schools.SchoolPaperHScoreReport"/>
             </report-category>
             <report-category name="基础数据">
                 <report name="基础数据统计" class="com.xz.report.schools.SchoolBasicDataReport"/>

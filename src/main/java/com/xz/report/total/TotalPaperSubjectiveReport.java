@@ -26,15 +26,10 @@ public class TotalPaperSubjectiveReport extends ReportGenerator{
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
-
-        SheetTask projectTask = new SheetTask("全部科目", TotalPaperSubjectiveSheets.class);
-        projectTask.put("target", Target.project(projectId));
-        tasks.add(projectTask);
-
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
             String subjectName = SubjectService.getSubjectName(subject.getId().toString());
-            projectTask = new SheetTask(subjectName, TotalPaperSubjectiveSheets.class);
+            SheetTask projectTask = new SheetTask(subjectName, TotalPaperSubjectiveSheets.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }

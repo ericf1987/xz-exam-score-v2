@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author by fengye on 2016/6/19.
+ * @author by fengye on 2016/6/25.
  */
 @Component
-@ReportGeneratorInfo(range= Range.SCHOOL)
-public class SchoolPaperSubjectiveReport extends ReportGenerator{
+@ReportGeneratorInfo(range = Range.SCHOOL)
+public class SchoolPaperQuestTypeReport extends ReportGenerator{
     @Autowired
     TargetService targetService;
 
@@ -29,7 +29,7 @@ public class SchoolPaperSubjectiveReport extends ReportGenerator{
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
             String subjectName = SubjectService.getSubjectName(subject.getId().toString());
-            SheetTask projectTask = new SheetTask(subjectName, SchoolPaperSubjectiveSheets.class);
+            SheetTask projectTask = new SheetTask(subjectName, SchoolPaperQuestTypeSheets.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }

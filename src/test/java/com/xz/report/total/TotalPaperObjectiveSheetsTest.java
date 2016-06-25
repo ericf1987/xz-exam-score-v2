@@ -18,6 +18,6 @@ public class TotalPaperObjectiveSheetsTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testGetSheetTask() throws Exception{
-        totalPaperObjectiveReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.province("430000"), "target/total-paper-objective.xlsx");
+        totalPaperObjectiveReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.province("430000"), "target/total-paper-objective.xlsx");
     }
 }

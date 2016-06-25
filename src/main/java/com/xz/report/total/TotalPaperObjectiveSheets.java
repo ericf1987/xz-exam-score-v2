@@ -8,6 +8,7 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -108,16 +109,21 @@ public class TotalPaperObjectiveSheets extends SheetGenerator {
     //根据获取指定选项的得分率
     @SuppressWarnings("unchecked")
     private String getRate(String optionKey, Map<String, Object> objective) {
-        if(StringUtils.isEmpty(objective.get(optionKey))){
-            return "0";
+        if(optionKey.equals("questDeviation")){
+            return DoubleUtils.toPercent(Double.parseDouble(objective.get(optionKey).toString()));
+        }else if(optionKey.equals("unSelect")){
+            Map<String, Object> unSelect = (Map<String, Object>)objective.get("unSelect");
+            return DoubleUtils.toPercent(Double.parseDouble(unSelect.get("rate").toString()));
         }else{
-            if(optionKey.equals("questDeviation")){
-                return objective.get(optionKey).toString();
-            }else{
-                Map<String, Object> totalOneOption = (Map<String, Object>) objective.get(optionKey);
-                return totalOneOption.get("rate").toString();
+            List<Map<String, Object>> items = (List<Map<String, Object>>)objective.get("items");
+            for(Map<String, Object> item : items){
+                String answer = item.get("answer").toString();
+                if(answer.equals(optionKey)){
+                    return DoubleUtils.toPercent(Double.parseDouble(item.get("rate").toString()));
+                }
             }
         }
+        return "0";
     }
 
 }

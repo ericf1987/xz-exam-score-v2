@@ -8,6 +8,7 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +45,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
         Result result = projectQuestTypeAnalysis.execute(param);
-        //System.out.println("总体试卷题型分析-->" + result.getData());
+        System.out.println("总体试卷题型分析-->" + result.getData());
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillTotalData(excelWriter, result.get("totals"));
@@ -76,7 +77,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
         excelWriter.set(2, column.incrementAndGet(), "总体");
         for(Map<String, Object> total : totals){
             excelWriter.set(2, column.incrementAndGet(), total.get("score"));
-            excelWriter.set(2, column.incrementAndGet(), total.get("scoreRate"));
+            excelWriter.set(2, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(total.get("scoreRate").toString())));
         }
     }
 
@@ -88,7 +89,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>)school.get("questTypes");
             for(Map<String, Object> questType : questTypes){
                 excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
-                excelWriter.set(row, column.incrementAndGet(), questType.get("scoreRate"));
+                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
             }
             row++;
             column.set(-1);

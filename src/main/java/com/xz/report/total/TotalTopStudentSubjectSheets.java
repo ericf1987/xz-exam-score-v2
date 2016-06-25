@@ -28,6 +28,7 @@ public class TotalTopStudentSubjectSheets extends SheetGenerator {
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Param param = new Param().setParameter("projectId", projectId).setParameter("rankSegment", RANKSEGMENTS);
         Result result = projectTopStudentQuestTypeStat.execute(param);
+        System.out.println("尖子生试卷题型分析-->" + result.getData());
         setupHeader(excelWriter);
         fillData(excelWriter, result.get("topStudents"));
     }
