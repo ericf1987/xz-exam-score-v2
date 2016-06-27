@@ -71,9 +71,6 @@ public class ClassRankAnalysis implements Server {
             map.put("studentId", studentId);
             map.put("studentName", studentName);
 
-            long time = System.currentTimeMillis();
-            //LOG.debug("------------------------- 开始进行学生：{}排名分析 -------------------------", studentId);
-
             // 项目排行分析
             Map<String, Object> projectRankMap = getRankAnalysisMap(
                     projectId, Target.project(projectId), schoolId, classId, studentId);
@@ -84,14 +81,12 @@ public class ClassRankAnalysis implements Server {
             map.put("subjectRankStat", subjectRankList);
 
             rankstats.add(map);
-
-            //LOG.debug("------------------------- 完成学生：{}排名分析,总用时:{} -------------------------", studentId, System.currentTimeMillis() - time);
         }
 
         rankstats.sort((o1, o2) -> {
             Double score1 = (Double) ((Map<String, Object>) o1.get("projectRankStat")).get("score");
             Double score2 = (Double) ((Map<String, Object>) o2.get("projectRankStat")).get("score");
-            return score1.compareTo(score2);
+            return score2.compareTo(score1);
         });
 
         return Result.success().set("rankstats", rankstats);
