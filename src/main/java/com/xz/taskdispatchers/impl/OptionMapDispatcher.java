@@ -31,7 +31,7 @@ public class OptionMapDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
         List<Document> objecitveQuests = questService.getQuests(projectId, true);
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.SCHOOL, Range.CLASS);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
 
         // 对每个学校、班级和每个客观题发布一个任务
         for (Document quest : objecitveQuests) {

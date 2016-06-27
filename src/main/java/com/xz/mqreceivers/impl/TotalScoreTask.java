@@ -47,36 +47,51 @@ public class TotalScoreTask extends Receiver {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
 
-        aggregateStudentTotalScore(projectId, target);
+        aggrStudentScores(projectId, target);
 
         for (String rangeName : AGGR_RANGE_NAMES) {
-            aggregateFromTotalScore(projectId, target, rangeName);
+            aggrNonStudentScores(projectId, target, rangeName);
         }
     }
 
-    private void aggregateStudentTotalScore(String projectId, Target target) {
-        List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
-        if (!target.match(Target.QUEST)) {
-            aggregateFromScore(projectId, studentRanges, target);
-        }
-    }
-
-    private void aggregateFromTotalScore(
+    private void aggrNonStudentScores(
             String projectId, Target target, String aggrRangeName) {
 
         String collectionName = scoreService.getTotalScoreCollection(projectId, target);
         List<Range> aggrRanges = rangeService.queryRanges(projectId, aggrRangeName);
 
         for (Range aggrRange : aggrRanges) {
-            aggregateFromTotalScore(projectId, collectionName, target, aggrRange);
+            if (target.match(Target.QUEST)) {
+                aggrNonStudentScoresFromDetail(projectId, target, aggrRange);
+            } else {
+                aggrNonStudentScores(projectId, collectionName, target, aggrRange);
+            }
+        }
+    }
+
+    // 从 score 成绩详情中统计题目总分
+    private void aggrNonStudentScoresFromDetail(
+            String projectId, Target target, Range aggrRange) {
+
+        MongoCollection<Document> c = scoreDatabase.getCollection("score");
+
+        AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
+                $match(doc("project", projectId).append(
+                        aggrRange.getName(), aggrRange.getId()).append("quest", target.getId().toString())),
+                $group(doc("_id", null).append("totalScore", doc("$sum", "$score")))
+        ));
+
+        Document aggregateResult = aggregate.first();
+        if (aggregateResult != null) {
+            Double score = aggregateResult.getDouble("totalScore");
+            Range parent = rangeService.getParentRange(projectId, aggrRange);
+            scoreService.saveTotalScore(projectId, aggrRange, parent, target, score, null);
         }
     }
 
     // 统计非学生的总分
-    private void aggregateFromTotalScore(
+    private void aggrNonStudentScores(
             String projectId, String collectionName, Target target, Range aggrRange) {
-
-        Range parent = rangeService.getParentRange(projectId, aggrRange);
 
         Document match = doc("project", projectId)
                 .append("parent", range2Doc(aggrRange))
@@ -90,13 +105,21 @@ public class TotalScoreTask extends Receiver {
 
         Document aggregateResult = aggregate.first();
         if (aggregateResult != null) {
+            Range parent = rangeService.getParentRange(projectId, aggrRange);
             Double score = aggregateResult.getDouble("totalScore");
             scoreService.saveTotalScore(projectId, aggrRange, parent, target, score, null);
         }
     }
 
+    private void aggrStudentScores(String projectId, Target target) {
+        List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
+        if (!target.match(Target.QUEST)) {
+            aggrStudentScores(projectId, studentRanges, target);
+        }
+    }
+
     // 统计单个学生的科目/知识点/项目/能力层级等总分
-    private void aggregateFromScore(String projectId, List<Range> studentRanges, Target target) {
+    private void aggrStudentScores(String projectId, List<Range> studentRanges, Target target) {
         Document group = new Document()
                 .append("_id", null)
                 .append("totalScore", new Document("$sum", "$score"));
