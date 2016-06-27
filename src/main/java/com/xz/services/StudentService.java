@@ -93,11 +93,7 @@ public class StudentService {
             if (subjectId != null) {
                 query.append("subjects", subjectId);
             }
-            int studentCount = (int) scoreDatabase.getCollection("student_list").count(query);
-            if (studentCount == 0) {
-                LOG.error("找不到学生数量: " + query.toJson());
-            }
-            return studentCount;
+            return (int) scoreDatabase.getCollection("student_list").count(query);
         });
     }
 

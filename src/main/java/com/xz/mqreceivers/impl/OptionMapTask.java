@@ -56,9 +56,16 @@ public class OptionMapTask extends Receiver {
 
         aggregate.forEach((Consumer<Document>) document -> {
             String answer = ((Document) document.get("_id")).getString("answer");
+            int count;
+            double rate;
 
-            int count = document.getInteger("count");
-            double rate = (double) count / studentCount;
+            if (studentCount == 0) {
+                count = 0;
+                rate = 0;
+            } else {
+                count = document.getInteger("count");
+                rate = (double) count / studentCount;
+            }
 
             addUpToList(optionMapList, answer, count, rate);
         });

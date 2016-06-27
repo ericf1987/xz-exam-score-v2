@@ -120,7 +120,7 @@ public class RankService {
         List<String> levelKeys = new ArrayList<>(rankingLevels.keySet());
         Collections.sort(levelKeys);
 
-        double sum = 0, rankLevelValue = (double) rank / studentCount;
+        double sum = 0, rankLevelValue = studentCount == 0 ? 0 : ((double) rank / studentCount);
         for (String levelKey : levelKeys) {
             sum += rankingLevels.get(levelKey);
             if (rankLevelValue <= sum) {
