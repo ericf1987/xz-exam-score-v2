@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/19.
- * 总体成绩分析/尖子生情况/尖子生统计/
+ * 总体成绩分析-尖子生情况-尖子生统计
  */
 @SuppressWarnings("unchecked")
 @Component

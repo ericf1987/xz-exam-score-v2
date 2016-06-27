@@ -5,7 +5,6 @@ import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
 import com.xz.report.classes.ReportGeneratorInfo;
-import com.xz.report.total.TotalBasicSubjectSheet;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/6/7.
+ * 学校成绩分析-基础分析-学科分析
  */
 @Component
 @ReportGeneratorInfo(range= Range.SCHOOL)

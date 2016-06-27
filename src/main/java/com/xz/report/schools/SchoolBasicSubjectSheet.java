@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/7.
- * 学校成绩分析/基础分析/学科分析
+ * 学校成绩分析-基础分析-学科分析
  */
 @Component
 public class SchoolBasicSubjectSheet extends SheetGenerator {

@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/19.
- * 学校成绩分析/尖子生情况/尖子生统计
+ * 学校成绩分析-尖子生情况-尖子生统计
  */
 @SuppressWarnings("unchecked")
 @Component
@@ -47,7 +47,6 @@ public class SchoolTopStudentSheets extends SheetGenerator {
                 .setParameter("schoolId", sheetTask.getRange().getId())
                 .setParameter("rankSegment", rankSegment);
         Result result = schoolTopStudentStat.execute(param);
-        System.out.println("学校尖子生统计-->" + result.getData());
         setupHeader(excelWriter, result.get("topStudents"));
         setupSecondaryHeader(excelWriter, result.get("topStudents"));
         fillData(excelWriter, result.get("topStudents"));

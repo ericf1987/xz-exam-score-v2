@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/24.
+ * 总体成绩分析-基础数据-学生各科成绩明细
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
 @Component
 public class TotalBasicDataSheets extends SheetGenerator {
     @Autowired

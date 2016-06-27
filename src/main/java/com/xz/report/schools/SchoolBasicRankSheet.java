@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author by fengye on 2016/6/7.
  * 学校成绩分析/基础分析/排名统计
  */
+@SuppressWarnings("ForLoopReplaceableByForEach")
 @Component
 public class SchoolBasicRankSheet extends SheetGenerator {
     @Autowired

@@ -24,7 +24,7 @@ import static com.xz.util.DoubleUtils.toPercent;
 
 /**
  * @author by fengye on 2016/6/6.
- * 学校成绩分析/基础分析/分数分析
+ * 学校成绩分析-基础分析-分数分析
  */
 @Component
 public class SchoolBasicScoreSheet extends SheetGenerator {

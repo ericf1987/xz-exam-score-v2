@@ -3,7 +3,6 @@ package com.xz.report.schools;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
-import com.xz.api.server.project.ProjectBasicDataAnalysis;
 import com.xz.api.server.school.SchoolBasicDataAnalysis;
 import com.xz.bean.Range;
 import com.xz.report.SheetGenerator;
@@ -15,11 +14,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/24.
+ * 学校成绩分析-基础数据-学生各科成绩明细
  */
+@SuppressWarnings("unchecked")
 @Component
 public class SchoolBasicDataSheets extends SheetGenerator {
     @Autowired
@@ -104,7 +104,6 @@ public class SchoolBasicDataSheets extends SheetGenerator {
 
     private List<Map<String, Object>> getSubjects(List<Map<String, Object>> studentBasicData) {
         Map<String, Object> one = studentBasicData.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) one.get("subjectAnalysis");
-        return subjects;
+        return (List<Map<String, Object>>) one.get("subjectAnalysis");
     }
 }

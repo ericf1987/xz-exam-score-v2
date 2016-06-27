@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/25.
+ * 学校成绩分析-试卷分析-试卷题型分析
  */
 @SuppressWarnings("unchecked")
 @Component
@@ -42,7 +43,6 @@ public class SchoolPaperQuestTypeSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("schoolId", schoolRange.getId()).setParameter("subjectId", subjectId);
         Result result = schoolQuestTypeAnalysis.execute(param);
-        System.out.println("学校试卷分析-->" + result.getData());
         setupHeader(excelWriter, result);
         setupSecondaryHeader(excelWriter, result);
         fillSchoolData(excelWriter, result);

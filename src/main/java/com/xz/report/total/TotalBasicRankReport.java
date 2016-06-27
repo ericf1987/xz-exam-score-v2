@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
 /**
- * 总体/基础/排名统计
+ * @author by fengye on 2016/6/24.
+ * 总体成绩分析-基础分析-排名统计
  */
 @Component
 @ReportGeneratorInfo(range = Range.PROVINCE)
@@ -25,7 +25,7 @@ public class TotalBasicRankReport extends ReportGenerator {
 
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
-        List<SheetTask> tasks = new ArrayList<SheetTask>();
+        List<SheetTask> tasks = new ArrayList<>();
 
         SheetTask projectTask = new SheetTask("全部科目", TotalBasicRankSheet.class);
         projectTask.setTarget(Target.project(projectId));

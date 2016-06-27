@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/6.
- * 总体成绩分析/基础分析/学科分析
+ * 总体成绩分析-基础分析-学科分析
  */
 @Component
 public class TotalBasicSubjectSheet extends SheetGenerator {

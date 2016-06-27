@@ -16,8 +16,8 @@ import java.util.List;
 /**
  * (description)
  * created at 16/05/31
- *
  * @author yiding_he
+ * 学校成绩分析-基础分析-分数分析
  */
 @ReportGeneratorInfo(range=Range.SCHOOL)
 @Component

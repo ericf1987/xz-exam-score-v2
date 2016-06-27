@@ -5,7 +5,6 @@ import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
 import com.xz.report.classes.ReportGeneratorInfo;
-import com.xz.services.SubjectService;
 import com.xz.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/6/24.
- * 总体/基础/基础数据统计
+ * 总体成绩分析-基础数据-学生各科成绩明细
  */
 @Component
 @ReportGeneratorInfo(range = Range.PROVINCE)

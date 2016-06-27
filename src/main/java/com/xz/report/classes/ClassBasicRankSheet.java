@@ -19,8 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/8.
- * 班级成绩分析/基础分析/分数排名统计
+ *         班级成绩分析-基础分析-分数排名统计
  */
+@SuppressWarnings("unchecked")
 @Component
 public class ClassBasicRankSheet extends SheetGenerator {
     @Autowired
@@ -51,7 +52,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
 
     private void fillStudentData(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {
         int row = 2;
-        for(Map<String, Object> rankstat : rankstats){
+        for (Map<String, Object> rankstat : rankstats) {
             fillRow(row, excelWriter, rankstat);
             row++;
         }
@@ -59,11 +60,11 @@ public class ClassBasicRankSheet extends SheetGenerator {
 
     private void fillRow(int row, ExcelWriter excelWriter, Map<String, Object> rankstat) {
         AtomicInteger column = new AtomicInteger(-1);
-        Map<String, Object> projectRank = (Map<String, Object>)rankstat.get("projectRankStat");
+        Map<String, Object> projectRank = (Map<String, Object>) rankstat.get("projectRankStat");
         excelWriter.set(row, column.incrementAndGet(), rankstat.get("studentName").toString());
         excelWriter.set(row, column.incrementAndGet(), projectRank.get("score").toString());
-        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>)rankstat.get("subjectRankStat");
-        for(Map<String, Object> subjectRank : subjectRankStat){
+        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
+        for (Map<String, Object> subjectRank : subjectRankStat) {
             excelWriter.set(row, column.incrementAndGet(), subjectRank.get("score"));
             excelWriter.set(row, column.incrementAndGet(), subjectRank.get("rankClassIndex"));
             excelWriter.set(row, column.incrementAndGet(), subjectRank.get("rankSchoolIndex"));
@@ -73,16 +74,16 @@ public class ClassBasicRankSheet extends SheetGenerator {
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {
         int row = 0;
         Map<String, Object> rankstat = rankstats.get(0);
-        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>)rankstat.get("subjectRankStat");
-        List<String> subjects = new ArrayList<String>();
-        for(Map<String, Object> subject : subjectRankStat){
+        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
+        List<String> subjects = new ArrayList<>();
+        for (Map<String, Object> subject : subjectRankStat) {
             String subjectName = subject.get("subjectName").toString();
             subjects.add(subjectName);
         }
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "学生姓名");
         excelWriter.set(row, column.incrementAndGet(), "全部科目");
-        for(String subjectName : subjects){
+        for (String subjectName : subjects) {
             excelWriter.set(row, column.incrementAndGet(), subjectName);
             column.incrementAndGet();
             column.incrementAndGet();
@@ -90,12 +91,12 @@ public class ClassBasicRankSheet extends SheetGenerator {
         }
     }
 
-    private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> rankstats){
+    private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {
         int row = 1;
         Map<String, Object> rankstat = rankstats.get(0);
-        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>)rankstat.get("subjectRankStat");
-        List<String> subjects = new ArrayList<String>();
-        for(Map<String, Object> subject : subjectRankStat){
+        List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
+        List<String> subjects = new ArrayList<>();
+        for (Map<String, Object> subject : subjectRankStat) {
             String subjectName = subject.get("subjectName").toString();
             subjects.add(subjectName);
         }
@@ -104,7 +105,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), "全部科目");
         excelWriter.mergeCells(0, 0, 1, 0);
         excelWriter.mergeCells(0, 1, 1, 1);
-        for(String subjectName : subjects){
+        for (int i = 0; i < subjects.size(); i++) {
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[2]);

@@ -1,4 +1,4 @@
-package com.xz.report.schools;
+package com.xz.report.total;
 
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -14,34 +14,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author by fengye on 2016/6/7.
- * 学校成绩分析-基础分析-分数段统计
+ * @author by fengye on 2016/6/19.
+ * 总体成绩分析-尖子生情况-试卷情况分析
  */
-@ReportGeneratorInfo(range= Range.SCHOOL)
 @Component
-public class SchoolBasicScoreSegmentReport extends ReportGenerator{
-    @Autowired
-    TargetService targetService;
+@ReportGeneratorInfo(range = Range.PROVINCE)
+public class TotalTopStudentQuestTypeReport extends ReportGenerator{
 
     @Autowired
-    SubjectService subjectService;
+    TargetService targetService;
 
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
-
-        SheetTask projectTask = new SheetTask("全部科目", SchoolBasicScoreSegmentSheet.class);
-        projectTask.put("target", Target.project(projectId));
-        tasks.add(projectTask);
-
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
             String subjectName = SubjectService.getSubjectName(subject.getId().toString());
-            projectTask = new SheetTask(subjectName, SchoolBasicScoreSegmentSheet.class);
+            SheetTask projectTask = new SheetTask(subjectName, TotalTopStudentQuestTypeSheets.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }
-
         return tasks;
     }
 }

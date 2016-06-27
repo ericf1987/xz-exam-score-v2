@@ -46,6 +46,9 @@ public class DownloadAnalysisService {
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
         //根据文件参数获取文件路径
         String[] paths = ReportNameMappings.getFileName(filePath);
+        for(int i = 0; i < filePath.length; i++){
+            System.out.println("编码-->" + filePath[i] + ", 路径-->" + paths[i]);
+        }
         List<Map<String, String>> pathList = new ArrayList<>();
         //压缩文件名称（学校名称-考试分析报表）
         String zipFileName = schoolService.findSchool(projectId, schoolId).getString("name") + "-考试分析报表.zip";
@@ -55,7 +58,6 @@ public class DownloadAnalysisService {
             pathList.addAll(category);
         }
         Map<String, Object> resultMap = createZipFiles(pathList, zipFileName);
-        System.out.println(resultMap.toString());
         return Result.success().set("downloadInfo", resultMap);
     }
 
@@ -70,6 +72,7 @@ public class DownloadAnalysisService {
             FileInputStream fis;
             for (Map<String, String> filePath : pathList) {
                 if (!new File(filePath.get("srcFile")).exists()) {
+                    System.out.println("不存在文件-->" + filePath.get("srcFile"));
                     failureList.add(filePath.get("zipFile"));
                     continue;
                 }
@@ -90,7 +93,7 @@ public class DownloadAnalysisService {
         //判断压缩文件中是否有文件条目
         int size = getZipSize(directory);
         if (size != 0) {
-            resultMap.put("downloadURL", zipFileName);
+            resultMap.put("downloadURL", downloadURL + zipFileName);
         } else {
             resultMap.put("downloadURL", "");
         }

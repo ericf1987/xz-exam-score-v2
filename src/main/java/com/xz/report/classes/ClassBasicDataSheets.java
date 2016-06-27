@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/24.
+ * 班级成绩分析-基础数据-学生各科成绩明细
  */
 @Component
 public class ClassBasicDataSheets extends SheetGenerator {

@@ -5,7 +5,6 @@ import com.xz.bean.Target;
 import com.xz.report.ReportGenerator;
 import com.xz.report.SheetTask;
 import com.xz.report.classes.ReportGeneratorInfo;
-import com.xz.report.total.TotalTopStudentSheets;
 import com.xz.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/6/19.
+ * 学校成绩分析-尖子生情况-尖子生统计
  */
 @Component
 @ReportGeneratorInfo(range = Range.SCHOOL)

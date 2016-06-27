@@ -24,7 +24,7 @@ import java.util.Map;
  * @author by fengye on 2016/6/24.
  */
 @SuppressWarnings("unchecked")
-@Function(description = "班级成绩-排名分析", parameters = {
+@Function(description = "班级成绩-学生各科成绩明细", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
         @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)

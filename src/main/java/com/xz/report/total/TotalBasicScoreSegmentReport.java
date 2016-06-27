@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 总体/基础/分数段统计
+ * @author by fengye on 2016/6/6.
+ * 总体成绩分析/基础分析/分数段统计
  */
 @Component
 @ReportGeneratorInfo(range = Range.PROVINCE)

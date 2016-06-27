@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author by fengye on 2016/6/14.
  */
-@Function(description = "总体成绩-学科分析", parameters = {
+@Function(description = "总体成绩-报表下载", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "fileParam", type = Type.StringArray, description = "文件参数", required = false),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = false)

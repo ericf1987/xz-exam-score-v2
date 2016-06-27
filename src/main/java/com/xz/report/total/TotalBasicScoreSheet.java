@@ -24,7 +24,7 @@ import static com.xz.util.DoubleUtils.toPercent;
 /**
  * (description)
  * created at 16/05/31
- * 总体成绩分析/基础分析/分数分析
+ * 总体成绩分析-基础分析-分数分析
  * @author yiding_he
  */
 @Component

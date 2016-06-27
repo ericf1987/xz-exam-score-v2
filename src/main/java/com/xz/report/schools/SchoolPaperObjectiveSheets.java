@@ -11,7 +11,6 @@ import com.xz.report.SheetTask;
 import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/19.
- * 学校成绩分析/试卷分析/客观题分析
+ * 学校成绩分析-试卷分析-客观题分析
  */
 @Component
 public class SchoolPaperObjectiveSheets extends SheetGenerator{
@@ -45,12 +44,11 @@ public class SchoolPaperObjectiveSheets extends SheetGenerator{
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
-        String subjectId = target.match(Target.PROJECT) ? null : target.getId().toString();
+        String subjectId = target.getId().toString();
         Range schoolRange = sheetTask.getRange();
         Param param = new Param().setParameter("projectId", projectId).
                 setParameter("schoolId", schoolRange.getId()).setParameter("subjectId", subjectId);
         Result result = schoolObjectiveAnalysis.execute(param);
-        System.out.println("学校客观题分析-->" + result.getData());
         setupHeader(excelWriter, result.get("classes"));
         fillData(excelWriter, result);
     }

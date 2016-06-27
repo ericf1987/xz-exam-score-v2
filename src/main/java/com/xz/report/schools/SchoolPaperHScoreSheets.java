@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/25.
+ * 学校成绩分析-尖子生情况-高分段竞争力分析
  */
+@SuppressWarnings("unchecked")
 @Component
 public class SchoolPaperHScoreSheets extends SheetGenerator {
 

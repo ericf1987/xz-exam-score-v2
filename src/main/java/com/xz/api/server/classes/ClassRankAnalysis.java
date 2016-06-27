@@ -72,7 +72,7 @@ public class ClassRankAnalysis implements Server {
             map.put("studentName", studentName);
 
             long time = System.currentTimeMillis();
-            LOG.debug("------------------------- 开始进行学生：{}排名分析 -------------------------", studentId);
+            //LOG.debug("------------------------- 开始进行学生：{}排名分析 -------------------------", studentId);
 
             // 项目排行分析
             Map<String, Object> projectRankMap = getRankAnalysisMap(
@@ -85,7 +85,7 @@ public class ClassRankAnalysis implements Server {
 
             rankstats.add(map);
 
-            LOG.debug("------------------------- 完成学生：{}排名分析,总用时:{} -------------------------", studentId, System.currentTimeMillis() - time);
+            //LOG.debug("------------------------- 完成学生：{}排名分析,总用时:{} -------------------------", studentId, System.currentTimeMillis() - time);
         }
 
         rankstats.sort((o1, o2) -> {

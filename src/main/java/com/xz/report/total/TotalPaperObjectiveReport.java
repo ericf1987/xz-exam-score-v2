@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 总体/试卷/客观题分析
+ * @author by fengye on 2016/6/17.
+ * 总体成绩分析-试卷分析-客观题分析
  */
 @Component
 @ReportGeneratorInfo(range = Range.PROVINCE)

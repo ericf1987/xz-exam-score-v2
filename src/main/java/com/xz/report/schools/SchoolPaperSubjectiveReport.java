@@ -15,6 +15,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/6/19.
+ * 学校成绩分析-试卷分析-主观题分析
  */
 @Component
 @ReportGeneratorInfo(range= Range.SCHOOL)
@@ -25,7 +26,6 @@ public class SchoolPaperSubjectiveReport extends ReportGenerator{
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
-
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
             String subjectName = SubjectService.getSubjectName(subject.getId().toString());

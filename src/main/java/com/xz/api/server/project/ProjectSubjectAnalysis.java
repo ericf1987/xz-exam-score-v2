@@ -137,7 +137,6 @@ public class ProjectSubjectAnalysis implements Server {
             // 科目T值
             double tScore = tScoreService.queryTScore(projectId, target, range);
             map.put("tScore", DoubleUtils.round(tScore));
-            System.out.println("当前学校:" + range.getId().toString() + ",当前目标：" + target.getId() + ",T分值：" + DoubleUtils.round(tScoreService.queryTScore(projectId, target, range)));
 
             // 科目贡献度
             Document subjectRate = subjectRateMap.get(subject);

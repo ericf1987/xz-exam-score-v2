@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/6/17.
- * 总体成绩分析/尖子生情况/高分段竞争力分析
+ * 总体成绩分析-尖子生情况-高分段竞争力分析
  */
 @Component
 public class TotalTopStudentHScoreSheets extends SheetGenerator {
