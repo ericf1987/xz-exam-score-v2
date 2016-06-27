@@ -84,7 +84,6 @@ public class AverageService {
         if (document != null) {
             return document.getDouble("average");
         } else {
-            LOG.error("找不到平均分, project={}, range={}, target={}", projectId, range, target);
             return 0d;
         }
     }
