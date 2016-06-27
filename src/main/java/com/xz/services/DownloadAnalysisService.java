@@ -94,12 +94,13 @@ public class DownloadAnalysisService {
         //判断压缩文件中是否有文件条目
         int size = getZipSize(directory);
         if (size != 0) {
-            resultMap.put("downloadURL", downloadURL + zipFileName);
+            resultMap.put("downloadURL", downloadURL + directory);
         } else {
             resultMap.put("downloadURL", "");
         }
         //不存在的文件列表
         resultMap.put("failureList", failureList);
+        System.out.println(resultMap.toString());
         return resultMap;
     }
 
@@ -175,7 +176,7 @@ public class DownloadAnalysisService {
         String year = String.valueOf(cal.get(Calendar.YEAR));
         String month = String.valueOf(cal.get((Calendar.MONTH)) + 1);
         String date = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-        return StringUtil.joinPaths(downloadPath, projectId, schoolId,
+        return StringUtil.joinPaths(projectId, schoolId,
                 year, month, date);
     }
 
