@@ -93,16 +93,16 @@ public class RankSegmentTask extends Receiver {
                 currentRange = Range.school(id);
             }
 
-            Map<String, List<Document>> resultMap = generateSectionRate(
-                    rangeCount, currentRange,
-                    range, projectId, target
-            );
+            Map<String, List<Document>> resultMap =
+                    generateSectionRate(rangeCount, currentRange, range, projectId, target);
 
-            rankSegmentCol.updateMany(
-                    query(projectId, currentRange, target),
-                    $set("rankSegments", resultMap.get("rankSegments")),
-                    UPSERT
-            );
+            if (resultMap != null && !resultMap.isEmpty()) {
+                rankSegmentCol.updateMany(
+                        query(projectId, currentRange, target),
+                        $set("rankSegments", resultMap.get("rankSegments")),
+                        UPSERT
+                );
+            }
         }
 
     }
@@ -110,16 +110,15 @@ public class RankSegmentTask extends Receiver {
     private Map<String, List<Document>> generateSectionRate(
             int rangeCount, Range currentRange, Range range, String projectId, Target target) {
 
-        Map<String, List<Document>> sectionRate = new LinkedHashMap<String, List<Document>>();
+        Map<String, List<Document>> sectionRate = new LinkedHashMap<>();
         List<String> studentIds = studentService.getStudentIds(projectId, currentRange, target);
         int studentCount = studentIds.size();
 
         if (studentCount == 0) {
-            throw new IllegalStateException(
-                    "学生列表为空，project=" + projectId + ", range=" + currentRange + ", target=" + target);
+            return null;
         }
 
-        List<Document> rankSegmentMap = listBySection(PIECE_WISE, studentCount);
+        List<Document> rankSegmentMap = listBySection(PIECE_WISE);
 
         for (String studentId : studentIds) {
             int rank = rankService.getRank(projectId, range, target, studentId);
@@ -135,10 +134,10 @@ public class RankSegmentTask extends Receiver {
         return sectionRate;
     }
 
-    private List<Document> listBySection(double[] pieceWise, int size) {
-        List<Document> items = new ArrayList<Document>();
-        for (int i = 0; i < pieceWise.length; i++) {
-            items.add(new Document("rankPercent", pieceWise[i]).append("rate", 0).append("count", 0));
+    private List<Document> listBySection(double[] pieceWise) {
+        List<Document> items = new ArrayList<>();
+        for (double percent : pieceWise) {
+            items.add(new Document("rankPercent", percent).append("rate", 0).append("count", 0));
         }
         return items;
     }
@@ -149,7 +148,7 @@ public class RankSegmentTask extends Receiver {
             doc.put("count", doc.getInteger("rate"));
             if (doc.getInteger("rate") != null) {
                 int num = doc.getInteger("rate");
-                doc.put("rate", Double.valueOf(num) / Double.valueOf(classCount));
+                doc.put("rate", (double) num / (double) classCount);
             } else {
                 doc.put("rate", 0);
             }
@@ -157,21 +156,20 @@ public class RankSegmentTask extends Receiver {
     }
 
     private void addCount(double section, List<Document> docs) {
-        for (Document doc : docs) {
-            if (doc.getDouble("rankPercent").equals(section)) {
-                int num = doc.getInteger("rate");
-                doc.put("rate", num + 1);
-            }
-        }
+        docs.stream()
+                .filter(doc -> doc.getDouble("rankPercent").equals(section))
+                .forEach(doc -> {
+                    int num = doc.getInteger("rate");
+                    doc.put("rate", num + 1);
+                });
     }
 
     private double getSection(int rank, int schoolCount, double[] PIECE_WISE) {
-        double rate = Double.valueOf(rank) / Double.valueOf(schoolCount);
-        for (int i = 0; i < PIECE_WISE.length; i++) {
-            if (rate > PIECE_WISE[i]) {
-                continue;
-            } else {
-                return PIECE_WISE[i];
+        double rate = (double) rank / (double) schoolCount;
+
+        for (double aPIECE_WISE : PIECE_WISE) {
+            if (rate <= aPIECE_WISE) {
+                return aPIECE_WISE;
             }
         }
         return 0;

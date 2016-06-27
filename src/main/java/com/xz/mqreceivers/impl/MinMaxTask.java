@@ -12,8 +12,6 @@ import com.xz.services.StudentService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +27,6 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 @ReceiverInfo(taskType = "score_minmax")
 @Component
 public class MinMaxTask extends Receiver {
-
-    static final Logger LOG = LoggerFactory.getLogger(MinMaxTask.class);
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -52,23 +48,19 @@ public class MinMaxTask extends Receiver {
         String subjectId = targetService.getTargetSubjectId(projectId, target);
 
         // 查询考生列表
-        List<String> studentIds = queryStudentList(projectId, target, range, subjectId);
-
-        // 查询每个考生的分数，得出最高分最低分
-        Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
-        queryMinMax(projectId, target, studentIds, min, max);
-
-        // 保存最高分最低分
-        saveMinMax(projectId, target, range, min, max);
-    }
-
-    private List<String> queryStudentList(String projectId, Target target, Range range, String subjectId) {
         List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);
 
         if (studentIds.isEmpty()) {
-            LOG.error("学生数量为0, projectId={}, subjectId={}, range={}", projectId, subjectId, range);
+            saveMinMax(projectId, target, range, Value.of(0d), Value.of(0d));
+
+        } else {
+            // 查询每个考生的分数，得出最高分最低分
+            Value<Double> min = Value.of((double) Integer.MAX_VALUE), max = Value.of(0d);
+            queryMinMax(projectId, target, studentIds, min, max);
+
+            // 保存最高分最低分
+            saveMinMax(projectId, target, range, min, max);
         }
-        return studentIds;
     }
 
     private void queryMinMax(

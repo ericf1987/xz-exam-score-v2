@@ -37,23 +37,23 @@ public class QuestTypeService {
         return cache.get(cacheKey, () -> {
             ArrayList<QuestType> result = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
-            Document query = doc("project", projectId).append("questionTypeId", $ne(null));
+            Document query = doc("project", projectId).append("questTypeId", $ne(null));
 
             Consumer<String> getQuestType = questTypeId -> {
-                Document q = doc("project", projectId).append("questionTypeId", questTypeId);
-                Document p = doc("questionTypeName", 1).append("subject", 1);
+                Document q = doc("project", projectId).append("questTypeId", questTypeId);
+                Document p = doc("questTypeName", 1).append("subject", 1);
                 Document d = collection.find(q).projection(p).first();
 
                 if (d != null) {
                     QuestType t = new QuestType();
                     t.setId(questTypeId);
-                    t.setName(d.getString("questionTypeName"));
+                    t.setName(d.getString("questTypeName"));
                     t.setSubjectId(d.getString("subject"));
                     result.add(t);
                 }
             };
 
-            collection.distinct("questionTypeId", query, String.class).forEach(getQuestType);
+            collection.distinct("questTypeId", query, String.class).forEach(getQuestType);
             return result;
         });
     }
@@ -71,15 +71,15 @@ public class QuestTypeService {
 
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
-            Document query = doc("project", projectId).append("questionTypeId", questTypeId);
-            Document projection = doc("questionTypeName", 1).append("subject", 1);
+            Document query = doc("project", projectId).append("questTypeId", questTypeId);
+            Document projection = doc("questTypeName", 1).append("subject", 1);
             Document result = collection.find(query).projection(projection).first();
             if (result == null) {
                 return null;
             } else {
                 QuestType questType = new QuestType();
                 questType.setId(questTypeId);
-                questType.setName(result.getString("questionTypeName"));
+                questType.setName(result.getString("questTypeName"));
                 questType.setSubjectId(result.getString("subject"));
                 return questType;
             }
