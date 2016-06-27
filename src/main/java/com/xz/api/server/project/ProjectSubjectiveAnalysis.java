@@ -116,7 +116,7 @@ public class ProjectSubjectiveAnalysis implements Server {
             Target target = Target.quest(questId);
             double average = averageService.getAverage(projectId, range, target);
             map.put("average", DoubleUtils.round(average));
-            map.put("rate", DoubleUtils.toPercent(DoubleUtils.round(score == 0 ? 0 : average / score, true)));
+            map.put("rate", DoubleUtils.round(score == 0 ? 0 : average / score, true));
 
             map.put("questNo", quest.getString("questNo"));
             map.put("score", score);

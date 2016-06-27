@@ -121,6 +121,9 @@ public class ClassRankAnalysis implements Server {
 
         double fullScore = fullScoreService.getFullScore(projectId, target);
 
+        // 总分
+        rankMaps.put("fullScore", fullScore);
+
         // 学生得分/得分率
         double score = scoreService.getScore(projectId, Range.student(studentId), target);
         rankMaps.put("score", score);
