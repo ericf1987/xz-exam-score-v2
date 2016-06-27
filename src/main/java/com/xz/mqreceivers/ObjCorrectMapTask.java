@@ -39,7 +39,7 @@ public class ObjCorrectMapTask extends Receiver {
         int studentCount = studentService.getStudentCount(projectId, subject, range);
         int correctCount = scoreService.getQuestCorrentCount(projectId, questId, range);
 
-        double correctRate = (double) correctCount / studentCount;
+        double correctRate = studentCount == 0 ? 0 : ((double) correctCount / studentCount);
         scoreDatabase.getCollection("obj_correct_map").updateOne(
                 query(projectId, range, target),
                 $set(doc("correctCount", correctCount).append("correctRate", correctRate)),

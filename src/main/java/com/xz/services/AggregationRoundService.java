@@ -91,6 +91,11 @@ public class AggregationRoundService {
         return s;
     }
 
+    public void clearTask() {
+        Redis.RedisQueue queue = redis.getQueue(taskListKey);
+        queue.clear();
+    }
+
     /**
      * 从队列中取指定类型的任务，会一直阻塞直到取到任务为止。用于单元测试
      *

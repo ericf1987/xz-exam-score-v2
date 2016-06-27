@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +79,9 @@ public class TopStudentListService {
      * @return  排名分段
      */
     public List<Map<String, Object>> getTopStudentRankSegment(String projectId, Range range) {
+
         String cacheKey = "top_student_rank_segment:" + projectId + ":" + range;
+
         return cache.get(cacheKey, () -> {
             ArrayList<Map<String, Object>> list = new ArrayList<>();
             int totalTopStudentCount = getTopStudentTotalCount(projectId, range);
@@ -116,8 +119,15 @@ public class TopStudentListService {
     public int getTopStudentTotalCount(String projectId, Range range) {
         String cacheKey = "top_student_count:" + projectId + ":" + range;
         return cache.get(cacheKey, () -> {
+
             int studentCount = studentService.getStudentCount(projectId, range);
-            return (int) ((studentCount * TOP_STUDENT_RATE) + 0.5);
+            if (studentCount == 0) {
+                return 0;
+            }
+
+            // 对于人数有小数的情况，四舍五入取整
+            double topCount = studentCount * TOP_STUDENT_RATE;
+            return new BigDecimal(topCount).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
         });
     }
 

@@ -49,6 +49,7 @@ public class PrepareDataService {
         prepareQuestTypeList(projectId);
         LOG.info("统计判断题选项...");
         prepareFixQuestOptions(projectId);
+        LOG.info("统计准备工作完成。");
     }
 
     /**

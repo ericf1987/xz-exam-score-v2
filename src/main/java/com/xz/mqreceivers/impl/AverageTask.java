@@ -53,8 +53,14 @@ public class AverageTask extends Receiver {
 
             // 计算平均分
             int studentCount = studentService.getStudentCount(projectId, range);
-            double totalScore = document.getDouble("totalScore");
-            double average = totalScore / studentCount;
+            double average;
+
+            if (studentCount == 0) {
+                average = 0;
+            } else {
+                double totalScore = document.getDouble("totalScore");
+                average = totalScore / studentCount;
+            }
 
             // 保存平均分
             averageCollection.updateOne(query, $set("average", average), MongoUtils.UPSERT);

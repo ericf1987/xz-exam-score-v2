@@ -2,9 +2,7 @@ package com.xz.controllers;
 
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.bean.ProjectStatus;
-import com.xz.services.AggregationService;
-import com.xz.services.ProjectConfigService;
-import com.xz.services.ProjectStatusService;
+import com.xz.services.*;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +37,12 @@ public class AggregationTaskController {
     @Autowired
     ProjectStatusService projectStatusService;
 
+    @Autowired
+    PrepareDataService prepareDataService;
+
+    @Autowired
+    AggregationRoundService aggregationRoundService;
+
     /**
      * 开始统计任务
      *
@@ -52,8 +56,19 @@ public class AggregationTaskController {
             @RequestParam("task") String taskType
     ) {
 
+        // 照顾以前的 student_list
+        if (taskType.equals("student_list")) {
+            prepareDataService.prepare(projectId);
+            return Result.success();
+        }
+
         String aggregationId = UUID.randomUUID().toString();
         TaskDispatcher taskDispatcher = taskDispatcherFactory.getTaskDispatcher(taskType);
+
+        if (taskDispatcher == null) {
+            return Result.fail("找不到任务 " + taskType + " 的分发类");
+        }
+
         aggregationService.runDispatchers(projectId, aggregationId, Collections.singletonList(taskDispatcher));
         return Result.success("项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。");
     }
@@ -93,5 +108,11 @@ public class AggregationTaskController {
         boolean running = aggregationService.isAggregationRunning(projectId);
         ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
         return Result.success().set("running", running).set("status", projectStatus.name());
+    }
+
+    @RequestMapping(value = "/clear/tasks", method = RequestMethod.POST)
+    public Result clearRedisQueue() {
+        aggregationRoundService.clearTask();
+        return Result.success();
     }
 }
