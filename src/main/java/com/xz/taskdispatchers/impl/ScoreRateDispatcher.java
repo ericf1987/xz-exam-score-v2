@@ -2,6 +2,7 @@ package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
+import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
@@ -25,15 +26,26 @@ public class ScoreRateDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.STUDENT, Range.CLASS, Range.SCHOOL);
+        // 当前统计得分率的范围：总体、学校、班级
+        // 当前统计得分率的目标：题型、主观题
 
-        List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST_TYPE, Target.QUEST, Target.POINT, Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.PROJECT);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
+        List<Target> targets = targetService.queryTargets(projectId, Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE);
 
         for (Range range : ranges) {
             for (Target target : targets) {
+
+                // 客观题不参与得分率统计
+                if (isObjective(target)) {
+                    continue;
+                }
+
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
             }
         }
+    }
+
+    private boolean isObjective(Target target) {
+        return target.match(Target.SUBJECT_OBJECTIVE) && target.getId(SubjectObjective.class).isObjective();
     }
 }
