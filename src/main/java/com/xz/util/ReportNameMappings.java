@@ -53,11 +53,35 @@ public class ReportNameMappings {
         List<String> fileNames = new ArrayList<>();
         for (String aCode : code) {
             String[] param = aCode.split("-");
-            String filename = PRIMARY_CLASSIFY_CODE_MAP.get(param[0]) + "-"
-                    + SECONDARY_CLASSIFY_CODE_MAP.get(param[1]) + "-"
+            String filename = PRIMARY_CLASSIFY_CODE_MAP.get(param[0]) + "-->"
+                    + SECONDARY_CLASSIFY_CODE_MAP.get(param[1]) + "-->"
                     + FILE_NAME_CODE_MAP.get(param[2]);
             fileNames.add(filename);
+            //如果包含总体，学校，班级的任何一张报表，则将基础数据附带在对应文件夹生成zip包
         }
-        return fileNames.toArray(new String[fileNames.size()]);
+
+        return fileNames.toArray(new String[addBySeed(fileNames).size()]);
+    }
+
+    public static List<String> addBySeed(List<String> fileNames){
+        String[] seeds = new String[]{
+                "总体成绩分析","学校成绩分析","班级成绩分析"
+        };
+        for(String seed : seeds){
+            String fileItem = seed + "-->基础数据-->学生各科成绩明细.xlsx";
+            for(String fileName : fileNames){
+                if(fileName.indexOf(seed) != -1){
+                    fileNames.add(fileItem);
+                    break;
+                }else if(fileName.indexOf(seed) != -1){
+                    fileNames.add(fileItem);
+                    break;
+                }else if(fileName.indexOf(seed) != -1){
+                    fileNames.add(fileItem);
+                    break;
+                }
+            }
+        }
+        return fileNames;
     }
 }

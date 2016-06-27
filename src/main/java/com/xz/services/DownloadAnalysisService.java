@@ -46,24 +46,26 @@ public class DownloadAnalysisService {
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
         //根据文件参数获取文件路径
         String[] paths = ReportNameMappings.getFileName(filePath);
-        for(int i = 0; i < filePath.length; i++){
-            System.out.println("编码-->" + filePath[i] + ", 路径-->" + paths[i]);
-        }
         List<Map<String, String>> pathList = new ArrayList<>();
         //压缩文件名称（学校名称-考试分析报表）
         String zipFileName = schoolService.findSchool(projectId, schoolId).getString("name") + "-考试分析报表.zip";
         for (String path : paths) {
-            String[] param = path.split("-");
+            String[] param = path.split("-->");
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
             pathList.addAll(category);
         }
-        Map<String, Object> resultMap = createZipFiles(pathList, zipFileName);
+        Map<String, Object> resultMap = createZipFiles(projectId, schoolId, pathList, zipFileName);
         return Result.success().set("downloadInfo", resultMap);
     }
 
     //将文件列表中的文件添置至压缩包
-    public Map<String, Object> createZipFiles(List<Map<String, String>> pathList, String zipFileName) {
-        String directory = downloadPath + zipFileName;
+    public Map<String, Object> createZipFiles(String projectId, String schoolId, List<Map<String, String>> pathList, String zipFileName) {
+        String prefix = getZipFilePrefix(projectId, schoolId);
+        File dir = new File(prefix);
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
+        String directory = prefix + File.separator +zipFileName;
         File file = new File(directory);
         Map<String, Object> resultMap = new HashMap<>();
         List<String> failureList = new ArrayList<>();
@@ -72,7 +74,6 @@ public class DownloadAnalysisService {
             FileInputStream fis;
             for (Map<String, String> filePath : pathList) {
                 if (!new File(filePath.get("srcFile")).exists()) {
-                    System.out.println("不存在文件-->" + filePath.get("srcFile"));
                     failureList.add(filePath.get("zipFile"));
                     continue;
                 }
@@ -165,10 +166,17 @@ public class DownloadAnalysisService {
                 md5.substring(0, 2), md5.substring(2, 4), projectId, filePath);
     }
 
-    public String getZipFilePrefix() {
-        UUID uuid = UUID.randomUUID();
+    public String getZipFilePrefix(String projectId, String schoolId) {
+/*        UUID uuid = UUID.randomUUID();
         String md5 = MD5.digest(uuid.toString());
-        return StringUtil.joinPaths(md5.substring(0, 2), md5.substring(2, 4));
+        return StringUtil.joinPaths(md5.substring(0, 2), md5.substring(2, 4));*/
+        //在zip包生成的目录下面追加一个文件路径，格式为projectId/schoolId/yyyy/mm/dd/
+        Calendar cal = Calendar.getInstance();
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String month = String.valueOf(cal.get((Calendar.MONTH)) + 1);
+        String date = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        return StringUtil.joinPaths(downloadPath, projectId, schoolId,
+                year, month, date);
     }
 
 }
