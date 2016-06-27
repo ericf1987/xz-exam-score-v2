@@ -25,12 +25,8 @@ public class MinMaxTaskDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
-        // 题目的最高最低分统计在 mapreduce 中完成
-        List<Target> targets = targetService.queryTargets(projectId,
-                Target.PROJECT, Target.SUBJECT);
-
-        List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.CLASS, Range.SCHOOL, Range.AREA, Range.CITY, Range.PROVINCE);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
 
         for (Target target : targets) {
             for (Range range : ranges) {
