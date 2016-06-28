@@ -70,7 +70,7 @@ public class RankPositionTask extends Receiver {
         //获取总人数
         int count = scoreMapDoc.getInteger("count");
         if (count == 0) {
-            LOG.error("没有排名信息：" + query.toJson());
+            return;
         }
 
         //获取总分表中的scoreMap节点
