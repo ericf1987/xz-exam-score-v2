@@ -81,7 +81,7 @@ public class ImportProjectService {
         importProjectInfo(projectId, context);
         importSubjects(projectId);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
-        importPoints(projectId, context);
+        importPointsAndLevels(projectId, context);
         importQuestTypes(projectId, context);
         importSchools(projectId, context);
         importClasses(projectId, context);
@@ -97,12 +97,13 @@ public class ImportProjectService {
         importQuests(projectId, new Context());
     }
 
-    // 导入考试知识点
+    // 导入考试知识点/能力层级
     @SuppressWarnings({"unchecked", "MismatchedQueryAndUpdateOfCollection"})
-    private void importPoints(String projectId, Context context) {
+    private void importPointsAndLevels(String projectId, Context context) {
         List<Document> projectQuests = context.get("quests");
         Set<String> existPoints = new HashSet<>();   // 方法内的缓存，因为 pointService.exists() 方法不做缓存
         DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
+        DoubleCounterMap<String> levelFullScore = new DoubleCounterMap<>();
         DoubleCounterMap<PointLevel> pointLevelFullScore = new DoubleCounterMap<>();
 
         LOG.info("导入项目 " + projectId + " 知识点信息...");
@@ -116,6 +117,7 @@ public class ImportProjectService {
 
                 for (String level : points.get(pointId)) {
                     pointLevelFullScore.incre(new PointLevel(pointId, level), score);
+                    levelFullScore.incre(level, score);
                 }
 
                 //////////////////////////////////////////////////////////////
@@ -138,12 +140,21 @@ public class ImportProjectService {
             }
         }
 
-        for (String pointId : pointFullScore.keySet()) {
-            fullScoreService.saveFullScore(projectId, Target.point(pointId), pointFullScore.get(pointId));
+        for (Map.Entry<String, Double> entry : pointFullScore.entrySet()) {
+            String point = entry.getKey();
+            double fullScore = entry.getValue();
+            fullScoreService.saveFullScore(projectId, Target.point(point), fullScore);
         }
 
-        for (PointLevel pointLevel : pointLevelFullScore.keySet()) {
-            double fullScore = pointLevelFullScore.get(pointLevel);
+        for (Map.Entry<String, Double> entry : levelFullScore.entrySet()) {
+            String level = entry.getKey();
+            double fullScore = entry.getValue();
+            fullScoreService.saveFullScore(projectId, Target.level(level), fullScore);
+        }
+
+        for (Map.Entry<PointLevel, Double> entry : pointLevelFullScore.entrySet()) {
+            PointLevel pointLevel = entry.getKey();
+            double fullScore = entry.getValue();
             fullScoreService.saveFullScore(projectId, Target.pointLevel(pointLevel), fullScore);
         }
     }
