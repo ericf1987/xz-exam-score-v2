@@ -80,8 +80,10 @@ public class ClassBasicDataAnalysis implements Server {
             map.put("class", className);
             map.put("city", cityName);
 
-            Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), Range.city(student.getString("city")), studentId);
-            List<Map<String, Object>> subjectAnalysis = getSubjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), Range.city(student.getString("city")), studentId);
+            //获取省排名
+            Range province = Range.province(student.getString("province"));
+            Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), province, studentId);
+            List<Map<String, Object>> subjectAnalysis = getSubjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), province, studentId);
             map.put("projectAnalysis", projectAnalysis);
             map.put("subjectAnalysis", subjectAnalysis);
             studentBasicData.add(map);
@@ -96,14 +98,14 @@ public class ClassBasicDataAnalysis implements Server {
         return Result.success().set("studentBasicData", studentBasicData);
     }
 
-    private Map<String,Object> getProjectAnalysis(String projectId, Range clazz, Range school, Range city, String studentId) {
+    private Map<String,Object> getProjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId) {
         Map<String, Object> map = new HashMap<>();
         //获取总分(全科目总分)
         double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
         //获取排名
         int classRankIndex = rankService.getRank(projectId, clazz, Target.project(projectId), studentId);
         int schoolRankIndex = rankService.getRank(projectId, school, Target.project(projectId), studentId);
-        int totalRankIndex = rankService.getRank(projectId, city, Target.project(projectId), studentId);
+        int totalRankIndex = rankService.getRank(projectId, province, Target.project(projectId), studentId);
         map.put("score", score);
         map.put("classRankIndex", classRankIndex);
         map.put("schoolRankIndex", schoolRankIndex);
@@ -111,7 +113,7 @@ public class ClassBasicDataAnalysis implements Server {
         return map;
     }
 
-    private List<Map<String,Object>> getSubjectAnalysis(String projectId, Range clazz, Range school, Range city, String studentId) {
+    private List<Map<String,Object>> getSubjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId) {
         //获取考试的科目
         List<String> subjects = subjectService.querySubjects(projectId);
         List<Map<String, Object>> subjectAnalysis = new ArrayList<>();
@@ -124,7 +126,7 @@ public class ClassBasicDataAnalysis implements Server {
             //获取排名
             int clazzRankIndex = rankService.getRank(projectId, clazz, Target.subject(subject), studentId);
             int schoolRankIndex = rankService.getRank(projectId, school, Target.subject(subject), studentId);
-            int totalRankIndex = rankService.getRank(projectId, city, Target.subject(subject), studentId);
+            int totalRankIndex = rankService.getRank(projectId, province, Target.subject(subject), studentId);
             map.put("score", score);
             map.put("classRankIndex", clazzRankIndex);
             map.put("schoolRankIndex", schoolRankIndex);
