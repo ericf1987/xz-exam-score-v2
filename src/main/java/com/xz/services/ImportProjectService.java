@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.api.Param;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * (description)
@@ -59,6 +62,12 @@ public class ImportProjectService {
     QuestService questService;
 
     @Autowired
+    PointService pointService;
+
+    @Autowired
+    QuestTypeService questTypeService;
+
+    @Autowired
     FullScoreService fullScoreService;
 
     @Autowired
@@ -72,6 +81,7 @@ public class ImportProjectService {
         importSubjects(projectId);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPoints(projectId, context);
+        importQuestTypes(projectId, context);
         importSchools(projectId, context);
         importClasses(projectId, context);
         importStudents(projectId, context);
@@ -92,13 +102,105 @@ public class ImportProjectService {
     @SuppressWarnings("unchecked")
     private void importPoints(String projectId, Context context) {
         List<Document> projectQuests = context.get("quests");
-        Set<String> pointIds = new HashSet<>();
+        Set<String> existPoints = new HashSet<>();   // 方法内的缓存，因为 pointService.exists() 方法不做缓存
+        DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
 
+        LOG.info("导入项目 " + projectId + " 知识点信息...");
         for (Document quest : projectQuests) {
+            double score = quest.getDouble("score");
             Map<String, String> points = (Map<String, String>) quest.get("points");
 
+            for (String pointId : points.keySet()) {
+                pointFullScore.incre(pointId, score);
+
+                if (existPoints.contains(pointId)) {
+                    continue;
+                }
+
+                if (pointService.exists(pointId)) {
+                    existPoints.add(pointId);
+                    continue;
+                }
+
+                Param param = new Param().setParameter("pointId", pointId);
+                Result result = interfaceClient.request("QueryKnowledgePointById", param);
+                Map<String, Object> point = result.get("point");
+                pointService.savePoint(pointId, point.get("point_name").toString());
+            }
         }
 
+        for (String pointId : pointFullScore.keySet()) {
+            fullScoreService.saveFullScore(projectId, Target.point(pointId), pointFullScore.get(pointId));
+        }
+    }
+
+    private void importQuestTypes(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 题型信息");
+
+        List<Document> projectQuests = context.get("quests");
+        Map<String, Document> questTypeMap = new HashMap<>();
+        DoubleCounterMap<String> questTypeFullScore = new DoubleCounterMap<>();
+
+        for (Document quest : projectQuests) {
+            double score = quest.getDouble("score");
+            String subject = quest.getString("subject");
+            String questTypeId = quest.getString("questionTypeId");
+            String questTypeName = quest.getString("questionTypeName");
+
+            questTypeFullScore.incre(questTypeId, score);
+
+            if (!questTypeMap.containsKey(questTypeId)) {
+                questTypeMap.put(questTypeId, doc("project", projectId)
+                        .append("subject", subject)
+                        .append("questTypeId", questTypeId)
+                        .append("questTypeName", questTypeName));
+            }
+        }
+
+        for (Document questType : questTypeMap.values()) {
+            questTypeService.saveQuestType(questType);
+        }
+
+        for (String questTypeId : questTypeFullScore.keySet()) {
+            fullScoreService.saveFullScore(
+                    projectId, Target.questType(questTypeId), questTypeFullScore.get(questTypeId));
+        }
+    }
+
+    // 导入考题信息
+    private void importQuests(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 考题信息...");
+        Param param = new Param().setParameter("projectId", projectId);
+        Result result = interfaceClient.request("QueryQuestionByProject", param);
+        List<Document> projectQuests = new ArrayList<>();
+
+        JSONArray jsonArray = result.get("quests");
+        context.put("questCount", jsonArray.size());
+
+        jsonArray.forEach(o -> {
+            JSONObject questObj = (JSONObject) o;
+            Document questDoc = new Document();
+            questDoc.put("project", projectId);
+            questDoc.put("questId", questObj.getString("questId"));
+            questDoc.put("subject", questObj.getString("subjectId"));
+            questDoc.put("questType", questObj.getString("questType"));
+            questDoc.put("isObjective", isObjective(questObj.getString("questType")));
+            questDoc.put("questNo", questObj.getString("paperQuestNum"));
+            questDoc.put("score", questObj.getDoubleValue("score"));
+            questDoc.put("standardAnswer", questObj.getString("answer"));
+            questDoc.put("points", questObj.get("points"));
+            questDoc.put("items", questObj.get("items"));
+            questDoc.put("answer", questObj.get("answer"));
+            questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
+            questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
+
+            fixQuest(questDoc);
+
+            projectQuests.add(questDoc);
+        });
+
+        context.put("quests", projectQuests);
+        questService.saveProjectQuests(projectId, projectQuests);
     }
 
     // 导入考试班级
@@ -216,44 +318,11 @@ public class ImportProjectService {
         areaService.saveProjectAreas(projectId, areas);
     }
 
-    // 导入考题信息
-    private void importQuests(String projectId, Context context) {
-        LOG.info("导入项目 " + projectId + " 考题信息...");
-        Param param = new Param().setParameter("projectId", projectId);
-        Result result = interfaceClient.request("QueryQuestionByProject", param);
-        List<Document> projectQuests = new ArrayList<>();
-
-        JSONArray jsonArray = result.get("quests");
-        context.put("questCount", jsonArray.size());
-
-        jsonArray.forEach(o -> {
-            JSONObject questObj = (JSONObject) o;
-            Document questDoc = new Document();
-            questDoc.put("project", projectId);
-            questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", questObj.getString("subjectId"));
-            questDoc.put("questType", questObj.getString("questType"));
-            questDoc.put("isObjective", isObjective(questObj.getString("questType")));
-            questDoc.put("questNo", questObj.getString("paperQuestNum"));
-            questDoc.put("score", questObj.getDoubleValue("score"));
-            questDoc.put("standardAnswer", questObj.getString("answer"));
-            questDoc.put("points", questObj.get("points"));
-            questDoc.put("items", questObj.get("items"));
-            questDoc.put("answer", questObj.get("answer"));
-            questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
-            questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
-
-            fixQuest(questDoc);
-
-            projectQuests.add(questDoc);
-        });
-
-        context.put("quests", projectQuests);
-        questService.saveProjectQuests(projectId, projectQuests);
-    }
-
+    // 修复官网的题目记录属性不全导致的问题
     private void fixQuest(Document questDoc) {
 
+        // 如果卷库当中没有题目记录，则会导致 questId 为空
+        // 在这里临时生成一个新的 questId 补上。
         if (questDoc.getString("questId") == null) {
             questDoc.put("questId", UUID.randomUUID().toString().replace("-", ""));
         }

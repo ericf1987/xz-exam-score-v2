@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$ne;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 @Service
 public class QuestTypeService {
@@ -113,5 +112,21 @@ public class QuestTypeService {
 
             return result;
         });
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    public void saveQuestType(String projectId, String subjectId, String questTypeId, String questTypeName) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("quest_type_list");
+        Document query = doc("project", projectId).append("subjectId", subjectId).append("questTypeId", questTypeId);
+        Document update = $set("questTypeName", questTypeName);
+        c.updateMany(query, update, UPSERT);
+    }
+
+    public void saveQuestType(Document doc) {
+        saveQuestType(
+                doc.getString("project"), doc.getString("subject"),
+                doc.getString("questTypeId"), doc.getString("questTypeName")
+        );
     }
 }
