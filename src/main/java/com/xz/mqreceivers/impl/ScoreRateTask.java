@@ -10,10 +10,13 @@ import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.FullScoreService;
 import com.xz.services.ScoreLevelService;
 import com.xz.services.ScoreService;
+import com.xz.services.TargetService;
 import com.xz.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -36,19 +39,22 @@ public class ScoreRateTask extends Receiver {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    TargetService targetService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
+        String projectId = aggrTask.getProjectId();
         Range range = aggrTask.getRange();
 
-        if (range.match(Range.STUDENT)) {
-            processStudentScoreRate(aggrTask);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+
+        for (Target target : targets) {
+            processStudentScoreRate(projectId, range, target);
         }
     }
 
-    private void processStudentScoreRate(AggrTask aggrTask) {
-        String projectId = aggrTask.getProjectId();
-        Range range = aggrTask.getRange();
-        Target target = aggrTask.getTarget();
+    private void processStudentScoreRate(String projectId, Range range, Target target) {
 
         double score = scoreService.getScore(projectId, range, target);
         double fullScore = fullScoreService.getFullScore(projectId, target);

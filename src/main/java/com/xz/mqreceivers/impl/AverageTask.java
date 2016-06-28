@@ -42,9 +42,7 @@ public class AverageTask extends Receiver {
         MongoCollection<Document> averageCollection = scoreDatabase.getCollection("average");
 
         FindIterable<Document> totalScores = totalScoreCollection.find(
-                new Document("project", projectId)
-                        .append("range", range2Doc(range))
-        );
+                new Document("project", projectId).append("range", range2Doc(range)));
 
         totalScores.forEach((Consumer<Document>) document -> {
             Document query = doc("range", document.get("range"))

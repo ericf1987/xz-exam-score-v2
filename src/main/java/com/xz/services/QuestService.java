@@ -3,16 +3,14 @@ package com.xz.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.lang.CollectionUtils.asArrayList;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * (description)
@@ -38,7 +36,7 @@ public class QuestService {
     }
 
     public List<Document> getQuests(String projectId, String subjectId, boolean isObjective) {
-        return MongoUtils.toList(
+        return toList(
                 scoreDatabase.getCollection("quest_list").find(
                         doc("project", projectId)
                                 .append("subject", subjectId)
@@ -47,19 +45,19 @@ public class QuestService {
     }
 
     public List<Document> getQuests(String projectId, String subjectId) {
-        return MongoUtils.toList(
+        return toList(
                 scoreDatabase.getCollection("quest_list").find(
                         doc("project", projectId).append("subject", subjectId)));
     }
 
     public List<Document> getQuestsByQuestType(String projectId, String questType) {
-        return MongoUtils.toList(scoreDatabase.getCollection("quest_list").find(
+        return toList(scoreDatabase.getCollection("quest_list").find(
                 doc("project", projectId).append("questType", questType)
         ));
     }
 
     public List<Document> getQuests(String projectId) {
-        return MongoUtils.toList(
+        return toList(
                 scoreDatabase.getCollection("quest_list").find(doc("project", projectId)));
     }
 
@@ -73,7 +71,12 @@ public class QuestService {
      * @return 相关题目
      */
     public List<Document> getQuests(String projectId, String point, String level) {
-        return Collections.emptyList();
+        String cacheKey = "quests_by_pointlevel:" + projectId + ":" + point + ":" + level;
+
+        return simpleCache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append("points." + point, level);
+            return asArrayList(toList(scoreDatabase.getCollection("quest_list").find(query)));
+        });
     }
 
     /**
@@ -85,7 +88,7 @@ public class QuestService {
      * @return 题目列表
      */
     public List<Document> getQuests(String projectId, boolean isObjective) {
-        return MongoUtils.toList(
+        return toList(
                 scoreDatabase.getCollection("quest_list").find(
                         doc("project", projectId).append("isObjective", isObjective)));
     }

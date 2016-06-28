@@ -26,12 +26,10 @@ public class ScoreMapDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         // 对哪些范围进行排名
-        List<Range> ranges = rangeService.queryRanges(projectId,
-                Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
+        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
 
         // 对哪些分数进行排名
-        List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.PROJECT, Target.POINT, Target.QUEST_TYPE);
+        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.PROJECT);
 
         // 如果项目需要对文综理综进行整合（考试本身没有这两个科目），则额外
         // 添加文综理综的排名统计（总分统计在 CombinedSubjectScoreDispatcher 里已经做了）
