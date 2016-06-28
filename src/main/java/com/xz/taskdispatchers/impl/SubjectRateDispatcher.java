@@ -3,7 +3,7 @@ package com.xz.taskdispatchers.impl;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.services.RangeService;
-import com.xz.services.TargetService;
+import com.xz.services.StudentService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,19 @@ public class SubjectRateDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Autowired
-    TargetService targetService;
+    StudentService studentService;
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS, Range.STUDENT);
+                projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
 
         for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
         }
+
+        // 为每个学生发布任务需要调用单独的方法，否则可能导致效率低下
+        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
     }
 }

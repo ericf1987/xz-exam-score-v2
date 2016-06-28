@@ -20,18 +20,25 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by fengye on 2016/5/25.
+ * (description)
+ * created at 2016/5/25
+ *
+ * @author fengye
  */
 @ReceiverInfo(taskType = "top_average")
 @Component
-public class TopAverageTask extends Receiver{
+public class TopAverageTask extends Receiver {
+
     @Autowired
     RangeService rangeService;
+
     @Autowired
     TargetService targetService;
+
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -46,15 +53,18 @@ public class TopAverageTask extends Receiver{
                 append("target", Mongo.target2Doc(target));
 
         Document scoreMap = scoreCol.find(query).first();
+        if (scoreMap == null) { // 可能整个班级/学校没有参加考试
+            return;
+        }
 
         //获取前30%,40%,50%排名的用户
         double arr[] = new double[]{0.3};
         //将总分更新至top_average表
-        List<Document> resultList = new ArrayList<Document>();
+        List<Document> resultList = new ArrayList<>();
         //对不同百分率进行便利查询
-        for(double d : arr){
-            int count = scoreMap.getInteger("count").intValue();
-            double aver = getAverage((List<Document>)scoreMap.get("scoreMap"), d, count);
+        for (double d : arr) {
+            int count = scoreMap.getInteger("count");
+            double aver = getAverage((List<Document>) scoreMap.get("scoreMap"), d, count);
             Document result = new Document("average", aver).append("percent", d);
             resultList.add(result);
         }
@@ -67,22 +77,22 @@ public class TopAverageTask extends Receiver{
         );
     }
 
-    private double getAverage(List<Document> scoreMaps, double v, int count){
+    private double getAverage(List<Document> scoreMaps, double v, int count) {
         //排序
         int cnt = 0;
         double sum = 0;
         Collections.sort(scoreMaps, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
         int requireCount = Double.valueOf(count * v).intValue();
 
-        if(requireCount == 0){
+        if (requireCount == 0) {
             return 0d;
-        }else if(requireCount > 0 && requireCount <= 1){
+        } else if (requireCount > 0 && requireCount <= 1) {
             return scoreMaps.get(0).getDouble("score");
-        }else{
-            for(Document d : scoreMaps){
+        } else {
+            for (Document d : scoreMaps) {
                 cnt += d.getInteger("count");
                 sum += d.getDouble("score") * d.getInteger("count");
-                if(cnt >= requireCount){
+                if (cnt >= requireCount) {
                     cnt = cnt - d.getInteger("count");
                     int offset = requireCount - cnt;
                     sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score") * offset;

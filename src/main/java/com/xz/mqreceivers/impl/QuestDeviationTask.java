@@ -72,6 +72,10 @@ public class QuestDeviationTask extends Receiver {
         MongoCollection<Document> questDeviationCol = scoreDatabase.getCollection("quest_deviation");
 
         Document oneScoreMap = scoreMapCol.find(query).first();
+        if (oneScoreMap == null) {  // 可能对应的 range 考生全部没有分数
+            return;
+        }
+
         int count = oneScoreMap.getInteger("count");
         //排名27%所占的人数
         int rankCount = (int) Math.ceil(count * DEVIATION_RATE);

@@ -1,15 +1,21 @@
 package com.xz.taskdispatchers;
 
+import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.ProjectConfig;
+import com.xz.bean.Range;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.services.AggregationRoundService;
+import com.xz.services.StudentService;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * (description)
@@ -82,5 +88,16 @@ public abstract class TaskDispatcher {
     public String getDependentTaskType() {
         TaskDispatcherInfo info = this.getClass().getAnnotation(TaskDispatcherInfo.class);
         return info == null ? null : (info.dependentTaskType().equals("") ? null : info.dependentTaskType());
+    }
+
+    //////////////////////////////////////////////////////////////
+
+    // 每个考生发布一个任务，这个任务只有 Range
+    protected void dispatchTaskForEveryStudent(String projectId, String aggregationId, StudentService studentService) {
+        FindIterable<Document> list = studentService.getProjectStudentList(projectId, null, 0, doc("student", 1));
+        for (Document document : list) {
+            String studentId = document.getString("student");
+            dispatchTask(createTask(projectId, aggregationId).setRange(Range.student(studentId)));
+        }
     }
 }

@@ -33,6 +33,8 @@ public class ReceiverManager {
 
     private boolean stop = false;
 
+    private String lastTaskType = null;
+
     @Autowired
     AggregationRoundService aggregationRoundService;
 
@@ -104,6 +106,10 @@ public class ReceiverManager {
 
         if (taskJson != null) {
             AggrTask aggrTask = JSON.parseObject(taskJson, AggrTask.class);
+            if (!aggrTask.getType().equals(lastTaskType)) {
+                lastTaskType = aggrTask.getType();
+                LOG.info("---- 开始执行队列中的 " + lastTaskType + " 任务。");
+            }
             handleCommand(aggrTask, true);
         }
     }

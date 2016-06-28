@@ -63,6 +63,10 @@ public class RankPositionTask extends Receiver {
         List<Document> positions = new ArrayList<>();
         Document scoreMapDoc = scoreMapCollection.find(query).first();
 
+        if (scoreMapDoc == null) {  // 可能对应的 range 考生全部没有分数
+            return;
+        }
+
         //获取总人数
         int count = scoreMapDoc.getInteger("count");
         if (count == 0) {

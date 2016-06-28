@@ -40,11 +40,12 @@ public class PrepareDataService {
     ScoreService scoreService;
 
     public void prepare(String projectId) {
+        LOG.info("----对项目 {} 数据进行预处理...", projectId);
         LOG.info("统计学生数量...");
         prepareStudentList(projectId);
         LOG.info("统计判断题选项...");
         prepareFixQuestOptions(projectId);
-        LOG.info("统计准备工作完成。");
+        LOG.info("----对项目 {} 数据预处理完成。", projectId);
     }
 
     /**

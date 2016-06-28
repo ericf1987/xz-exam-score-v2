@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.concurrent.LockFactory;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.ProjectConfig;
@@ -112,10 +113,13 @@ public class StudentService {
      * @param projectId       项目ID
      * @param range           范围（可选，null 表示整个项目）
      * @param maxStudentCount 最多查询多少个学生（调试用，<=0 表示不限）
+     * @param projection      要取哪些字段（可选，null 表示取所有字段）
      *
      * @return 学生列表
      */
-    public FindIterable<Document> getProjectStudentList(String projectId, Range range, int maxStudentCount) {
+    public FindIterable<Document> getProjectStudentList(
+            String projectId, Range range, int maxStudentCount, Document projection) {
+
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
         Document query = doc("project", projectId);
@@ -127,6 +131,10 @@ public class StudentService {
 
         if (maxStudentCount > 0) {
             findIterable.limit(maxStudentCount);
+        }
+
+        if (projection != null) {
+            findIterable.projection(projection);
         }
 
         return findIterable;
@@ -153,8 +161,8 @@ public class StudentService {
      * 查询学生列表
      *
      * @param projectId 项目ID
-     * @param subjectId 科目ID
-     * @param range     范围
+     * @param subjectId 科目ID（可选，null表示不论科目）
+     * @param range     范围（可选，null表示所有参考学生）
      *
      * @return 学生ID列表
      */
@@ -170,20 +178,25 @@ public class StudentService {
 
         String cacheKey = getCacheKey("student_list:", projectId, subjectIdValue.get(), range);
 
-        return simpleCache.get(cacheKey, () -> {
-            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
-            ArrayList<String> studentIds = new ArrayList<>();
-            Document query = new Document("project", projectId).append(range.getName(), range.getId());
+        synchronized (LockFactory.getLock(cacheKey)) {
+            return simpleCache.get(cacheKey, () -> {
+                MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+                ArrayList<String> studentIds = new ArrayList<>();
+                Document query = new Document("project", projectId);
+                if (range != null) {
+                    query.append(range.getName(), range.getId());
+                }
 
-            if (subjectIdValue.get() != null) {
-                query.append("subjects", subjectIdValue.get());
-            }
+                if (subjectIdValue.get() != null) {
+                    query.append("subjects", subjectIdValue.get());
+                }
 
-            FindIterable<Document> studentLists = students.find(query).projection(doc("student", 1));
-            studentLists.forEach((Consumer<Document>) doc -> studentIds.add(doc.getString("student")));
+                FindIterable<Document> studentLists = students.find(query).projection(doc("student", 1));
+                studentLists.forEach((Consumer<Document>) doc -> studentIds.add(doc.getString("student")));
 
-            return studentIds;
-        });
+                return studentIds;
+            });
+        }
     }
 
     /**

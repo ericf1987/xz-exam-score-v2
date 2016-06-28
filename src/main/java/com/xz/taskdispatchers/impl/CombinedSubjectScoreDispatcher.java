@@ -1,14 +1,11 @@
 package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
-import com.xz.bean.Range;
-import com.xz.services.RangeService;
+import com.xz.services.StudentService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 有些项目需要对文科理科分数合起来统计
@@ -18,17 +15,15 @@ import java.util.List;
 public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
 
     @Autowired
-    RangeService rangeService;
+    StudentService studentService;
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+
         if (!projectConfig.isCombineCategorySubjects()) {
             return;
         }
 
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.STUDENT);
-        for (Range range : ranges) {
-            dispatchTask(createTask(projectId, aggregationId).setRange(range));
-        }
+        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
     }
 }

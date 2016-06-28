@@ -1,16 +1,11 @@
 package com.xz.taskdispatchers.impl;
 
 import com.xz.bean.ProjectConfig;
-import com.xz.bean.Range;
-import com.xz.services.RangeService;
+import com.xz.services.StudentService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 注意：报表中的得分率都是算出来的，这里的得分率统计只为四率人数统计服务
@@ -23,17 +18,11 @@ import java.util.List;
 @Component
 public class ScoreRateDispatcher extends TaskDispatcher {
 
-    static final Logger LOG = LoggerFactory.getLogger(ScoreRateDispatcher.class);
-
     @Autowired
-    RangeService rangeService;
+    StudentService studentService;
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.STUDENT);
-        LOG.info("个人知识点得分率统计: ranges=" + ranges.size() );
-        for (Range range : ranges) {
-            dispatchTask(createTask(projectId, aggregationId).setRange(range));
-        }
+        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
     }
 }

@@ -1,7 +1,10 @@
 package com.xz.services;
 
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.concurrent.LockFactory;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.bean.Range;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,9 @@ public class RangeService {
 
     @Autowired
     SchoolService schoolService;
+
+    @Autowired
+    SimpleCache cache;
 
     /**
      * 查询指定项目的省份范围
@@ -91,27 +97,34 @@ public class RangeService {
     }
 
     private List<Range> queryStudentRangeList(String projectId) {
-        List<Range> result = new ArrayList<>();
-        Document query = doc("project", projectId);
+        String cacheKey = "student_ranges:" + projectId;
 
-        scoreDatabase.getCollection("student_list").find(query)
-                .forEach((Consumer<Document>) document ->
-                        result.add(new Range(Range.STUDENT, document.getString("student"))));
+        synchronized (LockFactory.getLock(cacheKey)) {
+            return cache.get(cacheKey, () -> {
+                List<Range> result = new ArrayList<>();
+                Document query = doc("project", projectId);
 
-        return result;
+                scoreDatabase.getCollection("student_list").find(query)
+                        .forEach((Consumer<Document>) document ->
+                                result.add(Range.student(document.getString("student"))));
+
+                return CollectionUtils.asArrayList(result);
+            });
+        }
     }
 
     private List<Range> queryRangeList(String projectId, String collectionName, String rangeName) {
-        List<Range> classIds = new ArrayList<>();
+
+        List<Range> rangeList = new ArrayList<>();
 
         FindIterable<Document> documents = scoreDatabase
                 .getCollection(collectionName)
                 .find(new Document("project", projectId));
 
         documents.forEach((Consumer<Document>) document ->
-                classIds.add(new Range(rangeName, document.getString(rangeName))));
+                rangeList.add(new Range(rangeName, document.getString(rangeName))));
 
-        return classIds;
+        return rangeList;
     }
 
     // 查询上一级的 range

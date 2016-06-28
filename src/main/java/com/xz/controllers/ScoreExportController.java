@@ -110,7 +110,7 @@ public class ScoreExportController {
 
         Value<Integer> counter = Value.of(0);
         String province = provinceService.getProjectProvince(projectId);
-        studentService.getProjectStudentList(projectId, Range.province(province), -1)
+        studentService.getProjectStudentList(projectId, Range.province(province), -1, null)
                 .forEach((Consumer<Document>) studentDoc -> addStudentScores(projectId, packCreator, studentDoc, counter));
 
         FileUtils.writeFile(packCreator.createZipArchive(), new File(filePath));

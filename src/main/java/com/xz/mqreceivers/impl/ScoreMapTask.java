@@ -46,6 +46,10 @@ public class ScoreMapTask extends Receiver {
         Target target = aggrTask.getTarget();
 
         List<String> studentIds = studentService.getStudentIds(projectId, range, target);
+        if (studentIds.isEmpty()) {  // 可能对应的 range 考生全部没有分数
+            return;
+        }
+
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
         Document query = Mongo.query(projectId, range, target);
 

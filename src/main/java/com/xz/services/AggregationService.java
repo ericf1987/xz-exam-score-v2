@@ -77,6 +77,9 @@ public class AggregationService {
                     reimportScoreFromScanner(projectId);
                 }
 
+                // 数据预处理
+                prepareDataService.prepare(projectId);
+
                 // 统计成绩
                 runAggregation0(projectId);
 
@@ -154,9 +157,6 @@ public class AggregationService {
         projectStatusService.setProjectStatus(projectId, ScoreImporting);
         scannerDBService.importProjectScore(projectId);
         projectStatusService.setProjectStatus(projectId, ScoreImported);
-
-        LOG.info("----对项目{}准备开始统计(ID={})", projectId, aggregationId);
-        prepareDataService.prepare(projectId);
     }
 
     // 等待本轮统计
