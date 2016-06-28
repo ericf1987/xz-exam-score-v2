@@ -1,6 +1,6 @@
 package com.xz.bean;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * 知识点
@@ -8,13 +8,19 @@ import java.util.List;
  *
  * @author yiding_he
  */
-public class Point {
+public class Point implements Serializable {
 
     private String id;
 
     private String name;
 
-    private List<String> levels;
+    public Point() {
+    }
+
+    public Point(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public String getId() {
         return id;
@@ -32,11 +38,11 @@ public class Point {
         this.name = name;
     }
 
-    public List<String> getLevels() {
-        return levels;
-    }
-
-    public void setLevels(List<String> levels) {
-        this.levels = levels;
+    @Override
+    public String toString() {
+        return "Point{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

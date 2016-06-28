@@ -26,6 +26,8 @@ public class Target {
 
     public static final String POINT = "point";
 
+    public static final String POINT_LEVEL = "pointLevel";
+
     public static final String ABILITY_LEVEL = "abilityLevel";
 
     public static Target project(String project) {
@@ -50,6 +52,14 @@ public class Target {
 
     public static Target point(String point) {
         return new Target(Target.POINT, point);
+    }
+
+    public static Target pointLevel(String point, String level) {
+        return new Target(POINT_LEVEL, new PointLevel(point, level));
+    }
+
+    public static Target pointLevel(PointLevel pointLevel) {
+        return new Target(POINT_LEVEL, pointLevel);
     }
 
     public static Target abilityLevel(String abilityLevel) {
@@ -136,7 +146,14 @@ public class Target {
 
         if (id instanceof Document) {
             Document idDoc = (Document) id;
-            SubjectObjective _id = new SubjectObjective(idDoc.getString("subject"), idDoc.getBoolean("objective"));
+            Object _id;
+
+            if (idDoc.containsKey("objective")) {
+                _id = new SubjectObjective(idDoc.getString("subject"), idDoc.getBoolean("objective"));
+            } else {
+                _id = new PointLevel(idDoc.getString("point"), idDoc.getString("level"));
+            }
+
             id = _id;
         }
 

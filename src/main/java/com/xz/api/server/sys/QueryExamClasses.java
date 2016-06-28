@@ -40,6 +40,7 @@ public class QueryExamClasses implements Server {
         String schoolId = param.getString("schoolId");
 
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
+        listClasses.sort((o1, o2) -> o1.getString("name").compareTo(o2.getString("name")));
         return Result.success().set("classes", listClasses);
     }
 }

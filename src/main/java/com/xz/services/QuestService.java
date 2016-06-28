@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
@@ -60,6 +61,19 @@ public class QuestService {
     public List<Document> getQuests(String projectId) {
         return MongoUtils.toList(
                 scoreDatabase.getCollection("quest_list").find(doc("project", projectId)));
+    }
+
+    /**
+     * 根据知识点和能力层级查询题目
+     *
+     * @param projectId 项目ID
+     * @param point     知识点
+     * @param level     能力层级
+     *
+     * @return 相关题目
+     */
+    public List<Document> getQuests(String projectId, String point, String level) {
+        return Collections.emptyList();
     }
 
     /**

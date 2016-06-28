@@ -3,8 +3,6 @@ package com.xz.services;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.beans.dic.QuestType;
-import com.xz.ajiaedu.common.lang.Converter;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.lang.CollectionUtils.convertList;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
- * 在导入完成后，正式开始统计之前，需要对数据进行一些准备工作。准备工作完成后，统计就可以进行了。
+ * 在基础信息和成绩都导入完成后，正式开始统计之前，需要对数据进行一些准备工作。准备工作完成后，统计就可以进行了。
  *
  * @author yiding_he
  */
@@ -45,8 +42,6 @@ public class PrepareDataService {
     public void prepare(String projectId) {
         LOG.info("统计学生数量...");
         prepareStudentList(projectId);
-        LOG.info("统计题型...");
-        prepareQuestTypeList(projectId);
         LOG.info("统计判断题选项...");
         prepareFixQuestOptions(projectId);
         LOG.info("统计准备工作完成。");
@@ -84,31 +79,6 @@ public class PrepareDataService {
             }
 
             questService.saveQuestItems(projectId, questId, items);
-        }
-    }
-
-    /**
-     * 处理题型列表
-     *
-     * @param projectId 项目ID
-     */
-    public void prepareQuestTypeList(String projectId) {
-
-        Converter<QuestType, Document> questType2Doc = questType ->
-                doc("project", projectId)
-                        .append("subject", questType.getSubjectId())
-                        .append("questTypeId", questType.getId())
-                        .append("questTypeName", questType.getName());
-
-        List<QuestType> questTypeList = questTypeService.getQuestTypeList(projectId);
-        List<Document> questTypeDocs = convertList(questTypeList, questType2Doc);
-        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
-
-        collection.deleteMany(doc("project", projectId));
-        if (questTypeList.isEmpty()) {
-            LOG.error("项目 {} 没有题型信息", projectId);
-        } else {
-            collection.insertMany(questTypeDocs);
         }
     }
 
