@@ -54,6 +54,7 @@ public class DownloadAnalysisService {
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
             pathList.addAll(category);
         }
+        //追加考试id和学校id
         Map<String, Object> resultMap = createZipFiles(projectId, schoolId, pathList, zipFileName);
         return Result.success().set("downloadInfo", resultMap);
     }
@@ -61,11 +62,12 @@ public class DownloadAnalysisService {
     //将文件列表中的文件添置至压缩包
     public Map<String, Object> createZipFiles(String projectId, String schoolId, List<Map<String, String>> pathList, String zipFileName) {
         String prefix = getZipFilePrefix(projectId, schoolId);
-        File dir = new File(prefix);
+        File dir = new File(downloadPath + prefix);
         if(!dir.exists()){
             dir.mkdirs();
         }
-        String directory = prefix + File.separator +zipFileName;
+        //下载zip包的生成路径
+        String directory = downloadPath + prefix + File.separator +zipFileName;
         File file = new File(directory);
         Map<String, Object> resultMap = new HashMap<>();
         List<String> failureList = new ArrayList<>();
@@ -94,13 +96,13 @@ public class DownloadAnalysisService {
         //判断压缩文件中是否有文件条目
         int size = getZipSize(directory);
         if (size != 0) {
-            resultMap.put("downloadURL", downloadURL + directory);
+            //zip文件下载url
+            resultMap.put("downloadURL", downloadURL + prefix + File.separator +zipFileName);
         } else {
             resultMap.put("downloadURL", "");
         }
         //不存在的文件列表
         resultMap.put("failureList", failureList);
-        System.out.println(resultMap.toString());
         return resultMap;
     }
 
