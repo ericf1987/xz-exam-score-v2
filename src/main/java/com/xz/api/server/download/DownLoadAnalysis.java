@@ -29,7 +29,6 @@ public class DownLoadAnalysis implements Server{
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
         String[] fileParam = param.getStringValues("fileParam");
-
         return downloadAnalysisService.generateZipFiles(projectId, schoolId, fileParam);
     }
 }
