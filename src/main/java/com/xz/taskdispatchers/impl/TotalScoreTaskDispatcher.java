@@ -24,6 +24,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
+        // 知识点和能力层级不在这里统计
         List<Target> targets = targetService.queryTargets(projectId,
                 Target.QUEST, Target.SUBJECT, Target.PROJECT, Target.SUBJECT_OBJECTIVE);
 

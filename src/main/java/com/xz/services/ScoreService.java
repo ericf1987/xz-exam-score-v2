@@ -234,6 +234,14 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
+    public void addTotalScore(String projectId, Range range, Target target, double score) {
+        String collectionName = getTotalScoreCollection(projectId, target);
+        Document query = Mongo.query(projectId, range, target);
+        scoreDatabase.getCollection(collectionName).updateOne(query, $inc("totalScore", score), UPSERT);
+        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+        cache.delete(cacheKey);
+    }
+
     public String getTotalScoreCollection(String projectId, Target target) {
         ProjectConfig config = projectConfigService.getProjectConfig(projectId);
         if (config.isCombineCategorySubjects() && SubjectUtil.isCombinedSubject(target)) {

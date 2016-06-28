@@ -47,7 +47,7 @@ public class ReceiverManager {
             return;
         }
 
-        executionPool = newBlockingThreadPoolExecutor(poolSize, poolSize, 10000);
+        executionPool = newBlockingThreadPoolExecutor(poolSize, poolSize, 1000);
         startKeeperThread();
         startMonitorThread();
 

@@ -26,9 +26,9 @@ public class ScoreRateDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
-        // 当前统计得分率的范围：总体、学校、班级
-        // 当前统计得分率的目标：题型、主观题
-
+        // 一般分数统计
+        // 统计得分率的范围：总体、学校、班级
+        // 统计得分率的目标：题型、主观题
         List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
         List<Target> targets = targetService.queryTargets(projectId, Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE);
 
@@ -43,6 +43,25 @@ public class ScoreRateDispatcher extends TaskDispatcher {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
             }
         }
+
+        // 知识点得分率统计
+        ranges = rangeService.queryRanges(projectId, Range.STUDENT);
+        targets = targetService.queryTargets(projectId, Target.POINT);
+        for (Range range : ranges) {
+            for (Target target : targets) {
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
+            }
+        }
+
+        // [知识点-能力层级]得分率统计
+        ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        targets = targetService.queryTargets(projectId, Target.POINT_LEVEL);
+        for (Range range : ranges) {
+            for (Target target : targets) {
+                dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
+            }
+        }
+
     }
 
     private boolean isObjective(Target target) {

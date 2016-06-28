@@ -20,7 +20,7 @@ public class TargetServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryTargets() throws Exception {
-        List<Target> targets = targetService.queryTargets(PROJECT_ID, Target.QUEST_TYPE);
+        List<Target> targets = targetService.queryTargets(UNION_PROJECT_ID, Target.POINT);
         targets.forEach(System.out::println);
     }
 }

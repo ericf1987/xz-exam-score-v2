@@ -44,11 +44,17 @@ public class TotalScoreTask extends Receiver {
 
     @Override
     protected void runTask(AggrTask aggrTask) {
+
+        // 获取任务信息（每个考生一个任务）
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
 
-        aggrStudentScores(projectId, target);
+        // 单个考生的题目的分已经在 score 集合有了，无需再统计
+        if (!target.match(Target.QUEST)) {
+            aggrStudentScores(projectId, target);
+        }
 
+        // 统计考生群体（班级/学校/总体）的分数
         for (String rangeName : AGGR_RANGE_NAMES) {
             aggrNonStudentScores(projectId, target, rangeName);
         }
@@ -111,15 +117,18 @@ public class TotalScoreTask extends Receiver {
         }
     }
 
+    //////////////////////////////////////////////////////////////
+
     private void aggrStudentScores(String projectId, Target target) {
         List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
-        if (!target.match(Target.QUEST)) {
-            aggrStudentScores(projectId, studentRanges, target);
+
+        if (target.match(Target.SUBJECT) || target.match(Target.PROJECT)) {
+            aggrStudentSubjectProjectScores(projectId, studentRanges, target);
         }
     }
 
-    // 统计单个学生的科目/知识点/项目/能力层级等总分
-    private void aggrStudentScores(String projectId, List<Range> studentRanges, Target target) {
+    // 统计单个学生的科目/项目总分
+    private void aggrStudentSubjectProjectScores(String projectId, List<Range> studentRanges, Target target) {
         Document group = new Document()
                 .append("_id", null)
                 .append("totalScore", new Document("$sum", "$score"));
@@ -131,6 +140,7 @@ public class TotalScoreTask extends Receiver {
             Document student = studentService.findStudent(projectId, studentId);
             String classId = student.getString("class");
 
+            // 统计单个考生的科目/项目总分
             AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
                     doc("$match", doc("project", projectId)
                             .append("student", studentId)

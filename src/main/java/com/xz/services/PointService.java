@@ -31,6 +31,19 @@ public class PointService {
     SimpleCache cache;
 
     /**
+     * 查询指定项目的所有知识点
+     *
+     * @param projectId 项目ID
+     *
+     * @return 知识点列表
+     */
+    public List<Point> getPoints(String projectId) {
+        Document query = doc("project", projectId);
+        String cacheKey = "points:" + projectId;
+        return getPoints(query, cacheKey);
+    }
+
+    /**
      * 查询指定项目的指定科目的知识点列表
      *
      * @param projectId 项目ID
@@ -38,16 +51,21 @@ public class PointService {
      *
      * @return 知识点列表
      */
-    @SuppressWarnings("unchecked")
     public List<Point> getPoints(String projectId, String subjectId) {
+        Document query = doc("project", projectId).append("subject", subjectId);
         String cacheKey = "points:" + projectId + ":" + subjectId;
+        return getPoints(query, cacheKey);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Point> getPoints(Document query, String cacheKey) {
         String mapFunction = "for (var key in this.points) {emit(key, null);}";
         String reduceFunction = "return null;";
 
         return cache.get(cacheKey, () -> {
             Document result = scoreDatabase.runCommand(
                     doc("mapreduce", "quest_list")
-                            .append("query", doc("project", projectId).append("subject", subjectId))
+                            .append("query", query)
                             .append("map", mapFunction)
                             .append("reduce", reduceFunction)
                             .append("out", doc("inline", 1))

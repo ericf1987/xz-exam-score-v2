@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.bean.Point;
 import com.xz.bean.SubjectObjective;
 import com.xz.bean.Target;
 import org.bson.Document;
@@ -15,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.xz.bean.Target.SUBJECT_OBJECTIVE;
+import static com.xz.bean.Target.*;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -29,6 +30,9 @@ public class TargetService {
 
     @Autowired
     QuestTypeService questTypeService;
+
+    @Autowired
+    PointService pointService;
 
     @Autowired
     SubjectService subjectService;
@@ -48,20 +52,24 @@ public class TargetService {
         List<Target> targetList = new ArrayList<>();
         List<String> targetNameList = Arrays.asList(targetNames);
 
-        if (targetNameList.contains(Target.PROJECT)) {
-            targetList.add(new Target(Target.PROJECT, projectId));
+        if (targetNameList.contains(PROJECT)) {
+            targetList.add(new Target(PROJECT, projectId));
         }
 
-        if (targetNameList.contains(Target.SUBJECT)) {
+        if (targetNameList.contains(SUBJECT)) {
             targetList.addAll(querySubjects(projectId));
         }
 
-        if (targetNameList.contains(Target.QUEST)) {
+        if (targetNameList.contains(QUEST)) {
             targetList.addAll(queryQuests(projectId));
         }
 
-        if (targetNameList.contains(Target.QUEST_TYPE)) {
+        if (targetNameList.contains(QUEST_TYPE)) {
             targetList.addAll(queryQuestTypes(projectId));
+        }
+
+        if (targetNameList.contains(POINT)) {
+            targetList.addAll(queryPoints(projectId));
         }
 
         if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
@@ -69,6 +77,13 @@ public class TargetService {
         }
 
         return targetList;
+    }
+
+    private List<Target> queryPoints(String projectId) {
+        List<Point> points = pointService.getPoints(projectId);
+        return points.stream()
+                .map(p -> Target.point(p.getId()))
+                .collect(Collectors.toList());
     }
 
     private List<Target> queryQuestTypes(String projectId) {
@@ -96,7 +111,7 @@ public class TargetService {
 
     private List<Target> querySubjects(String projectId) {
         return subjectService.querySubjects(projectId).stream()
-                .map(subjectId -> new Target(Target.SUBJECT, subjectId))
+                .map(subjectId -> new Target(SUBJECT, subjectId))
                 .collect(Collectors.toList());
     }
 
@@ -127,16 +142,16 @@ public class TargetService {
         String targetName = target.getName();
 
         switch (targetName) {
-            case Target.PROJECT:
+            case PROJECT:
                 return null;
 
-            case Target.SUBJECT:
+            case SUBJECT:
                 return target.getId().toString();
 
             case Target.SUBJECT_OBJECTIVE:
                 return target.getId(SubjectObjective.class).getSubject();
 
-            case Target.QUEST_TYPE:
+            case QUEST_TYPE:
                 String questTypeId = target.getId().toString();
                 QuestType questType = questTypeService.getQuestType(projectId, questTypeId);
                 if (questType != null) {
@@ -145,7 +160,7 @@ public class TargetService {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
 
-            case Target.QUEST:
+            case QUEST:
                 String questId = target.getId().toString();
                 Document quest = questService.findQuest(projectId, questId);
                 if (quest != null) {
