@@ -87,8 +87,6 @@ public class ImportProjectService {
         importClasses(projectId, context);
         importStudents(projectId, context);
 
-        LOG.info("正在准备数据...");
-        prepareDataService.prepare(projectId);
         return context;
     }
 
