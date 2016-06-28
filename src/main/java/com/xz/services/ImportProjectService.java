@@ -8,6 +8,7 @@ import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.api.Param;
+import com.xz.bean.PointLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
 import org.bson.Document;
@@ -99,19 +100,27 @@ public class ImportProjectService {
     }
 
     // 导入考试知识点
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "MismatchedQueryAndUpdateOfCollection"})
     private void importPoints(String projectId, Context context) {
         List<Document> projectQuests = context.get("quests");
         Set<String> existPoints = new HashSet<>();   // 方法内的缓存，因为 pointService.exists() 方法不做缓存
         DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
+        DoubleCounterMap<PointLevel> pointLevelFullScore = new DoubleCounterMap<>();
 
         LOG.info("导入项目 " + projectId + " 知识点信息...");
         for (Document quest : projectQuests) {
             double score = quest.getDouble("score");
-            Map<String, String> points = (Map<String, String>) quest.get("points");
+            Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
 
             for (String pointId : points.keySet()) {
+
                 pointFullScore.incre(pointId, score);
+
+                for (String level : points.get(pointId)) {
+                    pointLevelFullScore.incre(new PointLevel(pointId, level), score);
+                }
+
+                //////////////////////////////////////////////////////////////
 
                 if (existPoints.contains(pointId)) {
                     continue;
@@ -121,6 +130,8 @@ public class ImportProjectService {
                     existPoints.add(pointId);
                     continue;
                 }
+
+                //////////////////////////////////////////////////////////////
 
                 Param param = new Param().setParameter("pointId", pointId);
                 Result result = interfaceClient.request("QueryKnowledgePointById", param);
@@ -132,8 +143,14 @@ public class ImportProjectService {
         for (String pointId : pointFullScore.keySet()) {
             fullScoreService.saveFullScore(projectId, Target.point(pointId), pointFullScore.get(pointId));
         }
+
+        for (PointLevel pointLevel : pointLevelFullScore.keySet()) {
+            double fullScore = pointLevelFullScore.get(pointLevel);
+            fullScoreService.saveFullScore(projectId, Target.pointLevel(pointLevel), fullScore);
+        }
     }
 
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private void importQuestTypes(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 题型信息");
 
