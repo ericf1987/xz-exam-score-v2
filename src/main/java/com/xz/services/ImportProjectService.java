@@ -3,10 +3,7 @@ package com.xz.services;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
-import com.xz.ajiaedu.common.lang.Context;
-import com.xz.ajiaedu.common.lang.DoubleCounterMap;
-import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.lang.Value;
+import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
 import com.xz.bean.Target;
@@ -111,6 +108,10 @@ public class ImportProjectService {
             double score = quest.getDouble("score");
             Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
 
+            if (points == null) {
+                continue;
+            }
+
             for (String pointId : points.keySet()) {
 
                 pointFullScore.incre(pointId, score);
@@ -163,6 +164,8 @@ public class ImportProjectService {
     private void importQuestTypes(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 题型信息");
 
+        questTypeService.clearQuestTypes(projectId);
+
         List<Document> projectQuests = context.get("quests");
         Map<String, Document> questTypeMap = new HashMap<>();
         DoubleCounterMap<String> questTypeFullScore = new DoubleCounterMap<>();
@@ -172,6 +175,10 @@ public class ImportProjectService {
             String subject = quest.getString("subject");
             String questTypeId = quest.getString("questionTypeId");
             String questTypeName = quest.getString("questionTypeName");
+
+            if (StringUtil.isBlank(questTypeId)) {
+                continue;
+            }
 
             questTypeFullScore.incre(questTypeId, score);
 

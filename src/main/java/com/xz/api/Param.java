@@ -1,5 +1,6 @@
 package com.xz.api;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -76,29 +77,7 @@ public class Param implements Serializable {
 
     @Override
     public String toString() {
-        return "Param {" + parameterToString() + '}';
-    }
-
-    private String parameterToString() {
-        StringBuilder sb = new StringBuilder('{');
-
-        for (String key : parameters.keySet()) {
-            String[] values = parameters.get(key);
-
-            String strParamterValue = "";
-            for (String paramterValue : values) {
-                strParamterValue += paramterValue.trim() + ",";
-            }
-            strParamterValue = StringUtils.removeEnd(strParamterValue, ",");
-
-            sb.append(key).append(':').append("[").append(strParamterValue).append("]").append(',');
-        }
-
-        if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',') {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-
-        return sb.append('}').toString();
+        return JSON.toJSONString(this.parameters);
     }
 
     /////////////////////////////////////////

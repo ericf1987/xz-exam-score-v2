@@ -28,7 +28,7 @@ public class ApiController {
     /**
      * 验证参数和请求，访问服务
      */
-    @RequestMapping(value="/api/{server}", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/{server}", method = RequestMethod.GET)
     public Result api(String p, @PathVariable("server") String server) {
 
         // 验证服务
@@ -42,8 +42,9 @@ public class ApiController {
         Function function = ServerConsole.getFunctionByName(server);
         try {
             param = ParamUtils.decipherParam(function, p);
+            LOG.info("Request: " + server + "/" + param);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            LOG.error("", e);
             return Result.fail(e.getMessage());
         }
 
@@ -56,7 +57,7 @@ public class ApiController {
             return Result.fail(ThrowableUtils.toString(e));
         }
 
-        LOG.info(server + " return :" + JSON.toJSONString(result));
+        LOG.debug(server + " result: " + JSON.toJSONString(result));
         return result;
     }
 }

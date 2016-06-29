@@ -28,9 +28,9 @@ public class ParamUtils {
     /**
      * 解密参数信息
      *
-     * @param p  待解密参数
+     * @param p 待解密参数
      *
-     * @return  结果
+     * @return 结果
      */
     public static Param decipherParam(Function function, String p) {
         if (StringUtil.isNotBlank(p) && p.contains("%3D")) {
@@ -42,10 +42,7 @@ public class ParamUtils {
         }
 
         //获取参数
-        Param param = parseParams(function, p);
-
-        LOG.info("the result after parsing is " + param);
-        return param;
+        return parseParams(function, p);
     }
 
     private static Param parseParams(Function function, String value) {

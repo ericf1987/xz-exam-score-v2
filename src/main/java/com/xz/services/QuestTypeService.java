@@ -139,4 +139,8 @@ public class QuestTypeService {
                 doc.getString("questTypeId"), doc.getString("questTypeName")
         );
     }
+
+    public void clearQuestTypes(String projectId) {
+        scoreDatabase.getCollection("quest_type_list").deleteMany(doc("project", projectId));
+    }
 }

@@ -41,7 +41,7 @@ public class TopAverageDispatcher extends TaskDispatcher {
             for (Target target : targets) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
-                if (counter % 100 == 0) {
+                if (counter % 1000 == 0) {
                     LOG.info("为项目 " + projectId + " 的 top_average 统计发布了 " + counter + " 个任务");
                 }
             }
