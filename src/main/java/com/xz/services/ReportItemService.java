@@ -86,7 +86,7 @@ public class ReportItemService {
             reportItem.put("id", document.getObjectId("_id").toHexString());
 
             if (isPointOrLevelItem(name)) {
-                reportItem.put("dataStatus", pointService.getPoints(projectId).isEmpty());
+                reportItem.put("dataStatus", !pointService.getPoints(projectId).isEmpty());
             } else {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
             }
@@ -104,7 +104,9 @@ public class ReportItemService {
         }
 
         for (String pointLevelKey : POINT_LEVEL_KEYS) {
-            return itemName.contains(pointLevelKey);
+            if (itemName.contains(pointLevelKey)) {
+                return true;
+            }
         }
 
         return false;
