@@ -146,8 +146,8 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
         levelStat.put("levelInfos", levelInfos);
         levelStat.put("subjectId", subjectId);
-        levelStat.put("totalScore", totalScore);
-        levelStat.put("userScore", userScore);
+        levelStat.put("totalScore", DoubleUtils.round(totalScore));
+        levelStat.put("userScore", DoubleUtils.round(userScore));
 
         return levelStat;
     }
