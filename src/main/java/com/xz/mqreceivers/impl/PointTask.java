@@ -96,6 +96,11 @@ public class PointTask extends Receiver {
             Document quest = questService.findQuest(projectId, questId);
             Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
 
+            // 没有知识点，跳过处理
+            if (points == null || points.isEmpty()) {
+                continue;
+            }
+
             for (Map.Entry<String, List<String>> pEntry : points.entrySet()) {
                 String pointId = pEntry.getKey();
                 pointScores.incre(pointId, score);

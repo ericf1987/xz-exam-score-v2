@@ -20,7 +20,7 @@ public class QuestTypeServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetQuestTypeList() throws Exception {
-        List<QuestType> questTypeList = questTypeService.getQuestTypeList(PROJECT_ID);
+        List<QuestType> questTypeList = questTypeService.getQuestTypeList(UNION_PROJECT_ID, "001");
         questTypeList.forEach(System.out::println);
     }
 }

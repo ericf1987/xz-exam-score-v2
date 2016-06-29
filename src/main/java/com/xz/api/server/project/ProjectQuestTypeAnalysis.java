@@ -69,6 +69,7 @@ public class ProjectQuestTypeAnalysis implements Server {
     // 学校试题分析
     private List<Map<String, Object>> getSchoolQuestTypeAnalysis(
             String projectId, String subjectId, String[] schoolIds) {
+
         List<Map<String, Object>> list = new ArrayList<>();
 
         for (String schoolId : schoolIds) {
@@ -100,10 +101,12 @@ public class ProjectQuestTypeAnalysis implements Server {
     }
 
     // 题型分析数据
-    public static List<Map<String, Object>> getQuestTypeAnalysis(String projectId, String subjectId, Range range,
-                                                                 QuestTypeService questTypeService,
-                                                                 FullScoreService fullScoreService,
-                                                                 QuestTypeScoreService questTypeScoreService) {
+    public static List<Map<String, Object>> getQuestTypeAnalysis(
+            String projectId, String subjectId, Range range,
+            QuestTypeService questTypeService,
+            FullScoreService fullScoreService,
+            QuestTypeScoreService questTypeScoreService) {
+
         List<QuestType> questTypes = questTypeService.getQuestTypeList(projectId, subjectId);
 
         List<Map<String, Object>> list = new ArrayList<>();

@@ -25,8 +25,9 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.SubjectUtil.isCombinedSubject;
 
 /**
- * (description)
- * created at 16/05/10
+ * 查询学生列表
+ *
+ * 注意，在 student_list 记录中，subjects 属性如果不存在，表示该考生没有参加任何考试，不应计入统计当中。
  *
  * @author yiding_he
  */
@@ -93,6 +94,8 @@ public class StudentService {
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
             if (subjectId != null) {
                 query.append("subjects", subjectId);
+            } else {
+                query.append("subjects", doc("$exists", true));
             }
             return (int) scoreDatabase.getCollection("student_list").count(query);
         });
@@ -189,6 +192,8 @@ public class StudentService {
 
                 if (subjectIdValue.get() != null) {
                     query.append("subjects", subjectIdValue.get());
+                } else {
+                    query.append("subjects", doc("$exists", true));
                 }
 
                 FindIterable<Document> studentLists = students.find(query).projection(doc("student", 1));

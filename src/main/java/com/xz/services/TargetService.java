@@ -87,7 +87,7 @@ public class TargetService {
     }
 
     private List<Target> queryQuestTypes(String projectId) {
-        List<QuestType> questTypes = questTypeService.getQuestTypeList(projectId);
+        List<QuestType> questTypes = questTypeService.generateQuestTypeList(projectId);
 
         return questTypes.stream()
                 .map(questType -> Target.questType(questType.getId()))

@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class QuestTypeService {
      *
      * @return 题型列表
      */
-    public List<QuestType> getQuestTypeList(String projectId) {
+    public List<QuestType> generateQuestTypeList(String projectId) {
         String cacheKey = "quest_type_list:" + projectId;
 
         return cache.get(cacheKey, () -> {
@@ -89,7 +90,7 @@ public class QuestTypeService {
      * 查询指定项目的指定科目下的题型列表
      *
      * @param projectId 项目ID
-     * @param subjectId 科目ID
+     * @param subjectId 科目ID（可选）
      *
      * @return 题型列表
      */
@@ -99,14 +100,18 @@ public class QuestTypeService {
             ArrayList<QuestType> result = new ArrayList<QuestType>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
 
-            Document query = doc("project", projectId).append("subject", subjectId);
+            Document query = doc("project", projectId);
+            if (StringUtil.isNotBlank(subjectId)) {
+                query.append("subject", subjectId);
+            }
+
             Document projection = doc("questTypeId", 1).append("questTypeName", 1);
 
             collection.find(query).projection(projection).forEach((Consumer<Document>) doc -> {
                 QuestType type = new QuestType();
                 type.setId(doc.getString("questTypeId"));
                 type.setName(doc.getString("questTypeName"));
-                type.setSubjectId(subjectId);
+                type.setSubjectId(doc.getString("subject"));
                 result.add(type);
             });
 
@@ -114,11 +119,16 @@ public class QuestTypeService {
         });
     }
 
+    public List<QuestType> getQuestTypeList(String projectId) {
+        return getQuestTypeList(projectId, null);
+    }
+
+
     //////////////////////////////////////////////////////////////
 
     public void saveQuestType(String projectId, String subjectId, String questTypeId, String questTypeName) {
         MongoCollection<Document> c = scoreDatabase.getCollection("quest_type_list");
-        Document query = doc("project", projectId).append("subjectId", subjectId).append("questTypeId", questTypeId);
+        Document query = doc("project", projectId).append("subject", subjectId).append("questTypeId", questTypeId);
         Document update = $set("questTypeName", questTypeName);
         c.updateMany(query, update, UPSERT);
     }

@@ -38,4 +38,12 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
         List<String> studentList = studentService.getStudentIds(PROJECT_ID, "004005006", range);
         studentList.forEach(System.out::println);
     }
+
+    @Test
+    public void testGetStudentCount2() throws Exception {
+        String project = "430100-8d805ef37b2f4bc7ad9808a9a109dc22";
+        String school = "091fbca6-ab16-49e5-9ac5-bae0538ece14";
+        int studentCount = studentService.getStudentCount(project, Range.school(school));
+        System.out.println(studentCount);
+    }
 }
