@@ -30,8 +30,6 @@ public class Target {
 
     public static final String LEVEL = "level";
 
-    public static final String ABILITY_LEVEL = "abilityLevel";
-
     public static Target project(String project) {
         return new Target(Target.PROJECT, project);
     }
@@ -66,10 +64,6 @@ public class Target {
 
     public static Target pointLevel(PointLevel pointLevel) {
         return new Target(POINT_LEVEL, pointLevel);
-    }
-
-    public static Target abilityLevel(String abilityLevel) {
-        return new Target(Target.ABILITY_LEVEL, abilityLevel);
     }
 
     private String name;

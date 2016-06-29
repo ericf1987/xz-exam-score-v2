@@ -18,8 +18,8 @@ public class FullScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetFullScore() throws Exception {
-        String project = "430200-8a9be9fc2e1842a4b9b4894eee1f5f73";
-        double fullScore = fullScoreService.getFullScore(project, Target.project(project));
+        String project = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        double fullScore = fullScoreService.getFullScore(project, Target.level("A"));
         System.out.println(fullScore);
     }
 }
