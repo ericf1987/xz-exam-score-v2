@@ -78,12 +78,13 @@ public class PointTask extends Receiver {
             scoreService.addTotalScore(projectId, schoolRange, pointLevel, score);
         }
 
-        // 统计能力层级得分（学生，班级累加）
+        // 统计能力层级得分（学生，班级累加，学校累加）
         for (Map.Entry<SubjectLevel, Double> levelScoreEntry : subjectLevelScores.entrySet()) {
-            Target level = Target.subjectLevel(levelScoreEntry.getKey());
+            Target subjectLevel = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
-            scoreService.saveTotalScore(projectId, studentRange, null, level, score, null);
-            scoreService.addTotalScore(projectId, classRange, level, score);
+            scoreService.saveTotalScore(projectId, studentRange, null, subjectLevel, score, null);
+            scoreService.addTotalScore(projectId, classRange, subjectLevel, score);
+            scoreService.addTotalScore(projectId, schoolRange, subjectLevel, score);
         }
     }
 

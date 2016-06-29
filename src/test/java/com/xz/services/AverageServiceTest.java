@@ -19,8 +19,8 @@ public class AverageServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetAverage() throws Exception {
-        double average = averageService.getAverage(XT_PROJECT_ID,
-                Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), Target.subjectLevel("001", "A"));
+        double average = averageService.getAverage(UNION_PROJECT_ID,
+                Range.school("0835e05b-4d01-4944-9a0a-b8a77f201933"), Target.subjectLevel("001", "A"));
 
         System.out.println(average);
     }
