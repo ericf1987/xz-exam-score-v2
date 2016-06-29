@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.classes.ClassPointAnalysis.initSubject;
 import static com.xz.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
 
 /**
@@ -60,7 +61,7 @@ public class ClassQuestTypeAnalysis implements Server {
 
         // 初始化科目id
         if (StringUtil.isBlank(subjectId)) {
-            subjectId = initSubject(projectId);
+            subjectId = initSubject(projectId, subjectService);
         }
 
         if (StringUtil.isBlank(subjectId)) {
@@ -71,17 +72,6 @@ public class ClassQuestTypeAnalysis implements Server {
         List<Map<String, Object>> studentQuestTypeAnalysis = getStudentQuestTypeAnalysis(projectId, subjectId, classId);
 
         return Result.success().set("classes", classQuestTypeAnalysis).set("students", studentQuestTypeAnalysis);
-    }
-
-    private String initSubject(String projectId) {
-        List<String> subjectIds = subjectService.querySubjects(projectId);
-        subjectIds.sort(String::compareTo);
-
-        if (!subjectIds.isEmpty()) {
-            return subjectIds.get(0);
-        }
-
-        return null;
     }
 
     // 学生试题分析

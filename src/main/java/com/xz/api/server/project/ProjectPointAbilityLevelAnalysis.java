@@ -98,6 +98,7 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
                 List<String> questNos = questService.getQuests(projectId, pointId, levelName)
                         .stream().map(document -> document.getString("questNo")).collect(Collectors.toList());
                 pointLevel.put("questNos", questNos);
+                pointLevel.put("levelName", levelName);
 
                 if (!questNos.isEmpty()) {
                     double avgScore = averageService.getAverage(projectId, range, Target.pointLevel(pointId, levelName));
@@ -129,11 +130,12 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
             levelMap.put("name", levelName);
 
             // 能力层级满分
-            double fullScore = fullScoreService.getFullScore(projectId, Target.level(levelName));
+            Target target = Target.subjectLevel(subjectId, levelName);
+            double fullScore = fullScoreService.getFullScore(projectId, target);
             levelMap.put("fullScore", fullScore);
 
             // 能力层级得分
-            double avgScore = averageService.getAverage(projectId, range, Target.level(levelName));
+            double avgScore = averageService.getAverage(projectId, range, target);
             levelMap.put("avgScore", DoubleUtils.round(avgScore));
             levelMap.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : avgScore / fullScore, true));
 
