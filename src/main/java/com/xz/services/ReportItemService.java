@@ -33,8 +33,14 @@ public class ReportItemService {
 
     public static final String COMMON_RANGE_ID = "common";  // 通用报表id
 
+    public static final String[] POINT_LEVEL_KEYS
+            = new String[]{"双向细目", "知识点", "能力层级"};    // 知识点-能力层级统计类关键字
+
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    PointService pointService;
 
     @Autowired
     SimpleCache cache;
@@ -74,14 +80,34 @@ public class ReportItemService {
         List<Document> reportItemList = reportItemMap.get(type);
         for (Document document : reportItemList) {
             Map<String, Object> reportItem = new HashMap<>();
+            String name = document.getString("name");
             reportItem.put("type", document.getString("type"));
-            reportItem.put("name", document.getString("name"));
+            reportItem.put("name", name);
             reportItem.put("id", document.getObjectId("_id").toHexString());
-            reportItem.put("dataStatus", checkItemDate(projectId, document));
+
+            if (isPointOrLevelItem(name)) {
+                reportItem.put("dataStatus", pointService.getPoints(projectId).isEmpty());
+            } else {
+                reportItem.put("dataStatus", checkItemDate(projectId, document));
+            }
+
             list.add(reportItem);
         }
 
         return list;
+    }
+
+    // 是否是知识点与能力层级相关条目
+    private boolean isPointOrLevelItem(String itemName) {
+        if (StringUtil.isBlank(itemName)) {
+            return false;
+        }
+
+        for (String pointLevelKey : POINT_LEVEL_KEYS) {
+            return itemName.contains(pointLevelKey);
+        }
+
+        return false;
     }
 
     // 检查指定学校指定项目报表条目是否有数据
