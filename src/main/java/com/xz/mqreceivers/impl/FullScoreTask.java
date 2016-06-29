@@ -42,7 +42,7 @@ public class FullScoreTask extends Receiver {
             processSubjectObjective(aggrTask);
         } else if (target.match(Target.POINT)) {
             processPoint(aggrTask);
-        } else if (target.match(Target.ABILITY_LEVEL)) {
+        } else if (target.match(Target.LEVEL)) {
             processAbilityLevel(aggrTask);
         }
     }

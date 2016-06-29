@@ -102,4 +102,10 @@ public class PointService {
     public void savePoint(String pointId, String pointName) {
         scoreDatabase.getCollection("points").updateOne(doc("id", pointId), $set("name", pointName), UPSERT);
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////// 能力层级等级
+
+    public enum AbilityLevel {
+        A, B, C, D, E, F
+    }
 }
