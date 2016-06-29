@@ -123,7 +123,7 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
         double totalScore = 0, userScore = 0;
         Map<String, Object> levelStat = new HashMap<>();
-        List<Map<String, Object>> levels = new ArrayList<>();
+        List<Map<String, Object>> levelInfos = new ArrayList<>();
         for (PointService.AbilityLevel level : abilityLevels) {
             String levelName = level.name();
             Map<String, Object> levelMap = new HashMap<>();
@@ -141,10 +141,10 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
             totalScore += fullScore;
             userScore += avgScore;
-            levels.add(levelMap);
+            levelInfos.add(levelMap);
         }
 
-        levelStat.put("levels", levels);
+        levelStat.put("levelInfos", levelInfos);
         levelStat.put("subjectId", subjectId);
         levelStat.put("totalScore", totalScore);
         levelStat.put("userScore", userScore);
