@@ -28,8 +28,6 @@ public class Target {
 
     public static final String POINT_LEVEL = "pointLevel";
 
-    public static final String LEVEL = "level";
-
     public static final String SUBJECT_LEVEL = "subjectLevel";
 
     public static Target project(String project) {
@@ -58,10 +56,6 @@ public class Target {
 
     public static Target pointLevel(String point, String level) {
         return new Target(POINT_LEVEL, new PointLevel(point, level));
-    }
-
-    public static Target level(String level) {
-        return new Target(LEVEL, level);
     }
 
     public static Target subjectLevel(String subject, String level) {

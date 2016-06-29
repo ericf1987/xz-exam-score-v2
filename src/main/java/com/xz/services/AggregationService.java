@@ -150,7 +150,7 @@ public class AggregationService {
         if (projectStatus == ProjectStatus.Empty) {
             LOG.info("----开始导入项目{}", projectId);
             projectStatusService.setProjectStatus(projectId, ProjectImporting);
-            importProjectService.importProject(projectId);
+            importProjectService.importProject(projectId, true);
             projectStatusService.setProjectStatus(projectId, ProjectImported);
         }
 

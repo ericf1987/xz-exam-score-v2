@@ -29,10 +29,13 @@ public class ImportProjectController {
     @RequestMapping(value = "import", method = RequestMethod.POST)
     @ResponseBody
     public Result importProject(
-            @RequestParam("project") String projectId) {
+            @RequestParam("project") String projectId,
+            @RequestParam(value = "reimportStudents", required = false, defaultValue = "false") String reimportStudents
+    ) {
 
         LOG.info("开始导入项目 " + projectId + " 基本信息...");
-        Context context = importProjectService.importProject(projectId);
+        boolean bReimportStudents = Boolean.valueOf(reimportStudents);
+        Context context = importProjectService.importProject(projectId, bReimportStudents);
 
         LOG.info("项目 " + projectId + " 基本信息导入完毕。");
         return Result.success().set("questCount", context.get("questCount"));

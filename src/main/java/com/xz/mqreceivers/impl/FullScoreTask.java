@@ -36,23 +36,12 @@ public class FullScoreTask extends Receiver {
     protected void runTask(AggrTask aggrTask) {
         Target target = aggrTask.getTarget();
 
+        // 知识点/能力层级的满分统计在 PointTask 中完成
         if (target.match(Target.QUEST_TYPE)) {
             processQuestType(aggrTask);
         } else if (target.match(Target.SUBJECT_OBJECTIVE)) {
             processSubjectObjective(aggrTask);
-        } else if (target.match(Target.POINT)) {
-            processPoint(aggrTask);
-        } else if (target.match(Target.LEVEL)) {
-            processAbilityLevel(aggrTask);
         }
-    }
-
-    private void processAbilityLevel(AggrTask aggrTask) {
-
-    }
-
-    private void processPoint(AggrTask aggrTask) {
-
     }
 
     // 计算科目主客观题满分

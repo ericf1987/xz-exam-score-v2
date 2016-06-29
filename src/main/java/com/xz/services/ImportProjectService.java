@@ -6,6 +6,7 @@ import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
+import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
 import org.bson.Document;
@@ -74,7 +75,15 @@ public class ImportProjectService {
     @Autowired
     PrepareDataService prepareDataService;
 
-    public Context importProject(String projectId) {
+    /**
+     * 导入项目信息
+     *
+     * @param projectId        项目ID
+     * @param reimportStudents 是否要重新导入考生信息，如果为 false，则跳过考生信息导入。
+     *
+     * @return
+     */
+    public Context importProject(String projectId, boolean reimportStudents) {
         Context context = new Context();
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
@@ -83,9 +92,12 @@ public class ImportProjectService {
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
         importQuestTypes(projectId, context);
-        importSchools(projectId, context);
-        importClasses(projectId, context);
-        importStudents(projectId, context);
+
+        if (reimportStudents) {
+            importSchools(projectId, context);
+            importClasses(projectId, context);
+            importStudents(projectId, context);
+        }
 
         return context;
     }
@@ -103,12 +115,13 @@ public class ImportProjectService {
         List<Document> projectQuests = context.get("quests");
         Set<String> existPoints = new HashSet<>();   // 方法内的缓存，因为 pointService.exists() 方法不做缓存
         DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
-        DoubleCounterMap<String> levelFullScore = new DoubleCounterMap<>();
+        DoubleCounterMap<SubjectLevel> subjectLevelFullScore = new DoubleCounterMap<>();
         DoubleCounterMap<PointLevel> pointLevelFullScore = new DoubleCounterMap<>();
 
         LOG.info("导入项目 " + projectId + " 知识点信息...");
         for (Document quest : projectQuests) {
             double score = quest.getDouble("score");
+            String subject = quest.getString("subject");
             Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
 
             if (points == null) {
@@ -121,7 +134,7 @@ public class ImportProjectService {
 
                 for (String level : points.get(pointId)) {
                     pointLevelFullScore.incre(new PointLevel(pointId, level), score);
-                    levelFullScore.incre(level, score);
+                    subjectLevelFullScore.incre(new SubjectLevel(subject, level), score);
                 }
 
                 //////////////////////////////////////////////////////////////
@@ -150,10 +163,10 @@ public class ImportProjectService {
             fullScoreService.saveFullScore(projectId, Target.point(point), fullScore);
         }
 
-        for (Map.Entry<String, Double> entry : levelFullScore.entrySet()) {
-            String level = entry.getKey();
+        for (Map.Entry<SubjectLevel, Double> entry : subjectLevelFullScore.entrySet()) {
+            SubjectLevel subjectLevel = entry.getKey();
             double fullScore = entry.getValue();
-            fullScoreService.saveFullScore(projectId, Target.level(level), fullScore);
+            fullScoreService.saveFullScore(projectId, Target.subjectLevel(subjectLevel), fullScore);
         }
 
         for (Map.Entry<PointLevel, Double> entry : pointLevelFullScore.entrySet()) {
