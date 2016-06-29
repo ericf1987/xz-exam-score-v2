@@ -21,8 +21,8 @@ public class ScoreMapTaskTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testRunTask() throws Exception {
         scoreMapTask.runTask(
-                new AggrTask(PROJECT_ID, "aaaa", "score_map")
+                new AggrTask(XT_PROJECT_ID, "aaaa", "score_map")
                         .setRange(Range.clazz("46d626b6-9250-4a63-9191-e790ed67a789"))
-                        .setTarget(Target.project(PROJECT_ID)));
+                        .setTarget(Target.project(XT_PROJECT_ID)));
     }
 }

@@ -19,7 +19,7 @@ public class QuestTypeScoreTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        task.runTask(new AggrTask(PROJECT_ID, "1", "quest_type_score")
+        task.runTask(new AggrTask(XT_PROJECT_ID, "1", "quest_type_score")
                 .setRange(Range.student("000517ac-9277-4795-b0e7-0e9236b0e0b0")));
     }
 }

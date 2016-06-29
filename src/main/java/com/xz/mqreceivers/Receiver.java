@@ -36,6 +36,7 @@ public abstract class Receiver {
         try {
             runTask(task);
         } catch (Exception e) {
+            e.printStackTrace();
             LOG.error("执行任务失败", e);
         } finally {
             aggregationRoundService.taskFinished(task);

@@ -20,7 +20,7 @@ public class StdDeviationServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetStdDeviation() throws Exception {
         String schoolId = "002e02d6-c036-4780-85d4-e54e3f1fbf9f";
-        double d = stdDeviationService.getStdDeviation(PROJECT_ID, Range.province("430000"), Target.subject("003"));
+        double d = stdDeviationService.getStdDeviation(XT_PROJECT_ID, Range.province("430000"), Target.subject("003"));
         System.out.println(d);
     }
 }

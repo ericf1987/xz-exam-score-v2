@@ -22,7 +22,7 @@ public class ProjectScoreAnalysisTest extends XzExamScoreV2ApplicationTests {
         String schoolId = "11b66fc2-8a76-41c2-a1b3-5011523c7e47";
 
         Param param = new Param()
-                .setParameter("projectId", PROJECT_ID)
+                .setParameter("projectId", XT_PROJECT_ID)
                 .setParameter("subjectId", (String) null)
                 .setParameter("schoolIds", schoolId);
 

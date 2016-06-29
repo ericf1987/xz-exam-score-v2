@@ -23,7 +23,7 @@ public class RankSegmentServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testQueryFullRankSegment() throws Exception {
         List<Map<String, Object>> maps = rankSegmentService.queryFullRankSegment(
-                PROJECT_ID,
+                XT_PROJECT_ID,
                 Target.subject("001"),
                 Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"));
 

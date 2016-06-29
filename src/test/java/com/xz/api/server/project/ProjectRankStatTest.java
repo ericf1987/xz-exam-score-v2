@@ -23,7 +23,7 @@ public class ProjectRankStatTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testExecute() throws Exception {
         Result result = projectRankStat.execute(new Param()
-                .setParameter("projectId", PROJECT_ID)
+                .setParameter("projectId", XT_PROJECT_ID)
                 .setParameter("subjectId", "001")
                 .setParameter("schoolIds", "11b66fc2-8a76-41c2-a1b3-5011523c7e47"));
 

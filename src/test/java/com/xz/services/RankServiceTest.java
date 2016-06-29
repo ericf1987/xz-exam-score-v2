@@ -23,7 +23,7 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetRank() throws Exception {
         System.out.println("rank of 99: " +
-                rankService.getRank(PROJECT_ID, Range.school("SCHOOL_007"), Target.subject("003"), 99));
+                rankService.getRank(XT_PROJECT_ID, Range.school("SCHOOL_007"), Target.subject("003"), 99));
     }
 
     @Test
@@ -44,6 +44,6 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     public void testGetRankLevel() throws Exception {
         System.out.println(
                 rankService.getRankLevel(
-                        PROJECT_ID, Range.school("SCHOOL_008"), Target.subject("002"), "SCHOOL_008_CLASS_08_01"));
+                        XT_PROJECT_ID, Range.school("SCHOOL_008"), Target.subject("002"), "SCHOOL_008_CLASS_08_01"));
     }
 }

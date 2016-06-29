@@ -19,6 +19,6 @@ public class ScoreExportControllerTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testCreatePack() throws Exception {
-        scoreExportController.createPack(PROJECT_ID, "score-archives/" + UUID.randomUUID().toString() + ".zip");
+        scoreExportController.createPack(XT_PROJECT_ID, "score-archives/" + UUID.randomUUID().toString() + ".zip");
     }
 }

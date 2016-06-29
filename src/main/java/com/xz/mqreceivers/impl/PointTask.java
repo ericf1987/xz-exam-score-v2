@@ -4,6 +4,7 @@ import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.bean.PointLevel;
 import com.xz.bean.Range;
+import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
@@ -13,6 +14,8 @@ import com.xz.services.RangeService;
 import com.xz.services.ScoreService;
 import com.xz.services.StudentService;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,8 @@ import java.util.Map;
 @ReceiverInfo(taskType = "point")
 @Component
 public class PointTask extends Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(PointTask.class);
 
     @Autowired
     ScoreService scoreService;
@@ -52,10 +57,10 @@ public class PointTask extends Receiver {
         Range schoolRange = Range.school(student.getString("school"));
 
         DoubleCounterMap<String> pointScores = new DoubleCounterMap<>();
-        DoubleCounterMap<String> levelScores = new DoubleCounterMap<>();
+        DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
         DoubleCounterMap<PointLevel> pointLevelScores = new DoubleCounterMap<>();
 
-        countScores(projectId, studentId, pointScores, levelScores, pointLevelScores);
+        countScores(projectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
 
         // 统计知识点得分（学生，班级累加）
         for (Map.Entry<String, Double> pointScoreEntry : pointScores.entrySet()) {
@@ -74,8 +79,8 @@ public class PointTask extends Receiver {
         }
 
         // 统计能力层级得分（学生，班级累加）
-        for (Map.Entry<String, Double> levelScoreEntry : levelScores.entrySet()) {
-            Target level = Target.level(levelScoreEntry.getKey());
+        for (Map.Entry<SubjectLevel, Double> levelScoreEntry : subjectLevelScores.entrySet()) {
+            Target level = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, level, score, null);
             scoreService.addTotalScore(projectId, classRange, level, score);
@@ -86,14 +91,21 @@ public class PointTask extends Receiver {
     private void countScores(
             String projectId, String studentId,
             DoubleCounterMap<String> pointScores,
-            DoubleCounterMap<String> levelScores,
+            DoubleCounterMap<SubjectLevel> subjectLevelScores,
             DoubleCounterMap<PointLevel> pointLevelScores) {
 
         FindIterable<Document> scores = scoreService.getStudentQuestScores(projectId, studentId);
         for (Document scoreDoc : scores) {
             double score = scoreDoc.getDouble("score");
+            String subject = scoreDoc.getString("subject");
             String questId = scoreDoc.getString("quest");
             Document quest = questService.findQuest(projectId, questId);
+
+            if (quest == null) {
+                LOG.error("找不到题目: project=" + projectId + ", questId=" + questId);
+                continue;
+            }
+
             Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
 
             // 没有知识点，跳过处理
@@ -107,7 +119,7 @@ public class PointTask extends Receiver {
 
                 for (String level : pEntry.getValue()) {
                     pointLevelScores.incre(new PointLevel(pointId, level), score);
-                    levelScores.incre(level, score);
+                    subjectLevelScores.incre(new SubjectLevel(subject, level), score);
                 }
             }
         }

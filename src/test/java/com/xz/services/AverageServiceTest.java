@@ -6,8 +6,6 @@ import com.xz.bean.Target;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * (description)
  * created at 16/05/16
@@ -21,8 +19,8 @@ public class AverageServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetAverage() throws Exception {
-        double average = averageService.getAverage(PROJECT_ID,
-                Range.clazz("SCHOOL_004_CLASS_04"), Target.quest("5732e1f6c5a637047a2f43f8"));
+        double average = averageService.getAverage(XT_PROJECT_ID,
+                Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47"), Target.level("A"));
 
         System.out.println(average);
     }

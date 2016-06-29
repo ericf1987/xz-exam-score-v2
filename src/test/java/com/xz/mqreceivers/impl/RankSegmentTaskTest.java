@@ -20,7 +20,7 @@ public class RankSegmentTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        rankSegmentTask.runTask(new AggrTask(PROJECT_ID, "11", "rank_segment")
+        rankSegmentTask.runTask(new AggrTask(XT_PROJECT_ID, "11", "rank_segment")
                 .setRange(Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47")).setTarget(Target.subject("001")));
     }
 }

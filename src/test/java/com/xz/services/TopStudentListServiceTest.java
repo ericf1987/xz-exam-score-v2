@@ -27,9 +27,9 @@ public class TopStudentListServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetTopStudentList() throws Exception {
         List<Document> list = topStudentListService.getTopStudentList(
-                PROJECT_ID,
+                XT_PROJECT_ID,
                 Range.school("002e02d6-c036-4780-85d4-e54e3f1fbf9f"),
-                Target.project(PROJECT_ID), 1, 10);
+                Target.project(XT_PROJECT_ID), 1, 10);
 
         list.forEach(System.out::println);
     }
@@ -37,7 +37,7 @@ public class TopStudentListServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetTopStudentRankSegment() throws Exception {
         List<Map<String, Object>> topStudentRankSegment =
-                topStudentListService.getTopStudentRankSegment(PROJECT_ID, rangeService.queryProvinceRange(PROJECT_ID));
+                topStudentListService.getTopStudentRankSegment(XT_PROJECT_ID, rangeService.queryProvinceRange(XT_PROJECT_ID));
         for (Map<String, Object> map : topStudentRankSegment) {
             System.out.println(map);
         }

@@ -20,7 +20,7 @@ public class TscoreTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        tscoreTask.runTask(new AggrTask(PROJECT_ID, "111", "t_score")
+        tscoreTask.runTask(new AggrTask(XT_PROJECT_ID, "111", "t_score")
                 .setTarget(Target.subject("001")).setRange(Range.school("002e02d6-c036-4780-85d4-e54e3f1fbf9f")));
     }
 }

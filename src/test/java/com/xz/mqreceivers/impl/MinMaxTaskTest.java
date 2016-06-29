@@ -21,7 +21,7 @@ public class MinMaxTaskTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testRunTask() throws Exception {
         minMaxTask.runTask(
-                new AggrTask(PROJECT_ID, "aggr1", "minmax")
+                new AggrTask(XT_PROJECT_ID, "aggr1", "minmax")
                         .setRange(Range.SCHOOL, "SCHOOL_005")
                         .setTarget(Target.SUBJECT, "001"));
     }

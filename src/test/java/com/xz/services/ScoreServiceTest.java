@@ -19,7 +19,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetTotalScore() throws Exception {
-        double score = scoreService.getScore(PROJECT_ID,
+        double score = scoreService.getScore(XT_PROJECT_ID,
                 Range.student("SCHOOL_009_CLASS_03_02"),
                 Target.subject("004"));
 

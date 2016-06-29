@@ -30,6 +30,8 @@ public class Target {
 
     public static final String LEVEL = "level";
 
+    public static final String SUBJECT_LEVEL = "subjectLevel";
+
     public static Target project(String project) {
         return new Target(Target.PROJECT, project);
     }
@@ -60,6 +62,14 @@ public class Target {
 
     public static Target level(String level) {
         return new Target(LEVEL, level);
+    }
+
+    public static Target subjectLevel(String subject, String level) {
+        return new Target(SUBJECT_LEVEL, new SubjectLevel(subject, level));
+    }
+
+    public static Target subjectLevel(SubjectLevel subjectLevel) {
+        return new Target(SUBJECT_LEVEL, subjectLevel);
     }
 
     public static Target pointLevel(PointLevel pointLevel) {
@@ -150,8 +160,12 @@ public class Target {
 
             if (idDoc.containsKey("objective")) {
                 _id = new SubjectObjective(idDoc.getString("subject"), idDoc.getBoolean("objective"));
-            } else {
+            } else if (idDoc.containsKey("point")) {
                 _id = new PointLevel(idDoc.getString("point"), idDoc.getString("level"));
+            } else if (idDoc.containsKey("subject")) {
+                _id = new SubjectLevel(idDoc.getString("subject"), idDoc.getString("level"));
+            } else {
+                throw new IllegalStateException("无法解析 Target ID: " + id);
             }
 
             id = _id;

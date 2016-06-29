@@ -60,6 +60,9 @@ public class ImportProjectService {
     QuestService questService;
 
     @Autowired
+    QuestIdService questIdService;
+
+    @Autowired
     PointService pointService;
 
     @Autowired
@@ -357,7 +360,10 @@ public class ImportProjectService {
         // 如果卷库当中没有题目记录，则会导致 questId 为空
         // 在这里临时生成一个新的 questId 补上。
         if (questDoc.getString("questId") == null) {
-            questDoc.put("questId", UUID.randomUUID().toString().replace("-", ""));
+            String project = questDoc.getString("project");
+            String subject = questDoc.getString("subject");
+            String questNo = questDoc.getString("questNo");
+            questDoc.put("questId", questIdService.getQuestId(project, subject, questNo));
         }
 
     }

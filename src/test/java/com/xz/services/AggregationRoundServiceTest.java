@@ -20,7 +20,7 @@ public class AggregationRoundServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRounds() throws Exception {
-        AggrTask task = new AggrTask(PROJECT_ID, AGGR_ID, "total");
+        AggrTask task = new AggrTask(XT_PROJECT_ID, AGGR_ID, "total");
         aggregationRoundService.pushTask(task);
 
         new Thread(() -> {
