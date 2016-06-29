@@ -22,7 +22,7 @@ public class FullScoreDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE, Target.POINT, Target.LEVEL);
+                Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE, Target.POINT);
 
         for (Target target : targets) {
             dispatchTask(createTask(projectId, aggregationId).setTarget(target));
