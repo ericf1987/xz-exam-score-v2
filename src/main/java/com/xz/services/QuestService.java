@@ -107,6 +107,20 @@ public class QuestService {
         collection.insertMany(quests);
     }
 
+    public void clearQuests(String projectId, String subjectId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+        collection.deleteMany(doc("project", projectId).append("subject", subjectId));
+    }
+
+    public void saveQuest(Document quest) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+        collection.deleteMany(doc("project", quest.getString("project"))
+                .append("subject", quest.getString("subject"))
+                .append("questNo", quest.getString("questNo"))
+        );
+        collection.insertOne(quest);
+    }
+
     public Document findQuest(String projectId, String subject, String questNo) {
         String cacheKey = "quest_by_no:" + projectId + ":" + subject + ":" + questNo;
 
@@ -121,6 +135,7 @@ public class QuestService {
         });
     }
 
+    // 保存选择题答案
     public void saveQuestItems(String projectId, String questId, List<String> items) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
         collection.updateMany(doc("project", projectId).append("questId", questId), $set("items", items));

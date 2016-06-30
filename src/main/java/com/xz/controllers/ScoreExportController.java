@@ -2,6 +2,7 @@ package com.xz.controllers;
 
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.api.Param;
 import com.xz.bean.Range;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -85,7 +87,7 @@ public class ScoreExportController {
             }
 
             LOG.info("项目导出完毕。");
-            return Result.success();
+            return Result.success().set("ossPath", ossPath);
         } catch (IOException e) {
             return Result.fail(e.getMessage());
         }
@@ -145,6 +147,7 @@ public class ScoreExportController {
     }
 
     private List<String> getAnswer(Document scoreDoc) {
-        return Arrays.asList(scoreDoc.getString("answer").split(","));
+        String answer = scoreDoc.getString("answer");
+        return StringUtil.isBlank(answer) ? Collections.emptyList() : Arrays.asList(answer.split(","));
     }
 }

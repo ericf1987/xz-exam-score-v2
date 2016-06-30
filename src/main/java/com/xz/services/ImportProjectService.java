@@ -236,10 +236,9 @@ public class ImportProjectService {
             questDoc.put("isObjective", isObjective(questObj.getString("questType")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
             questDoc.put("score", questObj.getDoubleValue("score"));
-            questDoc.put("standardAnswer", questObj.getString("answer"));
+            questDoc.put("answer", questObj.getString("answer"));
             questDoc.put("points", questObj.get("points"));
             questDoc.put("items", questObj.get("items"));
-            questDoc.put("answer", questObj.get("answer"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
 

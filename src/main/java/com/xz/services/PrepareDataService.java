@@ -41,11 +41,28 @@ public class PrepareDataService {
 
     public void prepare(String projectId) {
         LOG.info("----对项目 {} 数据进行预处理...", projectId);
+        LOG.info("补完成绩记录...");
+        fixScore(projectId);
         LOG.info("统计学生数量...");
         prepareStudentList(projectId);
         LOG.info("统计判断题选项...");
         prepareFixQuestOptions(projectId);
         LOG.info("----对项目 {} 数据预处理完成。", projectId);
+    }
+
+    private void fixScore(String projectId) {
+        List<Document> quests = questService.getQuests(projectId);
+
+        for (Document quest : quests) {
+            String subject = quest.getString("subject");
+            String questId = quest.getString("questId");
+            String questNo = quest.getString("questNo");
+
+            scoreDatabase.getCollection("score").updateMany(
+                    doc("project", projectId).append("subject", subject).append("questNo", questNo),
+                    $set("quest", questId)
+            );
+        }
     }
 
     /**

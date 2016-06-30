@@ -4,6 +4,7 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.scanner.ScannerDBService;
 import com.xz.services.AggregationRoundService;
 import com.xz.services.AggregationService;
+import com.xz.services.PrepareDataService;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -16,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 从网阅数据库导入明细数据，并统计得分
@@ -42,6 +41,9 @@ public class ImportScoreFromScannerDB {
     @Autowired
     AggregationRoundService aggregationRoundService;
 
+    @Autowired
+    PrepareDataService prepareDataService;
+
     /**
      * 从 Scanner 数据库导入并计算客观题成绩
      *
@@ -60,23 +62,16 @@ public class ImportScoreFromScannerDB {
         importScoreData(project, projectDoc);
 
         // 2. 计算分数总和
-        LOG.info("分数导入完毕，开始计算总和...");
-        aggregateTotalScores(project);
+        LOG.info("分数导入完毕，开始准备数据...");
+        prepareData(project);
 
         LOG.info("项目{}的所有成绩导入完毕。", project);
         return Result.success();
     }
 
     // 计算分数总和
-    private void aggregateTotalScores(String projectId) {
-        String aggregationId = UUID.randomUUID().toString();
-
-        aggregationService.runDispatchers(projectId, aggregationId, Arrays.asList(
-                taskDispatcherFactory.getTaskDispatcher("student_list"),
-                taskDispatcherFactory.getTaskDispatcher("total_score")
-        ));
-
-        aggregationRoundService.waitForRoundCompletion(aggregationId);
+    private void prepareData(String projectId) {
+        prepareDataService.prepare(projectId);
     }
 
     private void importScoreData(@RequestParam("project") String project, Document projectDoc) {

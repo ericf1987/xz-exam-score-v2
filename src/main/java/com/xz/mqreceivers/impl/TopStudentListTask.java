@@ -11,6 +11,8 @@ import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.RankService;
 import com.xz.services.StudentService;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ import static com.xz.util.Mongo.target2Doc;
 @ReceiverInfo(taskType = "top_student_list")
 @Component
 public class TopStudentListTask extends Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(TopStudentListTask.class);
 
     @Autowired
     RankService rankService;
@@ -47,6 +51,9 @@ public class TopStudentListTask extends Receiver {
         }
 
         List<Document> scoreMap = rankService.getScoreMap(projectId, range, target);
+        if (scoreMap.isEmpty()) {
+            LOG.error("找不到排名信息: project={}, range={}, target={}", projectId, range, target);
+        }
 
         Value<Integer> totalCount = Value.of(0);
         scoreMap.forEach(d -> totalCount.set(totalCount.get() + d.getInteger("count")));

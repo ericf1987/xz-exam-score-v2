@@ -4,6 +4,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.NumberUtil;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.services.QuestService;
 import com.xz.services.StudentService;
 import org.bson.Document;
@@ -91,7 +92,7 @@ public class ScannerDBService {
         Document student = studentService.findStudent(projectId, studentId);
 
         scoreDatabase.getCollection("score").deleteMany(
-                doc("project", projectId).append("student", studentId)
+                doc("project", projectId).append("student", studentId).append("subject", subjectId)
         );
 
         if (student == null) {
@@ -102,7 +103,7 @@ public class ScannerDBService {
         saveSubjectiveScores(projectId, subjectId, document, student);
 
         if (counter.incrementAndGet() % 100 == 0) {
-            LOG.info("已导入 " + counter.get() + " 名学生...");
+            LOG.info("已导入科目 " + subjectId + " 的 " + counter.get() + " 名学生...");
         }
     }
 
@@ -141,17 +142,21 @@ public class ScannerDBService {
             String questionNo = objectiveItem.getString("questionNo");
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
             double fullScore = getFullScore(quest, objectiveItem);
+            String studentAnswer = objectiveItem.getString("answerContent");
+            String standardAnswer = objectiveItem.getString("standardAnswer");
 
-            ScoreAndRight scoreAndRight = calculateScore(
-                    fullScore,
-                    objectiveItem.getString("standardAnswer"),
-                    objectiveItem.getString("answerContent")
-            );
+            if (StringUtil.isBlank(studentAnswer)) {
+                throw new IllegalStateException("客观题没有考生作答, project=" +
+                        projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
+            }
+
+            ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer);
 
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
                     .append("questNo", questionNo)
                     .append("score", scoreAndRight.score)
+                    .append("answer", studentAnswer)
                     .append("right", scoreAndRight.right)
                     .append("isObjective", true)
                     .append("student", student.getString("student"))
