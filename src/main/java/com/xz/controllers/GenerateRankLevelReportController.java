@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -52,7 +53,7 @@ public class GenerateRankLevelReportController {
     @Autowired
     ScoreService scoreService;
 
-    @RequestMapping("/rank_level")
+    @RequestMapping(value = "/rank_level", method = RequestMethod.POST)
     @ResponseBody
     public Result generate(@RequestParam("project") String projectId) {
         List<Range> students = rangeService.queryRanges(projectId, Range.STUDENT);

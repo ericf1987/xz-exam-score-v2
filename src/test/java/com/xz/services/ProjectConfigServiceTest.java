@@ -15,15 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
+    public static final String[] LEVELS = {"A", "B", "C", "D", "E", "F"};
+
     @Autowired
     ProjectConfigService projectConfigService;
 
     @Test
     public void testSaveProjectConfig() throws Exception {
-        // saveDefaultConfig();
-        // saveShifengConfig();
-        // save19SchoolConfig();
-        saveShifeng2Config();
+        saveConfig("430200-e1274973fe994a86a9552a168fdeaa01", true, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
+        saveConfig("430200-b73f03af1d74484f84f1aa93f583caaa", true, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
     }
 
     // 缺省配置
@@ -46,47 +46,24 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         projectConfigService.saveProjectConfig(config);
     }
 
-    // 石峰中学配置（2016-05）
-    private void saveShifengConfig() {
+    /**
+     * 保存配置
+     *
+     * @param projectId               项目ID
+     * @param combineCategorySubjects 是否合并文理科
+     * @param levelPercentages        等第分布，从 A 开始算起，最多 6 个等第
+     */
+    private void saveConfig(String projectId, boolean combineCategorySubjects, double[] levelPercentages) {
         ProjectConfig config = new ProjectConfig();
-        config.setProjectId("430200-8a9be9fc2e1842a4b9b4894eee1f5f73");
-        config.setCombineCategorySubjects(true);
-        config.addRankingLevel("A", 0.40);
-        config.addRankingLevel("B", 0.25);
-        config.addRankingLevel("C", 0.23);
-        config.addRankingLevel("D", 0.07);
-        config.addRankingLevel("E", 0.04);
-        config.addRankingLevel("F", 0.01);
+        config.setProjectId(projectId);
+        config.setCombineCategorySubjects(combineCategorySubjects);
 
-        projectConfigService.saveProjectConfig(config);
-    }
-
-    // 石峰中学配置（2016-06）
-    private void saveShifeng2Config() {
-        ProjectConfig config = new ProjectConfig();
-        config.setProjectId("430200-3626a0b5e6ed4ec2b4a5f2bbd6647ef3");
-        config.setCombineCategorySubjects(true);
-        config.addRankingLevel("A", 0.40);
-        config.addRankingLevel("B", 0.25);
-        config.addRankingLevel("C", 0.23);
-        config.addRankingLevel("D", 0.07);
-        config.addRankingLevel("E", 0.04);
-        config.addRankingLevel("F", 0.01);
-
-        projectConfigService.saveProjectConfig(config);
-    }
-
-    // 十九中配置
-    private void save19SchoolConfig() {
-        ProjectConfig config = new ProjectConfig();
-        config.setProjectId("430200-89c9dc7481cd47a69d85af3f0808e0c4");
-        config.setCombineCategorySubjects(false);
-        config.addRankingLevel("A", 0.12);
-        config.addRankingLevel("B", 0.20);
-        config.addRankingLevel("C", 0.25);
-        config.addRankingLevel("D", 0.25);
-        config.addRankingLevel("E", 0.16);
-        config.addRankingLevel("F", 0.02);
+        for (int i = 0; i < LEVELS.length; i++) {
+            String level = LEVELS[i];
+            if (levelPercentages.length > i) {
+                config.addRankingLevel(level, levelPercentages[i]);
+            }
+        }
 
         projectConfigService.saveProjectConfig(config);
     }
