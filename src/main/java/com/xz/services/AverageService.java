@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.util.Mongo.range2Doc;
 import static com.xz.util.Mongo.target2Doc;
 
@@ -55,6 +56,24 @@ public class AverageService {
         }
 
         return result;
+    }
+
+    /**
+     * 判断指定目标对象名称是否已经有平均值
+     *
+     * @param projectId     考试项目id
+     * @param targetName    目标名称
+     *
+     * @return  是否有平均值
+     */
+    public boolean isExistAverage(String projectId, String targetName) {
+        String cacheKey = "average_status" + projectId + ":" + targetName;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> averageCollection = scoreDatabase.getCollection("average");
+            return averageCollection.find(
+                    doc("project", projectId).append("target.name", targetName)
+            ).first() != null;
+        });
     }
 
     /**

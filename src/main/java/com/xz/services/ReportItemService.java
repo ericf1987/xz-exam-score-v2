@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -41,6 +42,9 @@ public class ReportItemService {
 
     @Autowired
     PointService pointService;
+
+    @Autowired
+    AverageService averageService;
 
     @Autowired
     SimpleCache cache;
@@ -86,7 +90,7 @@ public class ReportItemService {
             reportItem.put("id", document.getObjectId("_id").toHexString());
 
             if (isPointOrLevelItem(name)) {
-                reportItem.put("dataStatus", !pointService.getPoints(projectId).isEmpty());
+                reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
             }
