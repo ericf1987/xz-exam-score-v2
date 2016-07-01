@@ -52,6 +52,7 @@ public class DownloadAnalysisService {
         for (String path : paths) {
             String[] param = path.split("-->");
             List<Map<String, String>> category = getFileCategory(projectId, schoolId, param);
+            System.out.println(category.toString());
             pathList.addAll(category);
         }
         //追加考试id和学校id

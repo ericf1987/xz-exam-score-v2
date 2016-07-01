@@ -8,6 +8,7 @@ import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +59,7 @@ public class SchoolPaperSubjectiveSheets extends SheetGenerator {
     private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> classes) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "主观题");
+        excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[0]);
         excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[1]);
         for (int i = 0; i < classes.size(); i++) {
@@ -73,12 +75,12 @@ public class SchoolPaperSubjectiveSheets extends SheetGenerator {
         for(int i = 0; i < schools.size(); i++){
             excelWriter.set(row, column.incrementAndGet(), schools.get(i).get("questNo"));
             excelWriter.set(row, column.incrementAndGet(), schools.get(i).get("score"));
-            excelWriter.set(row, column.incrementAndGet(), schools.get(i).get("rate"));
+            excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(schools.get(i).get("rate").toString())));
             List<Map<String, Object>> classes = result.get("classes");
             for(Map<String, Object> clazz : classes){
                 List<Map<String, Object>> subjectives = (List<Map<String, Object>>)clazz.get("subjectives");
                 excelWriter.set(row, column.incrementAndGet(), subjectives.get(i).get("score"));
-                excelWriter.set(row, column.incrementAndGet(), subjectives.get(i).get("rate"));
+                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(subjectives.get(i).get("rate").toString())));
             }
             row++;
             column.set(-1);

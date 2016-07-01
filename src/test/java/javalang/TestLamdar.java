@@ -1,5 +1,7 @@
 package javalang;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +62,8 @@ public class TestLamdar {
     public static void main(String[] args) {
         //new TestLamdar().test2();
         Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
-        Integer integer = converter.convert("123");
+//        Converter<String, Integer> converter = Integer::valueOf;
+        Integer integer = converter.convert("1980");
         System.out.println(integer.getClass());
     }
 

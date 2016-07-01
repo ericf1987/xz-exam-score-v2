@@ -59,6 +59,7 @@ public class TotalBasicRankSheet extends SheetGenerator {
 
         Result result = projectRankStat.execute(param);
 
+        System.out.println(result.getData());
         //设置表头
         setupHeader(excelWriter);
         setupSecondaryHeader(excelWriter);
