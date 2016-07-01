@@ -154,7 +154,7 @@ public class GenerateRankLevelReportController {
 
         //////////////////////////////////////////////////////////////
 
-        excelWriter.save("target/report.xlsx");
+        excelWriter.save("target/rank_level_map/" + projectId + ".xlsx");
         return Result.success();
     }
 

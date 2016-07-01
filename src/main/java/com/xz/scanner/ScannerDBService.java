@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.score.ScorePattern;
 import com.xz.services.QuestService;
 import com.xz.services.StudentService;
 import org.bson.Document;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -121,7 +124,7 @@ public class ScannerDBService {
                     .append("questNo", questionNo)
                     .append("score", score)
                     .append("right", NumberUtil.equals(score, fullScore))
-                    .append("isObjective", true)
+                    .append("isObjective", false)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
                     .append("school", student.getString("school"))
@@ -142,8 +145,8 @@ public class ScannerDBService {
             String questionNo = objectiveItem.getString("questionNo");
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
             double fullScore = getFullScore(quest, objectiveItem);
-            String studentAnswer = objectiveItem.getString("answerContent");
-            String standardAnswer = objectiveItem.getString("standardAnswer");
+            String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
+            String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
 
             if (StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" +
@@ -180,17 +183,42 @@ public class ScannerDBService {
         }
     }
 
-    private ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent) {
-        if (answerContent.equals(standardAnswer)) {
-            return new ScoreAndRight(fullScore, true);
+    protected static ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent) {
+
+        boolean isSingleAnswer = standardAnswer.length() == 1;  // 单选题
+
+        if (isSingleAnswer) {
+            if (answerContent.equals(standardAnswer)) {
+                return new ScoreAndRight(fullScore, true);
+            } else {
+                return new ScoreAndRight(0, false);
+            }
         } else {
-            return new ScoreAndRight(0, false);
+
+            ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
+            double score = scorePattern.getScore(answerContent);
+            return new ScoreAndRight(score, score > 0);
         }
+    }
+
+    private static List<String> parseUsrAnswer(String answerContent) {
+        List<String> result = new ArrayList<>();
+        for (char c : answerContent.toCharArray()) {
+            result.add(new String(new char[]{c}));
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+    private static List<String> parseStdAnswer(String standardAnswer) {
+        List<String> result = new ArrayList<>(Arrays.asList(standardAnswer.split(",")));
+        Collections.sort(result);
+        return result;
     }
 
     //////////////////////////////////////////////////////////////
 
-    private static class ScoreAndRight {
+    public static class ScoreAndRight {
 
         public double score;
 

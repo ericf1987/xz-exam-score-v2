@@ -7,6 +7,9 @@ import com.xz.taskdispatchers.TaskDispatcherInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 等第统计
+ */
 @Component
 @TaskDispatcherInfo(taskType = "rank_level", dependentTaskType = "score_map")
 public class RankLevelDispatcher extends TaskDispatcher {

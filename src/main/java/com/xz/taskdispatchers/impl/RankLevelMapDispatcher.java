@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * (description)
- * created at 2016/5/23
+ * 等第排名统计
  *
  * @author fengye
  */

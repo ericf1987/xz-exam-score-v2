@@ -22,8 +22,8 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testSaveProjectConfig() throws Exception {
-        saveConfig("430200-e1274973fe994a86a9552a168fdeaa01", true, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
-        saveConfig("430200-b73f03af1d74484f84f1aa93f583caaa", true, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
+        saveConfig("430200-e1274973fe994a86a9552a168fdeaa01", false, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
+        saveConfig("430200-b73f03af1d74484f84f1aa93f583caaa", false, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
     }
 
     // 缺省配置
