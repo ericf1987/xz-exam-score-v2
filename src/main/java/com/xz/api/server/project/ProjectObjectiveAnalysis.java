@@ -109,7 +109,7 @@ public class ProjectObjectiveAnalysis implements Server {
         for (Document quest : quests) {
             Map<String, Object> map = new HashMap<>();
             String questId = quest.getString("questId");
-            String standardAnswer = quest.getString("standardAnswer");
+            String answer = quest.getString("answer");
             List<String> items = quest.get("items", List.class);
             Map<String, Document> optionMap = optionMapService.getOptionMap(projectId, questId, range);
 
@@ -121,19 +121,19 @@ public class ProjectObjectiveAnalysis implements Server {
             List<Map<String, Object>> itemStats = new ArrayList<>();
             if (items != null) {
                 for (String itemName : items) {
-                    Map<String, Object> itemNameStat = getOptionValue(optionMap, itemName.trim(), standardAnswer);
+                    Map<String, Object> itemNameStat = getOptionValue(optionMap, itemName.trim(), answer);
                     itemStats.add(itemNameStat);
                 }
             }
             map.put("items", itemStats);
 
             // 不选率
-            Map<String, Object> unSelect = getOptionValue(optionMap, "*", standardAnswer);
+            Map<String, Object> unSelect = getOptionValue(optionMap, "*", answer);
             map.put("unSelect", unSelect);
 
             map.put("questNo", quest.getString("questNo"));
             map.put("score", DocumentUtils.getDouble(quest, "score", 0));
-            map.put("standardAnswer", standardAnswer == null ? "" : standardAnswer.trim());
+            map.put("standardAnswer", answer == null ? "" : answer.trim());
             list.add(map);
         }
 
@@ -144,7 +144,10 @@ public class ProjectObjectiveAnalysis implements Server {
             Map<String, Document> optionMap, String key, String standardAnswer) {
         Map<String, Object> map = new HashMap<>();
         Document document = optionMap.get(key);
-        boolean isRigth = Objects.equals(key, standardAnswer);
+        standardAnswer = standardAnswer == null ? "" : standardAnswer;
+        String[] answerArray = standardAnswer.split(",");
+        boolean isRigth = Arrays.asList(answerArray).contains(key);
+
         if (document == null) {
             map.put("count", 0);
             map.put("rate", 0);
