@@ -8,6 +8,7 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.SchoolService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,11 +58,11 @@ public class TotalPaperSubjectiveSheets extends SheetGenerator {
         for(int i = 0;i < totals.size();i++){
             excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("questNo").toString());
             excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("score").toString());
-            excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("rate").toString());
+            excelWriter.set(2 + i, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(totals.get(i).get("rate").toString())));
             for(Map<String, Object> school : schools){
                 List<Map<String, Object>> subjectives = (List<Map<String, Object>>)school.get("subjectives");
                 excelWriter.set(2 + i, column.incrementAndGet(), subjectives.get(i).get("score").toString());
-                excelWriter.set(2 + i, column.incrementAndGet(), subjectives.get(i).get("rate").toString());
+                excelWriter.set(2 + i, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(subjectives.get(i).get("rate").toString())));
             }
             column.set(-1);
         }

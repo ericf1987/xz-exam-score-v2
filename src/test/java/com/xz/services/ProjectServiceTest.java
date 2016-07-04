@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 /**
  * ${描述}
  *
@@ -25,5 +23,11 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
         for (Document document : documents) {
             System.out.println(document);
         }
+    }
+
+    @Test
+    public void testFindProjectStudyStage() throws Exception {
+        String studyStage = projectService.findProjectStudyStage("430300-672a0ed23d9148e5a2a31c8bf1e08e62");
+        System.out.println(studyStage);
     }
 }

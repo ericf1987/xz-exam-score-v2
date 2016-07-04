@@ -21,6 +21,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.total.TotalBasicDataReport"/>
+                <report name="总体各科试卷题目得分明细" class="com.xz.report.total.TotalQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 
@@ -43,6 +44,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.schools.SchoolBasicDataReport"/>
+                <report name="学校各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 
@@ -55,6 +57,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
+                <report name="班级各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 

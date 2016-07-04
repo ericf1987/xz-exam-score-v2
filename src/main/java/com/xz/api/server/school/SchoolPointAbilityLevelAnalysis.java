@@ -49,6 +49,12 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
     @Autowired
     ClassService classService;
 
+    @Autowired
+    ProjectService projectService;
+
+    @Autowired
+    AbilityLevelService abilityLevelService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -70,11 +76,13 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
 
         Range range = Range.clazz(classId);
         PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
+        String studyStage = projectService.findProjectStudyStage(projectId);
+        Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels,
+        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels, levelMap,
                 pointService, questService, fullScoreService, averageService);
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                abilityLevels, fullScoreService, averageService);
+                abilityLevels, levelMap, fullScoreService, averageService);
 
         return Result.success()
                 .set("points", pointStats)

@@ -49,6 +49,12 @@ public class ClassAbilityLevelAnalysis implements Server {
     @Autowired
     AverageService averageService;
 
+    @Autowired
+    ProjectService projectService;
+
+    @Autowired
+    AbilityLevelService abilityLevelService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -64,13 +70,19 @@ public class ClassAbilityLevelAnalysis implements Server {
             return Result.fail("找不到考试科目信息");
         }
 
-        List<Map<String, Object>> classLevelAnalysis = getClassAbilityLevelAnalysis(projectId, subjectId, classId);
-        List<Map<String, Object>> studentLevelAnalysis = getStudentAbilityLevelAnalysis(projectId, subjectId, classId);
+        String studyStage = projectService.findProjectStudyStage(projectId);
+        Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+
+        List<Map<String, Object>> classLevelAnalysis = getClassAbilityLevelAnalysis(
+                projectId, subjectId, classId, levelMap);
+        List<Map<String, Object>> studentLevelAnalysis = getStudentAbilityLevelAnalysis(
+                projectId, subjectId, classId, levelMap);
         return Result.success().set("classes", classLevelAnalysis).set("students", studentLevelAnalysis);
     }
 
     // 学生能力层级分析
-    private List<Map<String, Object>> getStudentAbilityLevelAnalysis(String projectId, String subjectId, String classId) {
+    private List<Map<String, Object>> getStudentAbilityLevelAnalysis(String projectId, String subjectId,
+                                                                     String classId, Map<String, Document> levelMap) {
         List<Map<String, Object>> list = new ArrayList<>();
 
         List<Document> studentList = studentService.getStudentList(projectId, Range.clazz(classId));
@@ -84,7 +96,7 @@ public class ClassAbilityLevelAnalysis implements Server {
 
             Range range = Range.student(studentId);
             map.put("subjectScore", scoreService.getScore(projectId, range, Target.subject(subjectId)));
-            map.put("levelStats", getLevelStats(projectId, subjectId, range));
+            map.put("levelStats", getLevelStats(projectId, subjectId, range, levelMap));
             list.add(map);
         }
 
@@ -93,20 +105,25 @@ public class ClassAbilityLevelAnalysis implements Server {
     }
 
     // 班级能力层级分析
-    private List<Map<String, Object>> getClassAbilityLevelAnalysis(String projectId, String subjectId, String classId) {
+    private List<Map<String, Object>> getClassAbilityLevelAnalysis(String projectId, String subjectId,
+                                                                   String classId, Map<String, Document> levelMap) {
         Range range = Range.clazz(classId);
-        return getLevelStats(projectId, subjectId, range);
+        return getLevelStats(projectId, subjectId, range, levelMap);
     }
 
-    private List<Map<String, Object>> getLevelStats(String projectId, String subjectId, Range range) {
+    private List<Map<String, Object>> getLevelStats(String projectId, String subjectId,
+                                                    Range range, Map<String, Document> levelMap) {
         List<Map<String, Object>> levelStats = new ArrayList<>();
         PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
         for (PointService.AbilityLevel level : abilityLevels) {
-            String levelName = level.name();
-            Map<String, Object> levelStat = new HashMap<>();
-            levelStat.put("levelName", levelName);
+            String levelId = level.name();
+            Document levelInfo = levelMap.get(levelId);
 
-            Target target = Target.subjectLevel(subjectId, levelName);
+            Map<String, Object> levelStat = new HashMap<>();
+            levelStat.put("levelName", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
+            levelStat.put("levelId", levelId);
+
+            Target target = Target.subjectLevel(subjectId, levelId);
             double score;
 
             if (range.match(Range.STUDENT)) {
