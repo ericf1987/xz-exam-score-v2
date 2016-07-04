@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.sys.QueryExamClasses.getFullClassName;
+
 /**
  * 学校成绩-尖子生对比分析
  *
@@ -55,9 +57,7 @@ public class SchoolTopStudentCompare implements Server {
         for (Document listClass : listClasses) {
             Map<String, Object> map = new HashMap<>();
             String classId = listClass.getString("class");
-            String name = listClass.getString("name");
-
-            map.put("className", name);
+            map.put("className", getFullClassName(listClass));
 
             Range rankRange = Range.school(schoolId);
             Range compareRange = Range.clazz(classId);

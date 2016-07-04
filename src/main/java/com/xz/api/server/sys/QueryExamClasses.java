@@ -1,6 +1,7 @@
 package com.xz.api.server.sys;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
 import com.xz.api.annotation.*;
 import com.xz.api.server.Server;
@@ -40,7 +41,29 @@ public class QueryExamClasses implements Server {
         String schoolId = param.getString("schoolId");
 
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
+        for (Document listClass : listClasses) {
+            listClass.put("name", getFullClassName(listClass));
+        }
+
         listClasses.sort((o1, o2) -> o1.getString("name").compareTo(o2.getString("name")));
         return Result.success().set("classes", listClasses);
+    }
+
+    // 从mongo对象获取班级全称
+    public static String getFullClassName(Document classDocument) {
+        if (classDocument == null) {
+            return "";
+        }
+
+        String className = classDocument.getString("name");
+        if (StringUtil.isBlank(className)) {
+            return "";
+        }
+
+        if (!className.contains("班")) {
+            className += "班";
+        }
+
+        return className;
     }
 }

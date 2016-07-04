@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.sys.QueryExamClasses.getFullClassName;
+
 /**
  * 学校成绩-排名统计
  *
@@ -63,10 +65,9 @@ public class SchoolRankStat implements Server {
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
             String classId = listClass.getString("class");
-            String name = listClass.getString("name");
 
             Map<String, Object> map = new HashMap<>();
-            map.put("className", name);
+            map.put("className", getFullClassName(listClass));
 
             // 考生人数
             Range range = Range.clazz(classId);

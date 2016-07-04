@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xz.api.server.project.ProjectScoreAnalysis.getScoreAnalysisStatInfo;
+import static com.xz.api.server.sys.QueryExamClasses.getFullClassName;
 
 /**
  * 学校成绩-分数分析
@@ -81,14 +82,13 @@ public class SchoolScoreAnalysis implements Server {
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
             String classId = listClass.getString("class");
-            String name = listClass.getString("name");
 
             Range range = Range.clazz(classId);
             Target target = targetService.getTarget(projectId, subjectId);
             Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
                     studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
                     passAndUnPassService, rankPositionService, overAverageService);
-            schoolMap.put("className", name);
+            schoolMap.put("className", getFullClassName(listClass));
 
             classStats.add(schoolMap);
         }

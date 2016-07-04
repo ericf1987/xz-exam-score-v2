@@ -3,6 +3,7 @@ package com.xz.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,16 @@ public class ClassService {
             return "";
         }
 
-        return examClass.getString("name");
+        String className = examClass.getString("name");
+        if (StringUtil.isBlank(className)) {
+            return "";
+        }
+
+        if (!className.contains("班")) {
+            className += "班";
+        }
+
+        return className;
     }
 
     public Document findClass(String projectId, String classId) {

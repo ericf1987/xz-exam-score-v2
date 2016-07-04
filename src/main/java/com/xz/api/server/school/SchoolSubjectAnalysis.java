@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xz.api.server.project.ProjectSubjectAnalysis.getSubjectAnalysis;
+import static com.xz.api.server.sys.QueryExamClasses.getFullClassName;
 
 /**
  * 学校成绩-学科分析
@@ -77,13 +78,12 @@ public class SchoolSubjectAnalysis implements Server {
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
             String classId = listClass.getString("class");
-            String name = listClass.getString("name");
 
             Range range = Range.clazz(classId);
             Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, studentService, averageService,
                     subjectService, subjectRateService, fullScoreService, tScoreService);
 
-            subjectAnalysis.put("className", name);
+            subjectAnalysis.put("className", getFullClassName(listClass));
             classsSubjectMaps.add(subjectAnalysis);
         }
 

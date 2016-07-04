@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xz.api.server.project.ProjectHighSegmentAnalysis.getHighSegmentAnalysis;
+import static com.xz.api.server.sys.QueryExamClasses.getFullClassName;
 
 /**
  * 学校成绩-高分段竞争力分析
@@ -66,9 +67,7 @@ public class SchoolHighSegmentAnalysis implements Server {
         for (Document listClass : listClasses) {
             Map<String, Object> map = new HashMap<>();
             String classId = listClass.getString("class");
-            String name = listClass.getString("name");
-
-            map.put("className", name);
+            map.put("className", getFullClassName(listClass));
 
             Range range = Range.clazz(classId);
             List<Map<String, Object>> subjects = getHighSegmentAnalysis(projectId, range, percent,
