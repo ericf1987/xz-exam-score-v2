@@ -5,14 +5,18 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -30,6 +34,49 @@ public class ProjectService {
 
     @Autowired
     SimpleCache cache;
+
+    private static final Map<String, String> GRADE_STUDYSTAGE_MAP = new HashMap<>();
+
+    @PostConstruct
+    public void init() {
+        GRADE_STUDYSTAGE_MAP.put("1", "1");
+        GRADE_STUDYSTAGE_MAP.put("2", "1");
+        GRADE_STUDYSTAGE_MAP.put("3", "1");
+        GRADE_STUDYSTAGE_MAP.put("4", "1");
+        GRADE_STUDYSTAGE_MAP.put("5", "1");
+        GRADE_STUDYSTAGE_MAP.put("6", "1");
+
+        GRADE_STUDYSTAGE_MAP.put("7", "2");
+        GRADE_STUDYSTAGE_MAP.put("8", "2");
+        GRADE_STUDYSTAGE_MAP.put("9", "2");
+
+        GRADE_STUDYSTAGE_MAP.put("10", "3");
+        GRADE_STUDYSTAGE_MAP.put("11", "3");
+        GRADE_STUDYSTAGE_MAP.put("12", "3");
+
+        GRADE_STUDYSTAGE_MAP.put("0", "0");
+    }
+
+    /**
+     * 通过考试项目id查询项目所属学段
+     *
+     * @param projectId  考试项目id
+     *
+     * @return 考试项目信息
+     */
+    public String findProjectStudyStage(String projectId) {
+        String cacheKey = "project_studystage:" + projectId;
+        return cache.get(cacheKey, () -> {
+            Document projectInfo = findProject(projectId);
+
+            int grade = 0;
+            if (projectInfo != null) {
+                grade = DocumentUtils.getInt(projectInfo, "grade", 0);
+            }
+
+            return GRADE_STUDYSTAGE_MAP.get(String.valueOf(grade));
+        });
+    }
 
     /**
      * 通过考试项目id查询考试项目

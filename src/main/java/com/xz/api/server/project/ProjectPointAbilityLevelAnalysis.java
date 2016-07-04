@@ -9,11 +9,9 @@ import com.xz.api.server.Server;
 import com.xz.bean.Point;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import com.xz.services.AverageService;
-import com.xz.services.FullScoreService;
-import com.xz.services.PointService;
-import com.xz.services.QuestService;
+import com.xz.services.*;
 import com.xz.util.DoubleUtils;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +46,12 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     @Autowired
     AverageService averageService;
 
+    @Autowired
+    AbilityLevelService abilityLevelService;
+
+    @Autowired
+    ProjectService projectService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -56,11 +60,13 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
         Range range = Range.school(schoolId);
         PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
+        String studyStage = projectService.findProjectStudyStage(projectId);
+        Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels,
+        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels, levelMap,
                 pointService, questService, fullScoreService, averageService);
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                abilityLevels, fullScoreService, averageService);
+                abilityLevels, levelMap, fullScoreService, averageService);
 
         return Result.success()
                 .set("points", pointStats)
@@ -70,6 +76,7 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     // 获取知识点统计分析
     public static List<Map<String, Object>> getPointAnalysis(String projectId, String subjectId, Range range,
                                                              PointService.AbilityLevel[] abilityLevels,
+                                                             Map<String, Document> levelMap,
                                                              PointService pointService,
                                                              QuestService questService,
                                                              FullScoreService fullScoreService,
@@ -94,14 +101,16 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
             for (PointService.AbilityLevel level : abilityLevels) {
                 Map<String, Object> pointLevel = new HashMap<>();
 
-                String levelName = level.name();
-                List<String> questNos = questService.getQuests(projectId, pointId, levelName)
+                String levelId = level.name();
+                Document levelInfo = levelMap.get(levelId);
+                List<String> questNos = questService.getQuests(projectId, pointId, levelId)
                         .stream().map(document -> document.getString("questNo")).collect(Collectors.toList());
                 pointLevel.put("questNos", questNos);
-                pointLevel.put("levelName", levelName);
+                pointLevel.put("levelId", levelId);
+                pointLevel.put("levelName", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
 
                 if (!questNos.isEmpty()) {
-                    double avgScore = averageService.getAverage(projectId, range, Target.pointLevel(pointId, levelName));
+                    double avgScore = averageService.getAverage(projectId, range, Target.pointLevel(pointId, levelId));
                     pointLevel.put("avgScore", DoubleUtils.round(avgScore));
                 }
 
@@ -117,31 +126,34 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
     // 获取能力层级统计分析
     public static Map<String, Object> getAbilityLevelStats(String projectId, String subjectId, Range range,
-                                                     PointService.AbilityLevel[] abilityLevels,
-                                                     FullScoreService fullScoreService,
-                                                     AverageService averageService) {
+                                                           PointService.AbilityLevel[] abilityLevels,
+                                                           Map<String, Document> levelMap,
+                                                           FullScoreService fullScoreService,
+                                                           AverageService averageService) {
 
         double totalScore = 0, userScore = 0;
         Map<String, Object> levelStat = new HashMap<>();
         List<Map<String, Object>> levelInfos = new ArrayList<>();
         for (PointService.AbilityLevel level : abilityLevels) {
-            String levelName = level.name();
-            Map<String, Object> levelMap = new HashMap<>();
-            levelMap.put("name", levelName);
+            String levelId = level.name();
+            Document levelInfo = levelMap.get(levelId);
+            Map<String, Object> levelStatMap = new HashMap<>();
+            levelStatMap.put("name", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
+            levelStatMap.put("levelId", levelId);
 
             // 能力层级满分
-            Target target = Target.subjectLevel(subjectId, levelName);
+            Target target = Target.subjectLevel(subjectId, levelId);
             double fullScore = fullScoreService.getFullScore(projectId, target);
-            levelMap.put("fullScore", fullScore);
+            levelStatMap.put("fullScore", fullScore);
 
             // 能力层级得分
             double avgScore = averageService.getAverage(projectId, range, target);
-            levelMap.put("avgScore", DoubleUtils.round(avgScore));
-            levelMap.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : avgScore / fullScore, true));
+            levelStatMap.put("avgScore", DoubleUtils.round(avgScore));
+            levelStatMap.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : avgScore / fullScore, true));
 
             totalScore += fullScore;
             userScore += avgScore;
-            levelInfos.add(levelMap);
+            levelInfos.add(levelStatMap);
         }
 
         levelStat.put("levelInfos", levelInfos);

@@ -84,7 +84,7 @@ public class TopStudentListService {
 
         return cache.get(cacheKey, () -> {
             ArrayList<Map<String, Object>> list = new ArrayList<>();
-            int totalTopStudentCount = getTopStudentTotalCount(projectId, range);
+            int totalTopStudentCount = getTopStudentMaxRank(projectId, range);
             int startIndex = 1;
             int endIndex = 0;
 
@@ -105,6 +105,28 @@ public class TopStudentListService {
             }
 
             return list;
+        });
+    }
+
+    /**
+     * 获取尖子生最大排名
+     *
+     * @param projectId 考试项目id
+     * @param range     范围
+     *
+     * @return  尖子生最大名次
+     */
+    private int getTopStudentMaxRank(String projectId, Range range) {
+        String cacheKey = "top_student_max_rank:" + projectId + ":" + range;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
+            Document document = collection.find(query(projectId, range)).sort(doc("rank", -1)).first();
+
+            if (document != null) {
+                return document.getInteger("rank");
+            }
+
+            return 0;
         });
     }
 
