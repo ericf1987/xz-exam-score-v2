@@ -1,5 +1,6 @@
 package com.xz.taskdispatchers;
 
+import com.xz.bean.AggregationType;
 import com.xz.services.AggregationRoundService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class TaskDispatcherFactory {
         return this.dispatcherMap.get(taskType);
     }
 
-    public List<TaskDispatcher> listAvailableDispatchers(String aggregationId) {
+    public List<TaskDispatcher> listAvailableDispatchers(String aggregationId, AggregationType aggregationType) {
         List<String> completedTaskTypes = aggregationRoundService.getCompletedTaskTypes(aggregationId);
 
         // 去掉已经完成的任务和依赖任务尚未完成的任务
@@ -42,7 +43,17 @@ public class TaskDispatcherFactory {
         dispatchers.removeIf(dispatcher -> isDispatcherCompleted(dispatcher, completedTaskTypes));
         dispatchers.removeIf(dispatcher -> !isDependencyCompleted(dispatcher, completedTaskTypes));
 
+        if (aggregationType == AggregationType.Basic) {
+            dispatchers.removeIf(dispatcher -> isAdvanced(dispatcher));
+        } else if (aggregationType == AggregationType.Advanced) {
+            dispatchers.removeIf(dispatcher -> !isAdvanced(dispatcher));
+        }
+
         return dispatchers;
+    }
+
+    private boolean isAdvanced(TaskDispatcher dispatcher) {
+        return dispatcher.getInfo().isAdvanced();
     }
 
     // 没有依赖任务亦可视为依赖任务已完成

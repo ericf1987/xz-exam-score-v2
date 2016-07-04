@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * 统计单个学生题型得分
  */
 @Component
-@TaskDispatcherInfo(taskType = "quest_type_score")
+@TaskDispatcherInfo(taskType = "quest_type_score", isAdvanced = true)
 public class QuestTypeScoreDispatcher extends TaskDispatcher {
 
     @Autowired

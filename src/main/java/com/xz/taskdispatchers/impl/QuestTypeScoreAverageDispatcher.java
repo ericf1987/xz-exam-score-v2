@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 非学生的题型得分（平均分）统计
  */
-@TaskDispatcherInfo(taskType = "quest_type_score_average", dependentTaskType = "quest_type_score")
+@TaskDispatcherInfo(taskType = "quest_type_score_average", dependentTaskType = "quest_type_score", isAdvanced = true)
 @Component
 public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
 

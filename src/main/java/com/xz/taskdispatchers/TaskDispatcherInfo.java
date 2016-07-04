@@ -18,4 +18,6 @@ public @interface TaskDispatcherInfo {
     String taskType();                      // 任务类型
 
     String dependentTaskType() default "";  // 依赖任务类型
+
+    boolean isAdvanced() default false;
 }

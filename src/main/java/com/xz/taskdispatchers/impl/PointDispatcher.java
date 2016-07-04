@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
-@TaskDispatcherInfo(taskType = "point")
+@TaskDispatcherInfo(taskType = "point", isAdvanced = true)
 @Component
 public class PointDispatcher extends TaskDispatcher {
 

@@ -1,6 +1,7 @@
 package com.xz.taskdispatchers;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.bean.AggregationType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,7 +22,7 @@ public class TaskDispatcherFactoryTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testListAvailableDispatchers() throws Exception {
-        List<TaskDispatcher> dispatchers = taskDispatcherFactory.listAvailableDispatchers("AGGR1");
+        List<TaskDispatcher> dispatchers = taskDispatcherFactory.listAvailableDispatchers("AGGR1", AggregationType.All);
         assertFalse(dispatchers.isEmpty());
     }
 }

@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.bean.AggregationConfig;
+import com.xz.bean.AggregationType;
 import com.xz.scanner.ScannerDBService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
@@ -122,7 +123,7 @@ public class AggregationService {
         int round = 1;
 
         do {
-            dispatcherList = createDispatchers(aggregationId);
+            dispatcherList = createDispatchers(aggregationId, aggregationConfig.getAggregationType());
             LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
 
             runDispatchers(projectId, aggregationId, dispatcherList);
@@ -143,8 +144,8 @@ public class AggregationService {
     }
 
     // 查询本轮统计用到的 Dispatcher 对象列表
-    private List<TaskDispatcher> createDispatchers(String aggregationId) {
-        return taskDispatcherFactory.listAvailableDispatchers(aggregationId);
+    private List<TaskDispatcher> createDispatchers(String aggregationId, AggregationType aggregationType) {
+        return taskDispatcherFactory.listAvailableDispatchers(aggregationId, aggregationType);
     }
 
     /**

@@ -59,6 +59,14 @@ public abstract class TaskDispatcher {
 
     public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);
 
+    public TaskDispatcherInfo getInfo() {
+        if (!this.getClass().isAnnotationPresent(TaskDispatcherInfo.class)) {
+            return null;
+        } else {
+            return this.getClass().getAnnotation(TaskDispatcherInfo.class);
+        }
+    }
+
     @PostConstruct
     private void init() {
         taskDispatcherFactory.registerTaskDispatcher(this);
