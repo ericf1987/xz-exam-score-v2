@@ -10,7 +10,6 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +27,6 @@ import static com.xz.util.Mongo.query;
 @Service
 public class TopStudentListService {
 
-    public static final double TOP_STUDENT_RATE = 0.05;     // 尖子生取参考总人数的前5%
-
     @Autowired
     MongoDatabase scoreDatabase;
 
@@ -42,15 +39,15 @@ public class TopStudentListService {
     /**
      * 查询指定排行范围下，指定（学校/班级）尖子生所占比例
      *
-     * @param projectId     考试项目id
-     * @param rankRange     排行范围
-     * @param compareRange  比较范围
-     * @param target        目标
-     *
-     * @return  占比
+     * @param projectId    考试项目id
+     * @param rankRange    排行范围
+     * @param compareRange 比较范围
+     * @param target       目标
+     * @return 占比
      */
     public int getTopStudentCount(String projectId, Range rankRange, Range compareRange,
-                                    Target target, int minRank, int maxRank) {
+                                  Target target, int minRank, int maxRank) {
+
         String cacheKey = "top_student_rate:" + projectId + ":" + rankRange + ":" +
                 compareRange + ":" + target + ":" + minRank + ":" + maxRank;
         return cache.get(cacheKey, () -> {
@@ -142,14 +139,8 @@ public class TopStudentListService {
         String cacheKey = "top_student_count:" + projectId + ":" + range;
         return cache.get(cacheKey, () -> {
 
-            int studentCount = studentService.getStudentCount(projectId, range);
-            if (studentCount == 0) {
-                return 0;
-            }
-
-            // 对于人数有小数的情况，四舍五入取整
-            double topCount = studentCount * TOP_STUDENT_RATE;
-            return new BigDecimal(topCount).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+            MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
+            return (int) collection.count(query(projectId, range));
         });
     }
 
