@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * (description)
- * created at 16/06/22
+ * 管理项目状态，具体参考 {@link ProjectStatus} 类
  *
  * @author yiding_he
  */

@@ -1,6 +1,8 @@
 package com.xz.controllers;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.bean.AggregationConfig;
+import com.xz.bean.AggregationType;
 import com.xz.bean.ProjectStatus;
 import com.xz.services.*;
 import com.xz.taskdispatchers.TaskDispatcher;
@@ -76,29 +78,34 @@ public class AggregationTaskController {
     /**
      * 开始统计项目
      *
-     * @param projectId      项目ID
-     * @param recalculate    是否要重新计算成绩，如果为 true 则会重新导入题目信息；如果 dataReady 为 false 则忽略本参数
-     * @param dataReady      数据是否已经存在，如果为 false 则会尝试重新导入整个项目信息
-     * @param generateReport 是否要生成报表 Excel 文件
+     * @param projectId       项目ID
+     * @param type            统计类型（参考 {@link AggregationType}）:basic
+     * @param reimportProject 是否要重新导入项目信息:false
+     * @param reimportScore   是否要重新导入和计算成绩（仅限网阅项目）:false
+     * @param generateReport  是否要生成 Excel 报表文件:false
      */
     @RequestMapping(value = "/start/project", method = RequestMethod.POST)
     @ResponseBody
     public Result startAggregation(
             @RequestParam("project") String projectId,
-            @RequestParam(value = "recalculate-score", required = false, defaultValue = "false") String recalculate,
-            @RequestParam(value = "data-ready", required = false, defaultValue = "true") String dataReady,
-            @RequestParam(value = "generate-report", required = false, defaultValue = "false") String generateReport
+            @RequestParam(value = "type", required = false, defaultValue = "Basic") String type,
+            @RequestParam(value = "reimportProject", required = false, defaultValue = "false") String reimportProject,
+            @RequestParam(value = "reimportScore", required = false, defaultValue = "false") String reimportScore,
+            @RequestParam(value = "generateReport", required = false, defaultValue = "false") String generateReport
     ) {
 
         if (aggregationService.isAggregationRunning(projectId)) {
             return Result.fail("项目 " + projectId + " 正在统计当中");
         }
 
-        Boolean isRecalculate = Boolean.valueOf(recalculate);
-        Boolean isDataReady = Boolean.valueOf(dataReady);
-        Boolean isGenerateReport = Boolean.valueOf(generateReport);
+        AggregationConfig aggregationConfig = new AggregationConfig();
+        aggregationConfig.setAggregationType(AggregationType.valueOf(type));
+        aggregationConfig.setReimportProject(Boolean.valueOf(reimportProject));
+        aggregationConfig.setReimportScore(Boolean.valueOf(reimportScore));
+        aggregationConfig.setGenerateReport(Boolean.valueOf(generateReport));
 
-        aggregationService.startAggregation(projectId, true, isRecalculate, isDataReady, isGenerateReport);
+        aggregationService.startAggregation(projectId, aggregationConfig, true);
+
         return Result.success("项目 " + projectId + " 已经开始统计。");
     }
 

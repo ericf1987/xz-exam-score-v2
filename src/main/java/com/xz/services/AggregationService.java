@@ -1,7 +1,7 @@
 package com.xz.services;
 
 import com.xz.ajiaedu.common.lang.Context;
-import com.xz.bean.ProjectStatus;
+import com.xz.bean.AggregationConfig;
 import com.xz.scanner.ScannerDBService;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
@@ -34,9 +34,6 @@ public class AggregationService {
     ProjectConfigService projectConfigService;
 
     @Autowired
-    PrepareDataService prepareDataService;
-
-    @Autowired
     ProjectStatusService projectStatusService;
 
     @Autowired
@@ -51,43 +48,34 @@ public class AggregationService {
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
-     * 开始对项目执行统计
+     * 开始执行项目统计
      *
-     * @param projectId        项目ID
-     * @param async            是否另起线程执行
-     * @param recalculate      是否要重新计算成绩，如果为 true 则会重新导入题目信息；如果 dataReady 为 false 则忽略本参数
-     * @param dataReady        项目数据是否已经准备好，只需要统计。如果为 false，则尝试重新导入整个项目数据
-     * @param isGenerateReport 是否要生成报表文件
+     * @param projectId         项目ID
+     * @param aggregationConfig 选项配置
      */
-    public void startAggregation(
-            String projectId, boolean async,
-            boolean recalculate, boolean dataReady, Boolean isGenerateReport) {
+    public void startAggregation(String projectId, AggregationConfig aggregationConfig, boolean async) {
 
         Runnable runnable = () -> {
             try {
                 runningProjects.add(projectId);
                 projectStatusService.setProjectStatus(projectId, AggregationStarted);
 
-                String aggregationId = UUID.randomUUID().toString();
-
-                // 数据导入
-                if (!dataReady) {
-                    beforeAggregation(projectId, aggregationId);
-                } else if (recalculate) {
-                    reimportScoreFromScanner(projectId);
+                // 导入考生信息和试题信息
+                if (aggregationConfig.isReimportProject()) {
+                    importProjectInfo(projectId);
                 }
 
-                // 数据预处理
-                prepareDataService.prepare(projectId);
+                // 导入成绩信息（网阅）
+                if (aggregationConfig.isReimportScore()) {
+                    importScannerScore(projectId);
+                }
 
                 // 统计成绩
-                runAggregation0(projectId);
+                runAggregation0(projectId, aggregationConfig);
 
                 // 生成报表
-                if (isGenerateReport) {
-                    projectStatusService.setProjectStatus(projectId, ReportGenerating);
-                    reportService.generateReports(projectId, false);
-                    projectStatusService.setProjectStatus(projectId, ReportGenerated);
+                if (aggregationConfig.isGenerateReport()) {
+                    generateReports(projectId);
                 }
 
             } catch (Exception e) {
@@ -108,7 +96,25 @@ public class AggregationService {
         }
     }
 
-    private void runAggregation0(String projectId) {
+    private void generateReports(String projectId) {
+        projectStatusService.setProjectStatus(projectId, ReportGenerating);
+        reportService.generateReports(projectId, false);
+        projectStatusService.setProjectStatus(projectId, ReportGenerated);
+    }
+
+    private void importScannerScore(String projectId) {
+        projectStatusService.setProjectStatus(projectId, ScoreImporting);
+        scannerDBService.importProjectScore(projectId);
+        projectStatusService.setProjectStatus(projectId, ScoreImported);
+    }
+
+    private void importProjectInfo(String projectId) {
+        projectStatusService.setProjectStatus(projectId, ProjectImporting);
+        importProjectService.importProject(projectId, true);
+        projectStatusService.setProjectStatus(projectId, ProjectImported);
+    }
+
+    private void runAggregation0(String projectId, AggregationConfig aggregationConfig) {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
@@ -129,34 +135,6 @@ public class AggregationService {
         } while (!dispatcherList.isEmpty());
 
         LOG.info("====对项目{}的统计全部结束，本次统计ID={}", projectId, aggregationId);
-    }
-
-    private void reimportScoreFromScanner(String projectId) {
-        LOG.info("----开始导入项目{}", projectId);
-
-        projectStatusService.setProjectStatus(projectId, ProjectImporting);
-        importProjectService.importProjectQuest(projectId);
-        projectStatusService.setProjectStatus(projectId, ProjectImported);
-
-        projectStatusService.setProjectStatus(projectId, ScoreImporting);
-        scannerDBService.importProjectScore(projectId);
-        projectStatusService.setProjectStatus(projectId, ScoreImported);
-    }
-
-    private void beforeAggregation(String projectId, String aggregationId) {
-
-        ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
-
-        if (projectStatus == ProjectStatus.Empty) {
-            LOG.info("----开始导入项目{}", projectId);
-            projectStatusService.setProjectStatus(projectId, ProjectImporting);
-            importProjectService.importProject(projectId, true);
-            projectStatusService.setProjectStatus(projectId, ProjectImported);
-        }
-
-        projectStatusService.setProjectStatus(projectId, ScoreImporting);
-        scannerDBService.importProjectScore(projectId);
-        projectStatusService.setProjectStatus(projectId, ScoreImported);
     }
 
     // 等待本轮统计

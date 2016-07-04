@@ -1,11 +1,12 @@
 package com.xz.services;
 
-import com.alibaba.fastjson.JSON;
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.ajiaedu.common.report.Keys.ScoreLevel;
 import com.xz.bean.ProjectConfig;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
 
 /**
  * (description)
@@ -22,8 +23,12 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testSaveProjectConfig() throws Exception {
-        saveConfig("430200-e1274973fe994a86a9552a168fdeaa01", false, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
-        saveConfig("430200-b73f03af1d74484f84f1aa93f583caaa", false, new double[]{0.40, 0.25, 0.23, 0.07, 0.04, 0.01});
+        saveConfig("431100-f1e329d8a05f4ba7b7398aec7976af58", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
+        saveConfig("431100-aa38e94f9c664e4f88d4e94494f2d962", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
+        saveConfig("431100-da3ee7b880424a90afc544f62bef2f65", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
+        saveConfig("431100-e8825df7825441bf98282dddc2ad3cd3", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
+        saveConfig("431100-1e777384b71a4f11b57ebda0798f750e", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
+        saveConfig("431100-b25c3bc8617b480da22278e74f2855e4", false, null, new double[]{0.8, 0.7, 0.6, 0.0});
     }
 
     // 缺省配置
@@ -52,26 +57,37 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
      * @param projectId               项目ID
      * @param combineCategorySubjects 是否合并文理科
      * @param levelPercentages        等第分布，从 A 开始算起，最多 6 个等第
+     * @param scoreRates              四率（优秀/良好/及格/不及格）得分率
      */
-    private void saveConfig(String projectId, boolean combineCategorySubjects, double[] levelPercentages) {
+    private void saveConfig(
+            String projectId,
+            boolean combineCategorySubjects,
+            double[] levelPercentages,
+            double[] scoreRates
+    ) {
+
         ProjectConfig config = new ProjectConfig();
         config.setProjectId(projectId);
         config.setCombineCategorySubjects(combineCategorySubjects);
 
-        for (int i = 0; i < LEVELS.length; i++) {
-            String level = LEVELS[i];
-            if (levelPercentages.length > i) {
-                config.addRankingLevel(level, levelPercentages[i]);
+        if (levelPercentages != null && levelPercentages.length > 0) {
+            for (int i = 0; i < LEVELS.length; i++) {
+                String level = LEVELS[i];
+                if (levelPercentages.length > i) {
+                    config.addRankingLevel(level, levelPercentages[i]);
+                }
             }
         }
 
-        projectConfigService.saveProjectConfig(config);
-    }
+        if (scoreRates != null && scoreRates.length > 0) {
+            HashMap<String, Double> scoreLevels = new HashMap<>();
+            scoreLevels.put(ScoreLevel.Excellent.name(), scoreRates[0]);
+            scoreLevels.put(ScoreLevel.Good.name(), scoreRates[1]);
+            scoreLevels.put(ScoreLevel.Pass.name(), scoreRates[2]);
+            scoreLevels.put(ScoreLevel.Fail.name(), scoreRates[3]);
+            config.setScoreLevels(scoreLevels);
+        }
 
-    @Test
-    public void testGetProjectConfig() throws Exception {
-        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        System.out.println(JSON.toJSONString(projectConfig));
+        projectConfigService.saveProjectConfig(config);
     }
 }

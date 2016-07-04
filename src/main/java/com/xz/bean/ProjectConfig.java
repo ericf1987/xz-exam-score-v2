@@ -83,6 +83,11 @@ public class ProjectConfig implements Serializable {
     }
 
     public String getLastRankLevel() {
+
+        if (rankLevels.isEmpty()) {
+            return "";
+        }
+
         List<String> levels = new ArrayList<>(rankLevels.keySet());
         Collections.sort(levels);
         Collections.reverse(levels);

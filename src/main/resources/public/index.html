@@ -39,8 +39,14 @@
     <legend>统计项目</legend>
     <form action="aggr/start/project" method="post">
         <p>项目ID：<input type="text" name="project"/></p>
-        <p><label><input type="checkbox" name="data-ready" value="true" checked="checked"> 数据已经准备好</label></p>
-        <p><label><input type="checkbox" name="generate-report" value="true">是否生成报表文件</label></p>
+        <p>统计方式：<select name="type">
+            <option value="All">全部统计</option>
+            <option value="Basic">只统计基础报表</option>
+            <option value="Advanced">只统计进阶报表</option>
+        </select></p>
+        <p><label><input type="checkbox" name="reimportProject" value="true"> 重新导入项目信息</label></p>
+        <p><label><input type="checkbox" name="reimportScore" value="true"> 重新导入网阅成绩</label></p>
+        <p><label><input type="checkbox" name="generateReport" value="true">是否生成报表文件</label></p>
         <p>
             <button type="submit">开始统计</button>
         </p>
