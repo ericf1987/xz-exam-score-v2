@@ -6,6 +6,8 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
+import com.xz.intclient.InterfaceClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,8 +22,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PublishProject implements Server {
 
+    @Autowired
+    InterfaceClient interfaceClient;
+
     @Override
     public Result execute(Param param) throws Exception {
-        return null;
+        return interfaceClient.request("ReleaseExamScore", param);
     }
 }
