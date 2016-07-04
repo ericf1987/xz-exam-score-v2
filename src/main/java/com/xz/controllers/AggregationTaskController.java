@@ -83,6 +83,7 @@ public class AggregationTaskController {
      * @param reimportProject 是否要重新导入项目信息:false
      * @param reimportScore   是否要重新导入和计算成绩（仅限网阅项目）:false
      * @param generateReport  是否要生成 Excel 报表文件:false
+     * @param exportScore     是否要将成绩导出到阿里云:false
      */
     @RequestMapping(value = "/start/project", method = RequestMethod.POST)
     @ResponseBody
@@ -91,7 +92,8 @@ public class AggregationTaskController {
             @RequestParam(value = "type", required = false, defaultValue = "Basic") String type,
             @RequestParam(value = "reimportProject", required = false, defaultValue = "false") String reimportProject,
             @RequestParam(value = "reimportScore", required = false, defaultValue = "false") String reimportScore,
-            @RequestParam(value = "generateReport", required = false, defaultValue = "false") String generateReport
+            @RequestParam(value = "generateReport", required = false, defaultValue = "false") String generateReport,
+            @RequestParam(value = "exportScore", required = false, defaultValue = "false") String exportScore
     ) {
 
         if (aggregationService.isAggregationRunning(projectId)) {
@@ -103,6 +105,7 @@ public class AggregationTaskController {
         aggregationConfig.setReimportProject(Boolean.valueOf(reimportProject));
         aggregationConfig.setReimportScore(Boolean.valueOf(reimportScore));
         aggregationConfig.setGenerateReport(Boolean.valueOf(generateReport));
+        aggregationConfig.setExportScore(Boolean.valueOf(exportScore));
 
         aggregationService.startAggregation(projectId, aggregationConfig, true);
 

@@ -46,6 +46,9 @@ public class AggregationService {
     @Autowired
     ReportService reportService;
 
+    @Autowired
+    ExportScoreService exportScoreService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
@@ -69,6 +72,11 @@ public class AggregationService {
                 // 导入成绩信息（网阅）
                 if (aggregationConfig.isReimportScore()) {
                     importScannerScore(projectId);
+                }
+
+                // 导出成绩到阿里云
+                if (aggregationConfig.isExportScore()) {
+                    exportScore(projectId);
                 }
 
                 // 统计成绩
@@ -95,6 +103,18 @@ public class AggregationService {
         } else {
             runnable.run();
         }
+    }
+
+    private void exportScore(String projectId) {
+        Runnable runnable = () -> {
+            try {
+                exportScoreService.exportScore(projectId, true);
+            } catch (Exception e) {
+                LOG.error("导出成绩失败", e);
+            }
+        };
+
+        new Thread(runnable).start();
     }
 
     private void generateReports(String projectId) {
