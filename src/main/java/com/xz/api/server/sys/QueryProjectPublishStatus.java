@@ -34,12 +34,12 @@ public class QueryProjectPublishStatus implements Server {
             result = interfaceClient.request("QueryProjectById",
                     new Param().setParameter("projectId", projectId));
         } catch (Exception e) {
-            return Result.fail("查询考试项目发布状态失败:" + e.getMessage());
+            return Result.fail(e.getMessage());
         }
 
         JSONObject projectObj = result.get("result");
         if (projectObj == null) {
-            return Result.fail("查询考试项目发布状态失败:项目结果属性为空");
+            return Result.fail("项目结果属性为空");
         }
 
         int scoreStatus = projectObj.getInteger("scoreStatus");
