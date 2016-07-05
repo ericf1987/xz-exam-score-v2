@@ -103,15 +103,22 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
                 String levelId = level.name();
                 Document levelInfo = levelMap.get(levelId);
-                List<String> questNos = questService.getQuests(projectId, pointId, levelId)
-                        .stream().map(document -> document.getString("questNo")).collect(Collectors.toList());
+                List<Document> quests = questService.getQuests(projectId, pointId, levelId);
+                List<String> questNos = quests.stream().map(document ->
+                        document.getString("questNo")).collect(Collectors.toList());
+
                 pointLevel.put("questNos", questNos);
                 pointLevel.put("levelId", levelId);
                 pointLevel.put("levelName", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
 
                 if (!questNos.isEmpty()) {
+                    double fullScore = getFullScore(projectId, quests, fullScoreService);
+                    pointLevel.put("fullScore", fullScore);
+
                     double avgScore = averageService.getAverage(projectId, range, Target.pointLevel(pointId, levelId));
                     pointLevel.put("avgScore", DoubleUtils.round(avgScore));
+
+                    pointLevel.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : avgScore / fullScore, true));
                 }
 
                 pointLevels.add(pointLevel);
@@ -122,6 +129,17 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
         }
 
         return pointStats;
+    }
+
+    // 获取题目集合总分
+    private static double getFullScore(String projectId, List<Document> quests, FullScoreService fullScoreService) {
+        double fullScore = 0;
+        for (Document quest : quests) {
+            String questId = quest.getString("questId");
+            fullScore += fullScoreService.getFullScore(projectId, Target.quest(questId));
+        }
+
+        return fullScore;
     }
 
     // 获取能力层级统计分析
