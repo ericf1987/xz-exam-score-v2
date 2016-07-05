@@ -13,6 +13,7 @@
                 <report name="试卷题型分析" class="com.xz.report.total.TotalPaperQuestTypeReport"/>
                 <report name="客观题分析" class="com.xz.report.total.TotalPaperObjectiveReport"/>
                 <report name="主观题分析" class="com.xz.report.total.TotalPaperSubjectiveReport"/>
+                <report name="双向细目分析" class="com.xz.report.total.TotalPointAbilityLevelReport"/>
             </report-category>
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class="com.xz.report.total.TotalTopStudentReport"/>
@@ -21,7 +22,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.total.TotalBasicDataReport"/>
-                <report name="总体各科试卷题目得分明细" class="com.xz.report.total.TotalQuestScoreDetailReport"/>
+                <report name="各科试卷题目得分明细" class="com.xz.report.total.TotalQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 
@@ -36,6 +37,7 @@
                 <report name="试卷题型分析" class="com.xz.report.schools.SchoolPaperQuestTypeReport"/>
                 <report name="客观题分析" class="com.xz.report.schools.SchoolPaperObjectiveReport"/>
                 <report name="主观题分析" class="com.xz.report.schools.SchoolPaperSubjectiveReport"/>
+                <report name="双向细目分析" class="com.xz.report.schools.SchoolPointAbilityLevelReport"/>
             </report-category>
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class="com.xz.report.schools.SchoolTopStudentReport"/>
@@ -44,7 +46,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.schools.SchoolBasicDataReport"/>
-                <report name="学校各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
+                <report name="各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 
@@ -57,7 +59,7 @@
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
-                <report name="班级各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
+                <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 

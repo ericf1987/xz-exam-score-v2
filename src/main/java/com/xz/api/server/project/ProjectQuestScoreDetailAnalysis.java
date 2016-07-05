@@ -70,9 +70,11 @@ public class ProjectQuestScoreDetailAnalysis implements Server{
             String schoolId = school.getString("school");
             List<Document> studentList = studentService.getStudentList(projectId, Range.school(schoolId));
             for(Document student : studentList){
+                String className = classService.getClassName(projectId, student.getString("class"));
                 Map<String, Object> studentMap = new HashMap<>();
                 studentMap.put("quests", classQuestScoreDetailAnalysis.getQuestListBySubject(projectId, subjectId, student.getString("student")));
                 studentMap.put("studentName", student.getString("name"));
+                studentMap.put("className", className);
                 studentMap.put("schoolName", schoolName);
                 studentMap.put("studentId", student.getString("student"));
                 students.add(studentMap);

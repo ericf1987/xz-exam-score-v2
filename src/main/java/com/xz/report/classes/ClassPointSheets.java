@@ -34,7 +34,6 @@ public class ClassPointSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
         Result result = classPointAnalysis.execute(param);
-        System.out.println("班级知识点分析-->" + result.getData());
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStudentData(excelWriter, result);

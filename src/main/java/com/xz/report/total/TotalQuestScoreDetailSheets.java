@@ -44,6 +44,7 @@ public class TotalQuestScoreDetailSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "全校");
         excelWriter.set(0, column.incrementAndGet(), "姓名");
+        excelWriter.set(0, column.incrementAndGet(), "班级");
         List<Map<String, Object>> quests = result.get("questList");
         for(Map<String, Object> quest : quests){
             String questName = Boolean.valueOf(quest.get("isObjective").toString()).booleanValue() ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
@@ -58,6 +59,7 @@ public class TotalQuestScoreDetailSheets extends SheetGenerator {
         for(Map<String, Object> student : studentList){
             excelWriter.set(row, column.incrementAndGet(), student.get("schoolName"));
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
+            excelWriter.set(row, column.incrementAndGet(), student.get("className"));
             List<Map<String, Object>> questList = (List<Map<String, Object>>)student.get("quests");
             for(Map<String, Object> quest : questList){
                 excelWriter.set(row, column.incrementAndGet(), quest.get("score"));

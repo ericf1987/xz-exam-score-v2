@@ -37,7 +37,6 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("schoolId", schoolRange.getId());
         Result result = schoolQuestScoreDetailAnalysis.execute(param);
-        System.out.println("学校题目得分明细-->" + result.getData());
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }

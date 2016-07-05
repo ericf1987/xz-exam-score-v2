@@ -18,6 +18,8 @@ public class ReportNameMappings {
 
     public static final Map<String, String> FILE_NAME_CODE_MAP = new HashMap<>();
 
+    public static final List<String> BASIC_REPORT_ITEM = new ArrayList<>();
+
     static {
         PRIMARY_CLASSIFY_CODE_MAP.put("100", "总体成绩分析");
         PRIMARY_CLASSIFY_CODE_MAP.put("101", "学校成绩分析");
@@ -47,6 +49,9 @@ public class ReportNameMappings {
         FILE_NAME_CODE_MAP.put("316", "能力层级分析.xlsx");
         FILE_NAME_CODE_MAP.put("317", "S-P试卷诊断.xlsx");
         FILE_NAME_CODE_MAP.put("318", "学生各科成绩明细.xlsx");
+
+        BASIC_REPORT_ITEM.add("-->基础数据-->学生各科成绩明细.xlsx");
+        BASIC_REPORT_ITEM.add("-->基础数据-->各科试卷题目得分明细.xlsx");
     }
 
     public static String[] getFileName(String[] code) {
@@ -59,24 +64,21 @@ public class ReportNameMappings {
             fileNames.add(filename);
             //如果包含总体，学校，班级的任何一张报表，则将基础数据附带在对应文件夹生成zip包
         }
+        String[] seeds = new String[]{
+                "总体成绩分析", "学校成绩分析", "班级成绩分析"
+        };
 
-        return fileNames.toArray(new String[addBySeed(fileNames).size()]);
+        for (String seed : seeds){
+            addBySeed(fileNames, seed, BASIC_REPORT_ITEM);
+        }
+        return fileNames.toArray(new String[fileNames.size()]);
     }
 
-    public static List<String> addBySeed(List<String> fileNames){
-        String[] seeds = new String[]{
-                "总体成绩分析","学校成绩分析","班级成绩分析"
-        };
-        for(String seed : seeds){
-            String fileItem = seed + "-->基础数据-->学生各科成绩明细.xlsx";
-            for(String fileName : fileNames){
-                if(fileName.indexOf(seed) != -1){
-                    fileNames.add(fileItem);
-                    break;
-                }else if(fileName.indexOf(seed) != -1){
-                    fileNames.add(fileItem);
-                    break;
-                }else if(fileName.indexOf(seed) != -1){
+    public static List<String> addBySeed(List<String> fileNames, String seed, List<String> items) {
+        for(String item : items){
+            String fileItem = seed + item;
+            for (String fileName : fileNames) {
+                if (fileName.indexOf(seed) != -1) {
                     fileNames.add(fileItem);
                     break;
                 }
@@ -84,4 +86,5 @@ public class ReportNameMappings {
         }
         return fileNames;
     }
+
 }

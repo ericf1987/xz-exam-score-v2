@@ -39,7 +39,6 @@ public class SchoolPaperSubjectiveSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("schoolId", schoolRange.getId());
         Result result = schoolSubjectiveAnalysis.execute(param);
-        System.out.println(result.getData());
         setupHeader(excelWriter, result.get("classes"));
         setupSecondaryHeader(excelWriter, result.get("classes"));
         fillData(excelWriter, result);

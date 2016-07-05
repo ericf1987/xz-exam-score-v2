@@ -1,14 +1,14 @@
-package com.xz.report.classes;
+package com.xz.report.schools;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
-import com.xz.api.server.classes.ClassAbilityLevelAnalysis;
+import com.xz.api.server.school.SchoolPointAnalysis;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
-import com.xz.services.ClassService;
+import com.xz.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,22 +17,26 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author by fengye on 2016/6/30.
+ * @author by fengye on 2016/7/5.
  */
 @Component
-public class ClassAbilityLevelSheet extends SheetGenerator {
+public class SchoolPointSheets extends SheetGenerator {
+
     @Autowired
-    ClassAbilityLevelAnalysis classAbilityLevelAnalysis;
+    SchoolPointAnalysis schoolPointAnalysis;
+
+    @Autowired
+    SchoolService schoolService;
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
         String subjectId = target.getId().toString();
-        Range classRange = sheetTask.getRange();
+        Range schoolRange = sheetTask.getRange();
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
-                .setParameter("classId", classRange.getId().toString());
-        Result result = classAbilityLevelAnalysis.execute(param);
+                .setParameter("schoolId", schoolRange.getId());
+        Result result = schoolPointAnalysis.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStudentData(excelWriter, result);
@@ -40,19 +44,21 @@ public class ClassAbilityLevelSheet extends SheetGenerator {
 
     private void setupHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
-        excelWriter.set(0, column.incrementAndGet(), "双向细目");
-        List<Map<String, Object>> classes = result.get("classes");
-        for(Map<String, Object> levelStat : classes){
-            excelWriter.set(0, column.incrementAndGet(), "能力层级" + levelStat.get("levelName"));
+        List<Map<String, Object>> schools = result.get("schools");
+        excelWriter.set(0, column.incrementAndGet(), "题型");
+        excelWriter.set(0, column.incrementAndGet(), "班级");
+        for(Map<String, Object> pointstat : schools){
+            excelWriter.set(0, column.incrementAndGet(), pointstat.get("pointName"));
         }
     }
 
     private void fillClassData(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
-        excelWriter.set(1, column.incrementAndGet(), "本班");
-        List<Map<String, Object>> classes = result.get("classes");
-        for(Map<String, Object> levelStat : classes){
-            excelWriter.set(1, column.incrementAndGet(), levelStat.get("score"));
+        List<Map<String, Object>> classes = result.get("schools");
+        excelWriter.set(1, column.incrementAndGet(), "本校");
+        excelWriter.set(1, column.incrementAndGet(), "本校");
+        for(Map<String, Object> pointstat : classes){
+            excelWriter.set(1, column.incrementAndGet(), pointstat.get("score"));
         }
     }
 
@@ -61,10 +67,11 @@ public class ClassAbilityLevelSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> students = result.get("students");
         for(Map<String, Object> student : students){
+            List<Map<String, Object>> pointStats = (List<Map<String, Object>>)student.get("pointStats");
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
-            List<Map<String, Object>> levelStats = (List<Map<String, Object>>)student.get("levelStats");
-            for(Map<String, Object> levelStat : levelStats){
-                excelWriter.set(row, column.incrementAndGet(), levelStat.get("score"));
+            excelWriter.set(row, column.incrementAndGet(), student.get("className"));
+            for(Map<String, Object> pointStat : pointStats) {
+                excelWriter.set(row, column.incrementAndGet(), pointStat.get("score"));
             }
             row++;
             column.set(-1);
