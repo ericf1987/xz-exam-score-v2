@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.project.ProjectPointAbilityLevelAnalysis.filterLevels;
+
 /**
  * 班级成绩-能力层级分析
  *
@@ -72,6 +74,7 @@ public class ClassAbilityLevelAnalysis implements Server {
 
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+        levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
         List<Map<String, Object>> classLevelAnalysis = getClassAbilityLevelAnalysis(
                 projectId, subjectId, classId, levelMap);
@@ -114,13 +117,11 @@ public class ClassAbilityLevelAnalysis implements Server {
     private List<Map<String, Object>> getLevelStats(String projectId, String subjectId,
                                                     Range range, Map<String, Document> levelMap) {
         List<Map<String, Object>> levelStats = new ArrayList<>();
-        PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
-        for (PointService.AbilityLevel level : abilityLevels) {
-            String levelId = level.name();
+        for (String levelId : levelMap.keySet()) {
             Document levelInfo = levelMap.get(levelId);
 
             Map<String, Object> levelStat = new HashMap<>();
-            levelStat.put("levelName", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
+            levelStat.put("levelName", levelInfo.getString("level_name"));
             levelStat.put("levelId", levelId);
 
             Target target = Target.subjectLevel(subjectId, levelId);
@@ -135,7 +136,7 @@ public class ClassAbilityLevelAnalysis implements Server {
 
             double fullScore = fullScoreService.getFullScore(projectId, target);
             levelStat.put("fullScore", fullScore);
-            levelStat.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
+            levelStat.put("scoreRate", DoubleUtils.round(score / fullScore, true));
 
             levelStats.add(levelStat);
         }

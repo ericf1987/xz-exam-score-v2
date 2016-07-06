@@ -59,14 +59,14 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
         String schoolId = param.getString("schoolId");
 
         Range range = Range.school(schoolId);
-        PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+        levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels, levelMap,
+        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap,
                 pointService, questService, fullScoreService, averageService);
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                abilityLevels, levelMap, fullScoreService, averageService);
+                levelMap, fullScoreService, averageService);
 
         return Result.success()
                 .set("points", pointStats)
@@ -75,7 +75,6 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
     // 获取知识点统计分析
     public static List<Map<String, Object>> getPointAnalysis(String projectId, String subjectId, Range range,
-                                                             PointService.AbilityLevel[] abilityLevels,
                                                              Map<String, Document> levelMap,
                                                              PointService pointService,
                                                              QuestService questService,
@@ -98,10 +97,9 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
             // 知识点-能力层级得分
             List<Map<String, Object>> pointLevels = new ArrayList<>();
-            for (PointService.AbilityLevel level : abilityLevels) {
+            for (String levelId : levelMap.keySet()) {
                 Map<String, Object> pointLevel = new HashMap<>();
 
-                String levelId = level.name();
                 Document levelInfo = levelMap.get(levelId);
                 List<Document> quests = questService.getQuests(projectId, pointId, levelId);
                 List<String> questNos = quests.stream().map(document ->
@@ -109,7 +107,7 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
                 pointLevel.put("questNos", questNos);
                 pointLevel.put("levelId", levelId);
-                pointLevel.put("levelName", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
+                pointLevel.put("levelName", levelInfo.getString("level_name"));
 
                 if (!questNos.isEmpty()) {
                     double fullScore = getFullScore(projectId, quests, fullScoreService);
@@ -144,7 +142,6 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
     // 获取能力层级统计分析
     public static Map<String, Object> getAbilityLevelStats(String projectId, String subjectId, Range range,
-                                                           PointService.AbilityLevel[] abilityLevels,
                                                            Map<String, Document> levelMap,
                                                            FullScoreService fullScoreService,
                                                            AverageService averageService) {
@@ -152,11 +149,10 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
         double totalScore = 0, userScore = 0;
         Map<String, Object> levelStat = new HashMap<>();
         List<Map<String, Object>> levelInfos = new ArrayList<>();
-        for (PointService.AbilityLevel level : abilityLevels) {
-            String levelId = level.name();
+        for (String levelId : levelMap.keySet()) {
             Document levelInfo = levelMap.get(levelId);
             Map<String, Object> levelStatMap = new HashMap<>();
-            levelStatMap.put("name", levelInfo == null ? ("能力层级" + levelId) : levelInfo.getString("level_name"));
+            levelStatMap.put("name", levelInfo.getString("level_name"));
             levelStatMap.put("levelId", levelId);
 
             // 能力层级满分
@@ -180,5 +176,24 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
         levelStat.put("userScore", DoubleUtils.round(userScore));
 
         return levelStat;
+    }
+
+    // 将满分为0分的能力层级过滤
+    public static Map<String, Document> filterLevels(
+            String projectId, String subjectId, Map<String, Document> levelMap, FullScoreService fullScoreService) {
+        Map<String, Document> newLevelMap = new HashMap<>();
+
+        for (String levelId : levelMap.keySet()) {
+
+            Target target = Target.subjectLevel(subjectId, levelId);
+            double fullScore = fullScoreService.getFullScore(projectId, target);
+            if (fullScore == 0) {
+                continue;
+            }
+
+            newLevelMap.put(levelId, levelMap.get(levelId));
+        }
+
+        return newLevelMap;
     }
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.project.ProjectPointAbilityLevelAnalysis.filterLevels;
 import static com.xz.api.server.project.ProjectPointAbilityLevelAnalysis.getAbilityLevelStats;
 import static com.xz.api.server.project.ProjectPointAbilityLevelAnalysis.getPointAnalysis;
 
@@ -75,14 +76,14 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
         }
 
         Range range = Range.clazz(classId);
-        PointService.AbilityLevel[] abilityLevels = PointService.AbilityLevel.values();
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+        levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, abilityLevels, levelMap,
+        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap,
                 pointService, questService, fullScoreService, averageService);
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                abilityLevels, levelMap, fullScoreService, averageService);
+                levelMap, fullScoreService, averageService);
 
         return Result.success()
                 .set("points", pointStats)
