@@ -90,11 +90,11 @@ public class OptionMapTask extends Receiver {
         }
 
         //如果没有找到选项，则新增选项
-        optionMapList.add(doc("answer", answer).append("count", studentCount).append("rate", rate));
+        optionMapList.add(doc("answer", answer).append("count", oneCount).append("rate", rate));
     }
 
     //将answer为多个选项的doc转化成多个单选项的组成的list
-    private List<Document> convertOneDoc(Document optionMap){
+    public List<Document> convertOneDoc(Document optionMap){
         List<Document> newOptionMapList = new ArrayList<>();
         String answer = ((Document) optionMap.get("_id")).getString("answer");
         int count = optionMap.getInteger("count");
