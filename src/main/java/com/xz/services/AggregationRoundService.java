@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.alibaba.fastjson.JSON;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.redis.Redis;
 import com.xz.mqreceivers.AggrTask;
 import org.slf4j.Logger;
@@ -13,8 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * (description)
- * created at 16/05/12
+ * 统计轮次管理
  *
  * @author yiding_he
  */
@@ -26,9 +26,6 @@ public class AggregationRoundService {
     @Autowired
     Redis redis;
 
-    /**
-     * 任务队列 key。任务队列是所有项目和所有统计共用的
-     */
     @Value("${redis.task.list.key}")
     private String taskListKey;
 
@@ -55,7 +52,7 @@ public class AggregationRoundService {
      * @param task 要发布的任务
      */
     public void pushTask(AggrTask task) {
-        redis.getQueue(taskListKey).push(Redis.Direction.Left, JSON.toJSONString(task));
+        redis.getQueue(getTaskListKey()).push(Redis.Direction.Left, JSON.toJSONString(task));
         redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(task.getType());
     }
 
@@ -83,7 +80,7 @@ public class AggregationRoundService {
      * @return 取到的任务，null 表示没有任务
      */
     public String pickTask() {
-        Redis.RedisQueue queue = redis.getQueue(taskListKey);
+        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
         String s = queue.popBlocking(Redis.Direction.Right, 3);
         if (s != null) {
             logTaskQueueSize(queue.size());
@@ -92,7 +89,7 @@ public class AggregationRoundService {
     }
 
     public void clearTask() {
-        Redis.RedisQueue queue = redis.getQueue(taskListKey);
+        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
         queue.clear();
     }
 
@@ -104,7 +101,7 @@ public class AggregationRoundService {
      * @return 指定类型的任务
      */
     public AggrTask pickOneTask(String taskType) {
-        Redis.RedisQueue queue = redis.getQueue(taskListKey);
+        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
         AggrTask aggrTask = null;
 
         while (aggrTask == null) {
@@ -151,5 +148,13 @@ public class AggregationRoundService {
             }
         }
         return true;
+    }
+
+    /**
+     * 任务队列 key。任务队列是所有项目和所有统计共用的
+     */
+    public String getTaskListKey() {
+        String suffix = StringUtil.or(System.getProperty("cluster"), "");
+        return taskListKey + ":" + suffix;
     }
 }
