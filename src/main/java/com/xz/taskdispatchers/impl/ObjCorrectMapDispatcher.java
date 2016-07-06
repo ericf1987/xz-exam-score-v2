@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 客观题正确率统计
+ */
 @Component
 @TaskDispatcherInfo(taskType = "obj_correct_map")
 public class ObjCorrectMapDispatcher extends TaskDispatcher {

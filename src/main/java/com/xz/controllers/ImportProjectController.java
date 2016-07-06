@@ -40,4 +40,22 @@ public class ImportProjectController {
         LOG.info("项目 " + projectId + " 基本信息导入完毕。");
         return Result.success().set("questCount", context.get("questCount"));
     }
+
+    /**
+     * 从本地文件中导入网阅成绩
+     *
+     * @param filePath 网阅成绩包路径
+     *
+     * @return 执行结果
+     */
+    @RequestMapping(value = "import-score-pack", method = RequestMethod.POST)
+    @ResponseBody
+    public Result importProjectScorePack(
+            @RequestParam("filePath") String filePath
+    ) {
+
+        // TODO 实现从成绩包中导入成绩
+
+        return Result.success();
+    }
 }
