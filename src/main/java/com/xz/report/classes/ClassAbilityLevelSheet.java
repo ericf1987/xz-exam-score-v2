@@ -8,7 +8,6 @@ import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
-import com.xz.services.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author by fengye on 2016/6/30.
  */
+@SuppressWarnings("unchecked")
 @Component
 public class ClassAbilityLevelSheet extends SheetGenerator {
     @Autowired
@@ -31,7 +31,7 @@ public class ClassAbilityLevelSheet extends SheetGenerator {
         Range classRange = sheetTask.getRange();
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
-                .setParameter("classId", classRange.getId().toString());
+                .setParameter("classId", classRange.getId());
         Result result = classAbilityLevelAnalysis.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);

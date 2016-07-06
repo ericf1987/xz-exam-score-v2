@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author by fengye on 2016/6/24.
  * 班级成绩分析-基础数据-学生各科成绩明细
  */
+@SuppressWarnings("unchecked")
 @Component
 public class ClassBasicDataSheets extends SheetGenerator {
 
@@ -114,7 +115,6 @@ public class ClassBasicDataSheets extends SheetGenerator {
 
     private List<Map<String, Object>> getSubjects(List<Map<String, Object>> studentBasicData) {
         Map<String, Object> one = studentBasicData.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) one.get("subjectAnalysis");
-        return subjects;
+        return (List<Map<String, Object>>) one.get("subjectAnalysis");
     }
 }

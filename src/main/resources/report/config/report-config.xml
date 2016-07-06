@@ -56,6 +56,8 @@
             </report-category>
             <report-category name="试卷分析">
                 <report name="题型分析" class="com.xz.report.classes.ClassQuestTypeReport"/>
+                <report name="知识点分析" class="com.xz.report.classes.ClassPointReport"/>
+                <report name="能力层级分析" class="com.xz.report.classes.ClassAbilityLevelReport"/>
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>

@@ -1,7 +1,6 @@
 package com.xz.api.server.project;
 
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.mongo.QuestNoComparator;
 import com.xz.api.Param;
 import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
@@ -16,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author by fengye on 2016/7/1.

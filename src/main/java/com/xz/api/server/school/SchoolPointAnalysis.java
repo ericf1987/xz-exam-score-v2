@@ -10,7 +10,10 @@ import com.xz.api.server.Server;
 import com.xz.api.server.classes.ClassPointAnalysis;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import com.xz.services.*;
+import com.xz.services.ClassService;
+import com.xz.services.ScoreService;
+import com.xz.services.StudentService;
+import com.xz.services.SubjectService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +56,7 @@ public class SchoolPointAnalysis implements Server{
 
         // 初始化科目id
         if (StringUtil.isBlank(subjectId)) {
-            subjectId = classPointAnalysis.initSubject(projectId, subjectService);
+            subjectId = ClassPointAnalysis.initSubject(projectId, subjectService);
         }
 
         if (StringUtil.isBlank(subjectId)) {

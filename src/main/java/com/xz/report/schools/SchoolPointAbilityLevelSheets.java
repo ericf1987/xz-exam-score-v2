@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author by fengye on 2016/7/1.
  */
+@SuppressWarnings("unchecked")
 @Component
 public class SchoolPointAbilityLevelSheets extends SheetGenerator {
     @Autowired
