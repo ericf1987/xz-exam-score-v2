@@ -39,6 +39,7 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
         Result result = classQuestScoreDetailAnalysis.execute(param);
+        System.out.println("班级试题总分明细-->" + result.getData());
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }
@@ -52,8 +53,13 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "主观题总分");
         List<Map<String, Object>> quests = result.get("questList");
         for(Map<String, Object> quest : quests){
-            String questName = Boolean.valueOf(quest.get("isObjective").toString()) ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
-            excelWriter.set(0, column.incrementAndGet(), questName);
+            //在题型没有录入的情况下，会拿到null属性
+            if(null != quest.get("isObjective")){
+                String questName = Boolean.valueOf(quest.get("isObjective").toString()) ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
+                excelWriter.set(0, column.incrementAndGet(), questName);
+            }else{
+                excelWriter.set(0, column.incrementAndGet(), quest.get("questNo"));
+            }
         }
     }
 
@@ -91,11 +97,15 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
             double objectiveScore = 0;
             double subjectiveScore = 0;
             for(Map<String, Object> quest : quests){
-                boolean isObjective = Boolean.parseBoolean(quest.get("isObjective").toString());
-                if(isObjective){
-                    objectiveScore += Double.parseDouble(quest.get("score").toString());
+                if(null != quest.get("isObjective")){
+                    boolean isObjective = Boolean.parseBoolean(quest.get("isObjective").toString());
+                    if(isObjective){
+                        objectiveScore += Double.parseDouble(quest.get("score").toString());
+                    }else{
+                        subjectiveScore += Double.parseDouble(quest.get("score").toString());
+                    }
                 }else{
-                    subjectiveScore += Double.parseDouble(quest.get("score").toString());
+                    continue;
                 }
             }
             student.put("objectiveScore", objectiveScore);
