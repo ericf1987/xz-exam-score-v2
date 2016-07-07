@@ -54,7 +54,10 @@ public class SchoolQuestTypeAnalysis implements Server {
         List<Map<String, Object>> classQuestTypeAnalysis = getClassQuestTypeAnalysis(projectId, subjectId, schoolId);
         List<Map<String, Object>> schoolQuestTypeAnalysis = getSchoolQuestTypeAnalysis(projectId, subjectId, schoolId);
 
-        return Result.success().set("schools", schoolQuestTypeAnalysis).set("classes", classQuestTypeAnalysis);
+        return Result.success()
+                .set("schools", schoolQuestTypeAnalysis)
+                .set("classes", classQuestTypeAnalysis)
+                .set("hasHeader", !schoolQuestTypeAnalysis.isEmpty());
     }
 
     // 班级试题分析

@@ -89,7 +89,8 @@ public class ClassRankAnalysis implements Server {
             return score2.compareTo(score1);
         });
 
-        return Result.success().set("rankstats", rankstats);
+        List<String> subjects = subjectService.querySubjects(projectId);
+        return Result.success().set("rankstats", rankstats).set("hasHeader", !subjects.isEmpty());
     }
 
     private List<Map<String, Object>> getSubjectRankList(

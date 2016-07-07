@@ -57,7 +57,10 @@ public class SchoolScoreSegment implements Server {
         List<Map<String, Object>> classSegments = getClassScoreSegments(projectId, subjectId, schoolId);
         List<Map<String, Object>> schoolSegments = getSchoolTotalScoreSegments(projectId, subjectId, schoolId);
 
-        return Result.success().set("schools", schoolSegments).set("classes", classSegments);
+        return Result.success()
+                .set("schools", schoolSegments)
+                .set("classes", classSegments)
+                .set("hasHeader", !schoolSegments.isEmpty());
     }
 
     private List<Map<String, Object>> getClassScoreSegments(String projectId, String subjectId, String schoolId) {

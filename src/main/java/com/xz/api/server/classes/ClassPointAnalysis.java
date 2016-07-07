@@ -70,7 +70,10 @@ public class ClassPointAnalysis implements Server {
 
         List<Map<String, Object>> classPointAnalysis = getClassPointAnalysis(projectId, subjectId, classId);
         List<Map<String, Object>> studentPointAnalysis = getStudentPointAnalysis(projectId, subjectId, classId);
-        return Result.success().set("classes", classPointAnalysis).set("students", studentPointAnalysis);
+        return Result.success()
+                .set("classes", classPointAnalysis)
+                .set("students", studentPointAnalysis)
+                .set("hasHeader", !classPointAnalysis.isEmpty());
     }
 
     // 学生知识点分析

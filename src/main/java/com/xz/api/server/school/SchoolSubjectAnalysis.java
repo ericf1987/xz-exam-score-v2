@@ -69,7 +69,10 @@ public class SchoolSubjectAnalysis implements Server {
         Map<String, Object> schoolSubjectMaps = getSubjectAnalysis(projectId, range, studentService, averageService,
                 subjectService, subjectRateService, fullScoreService, tScoreService);
 
-        return Result.success().set("schools", schoolSubjectMaps).set("classes", classsSubjectMaps);
+        return Result.success()
+                .set("schools", schoolSubjectMaps)
+                .set("classes", classsSubjectMaps)
+                .set("hasHeader", !((List) schoolSubjectMaps.get("subjects")).isEmpty());
     }
 
     private List<Map<String, Object>> getClassSubjectAnalysis(String projectId, String schoolId) {

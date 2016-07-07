@@ -61,7 +61,10 @@ public class ProjectObjectiveAnalysis implements Server {
         List<Map<String, Object>> schoolObjectiveAnalysis =  getSchoolAnalysis(projectId, subjectId, schoolIds);
         List<Map<String, Object>> totalObjectiveAnalysis = getProjectTotalAnalysis(projectId, subjectId);
 
-        return Result.success().set("totals", totalObjectiveAnalysis).set("schools", schoolObjectiveAnalysis);
+        return Result.success()
+                .set("totals", totalObjectiveAnalysis)
+                .set("schools", schoolObjectiveAnalysis)
+                .set("hasHeader", !totalObjectiveAnalysis.isEmpty());
     }
 
     // 学校客观题分数

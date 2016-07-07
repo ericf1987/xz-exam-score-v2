@@ -56,14 +56,19 @@ public class ProjectRankStat implements Server {
         String subjectId = param.getString("subjectId");
         String[] schoolIds = param.getStringValues("schoolIds");
 
-        List<Map<String, Object>> schoolRankSegments = getSchoolRankSegments(projectId, subjectId, schoolIds);
-        return Result.success().set("schools", schoolRankSegments);
+        Target target = targetService.getTarget(projectId, subjectId);
+        Map<String, Object> schoolRankSegments = getSchoolRankSegments(projectId, target, schoolIds);
+        return Result.success()
+                .set("schools", schoolRankSegments.get("schoolRankSegments"))
+                .set("hasHeader", schoolRankSegments.get("hasHeader"));
     }
 
     // 学校排名分段统计
-    private List<Map<String, Object>> getSchoolRankSegments(String projectId, String subjectId, String[] schoolIds) {
+    private Map<String, Object> getSchoolRankSegments(String projectId, Target target, String[] schoolIds) {
+        Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> schoolRankSegments = new ArrayList<>();
 
+        boolean hasHeader = false;
         for (String schoolId : schoolIds) {
             String schoolName = schoolService.getSchoolName(projectId, schoolId);
             if (StringUtil.isBlank(schoolName)) {
@@ -75,16 +80,21 @@ public class ProjectRankStat implements Server {
 
             // 考生人数
             Range range = Range.school(schoolId);
-            Target target = targetService.getTarget(projectId, subjectId);
+
             map.put("studentCount",  studentService.getStudentCount(projectId, range, target));
 
             // 排行分段
             List<Map<String, Object>> rankStat = rankSegmentService.queryFullRankSegment(projectId, target, range);
             map.put("rankStat", rankStat);
+            if (!rankStat.isEmpty()) {
+                hasHeader = true;
+            }
 
             schoolRankSegments.add(map);
         }
 
-        return schoolRankSegments;
+        result.put("schoolRankSegments", schoolRankSegments);
+        result.put("hasHeader", hasHeader);
+        return result;
     }
 }

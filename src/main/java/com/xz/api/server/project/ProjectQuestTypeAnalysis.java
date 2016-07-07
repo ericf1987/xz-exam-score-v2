@@ -63,7 +63,10 @@ public class ProjectQuestTypeAnalysis implements Server {
         List<Map<String, Object>> totalQuestTypeAnalysis =
                 getTotalQuestTypeAnalysis(projectId, subjectId);
 
-        return Result.success().set("totals", totalQuestTypeAnalysis).set("schools", schoolQuestTypeAnalysis);
+        return Result.success()
+                .set("totals", totalQuestTypeAnalysis)
+                .set("schools", schoolQuestTypeAnalysis)
+                .set("hasHeader", !totalQuestTypeAnalysis.isEmpty());
     }
 
     // 学校试题分析

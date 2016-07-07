@@ -87,6 +87,7 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
 
         return Result.success()
                 .set("points", pointStats)
-                .set("levels", abilityLevelStat);
+                .set("levels", abilityLevelStat)
+                .set("hasHeader", !((List) abilityLevelStat.get("levelInfos")).isEmpty());
     }
 }

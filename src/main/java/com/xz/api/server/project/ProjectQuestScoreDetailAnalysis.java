@@ -23,8 +23,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/7/1.
  */
-@SuppressWarnings("unchecked")
-@Function(description = "班级成绩-学生题目得分明细", parameters = {
+@Function(description = "项目成绩-学生题目得分明细", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "考试科目id", required = true)
 })

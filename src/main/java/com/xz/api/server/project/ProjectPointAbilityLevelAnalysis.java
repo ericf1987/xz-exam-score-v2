@@ -70,7 +70,8 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
         return Result.success()
                 .set("points", pointStats)
-                .set("levels", abilityLevelStat);
+                .set("levels", abilityLevelStat)
+                .set("hasHeader", !((List) abilityLevelStat.get("levelInfos")).isEmpty());
     }
 
     // 获取知识点统计分析

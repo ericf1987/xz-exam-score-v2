@@ -64,7 +64,10 @@ public class ProjectSubjectiveAnalysis implements Server {
         List<Map<String, Object>> totalSubjectiveAnalysis =
                 getProjectSubjectiveAnalysis(projectId, subjectId);
 
-        return Result.success().set("totals", totalSubjectiveAnalysis).set("schools", schoolSubjectiveAnalysis);
+        return Result.success()
+                .set("totals", totalSubjectiveAnalysis)
+                .set("schools", schoolSubjectiveAnalysis)
+                .set("hasHeader", !totalSubjectiveAnalysis.isEmpty());
     }
 
     // 学校主观题分析

@@ -65,7 +65,10 @@ public class ProjectHighSegmentAnalysis implements Server {
         List<Map<String, Object>> totalHighSegmentAnalysis =
                 getTotalHighSegmentAnalysis(projectId, percent);
 
-        return Result.success().set("totals", totalHighSegmentAnalysis).set("schools", schoolHighSegmentAnalysis);
+        return Result.success()
+                .set("totals", totalHighSegmentAnalysis)
+                .set("schools", schoolHighSegmentAnalysis)
+                .set("hasHeader", true);
     }
 
     // 学校高分段竞争力分析

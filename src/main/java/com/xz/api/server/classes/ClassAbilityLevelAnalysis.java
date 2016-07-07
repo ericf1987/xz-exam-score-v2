@@ -80,7 +80,10 @@ public class ClassAbilityLevelAnalysis implements Server {
                 projectId, subjectId, classId, levelMap);
         List<Map<String, Object>> studentLevelAnalysis = getStudentAbilityLevelAnalysis(
                 projectId, subjectId, classId, levelMap);
-        return Result.success().set("classes", classLevelAnalysis).set("students", studentLevelAnalysis);
+        return Result.success()
+                .set("classes", classLevelAnalysis)
+                .set("students", studentLevelAnalysis)
+                .set("hasHeader", !classLevelAnalysis.isEmpty());
     }
 
     // 学生能力层级分析

@@ -79,7 +79,10 @@ public class ProjectScoreAnalysis implements Server {
         List<Map<String, Object>> schoolStats = getSchoolStats(projectId, subjectId, schoolIds);
         Map<String, Object> totalStat = getProjectTotalStats(projectId, subjectId);
 
-        return Result.success().set("totals", totalStat).set("schools", schoolStats);
+        return Result.success()
+                .set("totals", totalStat)
+                .set("schools", schoolStats)
+                .set("hasHeader", true);
     }
 
     // 学校分数分析

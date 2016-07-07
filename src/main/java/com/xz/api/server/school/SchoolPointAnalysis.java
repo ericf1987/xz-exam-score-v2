@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/7/5.
  */
-@Function(description = "班级成绩-知识点分析", parameters = {
+@Function(description = "学校成绩-知识点分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目id,默认第一个科目", required = false),
         @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true)

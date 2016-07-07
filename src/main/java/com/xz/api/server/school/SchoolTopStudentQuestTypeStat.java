@@ -76,6 +76,9 @@ public class SchoolTopStudentQuestTypeStat implements Server {
         List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target,
                 subjectId, topStudentListService, studentService, schoolService, classService,
                 questTypeService, fullScoreService, questTypeScoreService);
-        return Result.success().set("schools", schoolQuestTypeAnalysis).set("topStudents", topStudents);
+        return Result.success()
+                .set("schools", schoolQuestTypeAnalysis)
+                .set("topStudents", topStudents)
+                .set("hasHeader", !schoolQuestTypeAnalysis.isEmpty());
     }
 }

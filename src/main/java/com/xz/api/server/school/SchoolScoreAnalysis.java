@@ -72,7 +72,10 @@ public class SchoolScoreAnalysis implements Server {
         List<Map<String, Object>> classStats = getClassStats(projectId, subjectId, schoolId);
         Map<String, Object> schoolStats = getSchoolTotalStats(projectId, subjectId, schoolId);
 
-        return Result.success().set("schools", schoolStats).set("classes", classStats);
+        return Result.success()
+                .set("schools", schoolStats)
+                .set("classes", classStats)
+                .set("hasHeader", true);
     }
 
     // 获取学校班级分数分析统计

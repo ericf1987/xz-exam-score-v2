@@ -85,7 +85,10 @@ public class ProjectTopStudentQuestTypeStat implements Server {
                 subjectId, topStudentListService, studentService, schoolService, classService,
                 questTypeService, fullScoreService, questTypeScoreService);
 
-        return Result.success().set("totals", totalQuestTypeAnalysis).set("topStudents", topStudents);
+        return Result.success()
+                .set("totals", totalQuestTypeAnalysis)
+                .set("topStudents", topStudents)
+                .set("hasHeader", !totalQuestTypeAnalysis.isEmpty());
     }
 
     // 初始化排名分数段

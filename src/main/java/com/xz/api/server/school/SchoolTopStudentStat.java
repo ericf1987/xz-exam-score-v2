@@ -66,6 +66,6 @@ public class SchoolTopStudentStat implements Server {
 
         List<Map<String, Object>> topStudents = getTopStudents(projectId, rankSegment, range, target, subjectIds,
                 topStudentListService, studentService, schoolService, classService, scoreService, rankService);
-        return Result.success().set("topStudents", topStudents);
+        return Result.success().set("topStudents", topStudents).set("hasHeader", true);
     }
 }

@@ -54,13 +54,17 @@ public class SchoolRankStat implements Server {
         String subjectId = param.getString("subjectId");
         String schoolId = param.getString("schoolId");
 
-        List<Map<String, Object>> classRankStats = getClassRankSegments(projectId, subjectId, schoolId);
-        return Result.success().set("classes", classRankStats);
+        Map<String, Object> classRankStats = getClassRankSegments(projectId, subjectId, schoolId);
+        return Result.success()
+                .set("classes", classRankStats.get("classRankStats"))
+                .set("hasHeader", classRankStats.get("hasHeader"));
     }
 
     // 学校排名分段统计
-    private List<Map<String, Object>> getClassRankSegments(String projectId, String subjectId, String schoolId) {
+    private Map<String, Object> getClassRankSegments(String projectId, String subjectId, String schoolId) {
+        Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> classRankStats = new ArrayList<>();
+        boolean hasHeader = false;
 
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
@@ -77,10 +81,15 @@ public class SchoolRankStat implements Server {
             // 排行分段
             List<Map<String, Object>> rankStat = rankSegmentService.queryFullRankSegment(projectId, target, range);
             map.put("rankStat", rankStat);
+            if (!rankStat.isEmpty()) {
+                hasHeader = true;
+            }
 
             classRankStats.add(map);
         }
 
-        return classRankStats;
+        result.put("classRankStats", classRankStats);
+        result.put("hasHeader", hasHeader);
+        return result;
     }
 }
