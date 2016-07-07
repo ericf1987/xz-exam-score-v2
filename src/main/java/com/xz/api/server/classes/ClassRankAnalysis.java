@@ -90,7 +90,9 @@ public class ClassRankAnalysis implements Server {
         });
 
         List<String> subjects = subjectService.querySubjects(projectId);
-        return Result.success().set("rankstats", rankstats).set("hasHeader", !subjects.isEmpty());
+        return Result.success()
+                .set("rankstats", rankstats)
+                .set("hasHeader", !rankstats.isEmpty() && !subjects.isEmpty());
     }
 
     private List<Map<String, Object>> getSubjectRankList(
