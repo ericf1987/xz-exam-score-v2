@@ -57,8 +57,12 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "主观题总分");
         List<Map<String, Object>> quests = result.get("questList");
         for(Map<String, Object> quest : quests){
-            String questName = Boolean.valueOf(quest.get("isObjective").toString()) ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
-            excelWriter.set(0, column.incrementAndGet(), questName);
+            if(null != quest.get("isObjective")){
+                String questName = Boolean.valueOf(quest.get("isObjective").toString()) ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
+                excelWriter.set(0, column.incrementAndGet(), questName);
+            }else{
+                excelWriter.set(0, column.incrementAndGet(), quest.get("questNo"));
+            }
         }
     }
 
