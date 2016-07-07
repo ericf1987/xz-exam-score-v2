@@ -22,8 +22,10 @@ public class TaskDispatcherFactory {
     @Autowired
     AggregationRoundService aggregationRoundService;
 
+    // 保存所有统计对象
     private Map<String, TaskDispatcher> dispatcherMap = new HashMap<>();
 
+    // 注册 Dispater 对象
     public void registerTaskDispatcher(TaskDispatcher taskDispatcher) {
         String taskType = taskDispatcher.getTaskType();
         if (taskType != null) {
@@ -35,6 +37,8 @@ public class TaskDispatcherFactory {
         return this.dispatcherMap.get(taskType);
     }
 
+    //////////////////////////////////////////////////////////////
+
     public List<TaskDispatcher> listAvailableDispatchers(String aggregationId, AggregationType aggregationType) {
         List<String> completedTaskTypes = aggregationRoundService.getCompletedTaskTypes(aggregationId);
 
@@ -44,7 +48,7 @@ public class TaskDispatcherFactory {
         dispatchers.removeIf(dispatcher -> !isDependencyCompleted(dispatcher, completedTaskTypes));
 
         if (aggregationType == AggregationType.Basic) {
-            dispatchers.removeIf(dispatcher -> isAdvanced(dispatcher));
+            dispatchers.removeIf(this::isAdvanced);
         } else if (aggregationType == AggregationType.Advanced) {
             dispatchers.removeIf(dispatcher -> !isAdvanced(dispatcher));
         }
