@@ -90,7 +90,7 @@ public class ScannerDBService {
         LOG.info("已导入 " + counter.get() + " 名学生...");
     }
 
-    private void importStudentScore(String projectId, String subjectId, Document document, AtomicInteger counter) {
+    public void importStudentScore(String projectId, String subjectId, Document document, AtomicInteger counter) {
         String studentId = document.getString("studentId");
         Document student = studentService.findStudent(projectId, studentId);
 
@@ -116,8 +116,8 @@ public class ScannerDBService {
 
         for (Document subjectiveItem : subjectiveList) {
             String questionNo = subjectiveItem.getString("questionNo");
-            double score = subjectiveItem.getDouble("score");
-            double fullScore = subjectiveItem.getDouble("fullScore");
+            double score = Double.parseDouble(subjectiveItem.get("score").toString());
+            double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
 
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
