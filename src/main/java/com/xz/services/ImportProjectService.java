@@ -454,23 +454,21 @@ public class ImportProjectService {
     }
 
     //从zip包读取学生信息
-    public void importStudentInfoFromZip(ZipFileReader zipFileReader){
+    public Result importStudentInfoFromZip(ZipFileReader zipFileReader){
         zipFileReader.readZipEntries("*",  consumer -> readEntry(consumer, zipFileReader));
+        return Result.success();
     }
 
     private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
-        System.out.println("读取文件-->" + entry.getName());
         //文件名为projectId_subjectId.json
         String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
         String projectId = fileName.split("_")[0];
         String subjectId = fileName.split("_")[1];
-        LOG.info("导入 " + fileName + " 的成绩...");
         AtomicInteger counter = new AtomicInteger();
         zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId, counter));
     }
 
     private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
-        System.out.println("文件内容-->" + line);
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
         scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
