@@ -19,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 统计 [考生] 的 [知识点] 得分/得分率
@@ -96,6 +98,7 @@ public class PointTask extends Receiver {
             DoubleCounterMap<PointLevel> pointLevelScores) {
 
         FindIterable<Document> scores = scoreService.getStudentQuestScores(projectId, studentId);
+
         for (Document scoreDoc : scores) {
             double score = scoreDoc.getDouble("score");
             String subject = scoreDoc.getString("subject");
@@ -108,6 +111,7 @@ public class PointTask extends Receiver {
             }
 
             Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
+            Set<SubjectLevel> subjectLevels = new HashSet<>();
 
             // 没有知识点，跳过处理
             if (points == null || points.isEmpty()) {
@@ -120,8 +124,12 @@ public class PointTask extends Receiver {
 
                 for (String level : pEntry.getValue()) {
                     pointLevelScores.incre(new PointLevel(pointId, level), score);
-                    subjectLevelScores.incre(new SubjectLevel(subject, level), score);
+                    subjectLevels.add(new SubjectLevel(subject, level));
                 }
+            }
+
+            for (SubjectLevel subjectLevel : subjectLevels) {
+                subjectLevelScores.incre(subjectLevel, score);
             }
         }
     }
