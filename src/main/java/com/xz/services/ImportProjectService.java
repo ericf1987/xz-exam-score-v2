@@ -128,13 +128,16 @@ public class ImportProjectService {
                 continue;
             }
 
+            // 每个题目对每个能力层级只计算一次分数
+            Set<String> levels = new HashSet<>();
+
             for (String pointId : points.keySet()) {
 
                 pointFullScore.incre(pointId, score);
 
                 for (String level : points.get(pointId)) {
                     pointLevelFullScore.incre(new PointLevel(pointId, level), score);
-                    subjectLevelFullScore.incre(new SubjectLevel(subject, level), score);
+                    levels.add(level);
                 }
 
                 //////////////////////////////////////////////////////////////
@@ -154,6 +157,11 @@ public class ImportProjectService {
                 Result result = interfaceClient.request("QueryKnowledgePointById", param);
                 Map<String, Object> point = result.get("point");
                 pointService.savePoint(pointId, point.get("point_name").toString());
+            }
+
+            // 将该题目的分数累加到每个能力层级
+            for (String level : levels) {
+                subjectLevelFullScore.incre(new SubjectLevel(subject, level), score);
             }
         }
 
@@ -237,6 +245,7 @@ public class ImportProjectService {
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
             questDoc.put("score", questObj.getDoubleValue("score"));
             questDoc.put("answer", questObj.getString("answer"));
+            questDoc.put("scoreRule", questObj.getString("scoreRule"));
             questDoc.put("points", questObj.get("points"));
             questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));

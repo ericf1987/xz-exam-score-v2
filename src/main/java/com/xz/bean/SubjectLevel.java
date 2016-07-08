@@ -27,4 +27,24 @@ public class SubjectLevel {
     public String getLevel() {
         return level;
     }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SubjectLevel that = (SubjectLevel) o;
+
+        if (!subject.equals(that.subject)) return false;
+        return level.equals(that.level);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = subject.hashCode();
+        result = 31 * result + level.hashCode();
+        return result;
+    }
 }
