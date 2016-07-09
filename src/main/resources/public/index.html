@@ -27,9 +27,9 @@
 
 <fieldset>
     <legend>导入考生分数zip包</legend>
-    <form action="project/import-score-pack" method="post">
+    <form action="project/import-score-pack" method="post" enctype="multipart/form-data">
         <p>
-            <input type="file" name="filePath"/>
+            <input type="file" name="zipFilePath"/>
         </p>
         <p>
             <button type="submit">开始导入</button>
