@@ -51,9 +51,9 @@ public class ImportProjectController {
     @RequestMapping(value = "import-score-pack", method = RequestMethod.POST)
     @ResponseBody
     public Result importProjectScorePack(
-            @RequestParam(value = "reimportStudents", required = true) String filePath
+            @RequestParam(value = "filePath", required = true) String filePath
     ) {
-        LOG.debug("文件路径-->{}" + filePath);
+        LOG.debug("服务器文件路径-->{}" + filePath);
 
         //1.读取zip源文件
 //        String zipPath = "F:\\chengji\\33.zip";
