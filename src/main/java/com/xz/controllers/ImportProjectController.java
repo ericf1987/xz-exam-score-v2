@@ -53,7 +53,7 @@ public class ImportProjectController {
     /**
      * 从本地文件中导入网阅成绩
      *
-     * @param filePath 网阅成绩包路径
+     * @param zipFilePath 网阅成绩包路径
      * @return 执行结果
      */
     @RequestMapping(value = "import-score-pack", method = RequestMethod.POST)
