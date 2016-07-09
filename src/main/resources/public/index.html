@@ -26,6 +26,18 @@
 </fieldset>
 
 <fieldset>
+    <legend>导入考生分数zip包</legend>
+    <form action="project/import-score-pack" method="post">
+        <p>
+            <input type="file" name="filePath"/>
+        </p>
+        <p>
+            <button type="submit">开始导入</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>导出成绩并上传到OSS</legend>
     <form action="export-score-to-oss" method="post">
         <p>项目ID：<input type="text" name="project"/></p>

@@ -1,5 +1,6 @@
 package com.xz.controllers;
 
+import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.services.ImportProjectService;
@@ -40,4 +41,25 @@ public class ImportProjectController {
         LOG.info("项目 " + projectId + " 基本信息导入完毕。");
         return Result.success().set("questCount", context.get("questCount"));
     }
+
+    /**
+     * 从本地文件中导入网阅成绩
+     *
+     * @param filePath 网阅成绩包路径
+     * @return 执行结果
+     */
+    @RequestMapping(value = "import-score-pack", method = RequestMethod.POST)
+    @ResponseBody
+    public Result importProjectScorePack(
+            @RequestParam(value = "reimportStudents", required = true) String filePath
+    ) {
+        LOG.debug("文件路径-->{}" + filePath);
+
+        //1.读取zip源文件
+//        String zipPath = "F:\\chengji\\33.zip";
+        ZipFileReader zipFileReader = new ZipFileReader(filePath);
+        importProjectService.importStudentInfoFromZip(zipFileReader);
+        return Result.success();
+    }
+
 }

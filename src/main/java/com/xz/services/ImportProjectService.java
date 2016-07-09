@@ -2,13 +2,16 @@ package com.xz.services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
+import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
 import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
+import com.xz.scanner.ScannerDBService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -74,6 +79,12 @@ public class ImportProjectService {
 
     @Autowired
     PrepareDataService prepareDataService;
+
+    @Autowired
+    MongoDatabase scoreDatabase;
+
+    @Autowired
+    ScannerDBService scannerDBService;
 
     /**
      * 导入项目信息
@@ -441,4 +452,26 @@ public class ImportProjectService {
         context.put("project", project);
         projectService.saveProject(project);
     }
+
+    //从zip包读取学生信息
+    public Result importStudentInfoFromZip(ZipFileReader zipFileReader){
+        zipFileReader.readZipEntries("*",  consumer -> readEntry(consumer, zipFileReader));
+        return Result.success();
+    }
+
+    private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
+        //文件名为projectId_subjectId.json
+        String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
+        String projectId = fileName.split("_")[0];
+        String subjectId = fileName.split("_")[1];
+        AtomicInteger counter = new AtomicInteger();
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId, counter));
+    }
+
+    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
+        //获取每个学生document对象
+        Document studentDoc = Document.parse(line.trim());
+        scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
+    }
+
 }

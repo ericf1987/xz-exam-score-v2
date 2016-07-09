@@ -64,12 +64,13 @@ public class PointTask extends Receiver {
 
         countScores(projectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
 
-        // 统计知识点得分（学生，班级累加）
+        // 统计知识点得分（学生，班级, 学校累加）
         for (Map.Entry<String, Double> pointScoreEntry : pointScores.entrySet()) {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, point, score, null);
             scoreService.addTotalScore(projectId, classRange, point, score);
+            scoreService.addTotalScore(projectId, schoolRange, point, score);
         }
 
         // 统计[知识点-能力层级]得分（班级累加，学校累加）
