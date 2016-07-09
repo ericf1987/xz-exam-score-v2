@@ -77,6 +77,7 @@ public class PointTask extends Receiver {
         for (Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelScores.entrySet()) {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
+            scoreService.saveTotalScore(projectId, studentRange, null, pointLevel, score, null);
             scoreService.addTotalScore(projectId, classRange, pointLevel, score);
             scoreService.addTotalScore(projectId, schoolRange, pointLevel, score);
         }
