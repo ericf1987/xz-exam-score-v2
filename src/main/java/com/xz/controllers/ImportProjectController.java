@@ -61,13 +61,10 @@ public class ImportProjectController {
     public Result importProjectScorePack(
             @RequestParam MultipartFile zipFilePath
     ) {
-
-        System.out.println("学生成绩导入文件名-->" + zipFilePath.getOriginalFilename());
         //上传原文件名
         String orginalFileName = zipFilePath.getOriginalFilename();
         //目的文件名
         String desPath = scoreUploadLocation + orginalFileName;
-        System.out.println("目的文件名-->" + desPath);
         if (!zipFilePath.isEmpty()) {
             //获取上传的文件的文件名
             try {
@@ -83,8 +80,14 @@ public class ImportProjectController {
 
         //1.读取zip源文件
 //        String zipPath = "F:\\chengji\\33.zip";
-        ZipFileReader zipFileReader = new ZipFileReader(desPath);
-        return importProjectService.importStudentInfoFromZip(zipFileReader);
+        try{
+            ZipFileReader zipFileReader = new ZipFileReader(desPath);
+            importProjectService.importStudentInfoFromZip(zipFileReader);
+            return Result.success().set("desc", "文件上传路径为:" + desPath + "，成绩数据导入成功！");
+        }catch(Exception e){
+            return Result.success().set("desc", "数据导入失败，请重新导入！");
+        }
+
     }
 
 }
