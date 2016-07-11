@@ -5,9 +5,11 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.Range;
+import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.AverageService;
 import com.xz.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,9 @@ public class AverageTask extends Receiver {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    AverageService averageService;
+
     @Override
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -50,14 +55,15 @@ public class AverageTask extends Receiver {
             double totalScore = document.getDouble("totalScore");
 
             Document query = doc();
-            double average = calculateAverate(projectId, rangeDoc, targetDoc, totalScore, query);
+            double average = calculateAverage(projectId, rangeDoc, targetDoc, totalScore, query);
 
             // 保存平均分
             averageCollection.updateOne(query, $set("average", average), MongoUtils.UPSERT);
+            averageService.deleteCache(projectId, range, Target.parse(targetDoc));
         });
     }
 
-    protected double calculateAverate(
+    protected double calculateAverage(
             String projectId, Document rangeDoc, Document targetDoc, double totalScore, Document query) {
 
         query.append("range", rangeDoc)

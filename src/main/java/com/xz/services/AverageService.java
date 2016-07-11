@@ -106,4 +106,9 @@ public class AverageService {
             return 0d;
         }
     }
+
+    public void deleteCache(String projectId, Range range, Target target) {
+        String cacheKey = "average:" + projectId + ":" + range + ":" + target;
+        cache.delete(cacheKey);
+    }
 }

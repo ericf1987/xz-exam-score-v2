@@ -1,6 +1,5 @@
 package com.xz.services;
 
-import com.alibaba.fastjson.JSON;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -183,24 +182,28 @@ public class ScoreService {
         String cacheKey = "score:" + collection + ":" + projectId + ":" + range + ":" + target;
 
         return cache.get(cacheKey, () -> {
-            MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
-
-            Object targetId = target.getId();
-            if (!(targetId instanceof String)) {
-                targetId = Document.parse(JSON.toJSONString(targetId));
-            }
-
-            Document query = new Document("project", projectId)
-                    .append("range", range2Doc(range))
-                    .append("target", target2Doc(target));
-
-            Document totalScoreDoc = totalScores.find(query).projection(doc("totalScore", 1)).first();
-            if (totalScoreDoc != null) {
-                return totalScoreDoc.getDouble("totalScore");
-            } else {
-                return 0d;
-            }
+            return getTotalScore0(collection, projectId, range, target);
         });
+    }
+
+    private Double getTotalScore0(String collection, String projectId, Range range, Target target) {
+        MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
+
+        Document query = new Document("project", projectId)
+                .append("range", range2Doc(range))
+                .append("target", target2Doc(target));
+
+        Document totalScoreDoc = totalScores.find(query).projection(doc("totalScore", 1)).first();
+        if (totalScoreDoc != null) {
+            return totalScoreDoc.getDouble("totalScore");
+        } else {
+            return 0d;
+        }
+    }
+
+    public Double getTotalScore0(String projectId, Range range, Target target) {
+        String collection = getTotalScoreCollection(projectId, target);
+        return getTotalScore0(collection, projectId, range, target);
     }
 
     public Map<String, Double> getAllSubjectScore(String projectId, Range range) {

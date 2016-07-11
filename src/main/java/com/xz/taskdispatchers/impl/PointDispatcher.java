@@ -32,13 +32,17 @@ public class PointDispatcher extends TaskDispatcher {
 
         // 删除旧数据
         LOG.info("删除项目 {} 的 point 相关旧数据...", projectId);
+        deleteOldData(projectId);
+
+        LOG.info("项目 {} 的 point 相关旧数据删除完毕，开始统计...", projectId);
+        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
+    }
+
+    protected void deleteOldData(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("total_score");
         c.deleteMany(doc("project", projectId).append("target.name", Target.POINT));
         c.deleteMany(doc("project", projectId).append("target.name", Target.POINT_LEVEL));
         c.deleteMany(doc("project", projectId).append("target.name", Target.SUBJECT_LEVEL));
-
-        LOG.info("项目 {} 的 point 相关旧数据删除完毕，开始统计...", projectId);
-        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
     }
 
 }
