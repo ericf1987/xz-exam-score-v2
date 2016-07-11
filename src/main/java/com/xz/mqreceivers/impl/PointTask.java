@@ -57,6 +57,7 @@ public class PointTask extends Receiver {
         Document student = studentService.findStudent(projectId, studentId);
         Range classRange = Range.clazz(student.getString("class"));
         Range schoolRange = Range.school(student.getString("school"));
+        Range provinceRange = Range.school(student.getString("province"));
 
         DoubleCounterMap<String> pointScores = new DoubleCounterMap<>();
         DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
@@ -64,31 +65,34 @@ public class PointTask extends Receiver {
 
         countScores(projectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
 
-        // 统计知识点得分（学生，班级, 学校累加）
+        // 统计知识点得分（学生，班级, 学校, 省份累加）
         for (Map.Entry<String, Double> pointScoreEntry : pointScores.entrySet()) {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, point, score, null);
             scoreService.addTotalScore(projectId, classRange, point, score);
             scoreService.addTotalScore(projectId, schoolRange, point, score);
+            scoreService.addTotalScore(projectId, provinceRange, point, score);
         }
 
-        // 统计[知识点-能力层级]得分（班级累加，学校累加）
+        // 统计[知识点-能力层级]得分（班级累加，学校累加，省份累加）
         for (Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelScores.entrySet()) {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, pointLevel, score, null);
             scoreService.addTotalScore(projectId, classRange, pointLevel, score);
             scoreService.addTotalScore(projectId, schoolRange, pointLevel, score);
+            scoreService.addTotalScore(projectId, provinceRange, pointLevel, score);
         }
 
-        // 统计能力层级得分（学生，班级累加，学校累加）
+        // 统计能力层级得分（学生，班级累加，学校累加，省份累加）
         for (Map.Entry<SubjectLevel, Double> levelScoreEntry : subjectLevelScores.entrySet()) {
             Target subjectLevel = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, subjectLevel, score, null);
             scoreService.addTotalScore(projectId, classRange, subjectLevel, score);
             scoreService.addTotalScore(projectId, schoolRange, subjectLevel, score);
+            scoreService.addTotalScore(projectId, provinceRange, subjectLevel, score);
         }
     }
 
