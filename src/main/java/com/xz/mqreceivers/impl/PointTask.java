@@ -57,7 +57,7 @@ public class PointTask extends Receiver {
         Document student = studentService.findStudent(projectId, studentId);
         Range classRange = Range.clazz(student.getString("class"));
         Range schoolRange = Range.school(student.getString("school"));
-        Range provinceRange = Range.school(student.getString("province"));
+        Range provinceRange = Range.province(student.getString("province"));
 
         DoubleCounterMap<String> pointScores = new DoubleCounterMap<>();
         DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
