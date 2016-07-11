@@ -29,9 +29,8 @@ public class ImportScoreZip implements Server{
     @Override
     public Result execute(Param param) throws Exception {
         String filePath = param.getString("filePath");
-        LOG.debug("文件路径-->{}" + filePath);
         ZipFileReader zipFileReader = new ZipFileReader(filePath);
         importProjectService.importStudentInfoFromZip(zipFileReader);
-        return Result.success();
+        return Result.success().set("desc", "文件上传路径为" + filePath + "，成绩数据导入成功！");
     }
 }
