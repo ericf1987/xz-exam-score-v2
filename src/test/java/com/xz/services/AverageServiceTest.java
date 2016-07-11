@@ -24,4 +24,13 @@ public class AverageServiceTest extends XzExamScoreV2ApplicationTests {
 
         System.out.println(average);
     }
+
+    @Test
+    public void testGetAverage2() throws Exception {
+        String project = "430200-b73f03af1d74484f84f1aa93f583caaa";
+        Range range = Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700");
+        Target target = Target.point("1025616");
+        double average = averageService.getAverage(project, range, target);
+        System.out.println(average);
+    }
 }

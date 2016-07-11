@@ -1,5 +1,7 @@
 package com.xz.bean;
 
+import org.bson.Document;
+
 import java.util.Objects;
 
 /**
@@ -76,6 +78,13 @@ public class Range {
 
     public boolean match(String range) {
         return Objects.equals(this.name, range);
+    }
+
+    public static Range fromDocument(Document document) {
+        return new Range(
+                document.getString("name"),
+                document.getString("id")
+        );
     }
 
     @SuppressWarnings("SimplifiableIfStatement")

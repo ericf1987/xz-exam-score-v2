@@ -45,23 +45,35 @@ public class AverageTask extends Receiver {
                 new Document("project", projectId).append("range", range2Doc(range)));
 
         totalScores.forEach((Consumer<Document>) document -> {
-            Document query = doc("range", document.get("range"))
-                    .append("target", document.get("target"))
-                    .append("project", document.get("project"));
+            Document rangeDoc = (Document) document.get("range");
+            Document targetDoc = (Document) document.get("target");
+            double totalScore = document.getDouble("totalScore");
 
-            // 计算平均分
-            int studentCount = studentService.getStudentCount(projectId, range);
-            double average;
-
-            if (studentCount == 0) {
-                average = 0;
-            } else {
-                double totalScore = document.getDouble("totalScore");
-                average = totalScore / studentCount;
-            }
+            Document query = doc();
+            double average = calculateAverate(projectId, rangeDoc, targetDoc, totalScore, query);
 
             // 保存平均分
             averageCollection.updateOne(query, $set("average", average), MongoUtils.UPSERT);
         });
+    }
+
+    protected double calculateAverate(
+            String projectId, Document rangeDoc, Document targetDoc, double totalScore, Document query) {
+
+        query.append("range", rangeDoc)
+                .append("target", targetDoc)
+                .append("project", projectId);
+
+        // 计算平均分
+        int studentCount = studentService.getStudentCount(projectId, Range.fromDocument(rangeDoc));
+        double average;
+
+        if (studentCount == 0) {
+            average = 0;
+        } else {
+            average = totalScore / studentCount;
+        }
+
+        return average;
     }
 }
