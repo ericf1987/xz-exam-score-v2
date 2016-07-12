@@ -30,7 +30,12 @@ public class ImportScoreZip implements Server{
     public Result execute(Param param) throws Exception {
         String filePath = param.getString("filePath");
         ZipFileReader zipFileReader = new ZipFileReader(filePath);
-        importProjectService.importStudentInfoFromZip(zipFileReader);
-        return Result.success().set("desc", "文件上传路径为" + filePath + "，成绩数据导入成功！");
+        try {
+            importProjectService.importStudentInfoFromZip(zipFileReader);
+            return Result.success().set("desc", "文件上传路径为" + filePath + "，成绩数据导入成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.fail("数据导入出现异常，请重新操作!");
+        }
     }
 }
