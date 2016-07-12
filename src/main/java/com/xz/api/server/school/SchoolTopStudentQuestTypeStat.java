@@ -56,6 +56,9 @@ public class SchoolTopStudentQuestTypeStat implements Server {
     @Autowired
     FullScoreService fullScoreService;
 
+    @Autowired
+    ScoreService scoreService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -75,7 +78,7 @@ public class SchoolTopStudentQuestTypeStat implements Server {
 
         List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target,
                 subjectId, topStudentListService, studentService, schoolService, classService,
-                questTypeService, fullScoreService, questTypeScoreService);
+                questTypeService, fullScoreService, questTypeScoreService, scoreService);
         return Result.success()
                 .set("schools", schoolQuestTypeAnalysis)
                 .set("topStudents", topStudents)
