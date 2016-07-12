@@ -187,18 +187,21 @@ public class ScoreService {
     }
 
     private Double getTotalScore0(String collection, String projectId, Range range, Target target) {
+
         MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
 
         Document query = new Document("project", projectId)
                 .append("range", range2Doc(range))
                 .append("target", target2Doc(target));
 
-        Document totalScoreDoc = totalScores.find(query).projection(doc("totalScore", 1)).first();
-        if (totalScoreDoc != null) {
-            return totalScoreDoc.getDouble("totalScore");
-        } else {
-            return 0d;
+        List<Document> docs = MongoUtils.toList(totalScores.find(query).projection(doc("totalScore", 1)));
+
+        double result = 0;
+        for (Document doc : docs) {
+            result += doc.getDouble("totalScore");
         }
+
+        return result;
     }
 
     public Double getTotalScore0(String projectId, Range range, Target target) {
@@ -237,11 +240,21 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
+    /**
+     * 累加总分
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param score     分数
+     */
     public void addTotalScore(String projectId, Range range, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
+        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+
         Document query = Mongo.query(projectId, range, target);
         scoreDatabase.getCollection(collectionName).updateOne(query, $inc("totalScore", score), UPSERT);
-        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+
         cache.delete(cacheKey);
     }
 

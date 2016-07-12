@@ -80,7 +80,7 @@ public class Range {
         return Objects.equals(this.name, range);
     }
 
-    public static Range fromDocument(Document document) {
+    public static Range parse(Document document) {
         return new Range(
                 document.getString("name"),
                 document.getString("id")

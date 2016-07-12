@@ -10,6 +10,7 @@ import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
 import com.xz.services.AverageService;
+import com.xz.services.ScoreService;
 import com.xz.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class AverageTask extends Receiver {
     @Autowired
     AverageService averageService;
 
+    @Autowired
+    ScoreService scoreService;
+
     @Override
     public void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -52,7 +56,9 @@ public class AverageTask extends Receiver {
         totalScores.forEach((Consumer<Document>) document -> {
             Document rangeDoc = (Document) document.get("range");
             Document targetDoc = (Document) document.get("target");
-            double totalScore = document.getDouble("totalScore");
+
+            // 一定要从 scoreService.getScore() 方法获取
+            double totalScore = scoreService.getScore(projectId, Range.parse(rangeDoc), Target.parse(targetDoc));
 
             Document query = doc();
             double average = calculateAverage(projectId, rangeDoc, targetDoc, totalScore, query);
@@ -71,7 +77,7 @@ public class AverageTask extends Receiver {
                 .append("project", projectId);
 
         // 计算平均分
-        int studentCount = studentService.getStudentCount(projectId, Range.fromDocument(rangeDoc));
+        int studentCount = studentService.getStudentCount(projectId, Range.parse(rangeDoc));
         double average;
 
         if (studentCount == 0) {

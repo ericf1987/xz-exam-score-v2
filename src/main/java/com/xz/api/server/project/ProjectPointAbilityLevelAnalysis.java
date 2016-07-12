@@ -60,11 +60,13 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
 
         Range range = Range.school(schoolId);
         String studyStage = projectService.findProjectStudyStage(projectId);
+
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
         levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
         List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap,
                 pointService, questService, fullScoreService, averageService);
+
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
                 levelMap, fullScoreService, averageService);
 
@@ -75,14 +77,17 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     }
 
     // 获取知识点统计分析
-    public static List<Map<String, Object>> getPointAnalysis(String projectId, String subjectId, Range range,
-                                                             Map<String, Document> levelMap,
-                                                             PointService pointService,
-                                                             QuestService questService,
-                                                             FullScoreService fullScoreService,
-                                                             AverageService averageService) {
+    public static List<Map<String, Object>> getPointAnalysis(
+            String projectId, String subjectId, Range range,
+            Map<String, Document> levelMap,
+            PointService pointService,
+            QuestService questService,
+            FullScoreService fullScoreService,
+            AverageService averageService) {
+
         List<Map<String, Object>> pointStats = new ArrayList<>();
         List<Point> points = pointService.getPoints(projectId, subjectId);
+
         for (Point point : points) {
             String pointId = point.getId();
             Map<String, Object> pointStat = new HashMap<>();
