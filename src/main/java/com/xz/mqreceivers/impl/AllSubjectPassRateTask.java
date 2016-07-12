@@ -48,36 +48,38 @@ public class AllSubjectPassRateTask extends Receiver {
         // 计算全科及格和不及格人数和优秀人数以及良好人数
         CounterMap<String> passCounter = new CounterMap<>();
 
+        int subjectCount = subjectIds.size();
         for (String studentId : studentList) {
-            boolean allPass = true, allFail = true, allExcellent = true, allGood = true;
 
+            int passCount = 0, excellentCount = 0, goodCount = 0, failCount = 0;
             for (String subjectId : subjectIds) {
                 String scoreLevel = scoreLevelService.getScoreLevel(projectId, studentId, Target.subject(subjectId));
-                if (!scoreLevel.equals(Pass.name())) {
-                    allPass = false;
-                }
-                if (!scoreLevel.equals(Excellent.name())) {
-                    allExcellent = false;
-                }
-                if (!scoreLevel.equals(Good.name())) {
-                    allGood = false;
-                }
-                if (!scoreLevel.equals(Fail.name())) {
-                    allFail = false;
+                if(scoreLevel.equals(Excellent.name())){
+                    passCount ++;
+                    goodCount ++;
+                    excellentCount ++;
+                }else if(scoreLevel.equals(Good.name())){
+                    passCount ++;
+                    goodCount ++;
+                }else if(scoreLevel.equals(Pass.name())){
+                    passCount ++;
+                }else{
+                    failCount ++;
                 }
             }
-
-            if (allPass) {
-                passCounter.incre("allPass");
-            }
-            if (allFail) {
-                passCounter.incre("allFail");
-            }
-            if (allExcellent) {
-                passCounter.incre("allExcellent");
-            }
-            if (allGood) {
-                passCounter.incre("allGood");
+            if(!subjectIds.isEmpty()){
+                if (subjectCount == passCount) {
+                    passCounter.incre("allPass");
+                }
+                if (subjectCount == failCount) {
+                    passCounter.incre("allFail");
+                }
+                if (subjectCount == excellentCount) {
+                    passCounter.incre("allExcellent");
+                }
+                if (subjectCount == goodCount) {
+                    passCounter.incre("allGood");
+                }
             }
         }
 
