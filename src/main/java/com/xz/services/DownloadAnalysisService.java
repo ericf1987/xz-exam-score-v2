@@ -25,15 +25,12 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class DownloadAnalysisService {
 
-    @Autowired
     @Value("${zip.download.url}")
     private String downloadURL;
 
-    @Autowired
     @Value("${report.generator.savepath}")
     private String savePath;
 
-    @Autowired
     @Value("${report.zip.location}")
     private String downloadPath;
 
