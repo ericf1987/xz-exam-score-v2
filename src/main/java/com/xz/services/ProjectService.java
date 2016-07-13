@@ -7,6 +7,7 @@ import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.bean.ProjectStatus;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class ProjectService {
     /**
      * 通过考试项目id查询项目所属学段
      *
-     * @param projectId  考试项目id
+     * @param projectId 考试项目id
      *
      * @return 考试项目信息
      */
@@ -81,7 +82,7 @@ public class ProjectService {
     /**
      * 通过考试项目id查询考试项目
      *
-     * @param projectId  考试项目id
+     * @param projectId 考试项目id
      *
      * @return 考试项目信息
      */
@@ -154,5 +155,17 @@ public class ProjectService {
      */
     public List<Document> queryProjects() {
         return toList(scoreDatabase.getCollection("project_list").find(doc()));
+    }
+
+    /**
+     * 设置项目状态
+     *
+     * @param projectId 项目ID
+     * @param status    状态
+     */
+    public void setProjectStatus(String projectId, ProjectStatus status) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        c.updateOne(query, $set("status", status.name()));
     }
 }
