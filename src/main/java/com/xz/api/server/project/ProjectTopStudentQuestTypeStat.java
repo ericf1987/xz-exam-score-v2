@@ -65,6 +65,9 @@ public class ProjectTopStudentQuestTypeStat implements Server {
     @Autowired
     FullScoreService fullScoreService;
 
+    @Autowired
+    ScoreService scoreService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -83,7 +86,7 @@ public class ProjectTopStudentQuestTypeStat implements Server {
 
         List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target,
                 subjectId, topStudentListService, studentService, schoolService, classService,
-                questTypeService, fullScoreService, questTypeScoreService);
+                questTypeService, fullScoreService, questTypeScoreService, scoreService);
 
         return Result.success()
                 .set("totals", totalQuestTypeAnalysis)
@@ -109,7 +112,7 @@ public class ProjectTopStudentQuestTypeStat implements Server {
             TopStudentListService topStudentListService, StudentService studentService,
             SchoolService schoolService, ClassService classService,
             QuestTypeService questTypeService, FullScoreService fullScoreService,
-            QuestTypeScoreService questTypeScoreService) {
+            QuestTypeScoreService questTypeScoreService, ScoreService scoreService) {
 
         List<Map<String, Object>> topStudents = new ArrayList<>();
         int minIndex = NumberUtils.toInt(rankSegment[0]);
@@ -129,9 +132,11 @@ public class ProjectTopStudentQuestTypeStat implements Server {
                 continue;
             }
 
+            double subjectScore = scoreService.getSubjectScore(projectId, studentId, subjectId);
             map.put("name", student.getString("name"));
             map.put("rank", rank);
             map.put("totalScore", totalScore);
+            map.put("subjectScore", subjectScore);
 
             if (range.match(Range.SCHOOL)) {
                 String classId = student.getString("class");
