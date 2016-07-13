@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.bean.ProjectStatus;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,5 +30,18 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
     public void testFindProjectStudyStage() throws Exception {
         String studyStage = projectService.findProjectStudyStage("430300-672a0ed23d9148e5a2a31c8bf1e08e62");
         System.out.println(studyStage);
+    }
+
+    @Test
+    public void testListProjects() throws Exception {
+        List<String> projectIds = projectService.listProjectIds();
+        projectIds.forEach(System.out::println);
+    }
+
+    @Test
+    public void testSetProjectStatus() throws Exception {
+        List<String> projectIds = projectService.listProjectIds();
+        projectIds.forEach(projectId ->
+                projectService.setProjectStatus(projectId, ProjectStatus.AggregationCompleted));
     }
 }

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -167,5 +168,21 @@ public class ProjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
         c.updateOne(query, $set("status", status.name()));
+    }
+
+    /**
+     * 查询所有项目ID列表
+     *
+     * @return 所有项目ID列表
+     */
+    public List<String> listProjectIds() {
+        List<String> result = new ArrayList<>();
+
+        scoreDatabase.getCollection("project_list")
+                .find(doc()).projection(doc("project", 1))
+                .forEach((Consumer<Document>)
+                        document -> result.add(document.getString("project")));
+
+        return result;
     }
 }
