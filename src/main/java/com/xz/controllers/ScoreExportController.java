@@ -1,13 +1,18 @@
 package com.xz.controllers;
 
+import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.services.ExportScoreService;
+import com.xz.services.OSSService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 导出成绩到 OSS
@@ -17,6 +22,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class ScoreExportController {
+
+    @Value("${zip.save.location}")
+    private String zipSaveLocation;     // zip 保存位置
+
+    @Value("${oss.url.prefix}")
+    private String ossUrlPrefix;        // zip 保存位置
+
+    @Autowired
+    OSSService ossService;
 
     @Autowired
     ExportScoreService exportScoreService;
@@ -42,4 +56,26 @@ public class ScoreExportController {
             return Result.fail(e.getMessage());
         }
     }
+
+    @RequestMapping(value = "upload-file-to-oss", method = RequestMethod.POST)
+    @ResponseBody
+    public Result uploadExamZip(
+            @RequestParam MultipartFile file,
+            @RequestParam("component") String component,
+            @RequestParam("version") String version
+    ) throws Exception {
+
+        if (StringUtil.isEmpty(component) || StringUtil.isEmpty(version) || file.isEmpty()) {
+            return Result.fail("参数不能为空");
+        }
+
+        String saveFilePath = zipSaveLocation + "oss-upload/" + component + "/" + version + "/update.zip";
+        String ossFilePath = "updates/" + component + "/" + version + "/update.zip";
+
+        file.transferTo(FileUtils.getOrCreateFile(saveFilePath));
+        ossService.uploadFile(saveFilePath, ossFilePath);
+
+        return Result.success().set("url", ossUrlPrefix + ossFilePath);
+    }
+
 }
