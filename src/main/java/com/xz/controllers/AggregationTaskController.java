@@ -7,6 +7,7 @@ import com.xz.bean.ProjectStatus;
 import com.xz.services.*;
 import com.xz.taskdispatchers.TaskDispatcher;
 import com.xz.taskdispatchers.TaskDispatcherFactory;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +38,7 @@ public class AggregationTaskController {
     ProjectConfigService projectConfigService;
 
     @Autowired
-    ProjectStatusService projectStatusService;
+    ProjectService projectService;
 
     @Autowired
     PrepareDataService prepareDataService;
@@ -116,8 +117,9 @@ public class AggregationTaskController {
     @ResponseBody
     public Result getProjectStatus(@RequestParam("project") String projectId) {
         boolean running = aggregationService.isAggregationRunning(projectId);
-        ProjectStatus projectStatus = projectStatusService.getProjectStatus(projectId);
-        return Result.success().set("running", running).set("status", projectStatus.name());
+        Document project = projectService.findProject(projectId);
+        ProjectStatus status = ProjectStatus.valueOf(project.getString("status"));
+        return Result.success().set("running", running).set("status", status == null ? null : status.name());
     }
 
     @RequestMapping(value = "/clear/tasks", method = RequestMethod.POST)
