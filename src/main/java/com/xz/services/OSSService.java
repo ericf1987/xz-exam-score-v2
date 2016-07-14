@@ -41,6 +41,9 @@ public class OSSService {
     }
 
     public void uploadFile(String filePath, String uploadPath) {
-        this.ossFileClient.uploadFile(new File(filePath), uploadPath);
+        boolean uploadSuccess = this.ossFileClient.uploadFile(new File(filePath), uploadPath);
+        if (!uploadSuccess) {
+            throw new IllegalStateException("zip上传失败");
+        }
     }
 }
