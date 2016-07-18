@@ -67,6 +67,7 @@ public class DownloadAnalysisService {
         //下载zip包的生成路径
         String directory = downloadPath + prefix + File.separator +zipFileName;
         File file = new File(directory);
+//        File file1 = new File(dir, zipFileName);
         Map<String, Object> resultMap = new HashMap<>();
         List<String> failureList = new ArrayList<>();
         try {

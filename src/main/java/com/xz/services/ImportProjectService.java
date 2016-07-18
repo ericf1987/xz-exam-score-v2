@@ -91,7 +91,6 @@ public class ImportProjectService {
      *
      * @param projectId        项目ID
      * @param reimportStudents 是否要重新导入考生信息，如果为 false，则跳过考生信息导入。
-     *
      * @return
      */
     public Context importProject(String projectId, boolean reimportStudents) {
@@ -454,7 +453,7 @@ public class ImportProjectService {
     }
 
     //从zip包读取学生信息
-    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception{
+    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
         zipFileReader.readZipEntries("*", consumer -> {
             try {
                 readEntry(consumer, zipFileReader);
@@ -465,22 +464,18 @@ public class ImportProjectService {
         return Result.success();
     }
 
-    private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) throws Exception{
+    private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
         //文件名为projectId_subjectId.json
         String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
         String projectId = fileName.split("_")[0];
         String subjectId = fileName.split("_")[1];
         AtomicInteger counter = new AtomicInteger();
         zipFileReader.readEntryByLine(entry, "UTF-8", line -> {
-            try {
-                readEntryLine(line, projectId, subjectId, counter);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            readEntryLine(line, projectId, subjectId, counter);
         });
     }
 
-    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) throws Exception{
+    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
         scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
