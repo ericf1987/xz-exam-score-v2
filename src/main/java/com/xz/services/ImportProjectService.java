@@ -8,6 +8,7 @@ import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
@@ -30,6 +31,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  *
  * @author yiding_he
  */
+@SuppressWarnings("unchecked")
 @Service
 public class ImportProjectService {
 
@@ -86,6 +88,9 @@ public class ImportProjectService {
     @Autowired
     ScannerDBService scannerDBService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     /**
      * 导入项目信息
      *
@@ -99,8 +104,8 @@ public class ImportProjectService {
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
         importProjectInfo(projectId, context);
-        importProjectReportConfig(projectId, context);
         importSubjects(projectId);
+        importProjectReportConfig(projectId, context);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
         importQuestTypes(projectId, context);
@@ -114,12 +119,35 @@ public class ImportProjectService {
         return context;
     }
 
-    protected void importProjectReportConfig(String projectId, Context context) {
+    protected Context importProjectReportConfig(String projectId, Context context) {
         Result result = interfaceClient.request("QueryProjectReportConfig",
                 new Param().setParameter("projectId", projectId));
 
         JSONObject rankLevel = result.get("rankLevel");
         // todo 将报表配置保存到数据库
+        List<String> displayOptions = (List<String>)rankLevel.get("displayOptions");
+        List<String> modelSubjects = (List<String>)rankLevel.get("modelSubjects");
+        boolean isCombine = JudgeCombine(modelSubjects);
+        ProjectConfig projectConfig = new ProjectConfig();
+        if(null != displayOptions && !displayOptions.isEmpty()){
+            projectConfig.setProjectId(projectId);
+            projectConfig.setCombineCategorySubjects(isCombine);
+            projectConfig.setDisplayOptions(displayOptions);
+            projectConfigService.mergeProjectConfig(projectConfig);
+        }else{
+
+        }
+        context.put("projectConfig", projectConfig);
+        return context;
+    }
+
+    private boolean JudgeCombine(List<String> modelSubjects) {
+        for(String subject : modelSubjects){
+            if(subject.equals("004005006") || subject.equals("007008009")){
+                return true;
+            }
+        }
+        return false;
     }
 
     // 仅导入题目数据，用于修改标答后的重新算分

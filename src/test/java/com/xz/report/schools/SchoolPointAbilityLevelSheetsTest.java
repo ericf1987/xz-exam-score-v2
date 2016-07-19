@@ -16,6 +16,6 @@ public class SchoolPointAbilityLevelSheetsTest extends XzExamScoreV2ApplicationT
 
     @Test
     public void testGenerateSheet() throws Exception {
-        schoolPointAbilityLevelReport.generate("430100-8d805ef37b2f4bc7ad9808a9a109dc22", Range.school("02784aa8-c523-497e-8536-7cd3c23f1126"), "target/school-point-ability-level.xlsx");
+        schoolPointAbilityLevelReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700"), "target/school-point-ability-level.xlsx");
     }
 }

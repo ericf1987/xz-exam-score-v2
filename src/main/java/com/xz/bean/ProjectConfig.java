@@ -35,6 +35,20 @@ public class ProjectConfig implements Serializable {
      */
     private Map<String, Double> scoreLevels = new HashMap<>();
 
+    public List<String> getDisplayOptions() {
+        return displayOptions;
+    }
+
+    public void setDisplayOptions(List<String> displayOptions) {
+        this.displayOptions = displayOptions;
+    }
+
+    /**
+     * 考试等第配置信息
+     */
+    private List<String> displayOptions = new ArrayList<>();
+
+
     public int getRankSegmentCount() {
         return rankSegmentCount;
     }

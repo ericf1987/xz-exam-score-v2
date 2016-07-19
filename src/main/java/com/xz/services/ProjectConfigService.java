@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -59,7 +60,16 @@ public class ProjectConfigService {
      * @param projectConfig 要保存的项目配置
      */
     public void mergeProjectConfig(ProjectConfig projectConfig) {
+        Document query = doc("projectId", projectConfig.getProjectId());
+        MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
 
+        collection.updateOne(
+                query,
+                $set(
+                        doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
+                        .append("displayOptions", projectConfig.getDisplayOptions())
+                )
+        );
     }
 
     /**
@@ -75,7 +85,6 @@ public class ProjectConfigService {
      * 获取指定项目的配置
      *
      * @param projectId 项目ID
-     *
      * @return 项目配置
      */
     public ProjectConfig getProjectConfig(String projectId) {

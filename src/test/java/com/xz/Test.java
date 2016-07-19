@@ -1,5 +1,10 @@
 package com.xz;
 
+import com.xz.ajiaedu.common.io.ZipFileReader;
+
+import java.util.function.Consumer;
+import java.util.zip.ZipEntry;
+
 /**
  * (description)
  * created at 16/06/06
@@ -7,8 +12,20 @@ package com.xz;
  * @author yiding_he
  */
 public class Test {
+    private static void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
+        System.out.println("读取文件-->" + entry.getName());
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(entry, line));
+    }
+    private static void readEntryLine(ZipEntry entry, String line) {
+        System.out.println("文件内容-->" + line);
+    }
 
     public static void main(String[] args) {
+        String zipPath = "F:\\chengji\\chengji.zip";
+
+        ZipFileReader zipFileReader = new ZipFileReader(zipPath);
+
+        zipFileReader.readZipEntries("*/students.json",  consumer -> readEntry(consumer, zipFileReader));
 
 /*        List<Teacher> teachers = new ArrayList<>();
         List<Student> students = new ArrayList<>();
@@ -37,7 +54,7 @@ public class Test {
         String b = test2(a);
         System.out.println(a);*/
 
-        Swapper swapper = new Swapper();
+/*        Swapper swapper = new Swapper();
 
         String a = "Mightly";
         String b = "Probally";
@@ -48,7 +65,7 @@ public class Test {
         swapper.swapStr(s);
         for (String arr : s){
             System.out.println("item-->" + arr);
-        }
+        }*/
     }
 
 /*    static String test2(String a) {
