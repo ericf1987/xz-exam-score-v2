@@ -99,6 +99,7 @@ public class ImportProjectService {
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
         importProjectInfo(projectId, context);
+        importProjectReportConfig(projectId, context);
         importSubjects(projectId);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
@@ -111,6 +112,14 @@ public class ImportProjectService {
         }
 
         return context;
+    }
+
+    protected void importProjectReportConfig(String projectId, Context context) {
+        Result result = interfaceClient.request("QueryProjectReportConfig",
+                new Param().setParameter("projectId", projectId));
+
+        JSONObject rankLevel = result.get("rankLevel");
+        // todo 将报表配置保存到数据库
     }
 
     // 仅导入题目数据，用于修改标答后的重新算分
@@ -454,7 +463,7 @@ public class ImportProjectService {
     }
 
     //从zip包读取学生信息
-    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception{
+    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
         zipFileReader.readZipEntries("*", consumer -> {
             try {
                 readEntry(consumer, zipFileReader);
@@ -465,7 +474,7 @@ public class ImportProjectService {
         return Result.success();
     }
 
-    private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) throws Exception{
+    private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) throws Exception {
         //文件名为projectId_subjectId.json
         String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
         String projectId = fileName.split("_")[0];
@@ -480,7 +489,7 @@ public class ImportProjectService {
         });
     }
 
-    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) throws Exception{
+    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) throws Exception {
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
         scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
