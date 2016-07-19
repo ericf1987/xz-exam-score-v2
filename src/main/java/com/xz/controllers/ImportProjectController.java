@@ -72,10 +72,10 @@ public class ImportProjectController {
                 zipFilePath.transferTo(desFile);
             } catch (Exception e) {
                 e.printStackTrace();
-                return Result.success().set("code", "001").set("desc", "文件上传失败！");
+                return Result.fail(-1, "文件上传失败！");
             }
         } else {
-            return Result.success().set("code", "001").set("desc", "文件为空，无法上传！");
+            return Result.fail(-1, "文件为空，无法上传！");
         }
 
         //1.读取zip源文件
@@ -83,9 +83,17 @@ public class ImportProjectController {
         try{
             ZipFileReader zipFileReader = new ZipFileReader(desPath);
             importProjectService.importStudentInfoFromZip(zipFileReader);
-            return Result.success().set("desc", "文件上传路径为:" + desPath + "，成绩数据导入成功！");
+            return Result.success("文件上传路径为:" + desPath + "，成绩数据导入成功！");
         }catch(Exception e){
-            return Result.success().set("desc", "数据导入失败，请重新导入！");
+            return Result.success("数据导入失败，请重新导入！");
+        }finally {
+            File desFile = new File(desPath);
+            if(desFile.exists()){
+                try{
+                    desFile.delete();
+                }catch (Exception e){
+                }
+            }
         }
 
     }
