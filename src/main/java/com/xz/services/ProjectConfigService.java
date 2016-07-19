@@ -36,21 +36,30 @@ public class ProjectConfigService {
     public void createProjectConfig(String projectId) {
         ProjectConfig template = getDefaultProjectConfig();
         template.setProjectId(projectId);
-        saveProjectConfig(template);
+        replaceProjectConfig(template);
     }
 
     /**
-     * 保存项目配置
+     * 更改项目配置（替换原来的配置）
      *
      * @param projectConfig 要保存的项目配置
      */
-    public void saveProjectConfig(ProjectConfig projectConfig) {
+    public void replaceProjectConfig(ProjectConfig projectConfig) {
         Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig));
         Document query = doc("projectId", projectConfig.getProjectId());
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
 
         collection.deleteMany(query);
         collection.insertOne(projectConfigDoc);
+    }
+
+    /**
+     * 更改项目配置（合并原来的配置）
+     *
+     * @param projectConfig 要保存的项目配置
+     */
+    public void mergeProjectConfig(ProjectConfig projectConfig) {
+
     }
 
     /**

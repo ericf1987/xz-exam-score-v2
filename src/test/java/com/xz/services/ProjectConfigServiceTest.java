@@ -48,7 +48,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         config.addRankingLevel("D", 0.20);
         config.addRankingLevel("E", 0.20);
 
-        projectConfigService.saveProjectConfig(config);
+        projectConfigService.replaceProjectConfig(config);
     }
 
     /**
@@ -88,6 +88,6 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
             config.setScoreLevels(scoreLevels);
         }
 
-        projectConfigService.saveProjectConfig(config);
+        projectConfigService.replaceProjectConfig(config);
     }
 }
