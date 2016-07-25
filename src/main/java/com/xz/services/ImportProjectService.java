@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -125,14 +126,18 @@ public class ImportProjectService {
 
         JSONObject rankLevel = result.get("rankLevel");
         // todo 将报表配置保存到数据库
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDate = format.format(Calendar.getInstance().getTime());
         List<String> displayOptions = (List<String>)rankLevel.get("displayOptions");
         List<String> modelSubjects = (List<String>)rankLevel.get("modelSubjects");
+        String startDate = rankLevel.getString("startDate") == null ? currentDate : rankLevel.getString("startDate");
         boolean isCombine = JudgeCombine(modelSubjects);
         ProjectConfig projectConfig = new ProjectConfig();
         if(null != displayOptions && !displayOptions.isEmpty()){
             projectConfig.setProjectId(projectId);
             projectConfig.setCombineCategorySubjects(isCombine);
             projectConfig.setDisplayOptions(displayOptions);
+            projectConfig.setStartDate(startDate);
             projectConfigService.mergeProjectConfig(projectConfig);
         }else{
 
@@ -474,7 +479,7 @@ public class ImportProjectService {
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
     }
 
-    private void importProjectInfo(String projectId, Context context) {
+    protected void importProjectInfo(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 基本信息...");
         Param param = new Param().setParameter("projectId", projectId);
         Result result = interfaceClient.request("QueryProjectById", param);  // 找不到项目则抛出异常
@@ -485,6 +490,8 @@ public class ImportProjectService {
         project.setName(projectObj.getString("name"));
         project.setGrade(projectObj.getInteger("grade"));
         project.setCreateTime(new Date());
+        //考试开始日期
+        project.setExamStartDate(projectObj.getString("examStartDate"));
 
         context.put("project", project);
         projectService.saveProject(project);

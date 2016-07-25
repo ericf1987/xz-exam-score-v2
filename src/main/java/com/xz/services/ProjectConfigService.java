@@ -68,6 +68,7 @@ public class ProjectConfigService {
                 $set(
                         doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
                         .append("displayOptions", projectConfig.getDisplayOptions())
+                        .append("startDate", projectConfig.getStartDate())
                 )
         );
     }

@@ -48,6 +48,15 @@ public class ProjectConfig implements Serializable {
      */
     private List<String> displayOptions = new ArrayList<>();
 
+    private String startDate;
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
 
     public int getRankSegmentCount() {
         return rankSegmentCount;

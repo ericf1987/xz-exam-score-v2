@@ -2,6 +2,7 @@ package com.xz.services;
 
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.bean.ProjectStatus;
+import com.xz.bean.Range;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +44,17 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
         List<String> projectIds = projectService.listProjectIds();
         projectIds.forEach(projectId ->
                 projectService.setProjectStatus(projectId, ProjectStatus.AggregationCompleted));
+    }
+
+    @Test
+    public void testFindProject() throws Exception {
+        Document doc = projectService.findProject("430200-b73f03af1d74484f84f1aa93f583caaa");
+        System.out.println(doc.toString());
+    }
+
+    @Test
+    public void testListProjectsByRange(){
+        Range schoolRange = Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47");
+        System.out.println(projectService.listProjectsByRange(schoolRange).toString());
     }
 }

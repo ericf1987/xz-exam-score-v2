@@ -8,16 +8,14 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.ProjectStatus;
+import com.xz.bean.Range;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -63,7 +61,6 @@ public class ProjectService {
      * 通过考试项目id查询项目所属学段
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public String findProjectStudyStage(String projectId) {
@@ -84,7 +81,6 @@ public class ProjectService {
      * 通过考试项目id查询考试项目
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public Document findProject(String projectId) {
@@ -102,7 +98,6 @@ public class ProjectService {
      *
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
-     *
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
@@ -132,7 +127,8 @@ public class ProjectService {
 
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
-                .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"));
+                .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
+                .append("startDate", project.getExamStartDate());
 
         c.updateOne(query, $set(update), UPSERT);
     }
@@ -185,4 +181,25 @@ public class ProjectService {
 
         return result;
     }
+
+    /**
+     * 根据range查看对应的所有考试信息
+     */
+    public List<Document> listProjectsByRange(Range range) {
+        String collectionName = range.getName() + "_list";
+        Document projection = MongoUtils.WITHOUT_INNER_ID.append("project", 1);
+
+        List<Document> projectDoc = toList(scoreDatabase.getCollection(collectionName)
+                .find(doc(range.getName(), range.getId())).projection(projection));
+
+        List<Document> projects = new ArrayList<>();
+        for (Document doc : projectDoc) {
+            String projectId = doc.getString("project");
+            Document d = findProject(projectId);
+            projects.add(d);
+        }
+
+        return projects;
+    }
+
 }
