@@ -23,13 +23,13 @@ import java.util.stream.Collectors;
  */
 
 @SuppressWarnings("unchecked")
-@Function(description = "学校成绩-优秀率对比", parameters = {
+@Function(description = "学校成绩-合格率对比", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true)
 })
 @Service
-public class SchoolExcellentCompareAnalysis implements Server {
+public class SchoolPassCompareAnalysis implements Server {
 
     @Autowired
     SchoolService schoolService;
@@ -39,9 +39,6 @@ public class SchoolExcellentCompareAnalysis implements Server {
 
     @Autowired
     ProjectService projectService;
-
-    @Autowired
-    AverageService averageService;
 
     @Autowired
     ScoreLevelService scoreLevelService;
@@ -59,15 +56,17 @@ public class SchoolExcellentCompareAnalysis implements Server {
         List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectList = projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
 
-        Map<String, Object> schoolExcellentMap = getSchoolExcellentMap(projectId, schoolId, subjectId, projectList);
-        List<Map<String, Object>> classExcellentList = getClassExcellentList(projectId, schoolId, subjectId, projectList);
-        return Result.success()
-                .set("school", schoolExcellentMap)
-                .set("classes", classExcellentList)
+        Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, subjectId, projectList);
+        List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, subjectId, projectList);
+        Result result = Result.success()
+                .set("school", schoolPassRateMap)
+                .set("classes", classPassRateList)
                 .set("projectList", projectList);
+        System.out.println(result.getData());
+        return result;
     }
 
-    private Map<String, Object> getSchoolExcellentMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {
+    private Map<String, Object> getSchoolPassRateMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> excellents = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -79,7 +78,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");
             List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.school(schoolId), subjectId == null ? Target.project(projectDoc.getString("project")) : Target.subject(subjectId));
-            double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
+            double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
             excellent.put("projectName", projectName);
             excellent.put("startDate", startDate);
             excellent.put("rate", rate);
@@ -88,12 +87,12 @@ public class SchoolExcellentCompareAnalysis implements Server {
 
         map.put("schoolId", schoolId);
         map.put("schoolName", schoolName);
-        map.put("excellents", excellents);
+        map.put("passes", excellents);
 
         return map;
     }
 
-    private List<Map<String, Object>> getClassExcellentList(String projectId, String schoolId, String subjectId, List<Document> projectList) {
+    private List<Map<String, Object>> getClassPassRateList(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         List<Document> classList = classService.listClasses(projectId, schoolId);
 
         List<Map<String, Object>> classes = new ArrayList<>();
@@ -108,7 +107,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
                 String currentDate = format.format(Calendar.getInstance().getTime());
                 String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
                 List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.clazz(classId), subjectId == null ? Target.project(projectDoc.getString("project")) : Target.subject(subjectId));
-                double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
+                double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
                 excellent.put("projectName", projectDoc.getString("name"));
                 excellent.put("startDate", startDate);
                 excellent.put("rate", rate);
@@ -117,7 +116,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
             Map<String, Object> map = new HashMap<>();
             map.put("classId", classId);
             map.put("className", className);
-            map.put("excellents", excellents);
+            map.put("passes", excellents);
             classes.add(map);
         }
         return classes;

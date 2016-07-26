@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.*;
 
 /**
- * @author by fengye on 2016/7/25.
+ * @author by fengye on 2016/7/26.
  */
-public class SchoolExcellentCompareAnalysisTest extends XzExamScoreV2ApplicationTests {
+public class SchoolPassCompareAnalysisTest extends XzExamScoreV2ApplicationTests{
 
     @Autowired
-    SchoolExcellentCompareAnalysis schoolExcellentCompareAnalysis;
+    SchoolPassCompareAnalysis schoolPassCompareAnalysis;
 
     @Test
     public void testExecute() throws Exception {
@@ -21,7 +21,6 @@ public class SchoolExcellentCompareAnalysisTest extends XzExamScoreV2Application
                 .setParameter("projectId", "430200-b73f03af1d74484f84f1aa93f583caaa")
                 .setParameter("schoolId", "200f3928-a8bd-48c4-a2f4-322e9ffe3700")
                 .setParameter("subjectId", "001");
-        schoolExcellentCompareAnalysis.execute(param);
+        schoolPassCompareAnalysis.execute(param);
     }
-
 }

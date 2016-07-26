@@ -187,7 +187,7 @@ public class ProjectService {
      */
     public List<Document> listProjectsByRange(Range range) {
         String collectionName = range.getName() + "_list";
-        Document projection = MongoUtils.WITHOUT_INNER_ID.append("project", 1);
+        Document projection = MongoUtils.doc("project", 1);
 
         List<Document> projectDoc = toList(scoreDatabase.getCollection(collectionName)
                 .find(doc(range.getName(), range.getId())).projection(projection));
