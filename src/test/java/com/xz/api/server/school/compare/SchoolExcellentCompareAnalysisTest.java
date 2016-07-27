@@ -21,7 +21,7 @@ public class SchoolExcellentCompareAnalysisTest extends XzExamScoreV2Application
                 .setParameter("projectId", "430200-b73f03af1d74484f84f1aa93f583caaa")
                 .setParameter("schoolId", "200f3928-a8bd-48c4-a2f4-322e9ffe3700")
                 .setParameter("subjectId", "001");
-        schoolExcellentCompareAnalysis.execute(param);
+        System.out.println(schoolExcellentCompareAnalysis.execute(param).getData());
     }
 
 }

@@ -53,7 +53,7 @@ public class SchoolAverageCompareAnalysis implements Server {
         return getResult(projectId, schoolId, subjectId);
     }
 
-    public Result getResult(String projectId, String subjectId, String schoolId) {
+    public Result getResult(String projectId, String schoolId, String subjectId) {
         //学校考试列表
         List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectList = projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
@@ -73,7 +73,7 @@ public class SchoolAverageCompareAnalysis implements Server {
         String currentDate = format.format(Calendar.getInstance().getTime());
         //查询学校的考试记录
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
-        projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).forEach(projectDoc -> {
+        projectList.stream().forEach(projectDoc -> {
             Map<String, Object> average = new HashMap<>();
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");
@@ -102,7 +102,7 @@ public class SchoolAverageCompareAnalysis implements Server {
             List<Map<String, Object>> averages = new ArrayList<>();
             String classId = classDoc.getString("class");
             String className = classDoc.getString("name");
-            projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).forEach(projectDoc -> {
+            projectList.stream().forEach(projectDoc -> {
                 Map<String, Object> average = new HashMap<>();
                 String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
                 double score = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), subjectId == null ? Target.project(projectDoc.getString("project")) : Target.subject(subjectId));

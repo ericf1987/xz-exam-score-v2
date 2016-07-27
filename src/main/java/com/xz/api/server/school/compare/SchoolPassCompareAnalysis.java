@@ -62,7 +62,6 @@ public class SchoolPassCompareAnalysis implements Server {
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
                 .set("projectList", projectList);
-        System.out.println(result.getData());
         return result;
     }
 

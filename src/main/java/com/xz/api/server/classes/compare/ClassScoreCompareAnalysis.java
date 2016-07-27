@@ -54,7 +54,6 @@ public class ClassScoreCompareAnalysis implements Server{
 
         Result result = Result.success().set("projectList", projectList).set("studentList", studentList);
 
-        System.out.println(result.getData());
         return result;
     }
 
