@@ -58,11 +58,10 @@ public class SchoolPassCompareAnalysis implements Server {
 
         Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, subjectId, projectList);
         List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, subjectId, projectList);
-        Result result = Result.success()
+        return Result.success()
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
                 .set("projectList", projectList);
-        return result;
     }
 
     private Map<String, Object> getSchoolPassRateMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {

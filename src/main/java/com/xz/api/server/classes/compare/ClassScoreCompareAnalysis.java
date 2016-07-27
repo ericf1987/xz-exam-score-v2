@@ -52,9 +52,7 @@ public class ClassScoreCompareAnalysis implements Server{
 
         List<Map<String, Object>> studentList = getStudentList(projectId, subjectId, classId, projectList);
 
-        Result result = Result.success().set("projectList", projectList).set("studentList", studentList);
-
-        return result;
+        return Result.success().set("projectList", projectList).set("studentList", studentList);
     }
 
     private List<Map<String, Object>> getStudentList(String projectId, String subjectId, String classId, List<Document> projectList) {
