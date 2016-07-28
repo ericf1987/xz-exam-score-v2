@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.api.server.classes.ClassPointAnalysis.initSubject;
 import static com.xz.api.server.project.ProjectPointAbilityLevelAnalysis.filterLevels;
 
 /**
@@ -145,16 +146,5 @@ public class ClassAbilityLevelAnalysis implements Server {
         }
 
         return levelStats;
-    }
-
-    public static String initSubject(String projectId, SubjectService subjectService) {
-        List<String> subjectIds = subjectService.querySubjects(projectId);
-        subjectIds.sort(String::compareTo);
-
-        if (!subjectIds.isEmpty()) {
-            return subjectIds.get(0);
-        }
-
-        return null;
     }
 }

@@ -22,7 +22,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 /*        Result result = interfaceClient.request("QueryProjectReportConfig", new Param()
                 .setParameter("projectId", "430200-b73f03af1d74484f84f1aa93f583caaa"));*/
 
-        Result result = interfaceClient.request("QueryProjectById", new Param()
+        Result result = interfaceClient.request("QueryExamSchoolByProject", new Param()
                 .setParameter("projectId", "430200-b73f03af1d74484f84f1aa93f583caaa"));
 
         System.out.println(result.isSuccess());

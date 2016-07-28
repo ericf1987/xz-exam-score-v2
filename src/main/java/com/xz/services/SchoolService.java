@@ -1,15 +1,20 @@
 package com.xz.services;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.RandomUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -135,4 +140,58 @@ public class SchoolService {
         MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
         c.deleteMany(doc("project", projectId));
     }
+
+    /**
+     * 根据学校标签查询学校列表
+     */
+    public List<Document> getSchoolsByTags(String projectId, String isInCity, String isGovernmental){
+
+        String cacheKey = "school_list:" + projectId + ":" + "isInCity" + ":" + isInCity + "isGovernmental" + ":" + isGovernmental;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
+            ArrayList<Document> result = new ArrayList<>();
+            List<Document> ands = new ArrayList<>();
+
+            ands.add(doc("project", projectId));
+
+            if (StringUtil.isNotBlank(isInCity)) {
+                ands.add(doc("tags.name", "isInCity").append("tags.value", isInCity));
+            }
+
+            if (StringUtil.isNotBlank(isGovernmental)) {
+                ands.add(doc("tags.name", "isGovernmental").append("tags.value", isGovernmental));
+            }
+
+            result.addAll(toList(c.find($and(ands)).projection(doc("school", 1))));
+
+            return result;
+        });
+    }
+
+    /**
+     * 补齐标记
+     */
+    public void paddingTags(String projectId){
+        MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
+
+        c.find(doc("project", projectId)).forEach((Consumer<Document>) document ->{
+            String isInCity = getRandomValue();
+            String isGovernmental = getRandomValue();
+            List<Document> tags = Arrays.asList(doc("name", "isInCity").append("value", isInCity), doc("name", "isGovernmental").append("value", isGovernmental));
+            c.updateOne(doc("project", projectId).append("school", document.getString("school")),
+                    $set("tags", tags),
+                    UPSERT);
+        });
+    }
+
+    public String getRandomValue(){
+        Random r = new Random();
+        if(r.nextInt(10) > 7)
+            return "true";
+        else if (r.nextInt(10) > 3)
+            return "false";
+        else return "unkown";
+    }
+
 }

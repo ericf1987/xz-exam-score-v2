@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 总体成绩-分数分析
@@ -70,11 +71,22 @@ public class ProjectScoreAnalysis implements Server {
     @Autowired
     RangeService rangeService;
 
+    //根据标签过滤学校ID
+    private String[] filterByTags(String projectId, String isIncity, String isGovernmental) {
+
+        List<String> schools = schoolService.getSchoolsByTags(projectId, isIncity, isGovernmental).stream()
+            .map(document -> document.getString("school")).collect(Collectors.toList());
+
+        return (String[])schools.toArray();
+    }
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
-        String[] schoolIds = param.getStringValues("schoolIds");
+        String isIncity = param.getString("isIncity") != null ? param.getString("isIncity") : "false";
+        String isGovernmental = param.getString("isGovernmental") != null ? param.getString("isGovernmental") : "false";
+        String[] schoolIds = filterByTags(projectId, isIncity, isGovernmental);
 
         List<Map<String, Object>> schoolStats = getSchoolStats(projectId, subjectId, schoolIds);
         Map<String, Object> totalStat = getProjectTotalStats(projectId, subjectId);

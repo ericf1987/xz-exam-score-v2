@@ -92,12 +92,14 @@ public class ImportProjectService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    DictionaryService dictionaryService;
+
     /**
      * 导入项目信息
      *
      * @param projectId        项目ID
      * @param reimportStudents 是否要重新导入考生信息，如果为 false，则跳过考生信息导入。
-     *
      * @return
      */
     public Context importProject(String projectId, boolean reimportStudents) {
@@ -128,18 +130,18 @@ public class ImportProjectService {
         // todo 将报表配置保存到数据库
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = format.format(Calendar.getInstance().getTime());
-        List<String> displayOptions = (List<String>)rankLevel.get("displayOptions");
-        List<String> modelSubjects = (List<String>)rankLevel.get("modelSubjects");
+        List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
+        List<String> modelSubjects = (List<String>) rankLevel.get("modelSubjects");
         String startDate = rankLevel.getString("startDate") == null ? currentDate : rankLevel.getString("startDate");
         boolean isCombine = JudgeCombine(modelSubjects);
         ProjectConfig projectConfig = new ProjectConfig();
-        if(null != displayOptions && !displayOptions.isEmpty()){
+        if (null != displayOptions && !displayOptions.isEmpty()) {
             projectConfig.setProjectId(projectId);
             projectConfig.setCombineCategorySubjects(isCombine);
             projectConfig.setDisplayOptions(displayOptions);
             projectConfig.setStartDate(startDate);
             projectConfigService.mergeProjectConfig(projectConfig);
-        }else{
+        } else {
 
         }
         context.put("projectConfig", projectConfig);
@@ -147,8 +149,8 @@ public class ImportProjectService {
     }
 
     private boolean JudgeCombine(List<String> modelSubjects) {
-        for(String subject : modelSubjects){
-            if(subject.equals("004005006") || subject.equals("007008009")){
+        for (String subject : modelSubjects) {
+            if (subject.equals("004005006") || subject.equals("007008009")) {
                 return true;
             }
         }
@@ -412,6 +414,18 @@ public class ImportProjectService {
             schoolDoc.put("city", schoolObj.getString("city"));
             schoolDoc.put("province", schoolObj.getString("province"));
 
+
+            List<Document> tags = new ArrayList<>();
+
+            String isInCity = dictionaryService.findDictionary("isInCity", schoolObj.getString("school_region")).getString("value");
+            String isGovernmental = dictionaryService.findDictionary("isGovernmental", schoolObj.getString("school_kind")).getString("value");
+
+            //学校归属区域 0=未知 1=城区 2=农村
+            tags.add(new Document().append("name", "isInCity").append("value", isInCity));
+            //学校类型 0=未知 1=公办 2=民办
+            tags.add(new Document().append("name", "isGovernmental").append("value", isGovernmental));
+            schoolDoc.put("tags", tags);
+
             areas.add(schoolObj.getString("area"));
             cities.add(schoolObj.getString("city"));
             provinces.add(schoolObj.getString("province"));
@@ -515,9 +529,7 @@ public class ImportProjectService {
         String projectId = fileName.split("_")[0];
         String subjectId = fileName.split("_")[1];
         AtomicInteger counter = new AtomicInteger();
-        zipFileReader.readEntryByLine(entry, "UTF-8", line -> {
-            readEntryLine(line, projectId, subjectId, counter);
-        });
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId, counter));
     }
 
     private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
