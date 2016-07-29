@@ -118,8 +118,11 @@ public class AggregationTaskController {
     public Result getProjectStatus(@RequestParam("project") String projectId) {
         boolean running = aggregationService.isAggregationRunning(projectId);
         Document project = projectService.findProject(projectId);
-        ProjectStatus status = ProjectStatus.valueOf(project.getString("status"));
-        return Result.success().set("running", running).set("status", status == null ? null : status.name());
+
+        String status = (project == null || !project.containsKey("status")) ?
+                ProjectStatus.Empty.name() : project.getString("status");
+
+        return Result.success().set("running", running).set("status", status);
     }
 
     @RequestMapping(value = "/clear/tasks", method = RequestMethod.POST)
