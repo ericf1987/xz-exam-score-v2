@@ -8,7 +8,6 @@ import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
-import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -122,7 +120,8 @@ public class ImportProjectService {
         return context;
     }
 
-    protected Context importProjectReportConfig(String projectId, Context context) {
+    protected void importProjectReportConfig(String projectId, Context context) {
+/*
         Result result = interfaceClient.request("QueryProjectReportConfig",
                 new Param().setParameter("projectId", projectId));
 
@@ -145,7 +144,7 @@ public class ImportProjectService {
 
         }
         context.put("projectConfig", projectConfig);
-        return context;
+*/
     }
 
     private boolean JudgeCombine(List<String> modelSubjects) {

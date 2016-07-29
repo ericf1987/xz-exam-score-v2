@@ -29,4 +29,12 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         System.out.println(result.getData());
     }
 
+    @Test
+    public void testQueryProjectReportConfig() throws Exception {
+        Result result = interfaceClient.request("QueryProjectReportConfig",
+                new Param().setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee"));
+
+        System.out.println(result.getData());
+    }
+
 }

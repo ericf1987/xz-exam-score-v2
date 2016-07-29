@@ -96,8 +96,8 @@ public class ExportScoreService {
         packCreator.setDeviceId("cms");
         packCreator.setChannel("cms");
 
-        Value<Integer> counter = Value.of(0);
         String province = provinceService.getProjectProvince(projectId);
+        Value<Integer> counter = Value.of(0);
         studentService.getProjectStudentList(projectId, Range.province(province), -1, null)
                 .forEach((Consumer<Document>) studentDoc -> addStudentScores(projectId, packCreator, studentDoc, counter));
 
@@ -111,6 +111,8 @@ public class ExportScoreService {
         if (counter.get() % 100 == 0) {
             LOG.info("读取项目 " + projectId + " 的第 " + counter.get() + " 条学生成绩...");
         }
+
+        packCreator.addStudent(studentDoc.getString("school"), studentDoc.getString("student"), "");
 
         String studentId = studentDoc.getString("student");
         scoreService.getStudentQuestScores(projectId, studentId)
