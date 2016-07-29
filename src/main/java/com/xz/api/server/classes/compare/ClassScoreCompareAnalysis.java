@@ -1,6 +1,7 @@
 package com.xz.api.server.classes.compare;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
 import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.xz.api.server.classes.ClassPointAnalysis.initSubject;
 
 /**
  * @author by fengye on 2016/7/26.
@@ -41,6 +44,9 @@ public class ClassScoreCompareAnalysis implements Server{
 
     @Autowired
     TargetService targetService;
+
+    @Autowired
+    SubjectService subjectService;
 
     @Override
     public Result execute(Param param) throws Exception {

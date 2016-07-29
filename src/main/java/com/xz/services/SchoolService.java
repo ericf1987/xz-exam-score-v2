@@ -156,14 +156,14 @@ public class SchoolService {
             ands.add(doc("project", projectId));
 
             if (StringUtil.isNotBlank(isInCity)) {
-                ands.add(doc("tags.name", "isInCity").append("tags.value", isInCity));
+                ands.add(doc("tags", $elemMatch(doc("name", "isInCity").append("value", isInCity))));
             }
 
             if (StringUtil.isNotBlank(isGovernmental)) {
-                ands.add(doc("tags.name", "isGovernmental").append("tags.value", isGovernmental));
+                ands.add(doc("tags", $elemMatch(doc("name", "isGovernmental").append("value", isGovernmental))));
             }
 
-            result.addAll(toList(c.find($and(ands)).projection(doc("school", 1))));
+            result.addAll(toList(c.find($and(ands)).projection(doc("school", 1).append("tags", 1))));
 
             return result;
         });
@@ -185,7 +185,7 @@ public class SchoolService {
         });
     }
 
-    public String getRandomValue(){
+    private String getRandomValue(){
         Random r = new Random();
         if(r.nextInt(10) > 7)
             return "true";
