@@ -99,7 +99,9 @@ public class PointService {
         return scoreDatabase.getCollection("points").count(doc("id", pointId)) > 0;
     }
 
-    public void savePoint(String pointId, String pointName) {
-        scoreDatabase.getCollection("points").updateOne(doc("id", pointId), $set("name", pointName), UPSERT);
+    public void savePoint(String pointId, String pointName, String parentPointId) {
+        Document query = doc("id", pointId);
+        Document update = doc("name", pointName).append("parent", parentPointId);
+        scoreDatabase.getCollection("points").updateOne(query, $set(update), UPSERT);
     }
 }

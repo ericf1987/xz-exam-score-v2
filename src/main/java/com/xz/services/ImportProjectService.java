@@ -2,11 +2,10 @@ package com.xz.services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.*;
-import com.xz.api.Param;
 import com.xz.bean.PointLevel;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
@@ -19,10 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -82,12 +79,6 @@ public class ImportProjectService {
     FullScoreService fullScoreService;
 
     @Autowired
-    PrepareDataService prepareDataService;
-
-    @Autowired
-    MongoDatabase scoreDatabase;
-
-    @Autowired
     ScannerDBService scannerDBService;
 
     @Autowired
@@ -101,7 +92,7 @@ public class ImportProjectService {
      *
      * @param projectId        项目ID
      * @param reimportStudents 是否要重新导入考生信息，如果为 false，则跳过考生信息导入。
-     * @return
+     * @return ?
      */
     public Context importProject(String projectId, boolean reimportStudents) {
         Context context = new Context();
@@ -124,34 +115,20 @@ public class ImportProjectService {
     }
 
     protected void importProjectReportConfig(String projectId, Context context) {
-        Result result = interfaceClient.request("QueryProjectReportConfig",
-                new Param().setParameter("projectId", projectId));
-
+        ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
         JSONObject rankLevel = result.get("rankLevel");
+
         if (null != rankLevel) {
-            // todo 将报表配置保存到数据库
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            String currentDate = format.format(Calendar.getInstance().getTime());
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
-            List<String> modelSubjects = (List<String>) rankLevel.get("modelSubjects");
             Map<String, Object> standard = (Map<String, Object>) rankLevel.get("standard");
             Map<String, Double> rankLevels = formatRankLevel(standard);
+            boolean isCombine = JudgeCombine((List<String>) rankLevel.get("modelSubjects"));
+            projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions);
 
-            String startDate = rankLevel.getString("startDate") == null ? currentDate : rankLevel.getString("startDate");
-            boolean isCombine = JudgeCombine(modelSubjects);
-            ProjectConfig projectConfig = new ProjectConfig();
-            projectConfig.setCombineCategorySubjects(isCombine);
-            projectConfig.setProjectId(projectId);
-            projectConfig.setDisplayOptions(displayOptions);
-            projectConfig.setStartDate(startDate);
-            projectConfig.setRankLevels(rankLevels);
-            //和default考试对比，不存在的选项由default考试中的属性补齐
-            projectConfigService.replaceProjectConfig(projectConfigService.fixProjectConfig(projectConfig));
-            context.put("projectConfig", projectConfig);
+            context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
+
         } else {
-            ProjectConfig projectConfig = new ProjectConfig();
-            projectConfig.setProjectId(projectId);
-            context.put("projectConfig", projectConfig);
+            context.put("projectConfig", new ProjectConfig(projectId));
         }
     }
 
@@ -160,7 +137,7 @@ public class ImportProjectService {
         Set<String> keys = m.keySet();
         for (String key : keys) {
             double d = Double.parseDouble(m.get(key).toString());
-            rankLevels.put(key, Double.valueOf(d / 100));
+            rankLevels.put(key, d / 100);
         }
         return rankLevels;
     }
@@ -225,10 +202,12 @@ public class ImportProjectService {
 
                 //////////////////////////////////////////////////////////////
 
-                Param param = new Param().setParameter("pointId", pointId);
-                Result result = interfaceClient.request("QueryKnowledgePointById", param);
-                Map<String, Object> point = result.get("point");
-                pointService.savePoint(pointId, point.get("point_name").toString());
+                JSONObject point = interfaceClient.queryKnowledgePointById(pointId);
+                if (point != null) {
+                    pointService.savePoint(pointId,
+                            point.getString("point_name"),
+                            point.getString("parent_point_id"));
+                }
             }
 
             // 将该题目的分数累加到每个能力层级
@@ -299,11 +278,9 @@ public class ImportProjectService {
     // 导入考题信息
     private void importQuests(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 考题信息...");
-        Param param = new Param().setParameter("projectId", projectId);
-        Result result = interfaceClient.request("QueryQuestionByProject", param);
+        JSONArray jsonArray = interfaceClient.queryQuestionByProject(projectId);
         List<Document> projectQuests = new ArrayList<>();
 
-        JSONArray jsonArray = result.get("quests");
         context.put("questCount", jsonArray.size());
 
         jsonArray.forEach(o -> {
@@ -344,11 +321,7 @@ public class ImportProjectService {
 
             LOG.info("导入学校 " + schoolId + "(" + school.getString("name") + ") 班级信息...");
 
-            Param param = new Param().setParameter("projectId", projectId)
-                    .setParameter("schoolId", schoolId).setParameter("needStudentCount", false);
-
-            Result result = interfaceClient.request("QueryExamClassByProject", param);
-            JSONArray jsonArray = result.get("classes");
+            JSONArray jsonArray = interfaceClient.queryExamClassByProject(projectId, schoolId, false);
 
             jsonArray.forEach(o -> {
                 JSONObject classObj = (JSONObject) o;
@@ -385,11 +358,7 @@ public class ImportProjectService {
             LOG.info("导入班级 " + classId + " 的考生信息(" + index + "/" + classCount + ")...");
 
             List<Document> classStudents = new ArrayList<>();
-            Param param = new Param().setParameter("projectId", projectId)
-                    .setParameter("classId", classId);
-            Result result = interfaceClient.request("QueryClassExamStudent", param);
-
-            JSONArray students = result.get("examStudents");
+            JSONArray students = interfaceClient.queryClassExamStudent(projectId, classId);
             students.forEach(o -> {
                 JSONObject studentObj = (JSONObject) o;
                 Document studentDoc = new Document()
@@ -412,9 +381,7 @@ public class ImportProjectService {
     // 导入学校和区市省
     private void importSchools(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 学校信息...");
-        Param param = new Param().setParameter("projectId", projectId).setParameter("needStudentCount", false);
-        Result result = interfaceClient.request("QueryExamSchoolByProject", param);
-        JSONArray jsonArray = result.get("schools");
+        JSONArray jsonArray = interfaceClient.queryExamSchoolByProject(projectId, false);
 
         List<Document> schoolList = new ArrayList<>();  // 存入 project_list
         Set<String> areas = new HashSet<>();
@@ -483,10 +450,7 @@ public class ImportProjectService {
 
     private void importSubjects(String projectId) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
-        Param param = new Param().setParameter("projectId", projectId);
-        Result result = interfaceClient.request("QuerySubjectListByProjectId", param);
-
-        JSONArray jsonArray = result.get("result");
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
 
@@ -512,10 +476,7 @@ public class ImportProjectService {
 
     protected void importProjectInfo(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 基本信息...");
-        Param param = new Param().setParameter("projectId", projectId);
-        Result result = interfaceClient.request("QueryProjectById", param);  // 找不到项目则抛出异常
-
-        JSONObject projectObj = result.get("result");
+        JSONObject projectObj = interfaceClient.queryProjectById(projectId);  // 找不到项目则抛出异常
         ExamProject project = new ExamProject();
         project.setId(projectId);
         project.setName(projectObj.getString("name"));

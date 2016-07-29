@@ -9,9 +9,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import java.util.List;
+import java.util.Map;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * (description)
@@ -55,27 +56,23 @@ public class ProjectConfigService {
         collection.insertOne(projectConfigDoc);
     }
 
-    /**
-     * 更改项目配置（合并原来的配置）
-     *
-     * @param projectConfig 要保存的项目配置
-     */
-    public void mergeProjectConfig(ProjectConfig projectConfig) {
-        Document query = doc("projectId", projectConfig.getProjectId());
-        MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
 
-        collection.updateOne(
-                query,
-                $set(
-                        doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
-                        .append("lastRankLevel", projectConfig.getDisplayOptions())
-                        .append("rankLevels", projectConfig.getRankLevels())
-                        .append("scoreLevels", projectConfig.getScoreLevels())
-                        .append("rankSegmentCount", projectConfig.getRankSegmentCount())
-                        .append("displayOptions", projectConfig.getDisplayOptions())
-                        .append("startDate", projectConfig.getStartDate())
-                )
-        );
+    /**
+     * 更新报表配置中的等第配置
+     *
+     * @param projectId         项目ID
+     * @param rankLevels        等第比例配置
+     * @param isCombine         是否合并文理科
+     * @param rankLevelCombines 展示的等第组合列表
+     */
+    public void updateRankLevelConfig(
+            String projectId, Map<String, Double> rankLevels, boolean isCombine, List<String> rankLevelCombines) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
+        collection.updateMany(doc("projectId", projectId), $set(
+                doc("combineCategorySubjects", isCombine)
+                        .append("rankLevels", rankLevels)
+                        .append("rankLevelCombines", rankLevelCombines)
+        ), UPSERT);
     }
 
     /**
@@ -91,6 +88,7 @@ public class ProjectConfigService {
      * 获取指定项目的配置
      *
      * @param projectId 项目ID
+     *
      * @return 项目配置
      */
     public ProjectConfig getProjectConfig(String projectId) {

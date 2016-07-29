@@ -4,7 +4,6 @@ import com.xz.AppException;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.lang.Value;
-import com.xz.api.Param;
 import com.xz.bean.Range;
 import com.xz.intclient.InterfaceClient;
 import com.xz.score.bean.Score;
@@ -86,8 +85,7 @@ public class ExportScoreService {
     }
 
     private void notifyInterface(String ossPath) {
-        Param param = new Param().setParameter("ossPath", ossPath);
-        interfaceClient.request("ImportExamScoreFromOSS", param);
+        interfaceClient.importExamScoreFromOSS(ossPath);
     }
 
     public void createPack(String projectId, String filePath) throws IOException {

@@ -34,6 +34,7 @@ public class AddFeedbackInfo implements Server {
 
     @Override
     public Result execute(Param param) throws Exception {
-        return interfaceClient.request("AddRpFeedbackInfo", param);
+        interfaceClient.addRpFeedbackInfo(param);
+        return Result.success();
     }
 }

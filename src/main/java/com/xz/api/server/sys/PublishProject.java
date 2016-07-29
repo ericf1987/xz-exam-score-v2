@@ -28,7 +28,7 @@ public class PublishProject implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-
-        return interfaceClient.request("ReleaseExamScore", new Param().setParameter("projectId", projectId));
+        interfaceClient.releaseExamScore(projectId);
+        return Result.success();
     }
 }

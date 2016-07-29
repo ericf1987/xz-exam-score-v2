@@ -121,6 +121,6 @@ public class ClassRankLevelAnalysis implements Server {
             rankLevelParam.add(it.next());
         }
 
-        return subjectId == null ? projectConfig.getDisplayOptions() : rankLevelParam;
+        return subjectId == null ? projectConfig.getRankLevelCombines() : rankLevelParam;
     }
 }
