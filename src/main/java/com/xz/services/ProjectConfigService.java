@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -67,6 +68,10 @@ public class ProjectConfigService {
                 query,
                 $set(
                         doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
+                        .append("lastRankLevel", projectConfig.getDisplayOptions())
+                        .append("rankLevels", projectConfig.getRankLevels())
+                        .append("scoreLevels", projectConfig.getScoreLevels())
+                        .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("displayOptions", projectConfig.getDisplayOptions())
                         .append("startDate", projectConfig.getStartDate())
                 )
@@ -106,7 +111,7 @@ public class ProjectConfigService {
         });
     }
 
-    private ProjectConfig fixProjectConfig(ProjectConfig projectConfig) {
+    public ProjectConfig fixProjectConfig(ProjectConfig projectConfig) {
 
         if (projectConfig.getProjectId().equals(DEFAULT)) {
             return projectConfig;

@@ -8,6 +8,7 @@ import com.xz.ajiaedu.common.io.ZipFileReader;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.api.Param;
 import com.xz.bean.PointLevel;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
 import com.xz.intclient.InterfaceClient;
@@ -18,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -121,30 +124,45 @@ public class ImportProjectService {
     }
 
     protected void importProjectReportConfig(String projectId, Context context) {
-/*
         Result result = interfaceClient.request("QueryProjectReportConfig",
                 new Param().setParameter("projectId", projectId));
 
         JSONObject rankLevel = result.get("rankLevel");
-        // todo 将报表配置保存到数据库
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDate = format.format(Calendar.getInstance().getTime());
-        List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
-        List<String> modelSubjects = (List<String>) rankLevel.get("modelSubjects");
-        String startDate = rankLevel.getString("startDate") == null ? currentDate : rankLevel.getString("startDate");
-        boolean isCombine = JudgeCombine(modelSubjects);
-        ProjectConfig projectConfig = new ProjectConfig();
-        if (null != displayOptions && !displayOptions.isEmpty()) {
-            projectConfig.setProjectId(projectId);
+        if (null != rankLevel) {
+            // todo 将报表配置保存到数据库
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            String currentDate = format.format(Calendar.getInstance().getTime());
+            List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
+            List<String> modelSubjects = (List<String>) rankLevel.get("modelSubjects");
+            Map<String, Object> standard = (Map<String, Object>) rankLevel.get("standard");
+            Map<String, Double> rankLevels = formatRankLevel(standard);
+
+            String startDate = rankLevel.getString("startDate") == null ? currentDate : rankLevel.getString("startDate");
+            boolean isCombine = JudgeCombine(modelSubjects);
+            ProjectConfig projectConfig = new ProjectConfig();
             projectConfig.setCombineCategorySubjects(isCombine);
+            projectConfig.setProjectId(projectId);
             projectConfig.setDisplayOptions(displayOptions);
             projectConfig.setStartDate(startDate);
-            projectConfigService.mergeProjectConfig(projectConfig);
+            projectConfig.setRankLevels(rankLevels);
+            //和default考试对比，不存在的选项由default考试中的属性补齐
+            projectConfigService.replaceProjectConfig(projectConfigService.fixProjectConfig(projectConfig));
+            context.put("projectConfig", projectConfig);
         } else {
-
+            ProjectConfig projectConfig = new ProjectConfig();
+            projectConfig.setProjectId(projectId);
+            context.put("projectConfig", projectConfig);
         }
-        context.put("projectConfig", projectConfig);
-*/
+    }
+
+    private Map<String, Double> formatRankLevel(Map<String, Object> m){
+        Map<String, Double> rankLevels = new HashMap<>();
+        Set<String> keys = m.keySet();
+        for (String key : keys) {
+            double d = Double.parseDouble(m.get(key).toString());
+            rankLevels.put(key, Double.valueOf(d / 100));
+        }
+        return rankLevels;
     }
 
     private boolean JudgeCombine(List<String> modelSubjects) {

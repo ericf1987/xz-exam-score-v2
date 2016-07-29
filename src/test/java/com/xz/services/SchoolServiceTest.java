@@ -19,7 +19,8 @@ public class SchoolServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetSchoolsByTags() throws Exception {
-        List<Document> doc = schoolService.getSchoolsByTags("430500-6539f2f49f74411a8a1beb232a0cedf1", "false", "true");
+        List<Document> doc = schoolService.getSchoolsByTags("430300-672a0ed23d9148e5a2a31c8bf1e08e62", "false", "true");
         System.out.println(doc.toString());
+        //schoolService.paddingTags("430300-672a0ed23d9148e5a2a31c8bf1e08e62");
     }
 }
