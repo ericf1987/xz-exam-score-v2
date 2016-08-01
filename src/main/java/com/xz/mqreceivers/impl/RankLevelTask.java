@@ -120,6 +120,10 @@ public class RankLevelTask extends Receiver {
 
                 // 保存排名等级
                 String rankLevel = saveRankLevel(projectId, studentId, rankRange, sbjTarget);
+                // 缺考考生没有排名等级
+                if(null == rankLevel){
+                    continue;
+                }
 
                 // 构造整体排名等级
                 if (!rankLevelsMap.containsKey(rankRange.getName())) {

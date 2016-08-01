@@ -32,11 +32,11 @@ public class DictionaryService {
      * @return
      */
     public List<Document> listItems(String type) {
-        String cacheKey = "dictionary:" + type;
+        String cacheKey = "dictionaries:" + type;
 
         return cache.get(cacheKey, () -> {
 
-            MongoCollection<Document> c = scoreDatabase.getCollection("dictionary");
+            MongoCollection<Document> c = scoreDatabase.getCollection("dictionaries");
             ArrayList<Document> items = new ArrayList<>();
             Document query = doc("type", type);
             items.addAll(toList(c.find(query).sort(doc("key", 1)).projection(WITHOUT_INNER_ID)));
@@ -47,10 +47,10 @@ public class DictionaryService {
     }
 
     public Document findDictionary(String type, String key){
-        String cacheKey = "dictionary:" + type + ":" + key;
+        String cacheKey = "dictionaries:" + type + ":" + key;
 
         return cache.get(cacheKey, () -> {
-            MongoCollection<Document> c = scoreDatabase.getCollection("dictionary");
+            MongoCollection<Document> c = scoreDatabase.getCollection("dictionaries");
             Document query = doc("type", type).append("key", key);
             return c.find(query).first();
         });
