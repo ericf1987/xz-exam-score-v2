@@ -16,6 +16,6 @@ public class SchoolTopStudentSheetsTest extends XzExamScoreV2ApplicationTests{
 
     @Test
     public void testGenerateSheet() throws Exception {
-        schoolTopStudentReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.school("b49b8e85-f390-4e09-a709-8ab1175b0c68"), "target/school-top-student.xlsx");
+        schoolTopStudentReport.generate("430100-2df3f3ad199042c39c5f4b69f5dc7840", Range.school("d00faaa0-8a9b-45c4-ae16-ea2688353cd0"), "target/school-top-student.xlsx");
     }
 }
