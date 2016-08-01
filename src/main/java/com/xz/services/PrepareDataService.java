@@ -50,6 +50,7 @@ public class PrepareDataService {
         LOG.info("----对项目 {} 数据预处理完成。", projectId);
     }
 
+    // 从 quest_list 里面将 questId 属性放到 score 记录的 quest 属性
     private void fixScore(String projectId) {
         List<Document> quests = questService.getQuests(projectId);
 

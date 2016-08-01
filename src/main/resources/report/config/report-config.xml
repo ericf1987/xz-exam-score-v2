@@ -48,6 +48,9 @@
                 <report name="学生各科成绩明细" class="com.xz.report.schools.SchoolBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
             </report-category>
+            <report-category name="进阶报表">
+                <report name="等第报表" class="com.xz.report.schools.SchoolRankLevelReport"/>
+            </report-category>
         </report-category>
 
         <report-category name="班级成绩分析" range="class">
@@ -62,6 +65,9 @@
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
+            </report-category>
+            <report-category name="进阶报表">
+                <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>
             </report-category>
         </report-category>
 

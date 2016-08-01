@@ -31,9 +31,42 @@ public class ProjectConfig implements Serializable {
     private int rankSegmentCount;
 
     /**
-     * 得分等级配置
+     * 得分等级配置，每个等级的得分率
      */
     private Map<String, Double> scoreLevels = new HashMap<>();
+
+    /**
+     * 选择展示哪些等第组合（如 5A、4A1B）
+     */
+    private List<String> rankLevelCombines = new ArrayList<>();
+
+    /**
+     * 考试开始日期，格式 yyyy-MM-dd
+     */
+    private String startDate;
+
+    public ProjectConfig() {
+    }
+
+    public ProjectConfig(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public List<String> getRankLevelCombines() {
+        return rankLevelCombines;
+    }
+
+    public void setRankLevelCombines(List<String> rankLevelCombines) {
+        this.rankLevelCombines = rankLevelCombines;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
 
     public int getRankSegmentCount() {
         return rankSegmentCount;

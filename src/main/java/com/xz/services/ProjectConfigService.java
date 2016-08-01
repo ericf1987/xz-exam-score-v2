@@ -9,7 +9,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import java.util.List;
+import java.util.Map;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * (description)
@@ -36,21 +39,40 @@ public class ProjectConfigService {
     public void createProjectConfig(String projectId) {
         ProjectConfig template = getDefaultProjectConfig();
         template.setProjectId(projectId);
-        saveProjectConfig(template);
+        replaceProjectConfig(template);
     }
 
     /**
-     * 保存项目配置
+     * 更改项目配置（替换原来的配置）
      *
      * @param projectConfig 要保存的项目配置
      */
-    public void saveProjectConfig(ProjectConfig projectConfig) {
+    public void replaceProjectConfig(ProjectConfig projectConfig) {
         Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig));
         Document query = doc("projectId", projectConfig.getProjectId());
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
 
         collection.deleteMany(query);
         collection.insertOne(projectConfigDoc);
+    }
+
+
+    /**
+     * 更新报表配置中的等第配置
+     *
+     * @param projectId         项目ID
+     * @param rankLevels        等第比例配置
+     * @param isCombine         是否合并文理科
+     * @param rankLevelCombines 展示的等第组合列表
+     */
+    public void updateRankLevelConfig(
+            String projectId, Map<String, Double> rankLevels, boolean isCombine, List<String> rankLevelCombines) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
+        collection.updateMany(doc("projectId", projectId), $set(
+                doc("combineCategorySubjects", isCombine)
+                        .append("rankLevels", rankLevels)
+                        .append("rankLevelCombines", rankLevelCombines)
+        ), UPSERT);
     }
 
     /**
@@ -87,7 +109,7 @@ public class ProjectConfigService {
         });
     }
 
-    private ProjectConfig fixProjectConfig(ProjectConfig projectConfig) {
+    public ProjectConfig fixProjectConfig(ProjectConfig projectConfig) {
 
         if (projectConfig.getProjectId().equals(DEFAULT)) {
             return projectConfig;

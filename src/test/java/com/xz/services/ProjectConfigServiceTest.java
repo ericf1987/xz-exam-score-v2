@@ -48,7 +48,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         config.addRankingLevel("D", 0.20);
         config.addRankingLevel("E", 0.20);
 
-        projectConfigService.saveProjectConfig(config);
+        projectConfigService.replaceProjectConfig(config);
     }
 
     /**
@@ -88,6 +88,27 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
             config.setScoreLevels(scoreLevels);
         }
 
-        projectConfigService.saveProjectConfig(config);
+        projectConfigService.replaceProjectConfig(config);
+    }
+
+    @Test
+    public void testMergeProjectConfig() throws Exception {
+        ProjectConfig config = new ProjectConfig();
+        config.setProjectId("430100-eddd6548432c4e5fab54739101c0affb");
+        config.setCombineCategorySubjects(false);
+
+        config.addScoreLevel(ScoreLevel.Excellent.name(), 0.9);
+        config.addScoreLevel(ScoreLevel.Good.name(), 0.8);
+        config.addScoreLevel(ScoreLevel.Pass.name(), 0.6);
+        config.addScoreLevel(ScoreLevel.Fail.name(), 0.0);
+
+        config.addRankingLevel("A", 0.20);
+        config.addRankingLevel("B", 0.20);
+        config.addRankingLevel("C", 0.20);
+        config.addRankingLevel("D", 0.20);
+        config.addRankingLevel("E", 0.20);
+
+        config.setRankSegmentCount(20);
+        projectConfigService.replaceProjectConfig(config);
     }
 }

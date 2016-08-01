@@ -6,6 +6,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.aliyun.ApiClient;
 import com.xz.ajiaedu.common.redis.Redis;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,6 +21,15 @@ import java.util.List;
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
 public class Config {
+
+    @Value("${aliyun.api.url}")
+    private String aliyunApiUrl;
+
+    @Value("${aliyun.api.key}")
+    private String aliyunApiKey;
+
+    @Value("${aliyun.api.secret}")
+    private String aliyunApiSecret;
 
     @Value("${redis.host}")
     private String redisHost;
@@ -57,6 +67,11 @@ public class Config {
             seeds.add(new ServerAddress(host_port[0], Integer.parseInt(host_port[1])));
         }
         return seeds;
+    }
+
+    @Bean
+    public ApiClient apiClient() {
+        return new ApiClient(aliyunApiUrl, aliyunApiKey, aliyunApiSecret);
     }
 
     @Bean

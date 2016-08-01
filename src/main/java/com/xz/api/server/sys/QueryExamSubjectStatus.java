@@ -1,5 +1,6 @@
 package com.xz.api.server.sys;
 
+import com.alibaba.fastjson.JSONArray;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.api.annotation.*;
@@ -32,14 +33,13 @@ public class QueryExamSubjectStatus implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
 
-        Result result;
+        JSONArray result;
         try {
-            result = interfaceClient.request("QuerySubjectListByProjectId",
-                    new Param().setParameter("projectId", projectId));
+            result = interfaceClient.querySubjectListByProjectId(projectId);
         } catch (Exception e) {
             return Result.fail(e.getMessage());
         }
 
-        return Result.success().set("subjects", result.get("result"));
+        return Result.success().set("subjects", result);
     }
 }
