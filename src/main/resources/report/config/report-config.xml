@@ -60,11 +60,11 @@
                 <report name="题型分析" class="com.xz.report.classes.ClassQuestTypeReport"/>
                 <report name="知识点分析" class="com.xz.report.classes.ClassPointReport"/>
                 <report name="能力层级分析" class="com.xz.report.classes.ClassAbilityLevelReport"/>
+                <report name="双向细目分析" class="com.xz.report.classes.ClassPointAbilityLevelReport"/>
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
-                <report name="双向细目分析" class="com.xz.report.classes.ClassPointAbilityLevelReport"/>
             </report-category>
             <report-category name="进阶报表">
                 <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>

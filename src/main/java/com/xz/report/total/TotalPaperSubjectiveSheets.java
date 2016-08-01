@@ -57,11 +57,11 @@ public class TotalPaperSubjectiveSheets extends SheetGenerator {
         List<Map<String, Object>> schools = result.get("schools");
         for(int i = 0;i < totals.size();i++){
             excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("questNo").toString());
-            excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("score").toString());
+            excelWriter.set(2 + i, column.incrementAndGet(), totals.get(i).get("average").toString());
             excelWriter.set(2 + i, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(totals.get(i).get("rate").toString())));
             for(Map<String, Object> school : schools){
                 List<Map<String, Object>> subjectives = (List<Map<String, Object>>)school.get("subjectives");
-                excelWriter.set(2 + i, column.incrementAndGet(), subjectives.get(i).get("score").toString());
+                excelWriter.set(2 + i, column.incrementAndGet(), subjectives.get(i).get("average").toString());
                 excelWriter.set(2 + i, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(subjectives.get(i).get("rate").toString())));
             }
             column.set(-1);
