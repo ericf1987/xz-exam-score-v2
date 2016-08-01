@@ -13,7 +13,6 @@
                 <report name="试卷题型分析" class="com.xz.report.total.TotalPaperQuestTypeReport"/>
                 <report name="客观题分析" class="com.xz.report.total.TotalPaperObjectiveReport"/>
                 <report name="主观题分析" class="com.xz.report.total.TotalPaperSubjectiveReport"/>
-                <report name="双向细目分析" class="com.xz.report.total.TotalPointAbilityLevelReport"/>
             </report-category>
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class="com.xz.report.total.TotalTopStudentReport"/>
@@ -65,6 +64,7 @@
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
+                <report name="双向细目分析" class="com.xz.report.classes.ClassPointAbilityLevelReport"/>
             </report-category>
             <report-category name="进阶报表">
                 <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>

@@ -86,10 +86,13 @@ public class ProjectScoreAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
-/*        String isIncity = param.getString("isInCity") != null ? param.getString("isInCity") : null;
+        String isIncity = param.getString("isInCity") != null ? param.getString("isInCity") : null;
         String isGovernmental = param.getString("isGovernmental") != null ? param.getString("isGovernmental") : null;
-        String[] schoolIds = filterByTags(projectId, isIncity, isGovernmental);*/
         String[] schoolIds = param.getStringValues("schoolIds");
+
+        if(null == schoolIds || schoolIds.length == 0){
+            schoolIds = filterByTags(projectId, isIncity, isGovernmental);
+        }
 
         List<Map<String, Object>> schoolStats = getSchoolStats(projectId, subjectId, schoolIds);
         Map<String, Object> totalStat = getProjectTotalStats(projectId, subjectId);
