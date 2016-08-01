@@ -69,7 +69,8 @@ public class TotalTopStudentQuestTypeSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>)topStudent.get("questTypes");
             for (Map<String, Object> questType : questTypes){
-                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                //excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
             }
             row++;
             column.set(-1);

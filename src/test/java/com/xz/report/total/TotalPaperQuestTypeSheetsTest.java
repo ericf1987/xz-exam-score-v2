@@ -17,6 +17,6 @@ public class TotalPaperQuestTypeSheetsTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testGenerateSheet() throws Exception {
-        totalPaperQuestTypeReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.province("430000"), "target/total-paper-quest-type.xlsx");
+        totalPaperQuestTypeReport.generate("430100-2df3f3ad199042c39c5f4b69f5dc7840", Range.province("430000"), "target/total-paper-quest-type.xlsx");
     }
 }

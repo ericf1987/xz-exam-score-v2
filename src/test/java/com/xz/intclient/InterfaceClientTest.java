@@ -3,6 +3,7 @@ package com.xz.intclient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -72,5 +73,12 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
         assertEquals(8, project.getIntValue("id"));
+    }
+
+    @Test
+    public void testQueryProjectReportConfig() throws Exception {
+        ApiResponse result = interfaceClient.queryProjectReportConfig(PROJECT_ID);
+        JSONObject rankLevel = result.get("rankLevel");
+        System.out.println(rankLevel.toString());
     }
 }

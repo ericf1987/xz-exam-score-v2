@@ -63,6 +63,9 @@ public class ClassBasicRankSheet extends SheetGenerator {
         Map<String, Object> projectRank = (Map<String, Object>) rankstat.get("projectRankStat");
         excelWriter.set(row, column.incrementAndGet(), rankstat.get("studentName").toString());
         excelWriter.set(row, column.incrementAndGet(), projectRank.get("score").toString());
+        Map<String, Object> projectRankStat = (Map<String, Object>)rankstat.get("projectRankStat");
+        excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankClassIndex"));
+        excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankSchoolIndex"));
         List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
         for (Map<String, Object> subjectRank : subjectRankStat) {
             excelWriter.set(row, column.incrementAndGet(), subjectRank.get("score"));
@@ -83,6 +86,9 @@ public class ClassBasicRankSheet extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "学生姓名");
         excelWriter.set(row, column.incrementAndGet(), "全部科目");
+        column.incrementAndGet();
+        column.incrementAndGet();
+        excelWriter.mergeCells(0, column.get() - 2, 0, column.get());
         for (String subjectName : subjects) {
             excelWriter.set(row, column.incrementAndGet(), subjectName);
             column.incrementAndGet();
@@ -102,9 +108,10 @@ public class ClassBasicRankSheet extends SheetGenerator {
         }
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "学生姓名");
-        excelWriter.set(row, column.incrementAndGet(), "全部科目");
         excelWriter.mergeCells(0, 0, 1, 0);
-        excelWriter.mergeCells(0, 1, 1, 1);
+        excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[0]);
+        excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[1]);
+        excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[2]);
         for (int i = 0; i < subjects.size(); i++) {
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[1]);
