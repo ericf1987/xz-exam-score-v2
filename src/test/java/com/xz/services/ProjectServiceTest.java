@@ -21,7 +21,7 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySchoolProjects() throws Exception {
-        List<Document> documents = projectService.querySchoolProjects("11b66fc2-8a76-41c2-a1b3-5011523c7e47", "2016-06");
+        List<Document> documents = projectService.querySchoolProjects("5266e03d-bc8a-4c6e-b2e0-45b6bad9357f", null);
         for (Document document : documents) {
             System.out.println(document);
         }

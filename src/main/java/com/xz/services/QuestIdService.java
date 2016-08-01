@@ -11,6 +11,6 @@ import org.springframework.stereotype.Service;
 public class QuestIdService {
 
     public Object getQuestId(String project, String subject, String questNo) {
-        return null;
+        return project + ":" + subject + ":" + questNo;
     }
 }
