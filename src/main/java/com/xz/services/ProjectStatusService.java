@@ -23,4 +23,7 @@ public class ProjectStatusService {
         projectService.setProjectStatus(projectId, status);
     }
 
+    public ProjectStatus getProjectStatus(String projectId) {
+        return projectService.getProjectStatus(projectId);
+    }
 }

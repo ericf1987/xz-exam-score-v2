@@ -49,6 +49,9 @@ public class AggregationService {
     @Autowired
     ExportScoreService exportScoreService;
 
+    @Autowired
+    PrepareDataService prepareDataService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
@@ -78,6 +81,9 @@ public class AggregationService {
                 if (aggregationConfig.isExportScore()) {
                     exportScore(projectId);
                 }
+
+                // 导入学生科目信息
+                prepareDataService.prepare(projectId);
 
                 // 统计成绩
                 runAggregation0(projectId, aggregationConfig);

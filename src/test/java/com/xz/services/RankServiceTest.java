@@ -20,6 +20,9 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    ScoreService scoreService;
+
     @Test
     public void testGetRank() throws Exception {
         System.out.println("rank of 99: " +
@@ -45,5 +48,16 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(
                 rankService.getRankLevel(
                         XT_PROJECT_ID, Range.school("SCHOOL_008"), Target.subject("002"), "SCHOOL_008_CLASS_08_01"));
+    }
+
+    @Test
+    public void testGetRankLevel1() throws Exception {
+        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+        String classId = "4a3336b6-4239-4e72-b613-cb3469b3def7";
+        String subjectId = "001";
+        String studentId = "fb599639-d37e-4372-bc97-e0977603c2a2";
+        int count = studentService.getStudentCount(projectId, Range.clazz(classId));
+        int rank = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), studentId);
+        System.out.println("学生总人数-->" + count + "排名-->" + rank);
     }
 }

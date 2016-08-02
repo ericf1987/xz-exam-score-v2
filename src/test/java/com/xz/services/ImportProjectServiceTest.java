@@ -24,7 +24,7 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testImportReportConfig() throws Exception {
         Context context = new Context();
-        importProjectService.importProjectReportConfig("430200-b73f03af1d74484f84f1aa93f583caaa", context);
+        importProjectService.importProjectReportConfig("430100-047a9cc248244e4e95b2fbc64074252f", context);
         System.out.println(context.toString());
     }
 

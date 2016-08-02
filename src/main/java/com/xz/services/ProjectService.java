@@ -15,7 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -61,6 +64,7 @@ public class ProjectService {
      * 通过考试项目id查询项目所属学段
      *
      * @param projectId 考试项目id
+     *
      * @return 考试项目信息
      */
     public String findProjectStudyStage(String projectId) {
@@ -81,6 +85,7 @@ public class ProjectService {
      * 通过考试项目id查询考试项目
      *
      * @param projectId 考试项目id
+     *
      * @return 考试项目信息
      */
     public Document findProject(String projectId) {
@@ -98,6 +103,7 @@ public class ProjectService {
      *
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
+     *
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
@@ -164,6 +170,24 @@ public class ProjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
         c.updateOne(query, $set("status", status.name()));
+
+        // 清除缓存
+        String cacheKey = "project_info:" + projectId;
+        cache.delete(cacheKey);
+    }
+
+    /**
+     * 查询项目状态
+     *
+     * @param projectId 项目ID
+     *
+     * @return 状态
+     */
+    public ProjectStatus getProjectStatus(String projectId) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        Document project = c.find(query).projection(doc("status", 1)).first();
+        return project == null ? ProjectStatus.Empty : ProjectStatus.valueOf(project.getString("status"));
     }
 
     /**
@@ -201,5 +225,4 @@ public class ProjectService {
 
         return projects;
     }
-
 }
