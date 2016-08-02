@@ -128,6 +128,7 @@ public class ImportProjectService {
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
 
         } else {
+            projectConfigService.updateRankLevelConfig(projectId, Collections.emptyMap(), false, Collections.emptyList());
             context.put("projectConfig", new ProjectConfig(projectId));
         }
     }

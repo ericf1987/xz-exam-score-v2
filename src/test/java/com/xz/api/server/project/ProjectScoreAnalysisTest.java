@@ -38,10 +38,14 @@ public class ProjectScoreAnalysisTest extends XzExamScoreV2ApplicationTests {
         System.out.println(result);*/
 
         String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
-        String subjectId = "001";
-        Param param = new Param().setParameter("projectId", projectId).setParameter("subjectId", subjectId)
+        String subjectId = "";
+/*        Param param = new Param().setParameter("projectId", projectId).setParameter("subjectId", subjectId)
                 .setParameter("isInCity", "true").setParameter("isGovernmental", "true");
         Result result = projectScoreAnalysis.execute(param);
-        System.out.println(result.getData());
+        System.out.println(result.getData());*/
+        String[] schoolIds = projectScoreAnalysis.filterByTags(projectId, null, null);
+        for (String schoolId : schoolIds){
+            System.out.println(schoolId);
+        }
     }
 }

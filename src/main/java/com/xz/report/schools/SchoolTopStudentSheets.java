@@ -56,7 +56,6 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学生姓名");
         excelWriter.set(0, column.incrementAndGet(), "班级");
-        excelWriter.set(0, column.incrementAndGet(), "班级尖子生人数");
         Map<String, Object> topStudent = topStudents.get(0);
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
         for (Map<String, Object> subject : subjects) {
@@ -70,8 +69,6 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         excelWriter.set(1, column.incrementAndGet(), "学生姓名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "班级");
-        excelWriter.mergeCells(0, column.get(), 1, column.get());
-        excelWriter.set(1, column.incrementAndGet(), "班级尖子生人数");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         Map<String, Object> topStudent = topStudents.get(0);
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
@@ -87,7 +84,6 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         for (Map<String, Object> topStudent : topStudents) {
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("name"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("className"));
-            excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));
             List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
             for (Map<String, Object> subject : subjects) {
                 excelWriter.set(row, column.incrementAndGet(), subject.get("score"));

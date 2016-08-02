@@ -57,7 +57,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> totals) {
         AtomicInteger column = new AtomicInteger(-1);
-        excelWriter.set(0, column.incrementAndGet(), "试题");
+        excelWriter.set(0, column.incrementAndGet(), "学校名称");
         for (Map<String, Object> total : totals) {
             //题型名称
             excelWriter.set(0, column.incrementAndGet(), total.get("name"));
@@ -67,7 +67,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
 
     private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> totals) {
         AtomicInteger column = new AtomicInteger(-1);
-        excelWriter.set(1, column.incrementAndGet(), "试题");
+        excelWriter.set(1, column.incrementAndGet(), "学校名称");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         for (int i = 0; i < totals.size(); i++) {
             excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[0]);

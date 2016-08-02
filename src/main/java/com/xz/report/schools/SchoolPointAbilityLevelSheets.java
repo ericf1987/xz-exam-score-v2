@@ -3,6 +3,7 @@ package com.xz.report.schools;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
+import com.xz.api.server.project.ProjectPointAbilityLevelAnalysis;
 import com.xz.api.server.school.SchoolPointAbilityLevelAnalysis;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -21,8 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("unchecked")
 @Component
 public class SchoolPointAbilityLevelSheets extends SheetGenerator {
+
     @Autowired
-    SchoolPointAbilityLevelAnalysis schoolPointAbilityLevelAnalysis;
+    ProjectPointAbilityLevelAnalysis projectPointAbilityLevelAnalysis;
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
@@ -32,7 +34,7 @@ public class SchoolPointAbilityLevelSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
                 .setParameter("schoolId", schoolRange.getId());
-        Result result = schoolPointAbilityLevelAnalysis.execute(param);
+        Result result = projectPointAbilityLevelAnalysis.execute(param);
         setupHeader(excelWriter, result);
         setupSecondaryHeader(excelWriter, result);
         fillDetailData(excelWriter, result);

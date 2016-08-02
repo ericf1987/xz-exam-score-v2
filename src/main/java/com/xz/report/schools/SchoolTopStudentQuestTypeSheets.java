@@ -70,7 +70,8 @@ public class SchoolTopStudentQuestTypeSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("className"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));
             for(Map<String, Object> questType : questTypes){
-                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(questType.get("scoreRate").toString())));
+                //excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.valueOf(questType.get("scoreRate").toString())));
+                excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
             }
             row++;
             column.set(-1);
