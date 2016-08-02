@@ -6,9 +6,7 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
-import com.xz.bean.ProjectStatus;
-import com.xz.services.ProjectService;
-import org.bson.Document;
+import com.xz.services.ProjectStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +23,11 @@ import org.springframework.stereotype.Service;
 public class QueryProjectStatus implements Server {
 
     @Autowired
-    ProjectService projectService;
+    ProjectStatusService projectStatusService;
 
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-
-        Document project = projectService.findProject(projectId);
-        ProjectStatus projectStatus = ProjectStatus.valueOf(project.getString("status"));
-        return Result.success().set("projectStatus", projectStatus);
+        return Result.success().set("projectStatus", projectStatusService.getProjectStatus(projectId));
     }
 }
