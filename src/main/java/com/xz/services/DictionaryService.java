@@ -46,6 +46,12 @@ public class DictionaryService {
 
     }
 
+    /**
+     * 根据字典类型和字典键查询字典
+     * @param type 字典类型
+     * @param key 字典键
+     * @return
+     */
     public Document findDictionary(String type, String key){
         String cacheKey = "dictionaries:" + type + ":" + key;
 
