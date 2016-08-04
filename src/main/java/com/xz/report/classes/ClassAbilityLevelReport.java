@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/6/30.
+ * 班级成绩分析-试卷分析-能力层级统计
  */
 @Component
 @ReportGeneratorInfo(range= Range.CLASS)

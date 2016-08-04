@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author by fengye on 2016/6/19.
  * 总体成绩分析-尖子生情况-试卷情况分析
  */
-@SuppressWarnings("unchecked")
 @Component
+@SuppressWarnings("unchecked")
 public class TotalTopStudentQuestTypeSheets extends SheetGenerator {
 
     @Autowired

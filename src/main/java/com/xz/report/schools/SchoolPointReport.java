@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/7/5.
+ * 学校成绩分析-试卷分析-知识点分析
  */
 @Component
 public class SchoolPointReport extends ReportGenerator{

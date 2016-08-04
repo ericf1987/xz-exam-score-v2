@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author by fengye on 2016/7/1.
+ * 总体成绩分析-基础数据-学生题目得分明细
  */
 @Component
 public class TotalQuestScoreDetailSheets extends SheetGenerator {

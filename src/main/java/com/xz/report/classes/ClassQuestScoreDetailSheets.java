@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/7/1.
+ * 班级成绩分析-基础数据-学生题目得分明细
  */
 @SuppressWarnings("unchecked")
 @Component
@@ -104,8 +105,6 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
                     }else{
                         subjectiveScore += Double.parseDouble(quest.get("score").toString());
                     }
-                }else{
-                    continue;
                 }
             }
             student.put("objectiveScore", objectiveScore);

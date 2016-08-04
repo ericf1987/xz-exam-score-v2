@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/7/26.
+ * 学校成绩分析-历次考试对比-平均分对比
  */
 @SuppressWarnings("unchecked")
 @Component

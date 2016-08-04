@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author by fengye on 2016/7/1.
+ * 学校成绩分析-试卷分析-知识点对比
  */
 @Component
 public class SchoolPointCompareSheets extends SheetGenerator {
@@ -32,6 +33,5 @@ public class SchoolPointCompareSheets extends SheetGenerator {
                 setParameter("pointId", pointId).
                 setParameter("schoolId", schoolRange.getId());
         Result result = schoolPointCompare.execute(param);
-        System.out.println("学校知识点对比-->" + result.getData());
     }
 }
