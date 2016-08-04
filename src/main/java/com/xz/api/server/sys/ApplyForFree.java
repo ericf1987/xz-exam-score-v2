@@ -27,6 +27,6 @@ public class ApplyForFree implements Server{
     @Override
     public Result execute(Param param) throws Exception {
         interfaceClient.addRpApplyOpen(param);
-        return null;
+        return Result.success();
     }
 }

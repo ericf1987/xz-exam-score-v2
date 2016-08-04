@@ -104,4 +104,10 @@ public class InterfaceClient {
         apiClient.call(apiRequest);
     }
 
+    public ApiResponse listRpApplyOpen(Param param) {
+        ApiRequest apiRequest = new ApiRequest(ApiName.ListRpApplyOpens);
+        apiRequest.setParameters(param.getParameters());
+        return apiClient.call(apiRequest);
+    }
+
 }

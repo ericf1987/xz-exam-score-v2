@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,5 +81,12 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         ApiResponse result = interfaceClient.queryProjectReportConfig(PROJECT_ID);
         JSONObject rankLevel = result.get("rankLevel");
         System.out.println(rankLevel.toString());
+    }
+
+    @Test
+    public void testAddRpApplyOpen() throws Exception {
+        Param param = new Param().setParameter("pageSize", 10).setParameter("pageIndex", 0);
+        ApiResponse result = interfaceClient.listRpApplyOpen(param);
+        System.out.println(result.getData());
     }
 }
