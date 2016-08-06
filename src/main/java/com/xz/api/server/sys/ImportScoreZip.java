@@ -8,10 +8,10 @@ import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
 import com.xz.services.ImportProjectService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 /**
  * @author by fengye on 2016/7/8.
@@ -33,8 +33,15 @@ public class ImportScoreZip implements Server{
             importProjectService.importStudentInfoFromZip(zipFileReader);
             return Result.success("文件上传路径为" + filePath + "，成绩数据导入成功！");
         } catch (Exception e) {
-            e.printStackTrace();
             return Result.fail("数据导入出现异常，请重新操作!");
+        }finally {
+            File desFile = new File(filePath);
+            if(desFile.exists()){
+                try{
+                    desFile.delete();
+                }catch (Exception e){
+                }
+            }
         }
     }
 }

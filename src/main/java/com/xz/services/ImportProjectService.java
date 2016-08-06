@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.io.ZipFileReader;
-import com.xz.ajiaedu.common.lang.*;
+import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.DoubleCounterMap;
+import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.PointLevel;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
@@ -19,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -133,7 +135,7 @@ public class ImportProjectService {
         }
     }
 
-    private Map<String, Double> formatRankLevel(Map<String, Object> m){
+    private Map<String, Double> formatRankLevel(Map<String, Object> m) {
         Map<String, Double> rankLevels = new HashMap<>();
         Set<String> keys = m.keySet();
         for (String key : keys) {
@@ -145,9 +147,7 @@ public class ImportProjectService {
 
     private boolean JudgeCombine(List<String> modelSubjects) {
         for (String subject : modelSubjects) {
-            if (subject.equals("004005006") || subject.equals("007008009")) {
-                return true;
-            }
+            if (subject.equals("004005006") || subject.equals("007008009")) return true;
         }
         return false;
     }
@@ -491,15 +491,10 @@ public class ImportProjectService {
     }
 
     //从zip包读取学生信息
-    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
+    public void importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
         zipFileReader.readZipEntries("*", consumer -> {
-            try {
-                readEntry(consumer, zipFileReader);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            readEntry(consumer, zipFileReader);
         });
-        return Result.success();
     }
 
     private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
