@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -17,11 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.WITHOUT_INNER_ID;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.util.SubjectUtil.isCombinedSubject;
 
 /**
@@ -99,6 +100,22 @@ public class StudentService {
             }
             return (int) scoreDatabase.getCollection("student_list").count(query);
         });
+    }
+
+    public List<Document> getSubjectAggrByRange(String projectId, Range range){
+        MongoCollection<Document> collection = scoreDatabase.getCollection("student_list");
+        Document query = doc("_id", doc("subjectId", "$subjects")).append("count", doc("$sum", 1));
+        AggregateIterable<Document> document = collection.aggregate(Arrays.asList(
+                $match(doc("project", projectId).append(range.getName(), range.getId())),
+                $unwind("$subjects"),
+                $group(query)
+                ));
+
+        List<Document> list = new ArrayList<>();
+
+        document.forEach((Consumer<Document>) list::add);
+
+        return list;
     }
 
     private String getCacheKey(String prefix, String projectId, String subjectId, Range range) {

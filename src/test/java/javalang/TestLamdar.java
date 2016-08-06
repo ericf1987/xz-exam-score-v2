@@ -58,7 +58,7 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-        new TestLamdar().test4();
+        new TestLamdar().test3();
 //        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
 //        Converter<String, Integer> converter = Integer::valueOf;
 //        Integer integer = converter.convert("1980");
@@ -74,7 +74,7 @@ public class TestLamdar {
     }
 
     public void test3() {
-        List<String> subjectIds = Arrays.asList("001", "003", "004", "111", "321", "019");
+        List<String> subjectIds = Arrays.asList("AAAAAA", "AAAAAB", "AAAABC", "BAAACA", "AAACCC", "BBBBAC", "AAAAC");
         //subjectIds.sort(String::compareTo);
         subjectIds.sort((String s1, String s2) -> s1.compareTo(s2));
         System.out.println(subjectIds.toString());
