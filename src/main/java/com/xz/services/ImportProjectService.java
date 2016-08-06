@@ -507,14 +507,14 @@ public class ImportProjectService {
         String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
         String projectId = fileName.split("_")[0];
         String subjectId = fileName.split("_")[1];
-        AtomicInteger counter = new AtomicInteger();
-        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId, counter));
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId));
     }
 
-    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
+    private void readEntryLine(String line, String projectId, String subjectId) {
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
-        scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
+        //scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
+        scannerDBService.importSubjectScore(projectId, subjectId);
     }
 
 }
