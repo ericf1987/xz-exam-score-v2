@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -508,8 +509,10 @@ public class ImportProjectService {
     private void readEntryLine(String line, String projectId, String subjectId) {
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
-        //scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
-        scannerDBService.importSubjectScore(projectId, subjectId);
+        AtomicInteger counter = new AtomicInteger();
+        scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
+        //文件导入方式
+        //scannerDBService.importSubjectScore(projectId, subjectId);
     }
 
 }
