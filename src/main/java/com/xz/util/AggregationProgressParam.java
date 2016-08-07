@@ -16,7 +16,7 @@ public class AggregationProgressParam {
         PROGRESS_MAP.put("ScoreImporting", "0.3");
         PROGRESS_MAP.put("ScoreImported", "0.4");
         PROGRESS_MAP.put("AggregationStarted", "0.5");
-        PROGRESS_MAP.put("AggregationCompleted", "0.8");
+        PROGRESS_MAP.put("AggregationCompleted", "1");
         PROGRESS_MAP.put("ReportGenerating", "0.9");
         PROGRESS_MAP.put("ReportGenerated", "1");
     }
