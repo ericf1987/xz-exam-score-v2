@@ -9,6 +9,8 @@ import java.util.Map;
 public class AggregationProgressParam {
     public static final Map<String, String> PROGRESS_MAP = new HashMap<>();
 
+    public static final Map<String, String> PROGRESS_MAP_STATUS = new HashMap<>();
+
     static{
         PROGRESS_MAP.put("Empty", "0");
         PROGRESS_MAP.put("ProjectImporting", "0.1");
@@ -20,4 +22,18 @@ public class AggregationProgressParam {
         PROGRESS_MAP.put("ReportGenerating", "0.9");
         PROGRESS_MAP.put("ReportGenerated", "1");
     }
+
+    static{
+        PROGRESS_MAP_STATUS.put("Empty", "0");
+        PROGRESS_MAP_STATUS.put("ProjectImporting", "0");
+        PROGRESS_MAP_STATUS.put("ProjectImported", "1");
+        PROGRESS_MAP_STATUS.put("ScoreImporting", "0");
+        PROGRESS_MAP_STATUS.put("ScoreImported", "1");
+        PROGRESS_MAP_STATUS.put("AggregationStarted", "0");
+        PROGRESS_MAP_STATUS.put("AggregationCompleted", "1");
+        PROGRESS_MAP_STATUS.put("ReportGenerating", "0");
+        PROGRESS_MAP_STATUS.put("ReportGenerated", "1");
+    }
+
+
 }

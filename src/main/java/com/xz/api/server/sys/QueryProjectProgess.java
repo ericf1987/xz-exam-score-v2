@@ -30,17 +30,20 @@ public class QueryProjectProgess implements Server{
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        Map<String, String> resultMap = getProjectProgress(projectService.getProjectStatus(projectId));
+        Map<String, Object> resultMap = getProjectProgress(projectService.getProjectStatus(projectId));
         return Result.success().set("progress", resultMap);
     }
 
-    private Map<String, String> getProjectProgress(ProjectStatus projectStatus) {
+    private Map<String, Object> getProjectProgress(ProjectStatus projectStatus) {
         String status = projectStatus.name();
         String progressRate = AggregationProgressParam.PROGRESS_MAP.get(status);
-        Map<String, String> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("status", status);
         result.put("rate", progressRate);
-        result.put("step", getStep(status));
+        Map<String, String> step = new HashMap<>();
+        step.put("stepNo", getStep(status));
+        step.put("isCompleted", AggregationProgressParam.PROGRESS_MAP_STATUS.get(status));
+        result.put("step", step);
         return result;
     }
 
