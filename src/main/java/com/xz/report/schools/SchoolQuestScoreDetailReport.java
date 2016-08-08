@@ -15,6 +15,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/7/1.
+ * 学校成绩分析-基础数据-学生题目得分明细
  */
 @Component
 @ReportGeneratorInfo(range= Range.SCHOOL)

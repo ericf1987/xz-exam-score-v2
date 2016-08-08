@@ -97,4 +97,17 @@ public class InterfaceClient {
                 .setParameter("projectId", projectId)
         );
     }
+
+    public void addRpApplyOpen(Param param) {
+        ApiRequest apiRequest = new ApiRequest(ApiName.AddRpApplyOpen);
+        apiRequest.setParameters(param.getParameters());
+        apiClient.call(apiRequest);
+    }
+
+    public ApiResponse listRpApplyOpen(Param param) {
+        ApiRequest apiRequest = new ApiRequest(ApiName.ListRpApplyOpens);
+        apiRequest.setParameters(param.getParameters());
+        return apiClient.call(apiRequest);
+    }
+
 }

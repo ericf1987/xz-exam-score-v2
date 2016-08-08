@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.io.ZipFileReader;
-import com.xz.ajiaedu.common.lang.*;
+import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.DoubleCounterMap;
+import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.lang.Value;
 import com.xz.bean.PointLevel;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.SubjectLevel;
@@ -133,7 +136,7 @@ public class ImportProjectService {
         }
     }
 
-    private Map<String, Double> formatRankLevel(Map<String, Object> m){
+    private Map<String, Double> formatRankLevel(Map<String, Object> m) {
         Map<String, Double> rankLevels = new HashMap<>();
         Set<String> keys = m.keySet();
         for (String key : keys) {
@@ -145,9 +148,7 @@ public class ImportProjectService {
 
     private boolean JudgeCombine(List<String> modelSubjects) {
         for (String subject : modelSubjects) {
-            if (subject.equals("004005006") || subject.equals("007008009")) {
-                return true;
-            }
+            if (subject.equals("004005006") || subject.equals("007008009")) return true;
         }
         return false;
     }
@@ -491,15 +492,10 @@ public class ImportProjectService {
     }
 
     //从zip包读取学生信息
-    public Result importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
+    public void importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
         zipFileReader.readZipEntries("*", consumer -> {
-            try {
-                readEntry(consumer, zipFileReader);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            readEntry(consumer, zipFileReader);
         });
-        return Result.success();
     }
 
     private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
@@ -507,14 +503,16 @@ public class ImportProjectService {
         String fileName = entry.getName().substring(0, entry.getName().lastIndexOf("."));
         String projectId = fileName.split("_")[0];
         String subjectId = fileName.split("_")[1];
-        AtomicInteger counter = new AtomicInteger();
-        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId, counter));
+        zipFileReader.readEntryByLine(entry, "UTF-8", line -> readEntryLine(line, projectId, subjectId));
     }
 
-    private void readEntryLine(String line, String projectId, String subjectId, AtomicInteger counter) {
+    private void readEntryLine(String line, String projectId, String subjectId) {
         //获取每个学生document对象
         Document studentDoc = Document.parse(line.trim());
+        AtomicInteger counter = new AtomicInteger();
         scannerDBService.importStudentScore(projectId, subjectId, studentDoc, counter);
+        //文件导入方式
+        //scannerDBService.importSubjectScore(projectId, subjectId);
     }
 
 }

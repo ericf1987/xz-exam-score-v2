@@ -1,11 +1,9 @@
 package javalang;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +23,7 @@ public class TestLamdar {
         T convert(F from);
     }
 
-    class Person{
+    class Person {
         private String name;
         private int num;
 
@@ -54,17 +52,17 @@ public class TestLamdar {
         }
     }
 
-    interface PersonFactory<P extends Person>{
+    interface PersonFactory<P extends Person> {
         P createPerson(String name, int num);
     }
 
 
     public static void main(String[] args) {
-        //new TestLamdar().test2();
-        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
+        new TestLamdar().test3();
+//        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
 //        Converter<String, Integer> converter = Integer::valueOf;
-        Integer integer = converter.convert("1980");
-        System.out.println(integer.getClass());
+//        Integer integer = converter.convert("1980");
+//        System.out.println(integer.getClass());
     }
 
     public void test2() {
@@ -73,5 +71,17 @@ public class TestLamdar {
                 a -> System.out.println(a)
         );
 
+    }
+
+    public void test3() {
+        List<String> subjectIds = Arrays.asList("AAAAAA", "AAAAAB", "AAAABC", "BAAACA", "AAACCC", "BBBBAC", "AAAAC");
+        //subjectIds.sort(String::compareTo);
+        subjectIds.sort((String s1, String s2) -> s1.compareTo(s2));
+        System.out.println(subjectIds.toString());
+    }
+
+    public void test4(){
+        Pattern like = Pattern.compile("^" + "2016");
+        System.out.println(like);
     }
 }

@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/7/26.
+ * 班级成绩分析-历次考试对比-分数对比
  */
 @Component
 public class ClassScoreCompareReport extends ReportGenerator{

@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * @author by fengye on 2016/7/21.
+ * 班级成绩分析-基础分析-等第统计
  */
 @Component
 public class ClassRankLevelReport extends ReportGenerator{

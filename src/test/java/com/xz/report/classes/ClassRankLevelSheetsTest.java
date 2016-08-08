@@ -14,6 +14,6 @@ public class ClassRankLevelSheetsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classRankLevelReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.clazz("0c738247-b62c-4c90-9016-1cc1163fd0b1"), "target/class-rank-level.xlsx");
+        classRankLevelReport.generate("430100-e7bd093d92d844819c7eda8b641ab6ee", Range.clazz("048eb56f-a105-4992-8228-0e436c9e4670"), "target/class-rank-level.xlsx");
     }
 }

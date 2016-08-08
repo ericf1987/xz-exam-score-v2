@@ -1,9 +1,11 @@
 package com.xz.services;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.ajiaedu.common.lang.Result;
+import com.xz.api.Param;
+import com.xz.api.server.sys.QueryExamSubjects;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +21,12 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    RangeService rangeService;
+
+    @Autowired
+    QueryExamSubjects queryExamSubjects;
 
     @Test
     public void testGetStudentCount() throws Exception {
@@ -58,5 +66,15 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
         int count = studentService.getStudentCount(projectId, Range.school(schoolId));
         System.out.println(studentList.toString());
         System.out.println(count);
+    }
+
+    @Test
+    public void test2() throws Exception{
+        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        String schoolId = "11b66fc2-8a76-41c2-a1b3-5011523c7e47";
+        Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId);
+        Result result = queryExamSubjects.execute(param);
+        System.out.println(result.getData());
+
     }
 }

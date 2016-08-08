@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/8.
- *         班级成绩分析-基础分析-分数排名统计
+ * 班级成绩分析-基础分析-分数排名统计
  */
 @SuppressWarnings("unchecked")
 @Component

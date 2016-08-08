@@ -29,6 +29,7 @@ public class ReportNameMappings {
         SECONDARY_CLASSIFY_CODE_MAP.put("201", "试卷分析");
         SECONDARY_CLASSIFY_CODE_MAP.put("202", "尖子生情况");
         SECONDARY_CLASSIFY_CODE_MAP.put("203", "基础数据");
+        SECONDARY_CLASSIFY_CODE_MAP.put("204", "历次考试对比");
 
         FILE_NAME_CODE_MAP.put("300", "分数分析.xlsx");
         FILE_NAME_CODE_MAP.put("301", "分数段统计.xlsx");
@@ -49,6 +50,10 @@ public class ReportNameMappings {
         FILE_NAME_CODE_MAP.put("316", "能力层级分析.xlsx");
         FILE_NAME_CODE_MAP.put("317", "S-P试卷诊断.xlsx");
         FILE_NAME_CODE_MAP.put("318", "学生各科成绩明细.xlsx");
+        FILE_NAME_CODE_MAP.put("319", "等第报表.xlsx");
+        FILE_NAME_CODE_MAP.put("320", "平均分对比.xlsx");
+        FILE_NAME_CODE_MAP.put("321", "优秀率对比.xlsx");
+        FILE_NAME_CODE_MAP.put("322", "及格率对比.xlsx");
 
         BASIC_REPORT_ITEM.add("-->基础数据-->学生各科成绩明细.xlsx");
         BASIC_REPORT_ITEM.add("-->基础数据-->各科试卷题目得分明细.xlsx");

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.XzExamScoreV2ApplicationTests;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,7 +70,8 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById(PROJECT_ID);
+        JSONObject project = interfaceClient.queryProjectById("430100-e15534273b1e428ebcaa31a46c7a8135");
+        System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
         assertEquals(8, project.getIntValue("id"));
@@ -77,8 +79,17 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig(PROJECT_ID);
-        JSONObject rankLevel = result.get("rankLevel");
-        System.out.println(rankLevel.toString());
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-e15534273b1e428ebcaa31a46c7a8135");
+//        JSONObject rankLevel = result.get("rankLevel");
+//        System.out.println(rankLevel.toString());
+        System.out.println(result.getData());
     }
+
+    @Test
+    public void testAddRpApplyOpen() throws Exception {
+        Param param = new Param().setParameter("pageSize", 10).setParameter("pageIndex", 0);
+        ApiResponse result = interfaceClient.listRpApplyOpen(param);
+        System.out.println(result.getData());
+    }
+
 }

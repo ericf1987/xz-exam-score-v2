@@ -7,6 +7,8 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.aliyun.ApiClient;
+import com.xz.ajiaedu.common.aliyun.OSSFileClient;
+import com.xz.ajiaedu.common.aliyun.OSSTempCridentialKeeper2;
 import com.xz.ajiaedu.common.redis.Redis;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,6 +23,12 @@ import java.util.List;
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
 public class Config {
+
+    @Value("${oss.bucket.componentupdate}")
+    private String componentUpdateBucketName;
+
+    @Value("${oss.bucket.scorepack}")
+    private String scorePackBucketName;
 
     @Value("${aliyun.api.url}")
     private String aliyunApiUrl;
@@ -67,6 +75,18 @@ public class Config {
             seeds.add(new ServerAddress(host_port[0], Integer.parseInt(host_port[1])));
         }
         return seeds;
+    }
+
+    @Bean
+    public OSSFileClient scorePackOssFileClient() {
+        return new OSSFileClient(new OSSTempCridentialKeeper2(
+                aliyunApiUrl, aliyunApiKey, aliyunApiSecret, scorePackBucketName));
+    }
+
+    @Bean
+    public OSSFileClient componentUpdateOssFileClient() {
+        return new OSSFileClient(new OSSTempCridentialKeeper2(
+                aliyunApiUrl, aliyunApiKey, aliyunApiSecret, componentUpdateBucketName));
     }
 
     @Bean

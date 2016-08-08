@@ -9,16 +9,12 @@ import com.xz.bean.Range;
 import com.xz.services.RangeService;
 import com.xz.services.StudentService;
 import com.xz.services.SubjectService;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.xz.services.SubjectService.getSubjectName;
 
 /**
  * 查询考试科目列表
@@ -63,18 +59,26 @@ public class QueryExamSubjects implements Server {
         }
 
         // 科目信息
-        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+/*        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
         subjectIds.sort(String::compareTo);
 
         examSubjects.addAll(subjectIds.stream().map(subjectId ->
-                getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));
+                getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));*/
+
+        List<Document> subjects = studentService.getSubjectAggrByRange(projectId, range);
+
+        examSubjects.addAll(
+                subjects.stream().map(this::getSubjectInfo2).collect(Collectors.toList())
+        );
+
+        Collections.sort(examSubjects, (Map<String, String> m1, Map<String, String> m2) -> m1.get("subjectId").compareTo(m2.get("subjectId")));
 
         // 总体信息
         Map<String, String> projectInfo = getProjectInfo(projectId, range);
         return Result.success().set("subjects", examSubjects).set("totals", projectInfo);
     }
 
-    private Map<String, String> getSubjectInfo(String projectId, String subjectId, Range range) {
+/*    private Map<String, String> getSubjectInfo(String projectId, String subjectId, Range range) {
         Map<String, String> subjectInfo = new HashMap<>();
 
         subjectInfo.put("subjectId", subjectId);
@@ -84,9 +88,19 @@ public class QueryExamSubjects implements Server {
         subjectInfo.put("studentCount", String.valueOf(studentCount));
 
         return subjectInfo;
+    }*/
+
+    private Map<String, String> getSubjectInfo2(Document doc) {
+        Map<String, String> subjectMap = new HashMap<>();
+        Document one = (Document)doc.get("_id");
+        String subjectId = one.getString("subjectId");
+        subjectMap.put("subjectId", subjectId);
+        subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
+        subjectMap.put("studentCount", doc.getInteger("count").toString());
+        return subjectMap;
     }
 
-    private Map<String, String> getProjectInfo(String projectId, Range range) {
+    public Map<String, String> getProjectInfo(String projectId, Range range) {
         Map<String, String> projectInfo = new HashMap<>();
 
         projectInfo.put("projectId", projectId);

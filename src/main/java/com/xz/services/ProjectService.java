@@ -107,7 +107,8 @@ public class ProjectService {
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
-        String cacheKey = "school_projects:" + schoolId + ":" + examMonth;
+        //为了防止跳转到云报表页面，考试项目无法刷新出新增的考试项目记录，此处不用缓存加载
+/*        String cacheKey = "school_projects:" + schoolId + ":" + examMonth;
         return cache.get(cacheKey, () -> {
             Document query = doc("schools.school", schoolId);
             Document projection = MongoUtils.WITHOUT_INNER_ID.append("schools", 0);
@@ -119,7 +120,17 @@ public class ProjectService {
 
             return new ArrayList<>(toList(scoreDatabase.getCollection("project_list")
                     .find(query).projection(projection).sort(doc("importDate", -1))));
-        });
+        });*/
+        Document query = doc("schools.school", schoolId);
+        Document projection = MongoUtils.WITHOUT_INNER_ID.append("schools", 0);
+
+        if (StringUtil.isNotBlank(examMonth)) {
+            Pattern like = Pattern.compile("^" + examMonth);
+            query.append("importDate", doc("$regex", like));
+        }
+
+        return new ArrayList<>(toList(scoreDatabase.getCollection("project_list")
+                .find(query).projection(projection).sort(doc("importDate", -1))));
     }
 
     /**
