@@ -1,10 +1,10 @@
 package com.xz.controllers;
 
+import com.xz.ajiaedu.common.aliyun.OSSFileClient;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.services.ExportScoreService;
-import com.xz.services.OSSService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 
 /**
  * 导出成绩到 OSS
@@ -30,10 +32,10 @@ public class ScoreExportController {
     private String ossUrlPrefix;        // zip 保存位置
 
     @Autowired
-    OSSService ossService;
+    ExportScoreService exportScoreService;
 
     @Autowired
-    ExportScoreService exportScoreService;
+    OSSFileClient componentUpdateOssFileClient;
 
     /**
      * 导出成绩到阿里云
@@ -57,6 +59,15 @@ public class ScoreExportController {
         }
     }
 
+    /**
+     * 直接上传文件到 OSS （用于组件更新）
+     *
+     * @param file      要上传的文件
+     * @param component 组件名
+     * @param version   版本
+     *
+     * @return 上传结果
+     */
     @RequestMapping(value = "upload-file-to-oss", method = RequestMethod.POST)
     @ResponseBody
     public Result uploadExamZip(
@@ -73,7 +84,7 @@ public class ScoreExportController {
         String ossFilePath = "updates/" + component + "/" + version + "/update.zip";
 
         file.transferTo(FileUtils.getOrCreateFile(saveFilePath));
-        ossService.uploadFile(saveFilePath, ossFilePath);
+        componentUpdateOssFileClient.uploadFile(new File(saveFilePath), ossFilePath);
 
         return Result.success().set("url", ossUrlPrefix + ossFilePath);
     }

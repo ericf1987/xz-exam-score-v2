@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.xz.AppException;
+import com.xz.ajiaedu.common.aliyun.OSSFileClient;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.lang.Value;
@@ -46,7 +47,7 @@ public class ExportScoreService {
     InterfaceClient interfaceClient;
 
     @Autowired
-    OSSService ossService;
+    OSSFileClient scorePackOssFileClient;
 
     /**
      * 导出成绩到阿里云
@@ -57,6 +58,8 @@ public class ExportScoreService {
      * @return 上传后的 oss 文件路径
      */
     public String exportScore(String projectId, boolean notifyInterface) {
+
+        // 本地文件路径
         String filePath = "score-archives/" + UUID.randomUUID().toString() + ".zip";
 
         try {
@@ -80,7 +83,7 @@ public class ExportScoreService {
 
     private String uploadPack(String projectId, String filePath) {
         String ossPath = "webmarking-score-pack/" + projectId + ".zip";
-        ossService.uploadFile(filePath, ossPath);
+        scorePackOssFileClient.uploadFile(new File(filePath), ossPath);
         return ossPath;
     }
 
