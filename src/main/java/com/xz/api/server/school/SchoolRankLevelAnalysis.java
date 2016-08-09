@@ -65,8 +65,9 @@ public class SchoolRankLevelAnalysis implements Server {
         //查询考试配置表中的等级配置参数
         List<String> rankLevelParam = classRankLevelAnalysis.getRankLevelParams(projectId, subjectId);
         Map<String, Object> school = getSchoolMap(projectId, target, schoolId, rankLevelParam);
-        List<Map<String, Object>> classes = getClassList(projectId, target, schoolId, rankLevelParam);
-        return Result.success().set("school", school).set("classes", classes).set("rankLevelParam", rankLevelParam);
+        List<Map<String, Object>> classes = getClassList(projectId, target, schoolId, rankLevelParam, school);
+        return Result.success().set("school", school).set("classes", classes).set("rankLevelParam", rankLevelParam)
+                .set("hasHeader", !rankLevelParam.isEmpty());
     }
 
     private Map<String, Object> getSchoolMap(String projectId, Target target, String schoolId, List<String> rankLevelParam) {
@@ -77,31 +78,35 @@ public class SchoolRankLevelAnalysis implements Server {
 
         //获取给定等第配置参数对应的人数
         List<Map<String, Object>> rankLevelList = rankLevelService.getRankLevelMap(projectId, schoolRange, target);
-        CounterMap map = new CounterMap();
-        for (String param : rankLevelParam){
+        CounterMap inMap = new CounterMap();
+        for (String param : rankLevelParam) {
             rankLevelList.forEach(rankLevel -> {
-                if(format(param).equals(rankLevel.get("rankLevel").toString())){
-                    map.incre(param, Integer.parseInt(rankLevel.get("count").toString()));
+                if (format(param).equals(rankLevel.get("rankLevel").toString())) {
+                    inMap.incre(format(param), Integer.parseInt(rankLevel.get("count").toString()));
                 }
             });
         }
 
-        List<Map<String, Object>> rankLevels = sort(convert(rankLevelParam, map, studentCount));
+        List<Map<String, Object>> rankLevels = sort(convert(rankLevelParam, inMap, studentCount));
+
+        //其他排名段的学生总数
+        int others = studentCount - getCountInRankLevel(rankLevels);
 
         //等第占比
-        rankLevels.forEach(rankLevel -> rankLevel.put("rate", getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount)));
+        rankLevels.forEach(rankLevel -> rankLevel.put("rate", getRate2(Integer.parseInt(rankLevel.get("count").toString()), studentCount)));
         schoolMap.put("studentCount", studentCount);
         schoolMap.put("schoolName", schoolName);
         schoolMap.put("schoolId", schoolId);
+        schoolMap.put("others", others);
         schoolMap.put("rankLevels", rankLevels);
         return schoolMap;
     }
 
-    private List<Map<String, Object>> getClassList(String projectId, Target target, String schoolId, List<String> rankLevelParam) {
+    private List<Map<String, Object>> getClassList(String projectId, Target target, String schoolId, List<String> rankLevelParam, Map<String, Object> school) {
         List<String> classIds = classService.listClasses(projectId, schoolId).stream()
                 .map(document -> document.getString("class")).collect(Collectors.toList());
 
-        int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
+        //int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         String lastRankLevel = projectConfig.getLastRankLevel();
@@ -109,6 +114,7 @@ public class SchoolRankLevelAnalysis implements Server {
         List<Map<String, Object>> classList = new ArrayList<>();
 
         for (String classId : classIds) {
+            int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId));
             List<Document> studentList = studentService.getStudentList(projectId, Range.clazz(classId));
             CounterMap map = new CounterMap();
             //统计每个班级中的学生在学校范围内的等第情况，并做汇总
@@ -119,14 +125,28 @@ public class SchoolRankLevelAnalysis implements Server {
             }
 
             //将CountMap做格式转化
-            List<Map<String, Object>> rankLevels = convert(rankLevelParam, map, studentCount);
+            List<Map<String, Object>> rankLevels = sort(convert0(rankLevelParam, map, school));
+            //给定等第参数下对应的人数总和
+            int rankLevelCount = getCountInRankLevel(rankLevels);
+
             Map<String, Object> clazzMap = new HashMap<>();
             clazzMap.put("rankLevels", rankLevels);
             clazzMap.put("className", classService.getClassName(projectId, classId));
             clazzMap.put("classId", classId);
+            clazzMap.put("studentCount", studentCount);
+            clazzMap.put("others", studentCount - rankLevelCount);
             classList.add(clazzMap);
         }
         return classList;
+    }
+
+    private int getCountInRankLevel(List<Map<String, Object>> rankLevels) {
+        int count = 0;
+        for (Map<String, Object> rankLevel : rankLevels){
+            int c = Integer.parseInt(rankLevel.get("count").toString());
+            count += c;
+        }
+        return count;
     }
 
     private List<Map<String, Object>> convert(List<String> rankLevelParam, CounterMap map, int studentCount) {
@@ -136,7 +156,24 @@ public class SchoolRankLevelAnalysis implements Server {
             Map<String, Object> m = new HashMap<>();
             m.put("rankLevel", format(rankLevel));
             m.put("count", count);
-            m.put("rate", getRate(count, studentCount));
+            m.put("rate", getRate2(count, studentCount));
+            list.add(m);
+        }
+        return list;
+    }
+
+    private List<Map<String, Object>> convert0(List<String> rankLevelParam, CounterMap map, Map<String, Object> school) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        List<Map<String, Object>> studentRankLevels = (List<Map<String, Object>>)school.get("rankLevels");
+        for (int i = 0; i < rankLevelParam.size(); i++) {
+            int count = map.get(format(rankLevelParam.get(i))) == null ? 0 : Integer.parseInt(map.get(format(rankLevelParam.get(i))).toString());
+            //班级所在学校在该等第内的人数
+            int studentCount = Integer.parseInt(studentRankLevels.get(i).get("count").toString());
+            Map<String, Object> m = new HashMap<>();
+            m.put("rankLevel", format(rankLevelParam.get(i)));
+            m.put("count", count);
+            m.put("studentCount", studentCount);
+            m.put("rate", getRate2(count, studentCount));
             list.add(m);
         }
         return list;
@@ -166,20 +203,18 @@ public class SchoolRankLevelAnalysis implements Server {
         } else {
             for (int i = 0; i < numbers.length; i++) {
                 int pos = Integer.parseInt(numbers[i]);
-                for (int j = 0; j < pos; j++) {
+                for (int j = 0; j < pos; j++)
                     builder.append(chars[i + 1]);
-                }
             }
             return builder.toString();
         }
     }
 
-    public String getRate(int count, int studentCount) {
+    public double getRate2(int count, int studentCount) {
         if (studentCount == 0) {
-            return "0%";
+            return 0;
         }
-        double rate = (double) count / (double) studentCount;
-        return DoubleUtils.toPercent(rate);
+        return (double) count / (double) studentCount;
     }
 
 }

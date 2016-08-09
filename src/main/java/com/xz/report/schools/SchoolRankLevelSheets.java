@@ -10,6 +10,7 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.ProjectConfigService;
+import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,7 +91,7 @@ public class SchoolRankLevelSheets extends SheetGenerator {
             for (Map<String, Object> rankLevel : rankLevels) {
                 if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                     excelWriter.set(2, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));
-                    excelWriter.set(2, column.incrementAndGet(), schoolRankLevelAnalysis.getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
+                    excelWriter.set(2, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(rankLevel.get("rate").toString())));
                     break;
                 }
             }
@@ -111,7 +112,7 @@ public class SchoolRankLevelSheets extends SheetGenerator {
                 for (Map<String, Object> rankLevel : rankLevels) {
                     if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                         excelWriter.set(row, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));
-                        excelWriter.set(row, column.incrementAndGet(), schoolRankLevelAnalysis.getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
+                        excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(rankLevel.get("rate").toString())));
                         break;
                     }
                 }
