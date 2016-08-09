@@ -10,7 +10,6 @@ import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
 import com.xz.report.SheetTask;
 import com.xz.services.ProjectConfigService;
-import com.xz.util.DoubleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -91,7 +90,7 @@ public class SchoolRankLevelSheets extends SheetGenerator {
             for (Map<String, Object> rankLevel : rankLevels) {
                 if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                     excelWriter.set(2, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));
-                    excelWriter.set(2, column.incrementAndGet(), getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
+                    excelWriter.set(2, column.incrementAndGet(), schoolRankLevelAnalysis.getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
                     break;
                 }
             }
@@ -112,7 +111,7 @@ public class SchoolRankLevelSheets extends SheetGenerator {
                 for (Map<String, Object> rankLevel : rankLevels) {
                     if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                         excelWriter.set(row, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));
-                        excelWriter.set(row, column.incrementAndGet(), getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
+                        excelWriter.set(row, column.incrementAndGet(), schoolRankLevelAnalysis.getRate(Integer.parseInt(rankLevel.get("count").toString()), studentCount));
                         break;
                     }
                 }
@@ -120,14 +119,6 @@ public class SchoolRankLevelSheets extends SheetGenerator {
             row++;
             column.set(-1);
         }
-    }
-
-    private String getRate(int count, int studentCount) {
-        if (studentCount == 0) {
-            return "0%";
-        }
-        double rate = (double) count / (double) studentCount;
-        return DoubleUtils.toPercent(rate);
     }
 
 }
