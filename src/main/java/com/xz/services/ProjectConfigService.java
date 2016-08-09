@@ -88,7 +88,6 @@ public class ProjectConfigService {
      * 获取指定项目的配置
      *
      * @param projectId 项目ID
-     *
      * @return 项目配置
      */
     public ProjectConfig getProjectConfig(String projectId) {
@@ -127,6 +126,14 @@ public class ProjectConfigService {
 
         if (projectConfig.getRankSegmentCount() == 0) {
             projectConfig.setRankSegmentCount(defaultConfig.getRankSegmentCount());
+        }
+
+        if (projectConfig.getRankLevelCombines() == null || projectConfig.getRankLevelCombines().isEmpty()) {
+            projectConfig.setRankLevelCombines(defaultConfig.getRankLevelCombines());
+        }
+
+        if (projectConfig.getTopStudentRate() == 0) {
+            projectConfig.setTopStudentRate(defaultConfig.getTopStudentRate());
         }
 
         return projectConfig;

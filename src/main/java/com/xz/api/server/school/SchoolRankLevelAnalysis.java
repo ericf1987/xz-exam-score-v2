@@ -75,16 +75,17 @@ public class SchoolRankLevelAnalysis implements Server {
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
         int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
 
-        //将rankLevelParam之外的数据过滤掉
+        //获取给定等第配置参数对应的人数
         List<Map<String, Object>> rankLevelList = rankLevelService.getRankLevelMap(projectId, schoolRange, target);
         CounterMap map = new CounterMap();
         for (String param : rankLevelParam){
             rankLevelList.forEach(rankLevel -> {
-                if(param.equals(rankLevel.get("rankLevel").toString())){
+                if(format(param).equals(rankLevel.get("rankLevel").toString())){
                     map.incre(param, Integer.parseInt(rankLevel.get("count").toString()));
                 }
             });
         }
+
         List<Map<String, Object>> rankLevels = sort(convert(rankLevelParam, map, studentCount));
 
         //等第占比
