@@ -57,7 +57,7 @@ public class QueryProjectProgess implements Server{
         }else if (status.startsWith("Report")){
             return "4";
         }
-        return "0";
+        return "1";
     }
 
 }

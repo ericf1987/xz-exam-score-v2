@@ -45,6 +45,19 @@ public class ProjectConfig implements Serializable {
      */
     private String startDate;
 
+    /**
+     * 尖子生比率
+     */
+    private double topStudentRate;
+
+    public double getTopStudentRate() {
+        return topStudentRate;
+    }
+
+    public void setTopStudentRate(double topStudentRate) {
+        this.topStudentRate = topStudentRate;
+    }
+
     public ProjectConfig() {
     }
 
