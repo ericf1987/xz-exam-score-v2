@@ -38,8 +38,8 @@ public class SchoolRankLevelSheetsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateSheet() throws Exception {
-        String projectId = "430200-b73f03af1d74484f84f1aa93f583caaa";
-        Range range = Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700");
+        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+        Range range = Range.school("d00faaa0-8a9b-45c4-ae16-ea2688353cd0");
         schoolRankLevelReport.generate(projectId, range, "target/school-rank-level.xlsx");
     }
 

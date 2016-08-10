@@ -70,7 +70,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById("430100-e15534273b1e428ebcaa31a46c7a8135");
+        JSONObject project = interfaceClient.queryProjectById("430100-405f6648c79545d589687a1d0763fc9f");
         System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
