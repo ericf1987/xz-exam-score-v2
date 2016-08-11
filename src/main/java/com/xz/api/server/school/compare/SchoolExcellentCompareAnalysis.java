@@ -68,7 +68,8 @@ public class SchoolExcellentCompareAnalysis implements Server {
         List<Map<String, Object>> classExcellentList = getClassExcellentList(projectId, schoolId, target, projectList);
         return Result.success()
                 .set("school", schoolExcellentMap)
-                .set("classes", classExcellentList);
+                .set("classes", classExcellentList)
+                .set("hasHeader", !schoolExcellentMap.isEmpty());
     }
 
     private Map<String, Object> getSchoolExcellentMap(String projectId, String schoolId, Target target, List<Document> projectList) {

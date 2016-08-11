@@ -65,7 +65,8 @@ public class SchoolPassCompareAnalysis implements Server {
         List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, target, projectList);
         return Result.success()
                 .set("school", schoolPassRateMap)
-                .set("classes", classPassRateList);
+                .set("classes", classPassRateList)
+                .set("hasHeader", !schoolPassRateMap.isEmpty());
     }
 
     private Map<String, Object> getSchoolPassRateMap(String projectId, String schoolId, Target target, List<Document> projectList) {

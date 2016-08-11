@@ -64,7 +64,8 @@ public class SchoolAverageCompareAnalysis implements Server {
         List<Map<String, Object>> classAverageList = getClassAverageList(projectId, schoolId, target, projectList);
         return Result.success()
                 .set("school", schoolAverageMap)
-                .set("classes", classAverageList);
+                .set("classes", classAverageList)
+                .set("hasHeader", !schoolAverageMap.isEmpty());
     }
 
     private Map<String, Object> getSchoolAverageMap(String projectId, String schoolId, Target target, List<Document> projectList) {
