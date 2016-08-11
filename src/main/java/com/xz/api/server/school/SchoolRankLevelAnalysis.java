@@ -221,6 +221,26 @@ public class SchoolRankLevelAnalysis implements Server {
         }
     }
 
+    //格式化等第参数 例如将AAAABC转化成4A1B1C
+    public String format2(String str){
+        //数组存放对应26个字母的出现次数比如a[0]的值对应字母A出现的次数，a[2]的值对应C出现的次数。。。
+        int[] arr = new int[26];
+
+        for(int i = 0; i < str.length();i++){
+            char c = str.charAt(i);
+            int index = c - 'A';
+            arr[index] = arr[index] + 1;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for(int j = 0; j < arr.length; j++){
+            if(arr[j] != 0){
+                builder.append(arr[j]).append("").append((char) (j + 'A'));
+            }
+        }
+        return builder.toString();
+    }
+
     public double getRate2(int count, int studentCount) {
         if (studentCount == 0) {
             return 0;

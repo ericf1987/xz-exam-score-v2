@@ -95,7 +95,7 @@ public class ClassRankLevelAnalysis implements Server {
             double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
             studentInfo.put("projectScore", score);
             String projectRankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.project(projectId), Range.SCHOOL, lastRankLevel);
-            studentInfo.put("ProjectRankLevel", getProjectRankLevelConfig(projectRankLevel, projectConfig.getRankLevelCombines()));
+            studentInfo.put("ProjectRankLevel", scholRankLevelAnalysis.format2(projectRankLevel));
 
 
             for(String subjectId : subjectIds){
@@ -128,14 +128,6 @@ public class ClassRankLevelAnalysis implements Server {
                 .set("studentInfos", studentInfos)
                 .set("rankLevelsConfig", rankLevelsConfig)
                 .set("hasHeader", !studentInfos.isEmpty());
-    }
-
-    private String getProjectRankLevelConfig(String projectRankLevel, List<String> rankLevelCombines) {
-        for(String rankLevelCombine : rankLevelCombines){
-            if(projectRankLevel.equals(scholRankLevelAnalysis.format(rankLevelCombine)))
-                return rankLevelCombine;
-        }
-        return projectRankLevel;
     }
 
     public List<String> getRankLevelParams(String projectId, String subjectId) {
