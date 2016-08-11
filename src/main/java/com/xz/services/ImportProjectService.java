@@ -146,6 +146,7 @@ public class ImportProjectService {
         return rankLevels;
     }
 
+    //判断是否文理分科
     private boolean JudgeCombine(List<String> modelSubjects) {
         for (String subject : modelSubjects) {
             if (subject.equals("004005006") || subject.equals("007008009")) return true;

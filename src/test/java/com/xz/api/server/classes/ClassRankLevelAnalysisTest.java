@@ -1,6 +1,7 @@
 package com.xz.api.server.classes;
 
 import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.bean.Range;
 import com.xz.services.StudentService;
@@ -25,7 +26,8 @@ public class ClassRankLevelAnalysisTest extends XzExamScoreV2ApplicationTests{
         Param param = new Param()
                 .setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
                 .setParameter("classId", "048eb56f-a105-4992-8228-0e436c9e4670");
-        classRankLevelAnalysis.execute(param);
+        Result result = classRankLevelAnalysis.execute(param);
+        System.out.println(result.getData());
 /*        List<Document> studentDoc = studentService.getStudentList("430100-e7bd093d92d844819c7eda8b641ab6ee", Range.clazz("048eb56f-a105-4992-8228-0e436c9e4670"));
         System.out.println(studentDoc.toString());*/
     }
