@@ -53,8 +53,7 @@ public class ReportItemService {
      * 查询指定项目报表条目信息
      *
      * @param projectId 考试项目id
-     *
-     * @return  报表条目信息
+     * @return 报表条目信息
      */
     public Map<String, Object> querySchoolReportItems(String projectId) {
         String cacheKey = "school_report_items:" + projectId;
@@ -148,8 +147,7 @@ public class ReportItemService {
      * 查询指定范围的报表条目列表(包括通用报表与自定义报表)
      *
      * @param range 范围
-     *
-     * @return  报表分类列表
+     * @return 报表分类列表
      */
     public Map<String, List<Document>> queryReportItems(Range range) {
         String cacheKey = "report_item_list:" + range;
@@ -192,11 +190,11 @@ public class ReportItemService {
     /**
      * 添加一个报表条目
      *
-     * @param range             范围
-     * @param type              类型
-     * @param name              报表名称
-     * @param collectionNames   报表数据来源的集合名称
-     * @param serverName        报表接口名称
+     * @param range           范围
+     * @param type            类型
+     * @param name            报表名称
+     * @param collectionNames 报表数据来源的集合名称
+     * @param serverName      报表接口名称
      */
     public void addReportItem(Range range, String type, String name,
                               String[] collectionNames, String serverName) {
@@ -215,12 +213,12 @@ public class ReportItemService {
     /**
      * 更新报表属性
      *
-     * @param id                条目id
-     * @param type              报表类型
-     * @param name              条目名称
-     * @param collectionNames   集合名称列表
-     * @param serverName        报表接口名称
-     * @param position          排序的位置
+     * @param id              条目id
+     * @param type            报表类型
+     * @param name            条目名称
+     * @param collectionNames 集合名称列表
+     * @param serverName      报表接口名称
+     * @param position        排序的位置
      */
     public void updateReportItem(String id, String type, String name, String[] collectionNames,
                                  String serverName, String position) {
@@ -244,7 +242,7 @@ public class ReportItemService {
     /**
      * 删除指定条目
      *
-     * @param id    条目id
+     * @param id 条目id
      */
     public void deleteReportItem(String id) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("report_item_list");
@@ -257,7 +255,8 @@ public class ReportItemService {
     public enum ReportType {
         basics,     // 基础报表
         paper,      // 试卷分析报表
-        topStudent  // 尖子生分析
+        topStudent,  // 尖子生分析
+        compare     // 比较类报表
     }
 
     //////////////////////////////////////////////////////////      报表范围

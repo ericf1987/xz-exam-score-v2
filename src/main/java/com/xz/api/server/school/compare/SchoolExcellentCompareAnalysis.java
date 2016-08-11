@@ -10,6 +10,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,7 +88,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
             double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
             excellent.put("projectName", projectName);
             excellent.put("startDate", startDate);
-            excellent.put("rate", rate);
+            excellent.put("rate", DoubleUtils.round(rate, true));
             excellents.add(excellent);
         });
 
@@ -116,7 +117,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
                 double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
                 excellent.put("projectName", projectDoc.getString("name"));
                 excellent.put("startDate", startDate);
-                excellent.put("rate", rate);
+                excellent.put("rate", DoubleUtils.round(rate, true));
                 excellents.add(excellent);
             });
             Map<String, Object> map = new HashMap<>();
@@ -131,7 +132,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
     private double getScoreLevelRate(List<Document> scoreLevels, Keys.ScoreLevel excellent) {
         for (Document doc : scoreLevels) {
             if (doc.getString("scoreLevel").equals(excellent.name())) {
-                return doc.getDouble("rate");
+                return DoubleUtils.round(doc.getDouble("rate"), true);
             }
         }
         return 0d;
