@@ -34,12 +34,6 @@ public class ClassRankLevelAnalysis implements Server {
     StudentService studentService;
 
     @Autowired
-    SchoolService schoolService;
-
-    @Autowired
-    ClassService classService;
-
-    @Autowired
     RankLevelService rankLevelService;
 
     @Autowired

@@ -494,9 +494,7 @@ public class ImportProjectService {
 
     //从zip包读取学生信息
     public void importStudentInfoFromZip(ZipFileReader zipFileReader) throws Exception {
-        zipFileReader.readZipEntries("*", consumer -> {
-            readEntry(consumer, zipFileReader);
-        });
+        zipFileReader.readZipEntries("*", consumer -> readEntry(consumer, zipFileReader));
     }
 
     private void readEntry(ZipEntry entry, ZipFileReader zipFileReader) {
