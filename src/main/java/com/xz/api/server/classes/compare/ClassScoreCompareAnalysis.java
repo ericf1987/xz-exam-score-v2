@@ -22,7 +22,7 @@ import java.util.Map;
  * @author by fengye on 2016/7/26.
  */
 
-@Function(description = "班级成绩-能力层级分析", parameters = {
+@Function(description = "班级成绩-分数对比", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目id,默认第一个科目", required = false),
         @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)

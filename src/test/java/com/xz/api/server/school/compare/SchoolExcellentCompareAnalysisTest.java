@@ -18,8 +18,8 @@ public class SchoolExcellentCompareAnalysisTest extends XzExamScoreV2Application
     @Test
     public void testExecute() throws Exception {
         Param param = new Param()
-                .setParameter("projectId", "430200-b73f03af1d74484f84f1aa93f583caaa")
-                .setParameter("schoolId", "200f3928-a8bd-48c4-a2f4-322e9ffe3700")
+                .setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
+                .setParameter("schoolId", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0")
                 .setParameter("subjectId", "001");
         System.out.println(schoolExcellentCompareAnalysis.execute(param).getData());
     }

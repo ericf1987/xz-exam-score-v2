@@ -8,10 +8,7 @@ import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
-import com.xz.services.AverageService;
-import com.xz.services.ClassService;
-import com.xz.services.ProjectService;
-import com.xz.services.SchoolService;
+import com.xz.services.*;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +24,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 @Function(description = "学校成绩-平均分对比", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
+        @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = false),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true)
 })
 @Service
@@ -45,6 +42,9 @@ public class SchoolAverageCompareAnalysis implements Server {
     @Autowired
     AverageService averageService;
 
+    @Autowired
+    TargetService targetService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -58,26 +58,29 @@ public class SchoolAverageCompareAnalysis implements Server {
         List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectList = projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
 
-        Map<String, Object> schoolAverageMap = getSchoolAverageMap(projectId, schoolId, subjectId, projectList);
-        List<Map<String, Object>> classAverageList = getClassAverageList(projectId, schoolId, subjectId, projectList);
+        Target target = targetService.getTarget(projectId, subjectId);
+
+        Map<String, Object> schoolAverageMap = getSchoolAverageMap(projectId, schoolId, target, projectList);
+        List<Map<String, Object>> classAverageList = getClassAverageList(projectId, schoolId, target, projectList);
         return Result.success()
                 .set("school", schoolAverageMap)
-                .set("classes", classAverageList)
-                .set("projectList", projectList);
+                .set("classes", classAverageList);
     }
 
-    private Map<String, Object> getSchoolAverageMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {
+    private Map<String, Object> getSchoolAverageMap(String projectId, String schoolId, Target target, List<Document> projectList) {
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> averages = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = format.format(Calendar.getInstance().getTime());
+
+
         //查询学校的考试记录
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
         projectList.stream().forEach(projectDoc -> {
             Map<String, Object> average = new HashMap<>();
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");
-            double score = averageService.getAverage(projectDoc.getString("project"), Range.school(schoolId), subjectId == null ? Target.project(projectDoc.getString("project")) : Target.subject(subjectId));
+            double score = averageService.getAverage(projectDoc.getString("project"), Range.school(schoolId), target);
             average.put("projectName", projectName);
             average.put("startDate", startDate);
             average.put("score", score);
@@ -91,7 +94,7 @@ public class SchoolAverageCompareAnalysis implements Server {
         return map;
     }
 
-    private List<Map<String, Object>> getClassAverageList(String projectId, String schoolId, String subjectId, List<Document> projectList) {
+    private List<Map<String, Object>> getClassAverageList(String projectId, String schoolId, Target target, List<Document> projectList) {
         List<Document> classList = classService.listClasses(projectId, schoolId);
         List<Map<String, Object>> classes = new ArrayList<>();
 
@@ -105,7 +108,7 @@ public class SchoolAverageCompareAnalysis implements Server {
             projectList.stream().forEach(projectDoc -> {
                 Map<String, Object> average = new HashMap<>();
                 String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
-                double score = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), subjectId == null ? Target.project(projectDoc.getString("project")) : Target.subject(subjectId));
+                double score = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), target);
                 average.put("projectName", projectDoc.getString("name"));
                 average.put("startDate", startDate);
                 average.put("score", score);
