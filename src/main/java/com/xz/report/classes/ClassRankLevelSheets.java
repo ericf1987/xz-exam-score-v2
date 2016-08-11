@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -46,9 +47,9 @@ public class ClassRankLevelSheets extends SheetGenerator {
     private void setHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "姓名");
-        List<String> subjectList = result.get("subjectList");
-        for (String subjectId : subjectList){
-            excelWriter.set(0, column.incrementAndGet(), SubjectService.getSubjectName(subjectId));
+        List<Map<String, Object>> subjectScoreList = result.get("subjectScoreList");
+        for (Map<String, Object> subjectScore : subjectScoreList){
+            excelWriter.set(0, column.incrementAndGet(), subjectScore.get("subjectName") + "(" + subjectScore.get("score") + ")");
             excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
         }
         excelWriter.set(0, column.incrementAndGet(), "合计");
