@@ -6,6 +6,7 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
+import com.xz.api.server.school.SchoolRankLevelAnalysis;
 import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
@@ -50,6 +51,12 @@ public class ClassRankLevelAnalysis implements Server {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    FullScoreService fullScoreService;
+
+    @Autowired
+    SchoolRankLevelAnalysis scholRankLevelAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -57,10 +64,22 @@ public class ClassRankLevelAnalysis implements Server {
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         String lastRankLevel = projectConfig.getLastRankLevel();
-
+        Map<String, Double> rankLevelsConfig = projectConfig.getRankLevels();
         List<Map<String, Object>> studentInfos = new ArrayList<>();
 
         List<String> subjectIds = subjectService.querySubjects(projectId);
+
+        List<Map<String, Object>> subjectScoreList = new ArrayList<>();
+
+        subjectIds.forEach(subjectId -> {
+            String subjectName = SubjectService.getSubjectName(subjectId);
+            //double score = scoreService.getScore(projectId, Range.clazz(classId), Target.subject(subjectId));
+            double fullScore = fullScoreService.getFullScore(projectId, Target.subject(subjectId));
+            Map<String, Object> map = new HashMap<>();
+            map.put("subjectName", subjectName);
+            map.put("score", fullScore);
+            subjectScoreList.add(map);
+        });
 
         //遍历班级学生
         List<Document> studentDoc = studentService.getStudentList(projectId, Range.clazz(classId));
@@ -75,8 +94,8 @@ public class ClassRankLevelAnalysis implements Server {
             studentInfo.put("studentId", studentId);
             double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
             studentInfo.put("projectScore", score);
-            String ProjectRankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.project(projectId), Range.SCHOOL, lastRankLevel);
-            studentInfo.put("ProjectRankLevel", ProjectRankLevel);
+            String projectRankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.project(projectId), Range.SCHOOL, lastRankLevel);
+            studentInfo.put("ProjectRankLevel", getProjectRankLevelConfig(projectRankLevel, projectConfig.getRankLevelCombines()));
 
 
             for(String subjectId : subjectIds){
@@ -87,6 +106,7 @@ public class ClassRankLevelAnalysis implements Server {
                 subjectMap.put("subjectRankLevel", subjectRankLevel);
                 subjectMap.put("subjectScore", subjectScore);
                 subjectMap.put("subjectId", subjectId);
+                subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
                 subjectList.add(subjectMap);
             }
             studentInfo.put("subject", subjectList);
@@ -102,12 +122,20 @@ public class ClassRankLevelAnalysis implements Server {
             return s2.compareTo(s1);
         });
 
-        Result result = new Result()
+        return new Result()
                 .set("subjectList", subjectIds)
-                .set("studentInfos", studentInfos);
+                .set("subjectScoreList", subjectScoreList)
+                .set("studentInfos", studentInfos)
+                .set("rankLevelsConfig", rankLevelsConfig)
+                .set("hasHeader", !studentInfos.isEmpty());
+    }
 
-        System.out.println(result.getData());
-        return result;
+    private String getProjectRankLevelConfig(String projectRankLevel, List<String> rankLevelCombines) {
+        for(String rankLevelCombine : rankLevelCombines){
+            if(projectRankLevel.equals(scholRankLevelAnalysis.format(rankLevelCombine)))
+                return rankLevelCombine;
+        }
+        return projectRankLevel;
     }
 
     public List<String> getRankLevelParams(String projectId, String subjectId) {

@@ -111,4 +111,12 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         config.setRankSegmentCount(20);
         projectConfigService.replaceProjectConfig(config);
     }
+
+    @Test
+    public void testGetProjectConfig() throws Exception {
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig("430100-405f6648c79545d589687a1d0763fc9f");
+        System.out.println(projectConfig.getTopStudentRate());
+        System.out.println(projectConfig.getRankLevels());
+        System.out.println(projectConfig.getRankLevelCombines().toString());
+    }
 }
