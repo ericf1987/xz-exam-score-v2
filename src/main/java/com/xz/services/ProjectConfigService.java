@@ -56,6 +56,21 @@ public class ProjectConfigService {
         collection.insertOne(projectConfigDoc);
     }
 
+    /**
+     * 更新报表配置中的等第配置
+     */
+    public void updateRankLevelConfig(ProjectConfig projectConfig){
+        MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
+        collection.updateMany(doc("projectId", projectConfig.getProjectId()), $set(
+                doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
+                        .append("rankLevels", projectConfig.getRankLevels())
+                        .append("rankLevelCombines", projectConfig.getRankLevelCombines())
+                        .append("scoreLevels", projectConfig.getScoreLevels())
+                        .append("topStudentRate", projectConfig.getTopStudentRate())
+                        .append("lastRankLevel", projectConfig.getLastRankLevel())
+                        .append("rankSegmentCount", projectConfig.getRankSegmentCount())
+        ), UPSERT);
+    }
 
     /**
      * 更新报表配置中的等第配置
@@ -64,14 +79,23 @@ public class ProjectConfigService {
      * @param rankLevels        等第比例配置
      * @param isCombine         是否合并文理科
      * @param rankLevelCombines 展示的等第组合列表
+     * @param scoreLevels       展示的分数等级
+     * @param topStudentRate    展示的尖子生比例
+     *
      */
     public void updateRankLevelConfig(
-            String projectId, Map<String, Double> rankLevels, boolean isCombine, List<String> rankLevelCombines) {
+            String projectId, Map<String, Double> rankLevels, boolean isCombine,
+            List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
+            String lastRankLevel, int rankSegmentCount) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
                         .append("rankLevels", rankLevels)
                         .append("rankLevelCombines", rankLevelCombines)
+                        .append("scoreLevels", scoreLevels)
+                        .append("topStudentRate", topStudentRate)
+                        .append("lastRankLevel", lastRankLevel)
+                        .append("rankSegmentCount", rankSegmentCount)
         ), UPSERT);
     }
 

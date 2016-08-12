@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
 
 /**
  * (description)
@@ -120,19 +121,57 @@ public class ImportProjectService {
     protected void importProjectReportConfig(String projectId, Context context) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
         JSONObject rankLevel = result.get("rankLevel");
+        JSONObject scoreLevels = result.get("scoreLevels");
+        JSONObject topStudentRatio = result.get("topStudentRatio");
+        Map<String, Double> scoreLevelsMap = new HashMap<>();
 
         if (null != rankLevel) {
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
             Map<String, Object> standard = (Map<String, Object>) rankLevel.get("standard");
             Map<String, Double> rankLevels = formatRankLevel(standard);
             boolean isCombine = JudgeCombine((List<String>) rankLevel.get("modelSubjects"));
-            projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions);
+            //尖子生比例
+            Double topStudentRate = 0.05;
+
+            //获取和分数等级参数
+            if (null != scoreLevels && !scoreLevels.isEmpty()) {
+                scoreLevelsMap.put(Excellent.name(), (Double) scoreLevels.get("excellent"));
+                scoreLevelsMap.put(Good.name(), (Double) scoreLevels.get("good"));
+                scoreLevelsMap.put(Pass.name(), (Double) scoreLevels.get("pass"));
+                scoreLevelsMap.put(Fail.name(), (Double) scoreLevels.get("fail"));
+            }
+
+            //获取尖子生比例
+            if (null != topStudentRatio && !topStudentRatio.isEmpty()) {
+                //topStudentRate = Double.parseDouble(topStudentRatio.get("ratio").toString());
+                topStudentRate = (Double) topStudentRatio.get("ratio");
+            }
+
+            //构建新的考试配置
+            ProjectConfig projectConfig = new ProjectConfig();
+            projectConfig.setProjectId(projectId);
+            projectConfig.setRankLevels(rankLevels);
+            projectConfig.setCombineCategorySubjects(isCombine);
+            projectConfig.setRankLevelCombines(displayOptions);
+            projectConfig.setScoreLevels(scoreLevelsMap);
+            projectConfig.setTopStudentRate(topStudentRate);
+            projectConfigService.fixProjectConfig(projectConfig);
+
+            //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
+            projectConfigService.updateRankLevelConfig(projectConfig);
 
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
 
         } else {
-            projectConfigService.updateRankLevelConfig(projectId, Collections.emptyMap(), false, Collections.emptyList());
-            context.put("projectConfig", new ProjectConfig(projectId));
+            ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
+            projectConfigService.updateRankLevelConfig(projectId,
+                    projectConfig.getRankLevels(), projectConfig.isCombineCategorySubjects(),
+                    projectConfig.getRankLevelCombines(), projectConfig.getScoreLevels(),
+                    projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
+                    projectConfig.getRankSegmentCount());
+            //projectConfigService.updateRankLevelConfig(projectConfig);
+            context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
     }
 
