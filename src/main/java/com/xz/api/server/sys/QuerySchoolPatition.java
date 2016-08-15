@@ -6,7 +6,6 @@ import com.xz.api.annotation.Function;
 import com.xz.api.annotation.Parameter;
 import com.xz.api.annotation.Type;
 import com.xz.api.server.Server;
-import com.xz.services.DictionaryService;
 import com.xz.services.SchoolService;
 import com.xz.services.SchoolTagService;
 import org.bson.Document;
@@ -21,6 +20,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/8/3.
  */
+@SuppressWarnings("unchecked")
 @Function(description = "根据考试项目ID该考试所有学校的标签",
         parameters = {
                 @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
@@ -38,33 +38,33 @@ public class QuerySchoolPatition implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        List<Document> schoolTagsList = QuerySchoolTagsList(projectId);
+        List<Map<String, Object>> schoolTagsList = querySchoolTagsList(projectId);
         return Result.success().set("schoolTagsList", schoolTagsList);
     }
 
-    //查询考试项目下所有tags
-    private List<Document> QuerySchoolTagsList(String projectId) {
-        List<Document> schoolList = schoolService.getProjectSchools(projectId);
-        //获取所有Tags中的key
-        List<String> keys = new ArrayList<>();
-        schoolList.forEach(document -> {
-            List<String> tags = (List<String>) document.get("tags");
-            if (null != tags && !tags.isEmpty()) {
-                tags.forEach(key ->{
-                    if (!keys.contains(key))
-                        keys.add(key);
-                });
+    private List<Map<String, Object>> querySchoolTagsList(String projectId) {
+        List<Document> tags = schoolService.findSchoolIdsByTags(projectId);
+        List<Map<String, Object>> schoolTags = new ArrayList<>();
+        for (Document tag : tags) {
+            List<String> tagNames = new ArrayList();
+            List<String> tagIds = (List<String>) tag.get("_id");
+            for (String tagId : tagIds) {
+                tagNames.add(schoolTagService.findTagNameByKey(tagId));
             }
-        });
-        //根据tags中的key获取字典项
-        return getDictionariesByTypes(keys);
-    }
-
-    private List<Document> getDictionariesByTypes(List<String> types){
-        String[] arrs = new String[types.size()];
-        types.toArray(arrs);
-        List<Document> tags = schoolTagService.findTagsByKeys(arrs);
-        return tags;
+            List<Map<String, String>> schoolList = new ArrayList<>();
+            for (String schoolId : (List<String>) tag.get("schoolIds")) {
+                Map<String, String> schoolMap = new HashMap<>();
+                schoolMap.put("schoolId", schoolId);
+                schoolMap.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
+                schoolList.add(schoolMap);
+            }
+            Map<String, Object> oneTag = new HashMap<>();
+            oneTag.put("tagIds", tagIds);
+            oneTag.put("tagNames", tagNames);
+            oneTag.put("schools", schoolList);
+            schoolTags.add(oneTag);
+        }
+        return schoolTags;
     }
 
 }

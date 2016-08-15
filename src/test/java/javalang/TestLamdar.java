@@ -57,16 +57,7 @@ public class TestLamdar {
 
     public static void main(String[] args) {
         //new TestLamdar().test3();
-        Map<String, String> map1 = new HashMap<>();
-        map1.put("name", "冯也");
-        map1.put("sex", "fale");
-        Map<String, String> map2 = new HashMap<>();
-        map2.put("name", "冯也2");
-        map2.put("sex", "fale");
-        List<String> l1 = new ArrayList<>();
-        l1.addAll(map1.keySet());
-        l1.addAll(map2.keySet());
-        l1.forEach(System.out::println);
+        List<String> list1 = Arrays.asList("1", "2", "4");
 
 //        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
 //        Converter<String, Integer> converter = Integer::valueOf;

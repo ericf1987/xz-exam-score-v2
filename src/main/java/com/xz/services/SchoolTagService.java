@@ -26,8 +26,8 @@ public class SchoolTagService {
     /**
      * 根据标签的多个key查询标签
      */
-    public List<Document> findTagsByKeys(String... key){
-        String cacheKey = "school_tags:" + key;
+    public List<Document> findTagsByKeys(String... key) {
+        String cacheKey = "school_tags:" + "list:" + key;
         return cache.get(cacheKey, () -> {
             ArrayList<Document> result = new ArrayList<>();
             MongoCollection<Document> school_tags = scoreDatabase.getCollection("school_tags");
@@ -39,11 +39,23 @@ public class SchoolTagService {
     /**
      * 根据单个key查询标签
      */
-    public Document findOneTagByKey(String key){
+    public Document findOneTagByKey(String key) {
         String cacheKey = "school_tags:" + key;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> school_tags = scoreDatabase.getCollection("school_tags");
             return school_tags.find(doc("key", key)).projection(WITHOUT_INNER_ID).first();
         });
     }
+
+    /**
+     * 根据单个key查询标签
+     */
+    public String findTagNameByKey(String key) {
+        Document tag = findOneTagByKey(key);
+        if (null == tag) {
+            return "";
+        }
+        return tag.getString("value");
+    }
+
 }

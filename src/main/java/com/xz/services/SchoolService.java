@@ -1,6 +1,7 @@
 package com.xz.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -149,6 +151,18 @@ public class SchoolService {
         result.addAll(toList(c.find(doc).projection(doc("school", 1).append("name", 1).append("tags", 1))));
 
         return result;
+    }
+
+    /**
+     * 根据标签分组查询，列出所有对应标签分组对应的学校ID数组
+     */
+    public List<Document> findSchoolIdsByTags(String projectId) {
+        MongoCollection<Document> school_tags = scoreDatabase.getCollection("school_list");
+        AggregateIterable<Document> aggregate = school_tags.aggregate(Arrays.asList(
+                $match("project", projectId),
+                $group(doc("_id", "$tags").append("schoolIds", doc("$push", "$school")))
+        ));
+        return toList(aggregate);
     }
 
 }
