@@ -59,12 +59,18 @@ public class QuerySchoolPatition implements Server {
                 schoolList.add(schoolMap);
             }
             Map<String, Object> oneTag = new HashMap<>();
-            oneTag.put("tagIds", tagIds);
-            oneTag.put("tagNames", tagNames);
+            oneTag.put("tagNames", list2string(tagNames));
             oneTag.put("schools", schoolList);
             schoolTags.add(oneTag);
         }
         return schoolTags;
+    }
+
+    private String list2string(List<String> tagNames) {
+        StringBuilder builder = new StringBuilder();
+        tagNames.forEach(tagName -> builder.append(tagName).append(","));
+        String result = builder.toString();
+        return result.substring(0, result.length() - 1);
     }
 
 }
