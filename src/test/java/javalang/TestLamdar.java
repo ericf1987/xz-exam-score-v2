@@ -1,8 +1,6 @@
 package javalang;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -58,7 +56,18 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-        new TestLamdar().test3();
+        //new TestLamdar().test3();
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("name", "冯也");
+        map1.put("sex", "fale");
+        Map<String, String> map2 = new HashMap<>();
+        map2.put("name", "冯也2");
+        map2.put("sex", "fale");
+        List<String> l1 = new ArrayList<>();
+        l1.addAll(map1.keySet());
+        l1.addAll(map2.keySet());
+        l1.forEach(System.out::println);
+
 //        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
 //        Converter<String, Integer> converter = Integer::valueOf;
 //        Integer integer = converter.convert("1980");

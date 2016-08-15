@@ -22,7 +22,8 @@ public class AddReportItemTest extends XzExamScoreV2ApplicationTests {
     public void testExecute() throws Exception {
 
         String[] collectionNames = new String[]{
-                "score", "total_score"
+                //"score", "total_score"
+                "rank_level_map"
         };
 
         Param param = new Param()
@@ -31,7 +32,7 @@ public class AddReportItemTest extends XzExamScoreV2ApplicationTests {
                 .setParameter("rangeName", "clazz")
                 .setParameter("rangeId", ReportItemService.COMMON_RANGE_ID)
                 .setParameter("collectionNames", collectionNames)
-                .setParameter("serverName", "ClassScoreCompareAnalysis");
+                .setParameter("serverName", "ClassRankLevelAnalysis");
         Result result = addReportItem.execute(param);
         System.out.println(result.getData());
     }

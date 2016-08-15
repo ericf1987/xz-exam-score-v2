@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,7 +44,7 @@ public class ProjectScoreAnalysisTest extends XzExamScoreV2ApplicationTests {
                 .setParameter("isInCity", "true").setParameter("isGovernmental", "true");
         Result result = projectScoreAnalysis.execute(param);
         System.out.println(result.getData());*/
-        String[] schoolIds = projectScoreAnalysis.filterByTags(projectId, null, null);
+        String[] schoolIds = projectScoreAnalysis.filterByTags(projectId, Arrays.asList("1", "3"));
         for (String schoolId : schoolIds){
             System.out.println(schoolId);
         }

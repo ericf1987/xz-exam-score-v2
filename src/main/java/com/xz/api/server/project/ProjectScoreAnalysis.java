@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +28,7 @@ import java.util.stream.Collectors;
 @Function(description = "总体成绩-分数分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = false),
-        @Parameter(name = "isInCity", type = Type.String, description = "是否是城区学校", required = false),
-        @Parameter(name = "isGovernmental", type = Type.String, description = "是否是公办学校", required = false),
+        @Parameter(name = "schoolTags", type = Type.StringArray, description = "标签参数", required = false),
         @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校id列表", required = true)
 })
 @Service
@@ -74,10 +70,10 @@ public class ProjectScoreAnalysis implements Server {
     RangeService rangeService;
 
     //根据标签过滤学校ID
-    public String[] filterByTags(String projectId, String isIncity, String isGovernmental) {
+    public String[] filterByTags(String projectId, List<String> tags) {
 
-        List<String> schools = schoolService.getSchoolsByTags(projectId, isIncity, isGovernmental).stream()
-            .map(document -> document.getString("school")).collect(Collectors.toList());
+        List<String> schools = schoolService.getSchoolsByTags(projectId, tags).stream()
+                .map(document -> document.getString("school")).collect(Collectors.toList());
 
         return schools.toArray(new String[schools.size()]);
     }
@@ -86,12 +82,12 @@ public class ProjectScoreAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
-        String isIncity = param.getString("isInCity") != null ? param.getString("isInCity") : null;
-        String isGovernmental = param.getString("isGovernmental") != null ? param.getString("isGovernmental") : null;
+        String[] tags = param.getStringValues("schoolTags");
         String[] schoolIds = param.getStringValues("schoolIds");
 
-        if(null == schoolIds || schoolIds.length == 0){
-            schoolIds = filterByTags(projectId, isIncity, isGovernmental);
+        //如果有标签参数，则过滤学校ID
+        if (null != tags || tags.length != 0) {
+            schoolIds = filterByTags(projectId, Arrays.asList(tags));
         }
 
         List<Map<String, Object>> schoolStats = getSchoolStats(projectId, subjectId, schoolIds);

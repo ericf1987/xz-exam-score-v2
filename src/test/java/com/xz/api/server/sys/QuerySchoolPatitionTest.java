@@ -16,6 +16,6 @@ public class QuerySchoolPatitionTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        System.out.println(querySchoolPatition.execute(new Param()).getData());
+        System.out.println(querySchoolPatition.execute(new Param().setParameter("projectId", "430300-672a0ed23d9148e5a2a31c8bf1e08e62")).getData());
     }
 }
