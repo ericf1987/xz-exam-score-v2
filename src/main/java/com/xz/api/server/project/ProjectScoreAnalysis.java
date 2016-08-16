@@ -69,26 +69,11 @@ public class ProjectScoreAnalysis implements Server {
     @Autowired
     RangeService rangeService;
 
-    //根据标签过滤学校ID
-    public String[] filterByTags(String projectId, List<String> tags) {
-
-        List<String> schools = schoolService.getSchoolsByTags(projectId, tags).stream()
-                .map(document -> document.getString("school")).collect(Collectors.toList());
-
-        return schools.toArray(new String[schools.size()]);
-    }
-
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
-        String[] tags = param.getStringValues("schoolTags");
         String[] schoolIds = param.getStringValues("schoolIds");
-
-        //如果有标签参数，则过滤学校ID
-        if (null != tags || tags.length != 0) {
-            schoolIds = filterByTags(projectId, Arrays.asList(tags));
-        }
 
         List<Map<String, Object>> schoolStats = getSchoolStats(projectId, subjectId, schoolIds);
         Map<String, Object> totalStat = getProjectTotalStats(projectId, subjectId);
