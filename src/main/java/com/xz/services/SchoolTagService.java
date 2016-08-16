@@ -48,7 +48,7 @@ public class SchoolTagService {
     }
 
     /**
-     * 根据单个key查询标签
+     * 根据单个key查询标签名称
      */
     public String findTagNameByKey(String key) {
         Document tag = findOneTagByKey(key);

@@ -46,11 +46,13 @@ public class QuerySchoolPatition implements Server {
         List<Document> tags = schoolService.findSchoolIdsByTags(projectId);
         List<Map<String, Object>> schoolTags = new ArrayList<>();
         for (Document tag : tags) {
+
             List<String> tagNames = new ArrayList();
             List<String> tagIds = (List<String>) tag.get("_id");
             for (String tagId : tagIds) {
                 tagNames.add(schoolTagService.findTagNameByKey(tagId));
             }
+
             List<Map<String, String>> schoolList = new ArrayList<>();
             for (String schoolId : (List<String>) tag.get("schoolIds")) {
                 Map<String, String> schoolMap = new HashMap<>();
@@ -58,9 +60,11 @@ public class QuerySchoolPatition implements Server {
                 schoolMap.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
                 schoolList.add(schoolMap);
             }
+
             Map<String, Object> oneTag = new HashMap<>();
             oneTag.put("tagNames", list2string(tagNames));
             oneTag.put("schools", schoolList);
+
             schoolTags.add(oneTag);
         }
         return schoolTags;

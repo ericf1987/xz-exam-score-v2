@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,7 +147,9 @@ public class ScannerDBService {
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
             double fullScore = getFullScore(quest, objectiveItem);
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
-            String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
+            //标准答案数据从统计数据库的quest_list中获取
+            //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
+            String standardAnswer = getStdAnswerFromQuest(objectiveItem, quest);
 
             if (StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" +
@@ -173,6 +176,19 @@ public class ScannerDBService {
         }
     }
 
+    //获取标准答案
+    private String getStdAnswerFromQuest(Document objectiveItem, Document quest) {
+        String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
+        if(quest.getBoolean("isObjective")){
+            if(!StringUtils.isEmpty(quest.getString("scoreRule"))){
+                standardAnswer = quest.getString("scoreRule");
+            }else{
+                standardAnswer = quest.getString("answer");
+            }
+        }
+        return standardAnswer;
+    }
+
     //////////////////////////////////////////////////////////////
 
     private double getFullScore(Document quest, Document objectiveItem) {
@@ -184,7 +200,7 @@ public class ScannerDBService {
     }
 
     protected static ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent) {
-
+/*
         boolean isSingleAnswer = standardAnswer.length() == 1;  // 单选题
 
         if (isSingleAnswer) {
@@ -195,6 +211,13 @@ public class ScannerDBService {
             }
         } else {
 
+            ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
+            double score = scorePattern.getScore(answerContent);
+            return new ScoreAndRight(score, score > 0);
+        }*/
+        if(answerContent.equals(standardAnswer)){
+            return new ScoreAndRight(fullScore, true);
+        }else{
             ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
             double score = scorePattern.getScore(answerContent);
             return new ScoreAndRight(score, score > 0);
