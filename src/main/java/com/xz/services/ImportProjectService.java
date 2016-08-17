@@ -88,9 +88,6 @@ public class ImportProjectService {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    @Autowired
-    DictionaryService dictionaryService;
-
     /**
      * 导入项目信息
      *
@@ -444,15 +441,6 @@ public class ImportProjectService {
 
 
             List<Document> tags = new ArrayList<>();
-
-            String isInCity = dictionaryService.findDictionary("isInCity", schoolObj.getString("school_region")).getString("value");
-            String isGovernmental = dictionaryService.findDictionary("isGovernmental", schoolObj.getString("school_kind")).getString("value");
-
-            //学校归属区域 0=未知 1=城区 2=农村
-            tags.add(new Document().append("name", "isInCity").append("value", isInCity));
-            //学校类型 0=未知 1=公办 2=民办
-            tags.add(new Document().append("name", "isGovernmental").append("value", isGovernmental));
-            schoolDoc.put("tags", tags);
 
             areas.add(schoolObj.getString("area"));
             cities.add(schoolObj.getString("city"));
