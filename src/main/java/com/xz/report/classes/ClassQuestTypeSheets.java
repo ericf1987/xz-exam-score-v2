@@ -52,6 +52,7 @@ public class ClassQuestTypeSheets extends SheetGenerator {
     private void setupHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> classes = result.get("classes");
+        excelWriter.set(0, column.incrementAndGet(), "考号");
         excelWriter.set(0, column.incrementAndGet(), "题型");
         for (Map<String, Object> clazz : classes) {
             excelWriter.set(0, column.incrementAndGet(), clazz.get("name"));
@@ -61,6 +62,8 @@ public class ClassQuestTypeSheets extends SheetGenerator {
     private void fillClassData(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> classes = result.get("classes");
+        excelWriter.set(1, column.incrementAndGet(), "考号");
+        excelWriter.mergeCells(0, 0, 1, 0);
         excelWriter.set(1, column.incrementAndGet(), "本班");
         for (Map<String, Object> clazz : classes) {
             excelWriter.set(1, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(clazz.get("scoreRate").toString())));
@@ -72,6 +75,7 @@ public class ClassQuestTypeSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> students = result.get("students");
         for (Map<String, Object> student : students) {
+            excelWriter.set(row, column.incrementAndGet(), student.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>) student.get("questTypes");
             for (Map<String, Object> questType : questTypes) {

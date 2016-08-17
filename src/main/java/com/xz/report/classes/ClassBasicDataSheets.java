@@ -52,6 +52,7 @@ public class ClassBasicDataSheets extends SheetGenerator {
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
         AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(0, column.incrementAndGet(), "考号");
         excelWriter.set(0, column.incrementAndGet(), "姓名");
         excelWriter.set(0, column.incrementAndGet(), "班级");
         excelWriter.set(0, column.incrementAndGet(), "全科");
@@ -72,6 +73,8 @@ public class ClassBasicDataSheets extends SheetGenerator {
 
     private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
         AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(1, column.incrementAndGet(), "考号");
+        excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "姓名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "班级");
@@ -93,6 +96,7 @@ public class ClassBasicDataSheets extends SheetGenerator {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         for (Map<String, Object> one : studentBasicData) {
+            excelWriter.set(row, column.incrementAndGet(), one.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), one.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), one.get("class"));
             //全科数据

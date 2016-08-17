@@ -87,6 +87,7 @@ public class ClassQuestTypeAnalysis implements Server {
 
             String studentId = student.getString("student");
             String studentName = student.getString("name");
+            map.put("examNo", student.getString("examNo"));
             map.put("studentId", studentId);
             map.put("studentName", studentName);
 

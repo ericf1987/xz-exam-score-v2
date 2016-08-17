@@ -84,6 +84,7 @@ public class ClassRankLevelAnalysis implements Server {
             List<Map<String, Object>> subjectList = new ArrayList<>();
             //学生的各科成绩分数和等级
             Map<String, Object> studentInfo = new HashMap<>();
+            studentInfo.put("examNo", student.getString("examNo"));
             studentInfo.put("studentName", studentName);
             studentInfo.put("studentId", studentId);
             double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));

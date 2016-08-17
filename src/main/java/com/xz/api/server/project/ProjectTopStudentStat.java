@@ -104,6 +104,8 @@ public class ProjectTopStudentStat implements Server {
 
             String schoolId = student.getString("school");
             String classId = student.getString("class");
+            //学生本次考试考号
+            map.put("examNo", student.getString("examNo"));
             map.put("name", student.getString("name"));
             map.put("totalScore", totalScore);
 

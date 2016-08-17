@@ -133,6 +133,8 @@ public class ProjectTopStudentQuestTypeStat implements Server {
             }
 
             double subjectScore = scoreService.getSubjectScore(projectId, studentId, subjectId);
+            //学生本次考试考号
+            map.put("examNo", student.getString("examNo"));
             map.put("name", student.getString("name"));
             map.put("rank", rank);
             map.put("totalScore", totalScore);

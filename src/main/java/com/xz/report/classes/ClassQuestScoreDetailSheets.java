@@ -40,13 +40,13 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
         Result result = classQuestScoreDetailAnalysis.execute(param);
-        System.out.println("班级试题总分明细-->" + result.getData());
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }
 
     private void setupHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(0, column.incrementAndGet(), "考号");
         excelWriter.set(0, column.incrementAndGet(), "班级");
         excelWriter.set(0, column.incrementAndGet(), "姓名");
         excelWriter.set(0, column.incrementAndGet(), "总分");
@@ -75,6 +75,7 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
         );
 
         for(Map<String, Object> student : studentList){
+            excelWriter.set(row, column.incrementAndGet(), student.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), student.get("className"));
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), student.get("questScore"));
