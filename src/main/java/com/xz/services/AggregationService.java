@@ -52,6 +52,9 @@ public class AggregationService {
     @Autowired
     PrepareDataService prepareDataService;
 
+    @Autowired
+    ProjectService projectService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
@@ -98,6 +101,8 @@ public class AggregationService {
                 LOG.error("执行统计失败", e);
             } finally {
                 runningProjects.remove(projectId);
+                //更新统计时间到project_list表
+                projectService.updateAggregationTime(projectId);
                 projectStatusService.setProjectStatus(projectId, AggregationCompleted);
             }
         };

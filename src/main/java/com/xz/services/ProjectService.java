@@ -15,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -160,6 +158,17 @@ public class ProjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
         c.updateOne(query, $set("schools", schoolList));
+    }
+
+    /**
+     * 更新项目统计时间
+     */
+    public void updateAggregationTime(String projectId){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String result = format.format(Calendar.getInstance().getTime());
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        c.updateOne(query, $set("aggregationTime", result));
     }
 
     /**
