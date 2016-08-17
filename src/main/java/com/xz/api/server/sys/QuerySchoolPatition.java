@@ -56,8 +56,8 @@ public class QuerySchoolPatition implements Server {
             List<Map<String, String>> schoolList = new ArrayList<>();
             for (String schoolId : (List<String>) tag.get("schoolIds")) {
                 Map<String, String> schoolMap = new HashMap<>();
-                schoolMap.put("schoolId", schoolId);
-                schoolMap.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
+                schoolMap.put("school", schoolId);
+                schoolMap.put("name", schoolService.getSchoolName(projectId, schoolId));
                 schoolList.add(schoolMap);
             }
 
