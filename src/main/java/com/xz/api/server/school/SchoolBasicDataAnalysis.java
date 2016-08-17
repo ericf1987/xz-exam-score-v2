@@ -73,6 +73,7 @@ public class SchoolBasicDataAnalysis implements Server {
                 String cityName = cityService.getCityName(student.getString("city"));
                 Map<String, Object> map = new HashMap<>();
                 map.put("studentName", student.getString("name"));
+                map.put("examNo", student.getString("examNo"));
                 map.put("class", className);
                 map.put("school", schoolName);
                 map.put("city", cityName);

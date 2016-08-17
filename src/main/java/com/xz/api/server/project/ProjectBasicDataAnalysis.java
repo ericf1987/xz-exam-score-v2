@@ -76,6 +76,7 @@ public class ProjectBasicDataAnalysis implements Server {
                 String studentId = student.getString("student");
                 String className = classService.getClassName(projectId, student.getString("class"));
                 map.put("studentName", studentName);
+                map.put("examNo", student.getString("examNo"));
                 map.put("class", className);
                 map.put("school", schoolName);
                 map.put("city", cityName);
