@@ -88,7 +88,7 @@ public class TotalTopStudentSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("name"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("schoolName"));
-            excelWriter.set(row, column.incrementAndGet(), topStudent.get("rankIndex"));
+            excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));
             List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
             for (Map<String, Object> subject : subjects) {
                 excelWriter.set(row, column.incrementAndGet(), subject.get("score"));
