@@ -85,6 +85,7 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         for (Map<String, Object> topStudent : topStudents) {
+            excelWriter.set(row, column.incrementAndGet(), topStudent.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("name"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("className"));
             List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
