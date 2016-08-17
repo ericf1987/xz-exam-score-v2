@@ -405,6 +405,8 @@ public class ImportProjectService {
                 JSONObject studentObj = (JSONObject) o;
                 Document studentDoc = new Document()
                         .append("project", projectId)
+                        //导入学生考号
+                        .append("examNo", studentObj.get("examNo"))
                         .append("student", studentObj.get("id"))
                         .append("name", studentObj.get("name"))
                         .append("class", classDoc.get("class"))

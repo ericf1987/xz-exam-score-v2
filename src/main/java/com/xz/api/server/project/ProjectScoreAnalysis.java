@@ -30,7 +30,6 @@ import java.util.Map;
 @Function(description = "总体成绩-分数分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = false),
-        @Parameter(name = "schoolTags", type = Type.StringArray, description = "标签参数", required = false),
         @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校id列表", required = true)
 })
 @Service
