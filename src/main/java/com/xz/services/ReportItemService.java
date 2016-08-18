@@ -87,6 +87,7 @@ public class ReportItemService {
             reportItem.put("type", document.getString("type"));
             reportItem.put("name", name);
             reportItem.put("id", document.getObjectId("_id").toHexString());
+            reportItem.put("tag", document.getString("tag"));
 
             if (isPointOrLevelItem(name)) {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
