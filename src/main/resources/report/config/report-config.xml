@@ -31,6 +31,7 @@
                 <report name="排名统计" class="com.xz.report.schools.SchoolBasicRankReport"/>
                 <report name="分数段统计" class="com.xz.report.schools.SchoolBasicScoreSegmentReport"/>
                 <report name="学科分析" class="com.xz.report.schools.SchoolBasicSubjectReport"/>
+                <report name="等第报表" class="com.xz.report.schools.SchoolRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="试卷题型分析" class="com.xz.report.schools.SchoolPaperQuestTypeReport"/>
@@ -47,14 +48,17 @@
                 <report name="学生各科成绩明细" class="com.xz.report.schools.SchoolBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
             </report-category>
-            <report-category name="进阶报表">
-                <report name="等第报表" class="com.xz.report.schools.SchoolRankLevelReport"/>
+            <report-category name="历次考试对比">
+                <report name="平均分对比" class="com.xz.report.schools.compare.SchoolAverageCompareReport"/>
+                <report name="优秀率对比" class="com.xz.report.schools.compare.SchoolExcellentCompareReport"/>
+                <report name="及格率对比" class="com.xz.report.schools.compare.SchoolAverageCompareReport"/>
             </report-category>
         </report-category>
 
         <report-category name="班级成绩分析" range="class">
             <report-category name="基础分析">
                 <report name="分数排名统计" class="com.xz.report.classes.ClassBasicRankReport"/>
+                <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="题型分析" class="com.xz.report.classes.ClassQuestTypeReport"/>
@@ -66,8 +70,8 @@
                 <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
             </report-category>
-            <report-category name="进阶报表">
-                <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>
+            <report-category name="历次考试对比">
+                <report name="学生历史成绩" class="com.xz.report.classes.compare.ClassScoreCompareReport"/>
             </report-category>
         </report-category>
 
