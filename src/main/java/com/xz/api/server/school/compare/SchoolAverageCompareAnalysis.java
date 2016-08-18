@@ -9,6 +9,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,7 +91,7 @@ public class SchoolAverageCompareAnalysis implements Server {
             double score = averageService.getAverage(projectDoc.getString("project"), Range.school(schoolId), target);
             average.put("projectName", projectName);
             average.put("startDate", startDate);
-            average.put("score", score);
+            average.put("score", DoubleUtils.round(score, true));
             averages.add(average);
         });
 
@@ -118,7 +119,7 @@ public class SchoolAverageCompareAnalysis implements Server {
                 double score = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), target);
                 average.put("projectName", projectDoc.getString("name"));
                 average.put("startDate", startDate);
-                average.put("score", score);
+                average.put("score", DoubleUtils.round(score, true));
                 averages.add(average);
             });
             Map<String, Object> map = new HashMap<>();
