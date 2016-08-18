@@ -84,7 +84,7 @@ public class ReportNameMappings {
         for(String item : items){
             String fileItem = seed + item;
             for (String fileName : fileNames) {
-                if (fileName.indexOf(seed) != -1) {
+                if (fileName.contains(seed)) {
                     fileNames.add(fileItem);
                     break;
                 }
