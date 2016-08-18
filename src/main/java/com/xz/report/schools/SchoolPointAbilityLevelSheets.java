@@ -4,7 +4,6 @@ import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.api.Param;
 import com.xz.api.server.project.ProjectPointAbilityLevelAnalysis;
-import com.xz.api.server.school.SchoolPointAbilityLevelAnalysis;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.report.SheetGenerator;
