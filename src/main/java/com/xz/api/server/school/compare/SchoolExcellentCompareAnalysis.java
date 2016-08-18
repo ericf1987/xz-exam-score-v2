@@ -76,6 +76,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
         return Result.success()
                 .set("school", schoolExcellentMap)
                 .set("classes", classExcellentList)
+                .set("projectList", projectDocs)
                 .set("hasHeader", !schoolExcellentMap.isEmpty());
     }
 

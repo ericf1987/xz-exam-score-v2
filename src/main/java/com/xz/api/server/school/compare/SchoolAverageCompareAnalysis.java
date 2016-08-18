@@ -72,6 +72,7 @@ public class SchoolAverageCompareAnalysis implements Server {
         return Result.success()
                 .set("school", schoolAverageMap)
                 .set("classes", classAverageList)
+                .set("projectList", projectDocs)
                 .set("hasHeader", !schoolAverageMap.isEmpty());
     }
 

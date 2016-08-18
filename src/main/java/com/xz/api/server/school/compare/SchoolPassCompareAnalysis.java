@@ -72,6 +72,7 @@ public class SchoolPassCompareAnalysis implements Server {
         return Result.success()
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
+                .set("projectList", projectDocs)
                 .set("hasHeader", !schoolPassRateMap.isEmpty());
     }
 
