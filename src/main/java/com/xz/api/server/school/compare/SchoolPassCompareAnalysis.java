@@ -56,14 +56,19 @@ public class SchoolPassCompareAnalysis implements Server {
     }
 
     public Result getResult(String projectId, String schoolId, String subjectId) {
+        //对比类报表只对比同年级数据，即只对比当前考试项目下班级的历次考试
+        List<Document> classDocs = classService.listClasses(projectId, schoolId);
+
+        List<Document> projectDocs = projectService.listProjectsByRange(Range.clazz(classDocs.get(0).getString("class")));
+
         //学校考试列表
-        List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
-        projectList = projectList.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
+        //List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
+        projectDocs = projectDocs.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
 
         Target target = targetService.getTarget(projectId, subjectId);
 
-        Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, target, projectList);
-        List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, target, projectList);
+        Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, target, projectDocs);
+        List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, target, projectDocs);
         return Result.success()
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
