@@ -9,6 +9,7 @@ import com.xz.api.server.Server;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,7 +82,7 @@ public class ClassScoreCompareAnalysis implements Server{
     private Map<String, Object> getScoreMap(String project, double score) {
         Map<String, Object> map = new HashMap<>();
         map.put("projectId", project);
-        map.put("score", score);
+        map.put("score", DoubleUtils.round(score, false));
         return map;
     }
 }
