@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>模拟数据管理</title>
+</head>
+<body>
+<fieldset>
+    <legend>生成模拟项目数据</legend>
+    <form action="fake/data_generate" method="post">
+        <p>项目个数：<input type="text" name="projectCount"/></p>
+        <p>每个项目学校个数：<input type="text" name="schoolsPerProject"/></p>
+        <p>每个学校班级个数：<input type="text" name="classesPerSchool"/></p>
+        <p>每个班级学生个数：<input type="text" name="studentsPerClass"/></p>
+        <p>考试科目数：<input type="text" name="subjectCount"/></p>
+
+        <p>
+            <button type="submit">开始生成</button>
+        </p>
+    </form>
+</fieldset>
+<fieldset>
+    <legend>删除模拟数据</legend>
+    <form action="fake/data_clear" method="post">
+        <p>
+            <button type="submit">清除数据</button>
+        </p>
+    </form>
+</fieldset>
+
+</body>
+</html>
