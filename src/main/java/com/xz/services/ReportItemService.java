@@ -47,7 +47,7 @@ public class ReportItemService {
     AverageService averageService;
 
     @Autowired
-    SimpleCache cache;
+    SimpleCache instantCache;
 
     /**
      * 查询指定项目报表条目信息
@@ -57,7 +57,7 @@ public class ReportItemService {
      */
     public Map<String, Object> querySchoolReportItems(String projectId) {
         String cacheKey = "school_report_items:" + projectId;
-        return cache.get(cacheKey, () -> {
+        return instantCache.get(cacheKey, () -> {
             HashMap<String, Object> reportItems = new HashMap<>();
             for (ReportRange reportRange : ReportRange.values()) {
                 Map<String, Object> map = new HashMap<>();
@@ -137,7 +137,7 @@ public class ReportItemService {
     // 检查集合指定项目是否有数据
     public boolean checkCollectionData(String projectId, String collectionName) {
         String cacheKey = "collection_data_status:" + projectId + ":" + collectionName;
-        return cache.get(cacheKey, () -> {
+        return instantCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection(collectionName);
             Document query = doc("project", projectId);
             return collection.find(query).first() != null;
@@ -152,7 +152,7 @@ public class ReportItemService {
      */
     public Map<String, List<Document>> queryReportItems(Range range) {
         String cacheKey = "report_item_list:" + range;
-        return cache.get(cacheKey, () -> {
+        return instantCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("report_item_list");
 
             Range commonRange = new Range(range.getName(), COMMON_RANGE_ID);
