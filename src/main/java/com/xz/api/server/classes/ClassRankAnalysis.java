@@ -101,6 +101,7 @@ public class ClassRankAnalysis implements Server {
             String projectId, String schoolId, String classId, String studentId) {
         List<Map<String, Object>> subjectRankList = new ArrayList<>();
 
+        // 复制查询结果，以免发生 ConcurrentModificationException 异常
         List<String> subjects = subjectService.querySubjects(projectId);
         for (String subjectId : subjects) {
 

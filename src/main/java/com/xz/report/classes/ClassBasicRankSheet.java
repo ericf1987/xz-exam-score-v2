@@ -2,7 +2,6 @@ package com.xz.report.classes;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
 import com.xz.api.server.classes.ClassRankAnalysis;
 import com.xz.bean.Range;
@@ -77,7 +76,8 @@ public class ClassBasicRankSheet extends SheetGenerator {
     }
 
     private String getString(Map<String, Object> map, String property) {
-        return StringUtil.defaultIfBlank((String) map.get(property), "");
+        Object value = map.get(property);
+        return value == null ? "" : value.toString();
     }
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {

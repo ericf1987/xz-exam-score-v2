@@ -113,9 +113,11 @@ public class ProjectBasicDataAnalysis implements Server {
     }
 
     private List<Map<String,Object>> getSubjectAnalysis(String projectId, Range province, String studentId) {
-        //获取考试的科目
+
+        // 获取考试的科目
         List<String> subjects = subjectService.querySubjects(projectId);
         List<Map<String, Object>> subjectAnalysis = new ArrayList<>();
+
         for(String subject : subjects){
             Map<String, Object> map = new HashMap<>();
             map.put("subjectId", subject);

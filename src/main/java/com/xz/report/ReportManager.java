@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -69,6 +70,7 @@ public class ReportManager implements ApplicationContextAware {
 
         List<ReportTask> reportTasks = createReportGenerators(projectId);
         ThreadPoolExecutor pool = async ? executionPool : newBlockingThreadPoolExecutor(10, 10, 100);
+        CountDownLatch countDownLatch = new CountDownLatch(reportTasks.size());
 
         for (final ReportTask reportTask : reportTasks) {
             Runnable runnable = () -> {
@@ -81,6 +83,8 @@ public class ReportManager implements ApplicationContextAware {
 
                 } catch (Exception e) {
                     LOG.error("生成报表失败", e);
+                } finally {
+                    countDownLatch.countDown();
                 }
             };
 
@@ -95,6 +99,13 @@ public class ReportManager implements ApplicationContextAware {
             } catch (InterruptedException e) {
                 throw new AppException(e);
             }
+        }
+
+        try {
+            countDownLatch.await(1, TimeUnit.HOURS);
+            LOG.info("====项目" + projectId + "报表全部生成完毕。");
+        } catch (InterruptedException e) {
+            LOG.error("====项目" + projectId + "报表生成超时！");
         }
     }
 
