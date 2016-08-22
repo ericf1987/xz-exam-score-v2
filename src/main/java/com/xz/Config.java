@@ -122,7 +122,7 @@ public class Config {
     }
 
     @Bean
-    public SimpleCache simpleCache() {
+    public SimpleCache cache() {
         EhCacheConfiguration c = new EhCacheConfiguration();
         c.setTimeToLiveSeconds(600);
         c.setMaxEntriesLocalHeap(1000000);

@@ -329,7 +329,7 @@ public class ImportProjectService {
             questDoc.put("questId", questObj.getString("questId"));
             questDoc.put("subject", questObj.getString("subjectId"));
             questDoc.put("questType", questObj.getString("questType"));
-            questDoc.put("isObjective", isObjective(questObj.getString("questType")));
+            questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
             questDoc.put("score", questObj.getDoubleValue("score"));
             questDoc.put("answer", questObj.getString("answer"));
@@ -472,9 +472,13 @@ public class ImportProjectService {
 
     }
 
-    private Boolean isObjective(String questType) {
+    private Boolean isObjective(String questType, String subObjTag) {
         if (questType == null) {
-            return null;
+            //如果questType为空，则根据subObjTag来判断是否为客观题
+            if(null != subObjTag){
+                return subObjTag.equals("o");
+            }
+            return false;
         } else {
             return "0".equals(questType) || "1".equals(questType) || "2".equals(questType);
         }
