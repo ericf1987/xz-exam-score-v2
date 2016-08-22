@@ -179,7 +179,9 @@ public class ScannerDBService {
     //获取标准答案
     private String getStdAnswerFromQuest(Document objectiveItem, Document quest) {
         String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
-        if(quest.getBoolean("isObjective")){
+
+        Boolean isObjective = quest.getBoolean("isObjective");
+        if(isObjective != null && isObjective){
             if(!StringUtils.isEmpty(quest.getString("scoreRule"))){
                 standardAnswer = quest.getString("scoreRule");
             }else{
