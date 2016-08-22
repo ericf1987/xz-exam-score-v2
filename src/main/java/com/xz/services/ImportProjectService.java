@@ -478,7 +478,7 @@ public class ImportProjectService {
             if(null != subObjTag){
                 return subObjTag.equals("o");
             }
-            return null;
+            return false;
         } else {
             return "0".equals(questType) || "1".equals(questType) || "2".equals(questType);
         }
