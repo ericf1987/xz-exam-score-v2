@@ -83,7 +83,7 @@ public class OptionMapTask extends Receiver {
         for (Document document : optionMapList) {
             if (document.getString("answer").equals(answer)) {
                 //如果答案选项已经存在，则累加count，同时修改rate
-                double count = StringUtil.isEmpty(document.getDouble("count").toString()) ? 0 : Double.parseDouble(document.getString("count"));
+                int count = StringUtil.isEmpty(document.getInteger("count").toString()) ? 0 : document.getInteger("count");
                 document.put("count", count + oneCount);
                 document.put("rate", (count + oneCount) / studentCount);
                 return;
