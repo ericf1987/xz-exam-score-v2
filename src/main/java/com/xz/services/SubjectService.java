@@ -50,7 +50,7 @@ public class SubjectService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache simpleCache;
+    SimpleCache cache;
 
     /**
      * 查询考试项目的科目列表
@@ -63,7 +63,7 @@ public class SubjectService {
     public List<String> querySubjects(String projectId) {
         String cacheKey = "subject_list:" + projectId;
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             ArrayList<String> targets = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("subject_list");
 

@@ -25,12 +25,12 @@ public class QuestService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache simpleCache;
+    SimpleCache cache;
 
     public Document findQuest(String projectId, String questId) {
         String cacheKey = "quest:" + projectId + ":" + questId;
 
-        return simpleCache.get(cacheKey, () ->
+        return cache.get(cacheKey, () ->
                 scoreDatabase.getCollection("quest_list")
                         .find(doc("questId", questId).append("project", projectId)).first());
     }
@@ -73,7 +73,7 @@ public class QuestService {
     public List<Document> getQuests(String projectId, String point, String level) {
         String cacheKey = "quests_by_pointlevel:" + projectId + ":" + point + ":" + level;
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("points." + point, level);
             return asArrayList(toList(scoreDatabase.getCollection("quest_list").find(query)));
         });
@@ -124,7 +124,7 @@ public class QuestService {
     public Document findQuest(String projectId, String subject, String questNo) {
         String cacheKey = "quest_by_no:" + projectId + ":" + subject + ":" + questNo;
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
             Document query = doc("project", projectId)

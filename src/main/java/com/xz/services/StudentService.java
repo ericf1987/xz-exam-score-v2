@@ -38,7 +38,7 @@ public class StudentService {
     static final Logger LOG = LoggerFactory.getLogger(StudentService.class);
 
     @Autowired
-    SimpleCache simpleCache;
+    SimpleCache cache;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -91,7 +91,7 @@ public class StudentService {
     public int getStudentCount(String projectId, String subjectId, Range range) {
         String cacheKey = getCacheKey("student_count:", projectId, subjectId, range);
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
             if (subjectId != null) {
                 query.append("subjects", subjectId);
@@ -171,7 +171,7 @@ public class StudentService {
      */
     public List<String> getStudentIds(String projectId, Range range, Target target) {
         String cacheKey = "student_id_list:" + projectId + ":" + range + ":" + target;
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             String subjectId = targetService.getTargetSubjectId(projectId, target);
             return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
         });
@@ -199,7 +199,7 @@ public class StudentService {
         String cacheKey = getCacheKey("student_list:", projectId, subjectIdValue.get(), range);
 
         synchronized (LockFactory.getLock(cacheKey)) {
-            return simpleCache.get(cacheKey, () -> {
+            return cache.get(cacheKey, () -> {
                 MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
                 ArrayList<String> studentIds = new ArrayList<>();
                 Document query = new Document("project", projectId);
@@ -232,7 +232,7 @@ public class StudentService {
     public List<Document> getStudentList(String projectId, Range range) {
         String cacheKey = "student_list_range:" + projectId + ":" + range;
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("student_list");
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
 
@@ -260,7 +260,7 @@ public class StudentService {
     public Document findStudent(String projectId, String studentId) {
         String cacheKey = "student:" + projectId + ":" + studentId;
 
-        return simpleCache.get(cacheKey, () -> {
+        return cache.get(cacheKey, () -> {
             MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
             return students.find(doc("student", studentId).append("project", projectId)).first();
         });
@@ -273,6 +273,6 @@ public class StudentService {
         students.insertMany(classStudents);
 
         String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
-        simpleCache.delete(cacheKey);
+        cache.delete(cacheKey);
     }
 }
