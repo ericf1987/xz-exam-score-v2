@@ -6,6 +6,7 @@ import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.bean.Target;
 import com.xz.services.ClassService;
 import com.xz.services.ProjectService;
 import com.xz.services.SchoolService;
@@ -43,7 +44,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @Controller
 public class FakeDataController {
 
-    static final Logger LOG = LoggerFactory.getLogger(FakeDataController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FakeDataController.class);
 
     private static final Random RANDOM = new Random();
 
@@ -64,6 +65,12 @@ public class FakeDataController {
     private static final String QUESTION_TYPE_BLANK_ID = "29ce182c-3377-478d-966d-c9e0a68f7eff";
 
     private static final String QUESTION_TYPE_BLANK_NAME = "填空题";
+
+    private static final String AREA = "430101";
+
+    private static final String CITY = "430100";
+
+    private static final String PROVINCE = "430000";
 
     private static ThreadLocal<Integer> idCounter = new ThreadLocal<>();
 
@@ -91,8 +98,14 @@ public class FakeDataController {
         List<Document> fakeProjects = MongoUtils.toList(
                 scoreDatabase.getCollection("project_list").find(doc("fake", true)));
 
+        LOG.info("找到 " + fakeProjects.size() + " 个需要清除的模拟项目");
+
         for (Document fakeProject : fakeProjects) {
             String projectId = fakeProject.getString("project");
+            LOG.info("....正在清除模拟项目 " + projectId + " 数据");
+            scoreDatabase.getCollection("province_list").deleteMany(doc("project", projectId));
+            scoreDatabase.getCollection("city_list").deleteMany(doc("project", projectId));
+            scoreDatabase.getCollection("area_list").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("school_list").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("class_list").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("student_list").deleteMany(doc("project", projectId));
@@ -123,8 +136,10 @@ public class FakeDataController {
             scoreDatabase.getCollection("top_student_list").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("total_score").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("total_score_combined").deleteMany(doc("project", projectId));
+            scoreDatabase.getCollection("project_list").deleteMany(doc("project", projectId));
         }
 
+        LOG.info("模拟数据删除完毕。");
         return Result.success("模拟数据删除完毕。");
     }
 
@@ -140,20 +155,22 @@ public class FakeDataController {
 
         idCounter.set(0);
         contextThreadLocal.set(new Context());
+        List<String> projectIds = new ArrayList<>();
 
         for (int i = 0; i < projectCount; i++) {
-            createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
+            projectIds.add(createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount));
         }
 
         contextThreadLocal.set(null);
-        return Result.success();
+        return Result.success("项目生成完毕").set("projectIds", projectIds);
     }
 
-    private void createProject(int schoolsPerProject, int classesPerSchool, int studentsPerClass, int subjectCount) {
+    private String createProject(int schoolsPerProject, int classesPerSchool, int studentsPerClass, int subjectCount) {
 
         // 创建项目
         Document projectDoc = createProjectDocument();
         String projectId = projectDoc.getString("project");
+        createAreas(projectId);
 
         projectDoc.append("schools", createSchools(
                 projectId, schoolsPerProject, classesPerSchool, studentsPerClass));
@@ -168,6 +185,14 @@ public class FakeDataController {
 
         // 创建分数
         createScore(projectId);
+
+        return projectId;
+    }
+
+    private void createAreas(String projectId) {
+        scoreDatabase.getCollection("province_list").insertOne(doc("project", projectId).append("province", PROVINCE));
+        scoreDatabase.getCollection("city_list").insertOne(doc("project", projectId).append("city", CITY));
+        scoreDatabase.getCollection("area_list").insertOne(doc("project", projectId).append("area", AREA));
     }
 
     private void createQuests(String projectId, int subjectCount) {
@@ -181,12 +206,13 @@ public class FakeDataController {
 
         List<Document> questList = new ArrayList<>();
         int questNoCounter = 1;
-        boolean isBigSubject = StringUtil.isOneOf(subjectId, "001", "002", "003");
+        boolean isBigSubject = isBigSubject(subjectId);
 
         for (int i = 0; i < (isBigSubject ? 30 : 20); i++) {
             String questNo = String.valueOf(questNoCounter++);
             String questId = projectId + ":" + subjectId + ":" + questNo;
             Document objQuest = doc("project", projectId).append("questId", questId)
+                    .append("questNo", questNo)
                     .append("subject", subjectId).append("isObjective", true)
                     .append("questType", QUEST_TYPE_SELECT).append("score", 1.0)
                     .append("answer", randomSelectAnswer()).append("items", OPTIONS_LIST)
@@ -199,6 +225,7 @@ public class FakeDataController {
             String questNo = String.valueOf(questNoCounter++);
             String questId = projectId + ":" + subjectId + ":" + questNo;
             Document sbjQuest = doc("project", projectId).append("questId", questId)
+                    .append("questNo", questNo)
                     .append("subject", subjectId).append("isObjective", false)
                     .append("questType", QUEST_TYPE_ANSWER).append("score", 4.0)
                     .append("questionTypeId", QUESTION_TYPE_BLANK_ID)
@@ -214,6 +241,10 @@ public class FakeDataController {
 
         contextQuestList.addAll(questList);
         scoreDatabase.getCollection("quest_list").insertMany(questList);
+    }
+
+    private boolean isBigSubject(String subjectId) {
+        return StringUtil.isOneOf(subjectId, "001", "002", "003");
     }
 
     private String randomSelectAnswer() {
@@ -234,7 +265,10 @@ public class FakeDataController {
                     .collect(Collectors.toList());
 
             scoreCollection.insertMany(studentScores);
-            LOG.info("已生成 " + counter.incrementAndGet() + "/" + students.size() + " 个考生成绩");
+            int count = counter.incrementAndGet();
+            if (count % 100 == 0) {
+                LOG.info("已生成 " + count + "/" + students.size() + " 个考生成绩");
+            }
         }
     }
 
@@ -269,6 +303,7 @@ public class FakeDataController {
         double fullScore = quest.getDouble("score");
         boolean isObjective = quest.getBoolean("isObjective");
         boolean isRight = RANDOM.nextInt(100) < intelligence;
+        String standardAnswer = quest.getString("answer");
 
         scoreDoc.put("right", isRight);
         scoreDoc.put("isObjective", isObjective);
@@ -276,7 +311,7 @@ public class FakeDataController {
         double scoreValue;
         if (isObjective) {
             scoreValue = isRight ? fullScore : 0;
-            String studentAnswer = pickRandomWithout(OPTIONS_LIST, quest.getString("answer"));
+            String studentAnswer = isRight ? standardAnswer : pickRandomWithout(OPTIONS_LIST, standardAnswer);
             scoreDoc.put("answer", studentAnswer);
         } else {
             scoreValue = isRight ? fullScore : (fullScore * (RANDOM.nextInt(20) + intelligence - 15) / 100);
@@ -287,9 +322,18 @@ public class FakeDataController {
 
     private void createSubjects(String projectId, int subjectCount) {
         List<String> subjects = new ArrayList<>();
+        MongoCollection<Document> fullScoreCollection = scoreDatabase.getCollection("full_score");
+
         for (int i = 0; i < subjectCount; i++) {
-            subjects.add("00" + (i + 1));
+            String subjectId = "00" + (i + 1);
+            subjects.add(subjectId);
+
+            fullScoreCollection.insertOne(doc("project", projectId)
+                    .append("target", doc("name", Target.SUBJECT).append("id", subjectId))
+                    .append("fullScore", isBigSubject(subjectId) ? 150.0 : 100.0)
+            );
         }
+
         Document subject = doc("project", projectId).append("subjects", subjects);
         scoreDatabase.getCollection("subject_list").insertOne(subject);
     }
@@ -310,7 +354,7 @@ public class FakeDataController {
         }
 
         Document school = doc("project", projectId).append("school", schoolId).append("name", schoolId)
-                .append("area", "430101").append("city", "430100").append("province", "430000");
+                .append("area", AREA).append("city", CITY).append("province", PROVINCE);
         scoreDatabase.getCollection("school_list").insertOne(school);
         return school;
     }
@@ -324,14 +368,17 @@ public class FakeDataController {
 
         Document _class = doc("project", projectId).append("school", schoolId)
                 .append("class", classId).append("name", classId).append("grade", GRADE)
-                .append("area", "430101").append("city", "430100").append("province", "430000");
+                .append("area", AREA).append("city", CITY).append("province", PROVINCE);
         scoreDatabase.getCollection("class_list").insertOne(_class);
     }
 
     private void createStudent(String projectId, String schoolId, String classId) {
+        String studentId = "STU_" + nextId();
+
         Document student = doc("project", projectId).append("name", ChineseName.nextRandomName())
-                .append("student", "STU_" + nextId()).append("class", classId).append("school", schoolId)
-                .append("area", "430101").append("city", "430100").append("province", "430000");
+                .append("student", studentId).append("class", classId).append("school", schoolId)
+                .append("area", AREA).append("city", CITY).append("province", PROVINCE)
+                .append("examNo", studentId);
 
         List<Document> students = getContext().get("students");
         if (students == null) {

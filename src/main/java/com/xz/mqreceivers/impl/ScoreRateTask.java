@@ -13,6 +13,8 @@ import com.xz.services.ScoreService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @Component
 @ReceiverInfo(taskType = "score_rate")
 public class ScoreRateTask extends Receiver {
+
+    static final Logger LOG = LoggerFactory.getLogger(ScoreRateTask.class);
 
     @Autowired
     FullScoreService fullScoreService;
@@ -60,6 +64,7 @@ public class ScoreRateTask extends Receiver {
         double fullScore = fullScoreService.getFullScore(projectId, target);
 
         if (fullScore <= 0) {
+            LOG.warn("满分为零分：" + target);
             return;
         }
 

@@ -6,10 +6,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
-import com.xz.services.AverageService;
-import com.xz.services.RangeService;
-import com.xz.services.StdDeviationService;
-import com.xz.services.TScoreService;
+import com.xz.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,13 +29,16 @@ public class TscoreTask extends Receiver {
     @Autowired
     TScoreService tScoreService;
 
+    @Autowired
+    ProvinceService provinceService;
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
         Target target = aggrTask.getTarget();
         Range range = aggrTask.getRange();
 
-        Range province = rangeService.queryRanges(projectId, Range.PROVINCE).get(0);
+        Range province = Range.province(provinceService.getProjectProvince(projectId));
         double provinceAverage = averageService.getAverage(projectId, province, target);
         double provinceStdDeviation = stdDeviationService.getStdDeviation(projectId, province, target);
 

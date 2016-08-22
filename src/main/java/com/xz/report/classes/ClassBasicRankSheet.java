@@ -2,6 +2,7 @@ package com.xz.report.classes;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.api.Param;
 import com.xz.api.server.classes.ClassRankAnalysis;
 import com.xz.bean.Range;
@@ -61,9 +62,9 @@ public class ClassBasicRankSheet extends SheetGenerator {
     private void fillRow(int row, ExcelWriter excelWriter, Map<String, Object> rankstat) {
         AtomicInteger column = new AtomicInteger(-1);
         Map<String, Object> projectRank = (Map<String, Object>) rankstat.get("projectRankStat");
-        excelWriter.set(row, column.incrementAndGet(), rankstat.get("examNo").toString());
-        excelWriter.set(row, column.incrementAndGet(), rankstat.get("studentName").toString());
-        excelWriter.set(row, column.incrementAndGet(), projectRank.get("score").toString());
+        excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "examNo"));
+        excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "studentName"));
+        excelWriter.set(row, column.incrementAndGet(), getString(projectRank, "score"));
         Map<String, Object> projectRankStat = (Map<String, Object>)rankstat.get("projectRankStat");
         excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankClassIndex"));
         excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankSchoolIndex"));
@@ -75,13 +76,17 @@ public class ClassBasicRankSheet extends SheetGenerator {
         }
     }
 
+    private String getString(Map<String, Object> map, String property) {
+        return StringUtil.defaultIfBlank((String) map.get(property), "");
+    }
+
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {
         int row = 0;
         Map<String, Object> rankstat = rankstats.get(0);
         List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
         List<String> subjects = new ArrayList<>();
         for (Map<String, Object> subject : subjectRankStat) {
-            String subjectName = subject.get("subjectName").toString();
+            String subjectName = getString(subject, "subjectName");
             subjects.add(subjectName);
         }
         AtomicInteger column = new AtomicInteger(-1);
@@ -105,7 +110,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
         List<Map<String, Object>> subjectRankStat = (List<Map<String, Object>>) rankstat.get("subjectRankStat");
         List<String> subjects = new ArrayList<>();
         for (Map<String, Object> subject : subjectRankStat) {
-            String subjectName = subject.get("subjectName").toString();
+            String subjectName = getString(subject, "subjectName");
             subjects.add(subjectName);
         }
         AtomicInteger column = new AtomicInteger(-1);
