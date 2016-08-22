@@ -63,7 +63,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
         Map<String, Object> projectRank = (Map<String, Object>) rankstat.get("projectRankStat");
         excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "examNo"));
         excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "studentName"));
-        excelWriter.set(row, column.incrementAndGet(), getString(projectRank, "score"));
+        excelWriter.set(row, column.incrementAndGet(), projectRank.get("score"));
         Map<String, Object> projectRankStat = (Map<String, Object>)rankstat.get("projectRankStat");
         excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankClassIndex"));
         excelWriter.set(row, column.incrementAndGet(), projectRankStat.get("rankSchoolIndex"));
