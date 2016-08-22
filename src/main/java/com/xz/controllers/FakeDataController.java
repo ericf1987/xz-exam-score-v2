@@ -3,6 +3,7 @@ package com.xz.controllers;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.ajiaedu.common.lang.RandomUtil;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
@@ -22,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -154,7 +152,7 @@ public class FakeDataController {
     ) {
 
         idCounter.set(0);
-        contextThreadLocal.set(new Context());
+        contextThreadLocal.set(initContext());
         List<String> projectIds = new ArrayList<>();
 
         for (int i = 0; i < projectCount; i++) {
@@ -163,6 +161,13 @@ public class FakeDataController {
 
         contextThreadLocal.set(null);
         return Result.success("项目生成完毕").set("projectIds", projectIds);
+    }
+
+    private Context initContext() {
+        Context context = new Context();
+        List<Document> points = MongoUtils.toList(scoreDatabase.getCollection("points").find(doc()));
+        context.put("points", points);
+        return context;
     }
 
     private String createProject(int schoolsPerProject, int classesPerSchool, int studentsPerClass, int subjectCount) {
@@ -218,6 +223,8 @@ public class FakeDataController {
                     .append("answer", randomSelectAnswer()).append("items", OPTIONS_LIST)
                     .append("questionTypeId", QUESTION_TYPE_SELECT_ID)
                     .append("questionTypeName", QUESTION_TYPE_SELECT_NAME);
+
+            injectPoints(objQuest);
             questList.add(objQuest);
         }
 
@@ -230,6 +237,8 @@ public class FakeDataController {
                     .append("questType", QUEST_TYPE_ANSWER).append("score", 4.0)
                     .append("questionTypeId", QUESTION_TYPE_BLANK_ID)
                     .append("questionTypeName", QUESTION_TYPE_BLANK_NAME);
+
+            injectPoints(sbjQuest);
             questList.add(sbjQuest);
         }
 
@@ -241,6 +250,20 @@ public class FakeDataController {
 
         contextQuestList.addAll(questList);
         scoreDatabase.getCollection("quest_list").insertMany(questList);
+    }
+
+    private void injectPoints(Document quest) {
+        int pointCount = RANDOM.nextInt(3) + 1;
+        List<Document> pointList = getContext().get("points");
+        Document pointsProp = doc();
+
+        for (int i = 0; i < pointCount; i++) {
+            String point = RandomUtil.pickRandom(pointList, 1).get(0).getString("id");
+            String level = RandomUtil.pickRandom(OPTIONS_LIST, 1).get(0);
+            pointsProp.put(point, Collections.singletonList(level));
+        }
+
+        quest.put("points", pointsProp);
     }
 
     private boolean isBigSubject(String subjectId) {
