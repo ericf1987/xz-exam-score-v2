@@ -3,6 +3,7 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.bean.Range;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
@@ -82,7 +83,7 @@ public class OptionMapTask extends Receiver {
         for (Document document : optionMapList) {
             if (document.getString("answer").equals(answer)) {
                 //如果答案选项已经存在，则累加count，同时修改rate
-                int count = document.get("count").toString() == null ? 0 : Integer.parseInt(document.get("count").toString());
+                int count = StringUtil.isEmpty(document.getString("count")) ? 0 : Integer.parseInt(document.getString("count"));
                 document.put("count", count + oneCount);
                 document.put("rate", (double) (count + oneCount) / studentCount);
                 return;
