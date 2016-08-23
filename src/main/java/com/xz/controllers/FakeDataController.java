@@ -5,11 +5,10 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.bean.PointLevel;
+import com.xz.bean.SubjectLevel;
 import com.xz.bean.Target;
-import com.xz.services.ClassService;
-import com.xz.services.ProjectService;
-import com.xz.services.SchoolService;
-import com.xz.services.StudentService;
+import com.xz.services.*;
 import com.xz.util.ChineseName;
 import org.bson.BsonUndefined;
 import org.bson.Document;
@@ -87,6 +86,9 @@ public class FakeDataController {
     StudentService studentService;
 
     @Autowired
+    FullScoreService fullScoreService;
+
+    @Autowired
     MongoDatabase scoreDatabase;
 
     @RequestMapping(value = "/fake/data_clear", method = RequestMethod.POST)
@@ -144,33 +146,44 @@ public class FakeDataController {
     @RequestMapping(value = "/fake/data_generate", method = RequestMethod.POST)
     @ResponseBody
     public Result generateFakeData(
-            @RequestParam(value = "projectCount", required = false, defaultValue = "1") int projectCount,
-            @RequestParam(value = "schoolsPerProject") int schoolsPerProject,
-            @RequestParam(value = "classesPerSchool") int classesPerSchool,
-            @RequestParam(value = "studentsPerClass") int studentsPerClass,
-            @RequestParam(value = "subjectCount", required = false, defaultValue = "9") int subjectCount
+            @RequestParam(value = "projectCount", required = false, defaultValue = "1") final int projectCount,
+            @RequestParam(value = "schoolsPerProject") final int schoolsPerProject,
+            @RequestParam(value = "classesPerSchool") final int classesPerSchool,
+            @RequestParam(value = "studentsPerClass") final int studentsPerClass,
+            @RequestParam(value = "subjectCount", required = false, defaultValue = "9") final int subjectCount
     ) {
 
-        idCounter.set(0);
-        contextThreadLocal.set(initContext());
-        List<String> projectIds = new ArrayList<>();
+        Runnable runnable = () -> {
+            int counter = 0;
+            idCounter.set(0);
+            contextThreadLocal.set(initContext());
 
-        for (int i = 0; i < projectCount; i++) {
-            projectIds.add(createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount));
-        }
+            for (int i = 0; i < projectCount; i++) {
+                String projectId = createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
+                counter++;
+                LOG.info("已生成项目 " + counter + ": " + projectId);
+            }
 
-        contextThreadLocal.set(null);
-        return Result.success("项目生成完毕").set("projectIds", projectIds);
+            contextThreadLocal.set(null);
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.start();
+
+        return Result.success("项目已经开始生成");
     }
 
     private Context initContext() {
         Context context = new Context();
         context.put("points", MongoUtils.toList(scoreDatabase.getCollection("points").find(doc())));
-        context.put("questTypes", getQuestTypes());
+        context.put("questTypes", getTotalQuestTypes());
+        context.put("usedQuestTypes", new HashMap<String, KeyValue<String, String>>());
         return context;
     }
 
-    private Map<String, List<KeyValue<String, String>>> getQuestTypes() {
+    // 查询所有的题型
+    private Map<String, List<KeyValue<String, String>>> getTotalQuestTypes() {
 
         HashMap<String, List<KeyValue<String, String>>> result = new HashMap<>();
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
@@ -179,8 +192,14 @@ public class FakeDataController {
         for (String questTypeId : questTypeIds) {
             Document questTypeDoc = collection.find(doc("questTypeId", questTypeId)).first();
 
+            // 去掉格式不正确的记录
             if (questTypeDoc.get("subject") instanceof BsonUndefined) {
                 LOG.warn("subject is undefined: " + questTypeDoc.getString("project"));
+                continue;
+            }
+
+            // 去掉名称为空的记录
+            if (StringUtil.isEmpty(questTypeDoc.getString("questTypeName"))) {
                 continue;
             }
 
@@ -198,6 +217,10 @@ public class FakeDataController {
     }
 
     private String createProject(int schoolsPerProject, int classesPerSchool, int studentsPerClass, int subjectCount) {
+
+        // 初始化上下文
+        getContext().put("students", new ArrayList<Document>());
+        getContext().put("quests", new ArrayList<Document>());
 
         // 创建项目
         Document projectDoc = createProjectDocument();
@@ -231,6 +254,62 @@ public class FakeDataController {
         for (int i = 0; i < subjectCount; i++) {
             String subjectId = "00" + (i + 1);
             createSubjectQuests(projectId, subjectId);
+        }
+
+        createPointLevelFullScore(projectId);
+    }
+
+    private void createPointLevelFullScore(String projectId) {
+        DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
+        DoubleCounterMap<SubjectLevel> subjectLevelFullScore = new DoubleCounterMap<>();
+        DoubleCounterMap<PointLevel> pointLevelFullScore = new DoubleCounterMap<>();
+
+        List<Document> contextQuestList = getContext().get("quests");
+
+        for (Document quest : contextQuestList) {
+            double score = quest.getDouble("score");
+            String subject = quest.getString("subject");
+            Map<String, List<String>> points = (Map<String, List<String>>) quest.get("points");
+
+            if (points == null) {
+                continue;
+            }
+
+            // 每个题目对每个能力层级只计算一次分数
+            Set<String> levels = new HashSet<>();
+
+            for (String pointId : points.keySet()) {
+
+                pointFullScore.incre(pointId, score);
+
+                for (String level : points.get(pointId)) {
+                    pointLevelFullScore.incre(new PointLevel(pointId, level), score);
+                    levels.add(level);
+                }
+            }
+
+            // 将该题目的分数累加到每个能力层级
+            for (String level : levels) {
+                subjectLevelFullScore.incre(new SubjectLevel(subject, level), score);
+            }
+        }
+
+        for (Map.Entry<String, Double> entry : pointFullScore.entrySet()) {
+            String point = entry.getKey();
+            double fullScore = entry.getValue();
+            fullScoreService.saveFullScore(projectId, Target.point(point), fullScore);
+        }
+
+        for (Map.Entry<SubjectLevel, Double> entry : subjectLevelFullScore.entrySet()) {
+            SubjectLevel subjectLevel = entry.getKey();
+            double fullScore = entry.getValue();
+            fullScoreService.saveFullScore(projectId, Target.subjectLevel(subjectLevel), fullScore);
+        }
+
+        for (Map.Entry<PointLevel, Double> entry : pointLevelFullScore.entrySet()) {
+            PointLevel pointLevel = entry.getKey();
+            double fullScore = entry.getValue();
+            fullScoreService.saveFullScore(projectId, Target.pointLevel(pointLevel), fullScore);
         }
     }
 
@@ -279,14 +358,33 @@ public class FakeDataController {
 
         contextQuestList.addAll(questList);
         scoreDatabase.getCollection("quest_list").insertMany(questList);
+
+        ////////////////////////////////////////////////////////////// 保存 quest_type_list
+
+        Map<String, KeyValue<String, String>> usedQuestTypeMap = getContext().get("usedQuestTypes");
+        List<KeyValue<String, String>> questTypeList = new ArrayList<>(usedQuestTypeMap.values());
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
+
+        for (KeyValue<String, String> questType : questTypeList) {
+            collection.insertOne(doc("project", projectId).append("subject", subjectId)
+                    .append("questTypeId", questType.getKey()).append("questTypeName", questType.getValue()));
+        }
+
     }
 
     private void injectQuestType(Document quest) {
-        Map<String, List<KeyValue<String, String>>> questTypeMap = getContext().get("questTypes");
-        List<KeyValue<String, String>> questTypeList = questTypeMap.get(quest.getString("subject"));
+        Map<String, List<KeyValue<String, String>>> totalQuestTypeMap = getContext().get("questTypes");
+        Map<String, KeyValue<String, String>> usedQuestTypeMap = getContext().get("usedQuestTypes");
+
+        List<KeyValue<String, String>> questTypeList = totalQuestTypeMap.get(quest.getString("subject"));
         KeyValue<String, String> questType = pickRandom(questTypeList, 1).get(0);
 
-        quest.append("questionTypeId", questType.getKey()).append("questionTypeName", questType.getValue());
+        String questTypeId = questType.getKey();
+        quest.append("questionTypeId", questTypeId).append("questionTypeName", questType.getValue());
+
+        if (!usedQuestTypeMap.containsKey(questTypeId)) {
+            usedQuestTypeMap.put(questTypeId, questType);
+        }
     }
 
     private void injectPoints(Document quest) {
@@ -326,7 +424,7 @@ public class FakeDataController {
 
             scoreCollection.insertMany(studentScores);
             int count = counter.incrementAndGet();
-            if (count % 100 == 0) {
+            if (count % 10 == 0) {
                 LOG.info("已生成 " + count + "/" + students.size() + " 个考生成绩");
             }
         }
@@ -382,20 +480,27 @@ public class FakeDataController {
 
     private void createSubjects(String projectId, int subjectCount) {
         List<String> subjects = new ArrayList<>();
+        double projectFullScore = 0;
         MongoCollection<Document> fullScoreCollection = scoreDatabase.getCollection("full_score");
 
         for (int i = 0; i < subjectCount; i++) {
             String subjectId = "00" + (i + 1);
             subjects.add(subjectId);
 
+            double subjectFullScore = isBigSubject(subjectId) ? 150.0 : 100.0;
+            projectFullScore += subjectFullScore;
             fullScoreCollection.insertOne(doc("project", projectId)
                     .append("target", doc("name", Target.SUBJECT).append("id", subjectId))
-                    .append("fullScore", isBigSubject(subjectId) ? 150.0 : 100.0)
+                    .append("fullScore", subjectFullScore)
             );
         }
 
         Document subject = doc("project", projectId).append("subjects", subjects);
         scoreDatabase.getCollection("subject_list").insertOne(subject);
+
+        fullScoreCollection.insertOne(doc("project", projectId)
+                .append("target", doc("name", Target.PROJECT).append("id", projectId))
+                .append("fullScore", projectFullScore));
     }
 
     private List<Document> createSchools(String projectId, int schoolsPerProject, int classesPerSchool, int studentsPerClass) {

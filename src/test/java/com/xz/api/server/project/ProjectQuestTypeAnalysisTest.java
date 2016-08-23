@@ -25,9 +25,9 @@ public class ProjectQuestTypeAnalysisTest extends XzExamScoreV2ApplicationTests 
     @Test
     public void testExecute() throws Exception {
         Result result = projectQuestTypeAnalysis.execute(new Param()
-                .setParameter("projectId", "430100-2df3f3ad199042c39c5f4b69f5dc7840")
-                .setParameter("subjectId", "003")
-                .setParameter("schoolIds", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0"));
+                .setParameter("projectId", "FAKE_PROJ_1471919953702_0")
+                .setParameter("subjectId", "001")
+                .setParameter("schoolIds", "SCHOOL_1471919953731_1"));
 
         System.out.println(JSON.toJSONString(result));
     }
