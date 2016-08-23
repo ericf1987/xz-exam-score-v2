@@ -1,11 +1,9 @@
 package com.xz.controllers;
 
+import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.lang.Context;
-import com.xz.ajiaedu.common.lang.RandomUtil;
-import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.lang.*;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.bean.Target;
 import com.xz.services.ClassService;
@@ -13,6 +11,7 @@ import com.xz.services.ProjectService;
 import com.xz.services.SchoolService;
 import com.xz.services.StudentService;
 import com.xz.util.ChineseName;
+import org.bson.BsonUndefined;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandom;
 import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandomWithout;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -165,9 +165,36 @@ public class FakeDataController {
 
     private Context initContext() {
         Context context = new Context();
-        List<Document> points = MongoUtils.toList(scoreDatabase.getCollection("points").find(doc()));
-        context.put("points", points);
+        context.put("points", MongoUtils.toList(scoreDatabase.getCollection("points").find(doc())));
+        context.put("questTypes", getQuestTypes());
         return context;
+    }
+
+    private Map<String, List<KeyValue<String, String>>> getQuestTypes() {
+
+        HashMap<String, List<KeyValue<String, String>>> result = new HashMap<>();
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
+        DistinctIterable<String> questTypeIds = collection.distinct("questTypeId", String.class);
+
+        for (String questTypeId : questTypeIds) {
+            Document questTypeDoc = collection.find(doc("questTypeId", questTypeId)).first();
+
+            if (questTypeDoc.get("subject") instanceof BsonUndefined) {
+                LOG.warn("subject is undefined: " + questTypeDoc.getString("project"));
+                continue;
+            }
+
+            String questTypeName = questTypeDoc.getString("questTypeName");
+            String subject = questTypeDoc.getString("subject");
+
+            if (!result.containsKey(subject)) {
+                result.put(subject, new ArrayList<>());
+            }
+
+            result.get(subject).add(new KeyValue<>(questTypeId, questTypeName));
+        }
+
+        return result;
     }
 
     private String createProject(int schoolsPerProject, int classesPerSchool, int studentsPerClass, int subjectCount) {
@@ -225,6 +252,7 @@ public class FakeDataController {
                     .append("questionTypeName", QUESTION_TYPE_SELECT_NAME);
 
             injectPoints(objQuest);
+            injectQuestType(objQuest);
             questList.add(objQuest);
         }
 
@@ -239,6 +267,7 @@ public class FakeDataController {
                     .append("questionTypeName", QUESTION_TYPE_BLANK_NAME);
 
             injectPoints(sbjQuest);
+            injectQuestType(sbjQuest);
             questList.add(sbjQuest);
         }
 
@@ -250,6 +279,14 @@ public class FakeDataController {
 
         contextQuestList.addAll(questList);
         scoreDatabase.getCollection("quest_list").insertMany(questList);
+    }
+
+    private void injectQuestType(Document quest) {
+        Map<String, List<KeyValue<String, String>>> questTypeMap = getContext().get("questTypes");
+        List<KeyValue<String, String>> questTypeList = questTypeMap.get(quest.getString("subject"));
+        KeyValue<String, String> questType = pickRandom(questTypeList, 1).get(0);
+
+        quest.append("questionTypeId", questType.getKey()).append("questionTypeName", questType.getValue());
     }
 
     private void injectPoints(Document quest) {
