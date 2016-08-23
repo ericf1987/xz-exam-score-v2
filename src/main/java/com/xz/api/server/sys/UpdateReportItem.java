@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
         @Parameter(name = "name", type = Type.String, description = "报表名称", required = false),
         @Parameter(name = "collectionNames", type = Type.StringArray, description = "报表数据来源的集合名称", required = false),
         @Parameter(name = "serverName", type = Type.String, description = "报表接口名称", required = false),
+        @Parameter(name = "tag", type = Type.String, description = "报表文件保存路径标识", required = false),
         @Parameter(name = "position", type = Type.String, description = "位置", required = false)
 })
 @Component
@@ -39,13 +40,14 @@ public class UpdateReportItem implements Server {
         String[] collectionNames = param.getStringValues("collectionNames");
         String serverName = param.getString("serverName");
         String position = param.getString("position");
+        String tag = param.getString("tag");
 
         if (StringUtil.isNotBlank(type)) {
             ReportItemService.ReportType reportType = ReportItemService.ReportType.valueOf(type);
             type = reportType.name();
         }
 
-        reportItemService.updateReportItem(id, type, name, collectionNames, serverName, position);
+        reportItemService.updateReportItem(id, type, name, collectionNames, serverName, position, tag);
         return Result.success();
     }
 }

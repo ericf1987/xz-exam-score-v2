@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
         @Parameter(name = "rangeId", type = Type.String, description = "范围编号 common=通用报表,{projectId}=项目自定义报表"),
         @Parameter(name = "collectionNames", type = Type.StringArray, description = "报表数据来源的集合名称"),
         @Parameter(name = "serverName", type = Type.String, description = "报表接口名称"),
+        @Parameter(name = "tag", type = Type.String, description = "报表文件保存路径标识")
 })
 @Component
 public class AddReportItem implements Server {
@@ -36,12 +37,13 @@ public class AddReportItem implements Server {
         String rangeId = param.getString("rangeId");
         String[] collectionNames = param.getStringValues("collectionNames");
         String serverName = param.getString("serverName");
+        String tag = param.getString("tag");
 
         ReportItemService.ReportType ReportType = ReportItemService.ReportType.valueOf(type);
         ReportItemService.ReportRange reportRange = ReportItemService.ReportRange.valueOf(rangeName);
 
         Range range = new Range(reportRange.name(), rangeId);
-        reportItemService.addReportItem(range, ReportType.name(), name, collectionNames, serverName);
+        reportItemService.addReportItem(range, ReportType.name(), name, collectionNames, serverName, tag);
         return Result.success();
     }
 }

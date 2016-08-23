@@ -50,6 +50,21 @@ public class ReportItemService {
     SimpleCache instantCache;
 
     /**
+     * 查询指定报表条目明细
+     *
+     * @param id    条目id
+     *
+     * @return 条目明细
+     */
+    public Document queryReportItemById(String id) {
+        String cacheKey = "report_item_id" + id;
+        return instantCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("report_item_list");
+            return collection.find(doc("_id", new ObjectId(id))).first();
+        });
+    }
+
+    /**
      * 查询指定项目报表条目信息
      *
      * @param projectId 考试项目id
@@ -196,9 +211,10 @@ public class ReportItemService {
      * @param name            报表名称
      * @param collectionNames 报表数据来源的集合名称
      * @param serverName      报表接口名称
+     * @param tag             报表文件保存路径标识
      */
     public void addReportItem(Range range, String type, String name,
-                              String[] collectionNames, String serverName) {
+                              String[] collectionNames, String serverName, String tag) {
 
         Document document = new Document();
         document.append("range", range2Doc(range));
@@ -206,6 +222,7 @@ public class ReportItemService {
         document.append("name", name);
         addList(document, "collection_names", collectionNames);
         document.append("server_name", serverName);
+        document.append("tag", tag);
         document.append("position", queryMaxPosition() + 1);
 
         scoreDatabase.getCollection("report_item_list").insertOne(document);
@@ -220,9 +237,10 @@ public class ReportItemService {
      * @param collectionNames 集合名称列表
      * @param serverName      报表接口名称
      * @param position        排序的位置
+     * @param tag             报表文件保存路径标识
      */
     public void updateReportItem(String id, String type, String name, String[] collectionNames,
-                                 String serverName, String position) {
+                                 String serverName, String position, String tag) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("report_item_list");
         Document query = doc("_id", new ObjectId(id));
 
@@ -231,6 +249,7 @@ public class ReportItemService {
         DocumentUtils.addTo(document, "name", name);
         DocumentUtils.addList(document, "collection_names", collectionNames);
         DocumentUtils.addTo(document, "server_name", serverName);
+        DocumentUtils.addTo(document, "tag", tag);
 
         if (StringUtil.isNotBlank(position)) {
             document.put("position", NumberUtils.toInt(position));
@@ -256,7 +275,7 @@ public class ReportItemService {
     public enum ReportType {
         basics,     // 基础报表
         paper,      // 试卷分析报表
-        topStudent,  // 尖子生分析
+        topStudent, // 尖子生分析
         compare     // 比较类报表
     }
 
