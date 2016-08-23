@@ -2,15 +2,14 @@ package com.xz.mqreceivers.impl;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
-import com.xz.services.ClassService;
-import com.xz.services.RankService;
-import com.xz.services.SchoolService;
-import com.xz.services.StudentService;
+import com.xz.services.*;
+import com.xz.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,16 +29,6 @@ import static com.xz.util.Mongo.query;
 @ReceiverInfo(taskType = "rank_segment")
 @Component
 public class RankSegmentTask extends Receiver {
-
-    //分段
-    public static final double[] PIECE_WISE = new double[]{
-            0.05, 0.1, 0.15, 0.2,
-            0.25, 0.3, 0.35, 0.4,
-            0.45, 0.5, 0.55, 0.6,
-            0.65, 0.7, 0.75, 0.8,
-            0.85, 0.9, 0.95, 1.0
-    };
-
     @Autowired
     MongoDatabase scoreDataBase;
 
@@ -54,6 +43,19 @@ public class RankSegmentTask extends Receiver {
 
     @Autowired
     SchoolService schoolService;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
+
+    public double[] getPieceWise(String projectId){
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        int rankSegmentCount = projectConfig.getRankSegmentCount();
+        double[] pieses = new double[rankSegmentCount];
+        for (int i = 0;i < rankSegmentCount;i++){
+            pieses[i] = DoubleUtils.round((double)(i + 1) / rankSegmentCount, false);
+        }
+        return pieses;
+    }
 
     @Override
     protected void runTask(AggrTask aggrTask) {
@@ -94,7 +96,7 @@ public class RankSegmentTask extends Receiver {
             }
 
             Map<String, List<Document>> resultMap =
-                    generateSectionRate(rangeCount, currentRange, range, projectId, target);
+                    generateSectionRate(rangeCount, currentRange, range, projectId, target, getPieceWise(projectId));
 
             if (resultMap != null && !resultMap.isEmpty()) {
                 rankSegmentCol.updateMany(
@@ -108,7 +110,7 @@ public class RankSegmentTask extends Receiver {
     }
 
     private Map<String, List<Document>> generateSectionRate(
-            int rangeCount, Range currentRange, Range range, String projectId, Target target) {
+            int rangeCount, Range currentRange, Range range, String projectId, Target target, double[] pieceWise) {
 
         Map<String, List<Document>> sectionRate = new LinkedHashMap<>();
         List<String> studentIds = studentService.getStudentIds(projectId, currentRange, target);
@@ -118,11 +120,11 @@ public class RankSegmentTask extends Receiver {
             return null;
         }
 
-        List<Document> rankSegmentMap = listBySection(PIECE_WISE);
+        List<Document> rankSegmentMap = listBySection(pieceWise);
 
         for (String studentId : studentIds) {
             int rank = rankService.getRank(projectId, range, target, studentId);
-            double section = getSection(rank, rangeCount, PIECE_WISE);
+            double section = getSection(rank, rangeCount, pieceWise);
 
             //对每个分段的人数进行累加
             addCount(section, rankSegmentMap);

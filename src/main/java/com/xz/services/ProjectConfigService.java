@@ -69,6 +69,7 @@ public class ProjectConfigService {
                         .append("topStudentRate", projectConfig.getTopStudentRate())
                         .append("lastRankLevel", projectConfig.getLastRankLevel())
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
+                        .append("highScoreRate", projectConfig.getHighScoreRate())
         ), UPSERT);
     }
 
@@ -81,12 +82,13 @@ public class ProjectConfigService {
      * @param rankLevelCombines 展示的等第组合列表
      * @param scoreLevels       展示的分数等级
      * @param topStudentRate    展示的尖子生比例
+     * @param highScoreRate     展示的高分段比例
      *
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
-            String lastRankLevel, int rankSegmentCount) {
+            String lastRankLevel, int rankSegmentCount, Double highScoreRate) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -96,6 +98,7 @@ public class ProjectConfigService {
                         .append("topStudentRate", topStudentRate)
                         .append("lastRankLevel", lastRankLevel)
                         .append("rankSegmentCount", rankSegmentCount)
+                        .append("highScoreRate", highScoreRate)
         ), UPSERT);
     }
 
@@ -140,24 +143,34 @@ public class ProjectConfigService {
 
         ProjectConfig defaultConfig = getDefaultProjectConfig();
 
+        //排名等级
         if (projectConfig.getRankLevels() == null || projectConfig.getRankLevels().isEmpty()) {
             projectConfig.setRankLevels(defaultConfig.getRankLevels());
         }
 
+        //分数等级
         if (projectConfig.getScoreLevels() == null || projectConfig.getScoreLevels().isEmpty()) {
             projectConfig.setScoreLevels(defaultConfig.getScoreLevels());
         }
 
+        //排名分段
         if (projectConfig.getRankSegmentCount() == 0) {
             projectConfig.setRankSegmentCount(defaultConfig.getRankSegmentCount());
         }
 
+        //报表等第参数
         if (projectConfig.getRankLevelCombines() == null || projectConfig.getRankLevelCombines().isEmpty()) {
             projectConfig.setRankLevelCombines(defaultConfig.getRankLevelCombines());
         }
 
+        //尖子生比率
         if (projectConfig.getTopStudentRate() == 0) {
             projectConfig.setTopStudentRate(defaultConfig.getTopStudentRate());
+        }
+
+        //高分段比例
+        if (projectConfig.getHighScoreRate() == 0) {
+            projectConfig.setHighScoreRate(defaultConfig.getHighScoreRate());
         }
 
         return projectConfig;

@@ -120,6 +120,7 @@ public class ImportProjectService {
         JSONObject rankLevel = result.get("rankLevel");
         JSONObject scoreLevels = result.get("scoreLevels");
         JSONObject topStudentRatio = result.get("topStudentRatio");
+        JSONObject highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
 
         if (null != rankLevel) {
@@ -128,7 +129,9 @@ public class ImportProjectService {
             Map<String, Double> rankLevels = formatRankLevel(standard);
             boolean isCombine = JudgeCombine((List<String>) rankLevel.get("modelSubjects"));
             //尖子生比例
-            Double topStudentRate = 0.05;
+            Double topStudentRate = 0d;
+            //高分段比例
+            Double highScoreRate = 0d;
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
@@ -144,6 +147,11 @@ public class ImportProjectService {
                 topStudentRate = (Double) topStudentRatio.get("ratio");
             }
 
+            //获取高分段比例
+            if (null != highScoreRatio && !highScoreRatio.isEmpty()) {
+                highScoreRate = (Double) highScoreRatio.get("ratio");
+            }
+
             //构建新的考试配置
             ProjectConfig projectConfig = new ProjectConfig();
             projectConfig.setProjectId(projectId);
@@ -152,6 +160,7 @@ public class ImportProjectService {
             projectConfig.setRankLevelCombines(displayOptions);
             projectConfig.setScoreLevels(scoreLevelsMap);
             projectConfig.setTopStudentRate(topStudentRate);
+            projectConfig.setHighScoreRate(highScoreRate);
             projectConfigService.fixProjectConfig(projectConfig);
 
             //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
@@ -166,7 +175,7 @@ public class ImportProjectService {
                     projectConfig.getRankLevels(), projectConfig.isCombineCategorySubjects(),
                     projectConfig.getRankLevelCombines(), projectConfig.getScoreLevels(),
                     projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
-                    projectConfig.getRankSegmentCount());
+                    projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate());
             //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }

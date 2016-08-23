@@ -50,6 +50,19 @@ public class ProjectConfig implements Serializable {
      */
     private double topStudentRate;
 
+    /**
+     * 高分段比率
+     */
+    private double highScoreRate;
+
+    public double getHighScoreRate() {
+        return highScoreRate;
+    }
+
+    public void setHighScoreRate(double highScoreRate) {
+        this.highScoreRate = highScoreRate;
+    }
+
     public double getTopStudentRate() {
         return topStudentRate;
     }

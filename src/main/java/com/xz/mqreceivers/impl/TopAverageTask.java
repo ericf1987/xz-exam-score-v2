@@ -3,11 +3,13 @@ package com.xz.mqreceivers.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.bean.ProjectConfig;
 import com.xz.bean.Range;
 import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.ProjectConfigService;
 import com.xz.services.RangeService;
 import com.xz.services.TargetService;
 import com.xz.util.Mongo;
@@ -38,6 +40,13 @@ public class TopAverageTask extends Receiver {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
+    public double getHighScoreRate(String projectId){
+        return projectConfigService.getProjectConfig(projectId).getHighScoreRate();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected void runTask(AggrTask aggrTask) {
@@ -58,7 +67,7 @@ public class TopAverageTask extends Receiver {
         }
 
         //获取前30%,40%,50%排名的用户
-        double arr[] = new double[]{0.3};
+        double arr[] = new double[]{getHighScoreRate(projectId)};
         //将总分更新至top_average表
         List<Document> resultList = new ArrayList<>();
         //对不同百分率进行便利查询
