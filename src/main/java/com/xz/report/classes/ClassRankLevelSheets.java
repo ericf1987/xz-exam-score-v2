@@ -77,6 +77,7 @@ public class ClassRankLevelSheets extends SheetGenerator {
         List<Map<String, Object>> studentInfos = result.get("studentInfos");
         for(Map<String, Object> studentInfo : studentInfos){
             List<Map<String, Object>> subjectList = (List<Map<String, Object>>)studentInfo.get("subject");
+            excelWriter.set(row, column.incrementAndGet(), studentInfo.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), studentInfo.get("studentName"));
             for(Map<String, Object> subject : subjectList){
                 excelWriter.set(row, column.incrementAndGet(), subject.get("subjectScore"));
