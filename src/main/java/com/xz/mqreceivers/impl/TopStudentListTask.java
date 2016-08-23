@@ -8,6 +8,7 @@ import com.xz.bean.Target;
 import com.xz.mqreceivers.AggrTask;
 import com.xz.mqreceivers.Receiver;
 import com.xz.mqreceivers.ReceiverInfo;
+import com.xz.services.ProjectConfigService;
 import com.xz.services.RankService;
 import com.xz.services.StudentService;
 import org.bson.Document;
@@ -40,6 +41,13 @@ public class TopStudentListTask extends Receiver {
     @Autowired
     MongoDatabase scoreDatabase;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
+    public double getTopStudentRate(String projectId){
+        return projectConfigService.getProjectConfig(projectId).getTopStudentRate();
+    }
+
     @Override
     protected void runTask(AggrTask aggrTask) {
         String projectId = aggrTask.getProjectId();
@@ -68,7 +76,7 @@ public class TopStudentListTask extends Receiver {
         ////////////////////////////////////////////////////////////// 统计尖子生的得分范围
 
         Map<Double, Integer> rankMap = new HashMap<>();  // 排名 Map，
-        int topCount = Math.max((int) (totalCount.get() * 0.05), 1);  // 尖子生人数
+        int topCount = Math.max((int) (totalCount.get() * getTopStudentRate(projectId)), 1);  // 尖子生人数
         double maxTopScore = scoreMap.get(0).getDouble("score"), minTopScore = 0;     // 尖子分数列表
 
         int count = 0, index = 0;
