@@ -89,7 +89,13 @@ public class AggregationService {
                 prepareDataService.prepare(projectId);
 
                 // 统计成绩
-                runAggregation0(projectId, aggregationConfig);
+                try {
+                    runAggregation0(projectId, aggregationConfig);
+                } finally {
+                    //更新统计时间到project_list表
+                    projectService.updateAggregationTime(projectId);
+                    projectStatusService.setProjectStatus(projectId, AggregationCompleted);
+                }
 
                 // 生成报表
                 if (aggregationConfig.isGenerateReport()) {
@@ -101,9 +107,6 @@ public class AggregationService {
                 LOG.error("执行统计失败", e);
             } finally {
                 runningProjects.remove(projectId);
-                //更新统计时间到project_list表
-                projectService.updateAggregationTime(projectId);
-                projectStatusService.setProjectStatus(projectId, AggregationCompleted);
             }
         };
 

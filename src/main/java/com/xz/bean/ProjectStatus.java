@@ -56,5 +56,10 @@ public enum ProjectStatus {
     /**
      * 报表已经生成
      */
-    ReportGenerated
+    ReportGenerated,
+
+    /**
+     * 报表生成超时
+     */
+    ReportGenerateTimeOut
 }
