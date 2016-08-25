@@ -2,7 +2,7 @@ package com.xz.mongo;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
