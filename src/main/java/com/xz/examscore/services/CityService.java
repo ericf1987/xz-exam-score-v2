@@ -86,6 +86,11 @@ public class CityService {
      * @param cities    城市列表
      */
     public void saveProjectCities(String projectId, Collection<String> cities) {
+
+        if (cities.isEmpty()) {
+            return;
+        }
+
         List<Document> documents = cities.stream()
                 .map(city -> doc("project", projectId).append("city", city))
                 .collect(Collectors.toList());

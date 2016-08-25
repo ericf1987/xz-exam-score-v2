@@ -129,7 +129,9 @@ public class SchoolService {
     public void saveProjectSchool(String projectId, List<Document> schoolList) {
         MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
         c.deleteMany(doc("project", projectId));
-        c.insertMany(schoolList);
+        if (!schoolList.isEmpty()) {
+            c.insertMany(schoolList);
+        }
     }
 
     public void clearProjectSchool(String projectId) {

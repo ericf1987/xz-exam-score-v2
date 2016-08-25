@@ -20,6 +20,11 @@ public class ProvinceService {
     MongoDatabase scoreDatabase;
 
     public void saveProjectProvince(String projectId, String province) {
+
+        if (province == null) {
+            return;
+        }
+
         scoreDatabase.getCollection("province_list").updateOne(
                 doc("project", projectId), $set("province", province), UPSERT);
     }

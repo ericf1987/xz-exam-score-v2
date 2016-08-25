@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.Range;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,6 @@ public class AllSubjectPassRateTaskTest extends XzExamScoreV2ApplicationTests {
         String schoolId = "200f3928-a8bd-48c4-a2f4-322e9ffe3700";
 
         allSubjectPassRateTask.runTask(
-                new AggrTaskInfo(projectId, "1", "all_subject_pass_rate").setRange(Range.school(schoolId)));
+                new AggrTaskMessage(projectId, "1", "all_subject_pass_rate").setRange(Range.school(schoolId)));
     }
 }

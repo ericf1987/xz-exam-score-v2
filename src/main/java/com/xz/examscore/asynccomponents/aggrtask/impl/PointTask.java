@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
@@ -49,7 +49,7 @@ public class PointTask extends AggrTask {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {
+    protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
         Range studentRange = taskInfo.getRange();
         String studentId = studentRange.getId();

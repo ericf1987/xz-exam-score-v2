@@ -1,6 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask;
 
-import com.alibaba.fastjson.JSON;
+import com.xz.examscore.asynccomponents.QueueService;
 import com.xz.examscore.services.AggregationRoundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,9 @@ public class AggrTaskManager {
 
     @Autowired
     AggregationRoundService aggregationRoundService;
+
+    @Autowired
+    QueueService queueService;
 
     @Value("${task.executor.poolsize}")
     private int poolSize;
@@ -102,10 +105,9 @@ public class AggrTaskManager {
     }
 
     private void handleMessages() throws Exception {
-        String taskJson = aggregationRoundService.pickTask();
+        AggrTaskMessage taskInfo = aggregationRoundService.pickTask();
 
-        if (taskJson != null) {
-            AggrTaskInfo taskInfo = JSON.parseObject(taskJson, AggrTaskInfo.class);
+        if (taskInfo != null) {
             if (!taskInfo.getType().equals(lastTaskType)) {
                 lastTaskType = taskInfo.getType();
                 LOG.info("---- 开始执行队列中的 " + lastTaskType + " 任务。");
@@ -114,7 +116,7 @@ public class AggrTaskManager {
         }
     }
 
-    private void handleCommand(AggrTaskInfo taskInfo, boolean async) {
+    private void handleCommand(AggrTaskMessage taskInfo, boolean async) {
         String commandType = taskInfo.getType();
         AggrTask aggrTask = taskInstanceMap.get(commandType);
         if (aggrTask != null) {
@@ -138,7 +140,7 @@ public class AggrTaskManager {
      */
     @SuppressWarnings("unused")
     public void pickOneTask(String taskType) {
-        AggrTaskInfo taskInfo = aggregationRoundService.pickOneTask(taskType);
+        AggrTaskMessage taskInfo = aggregationRoundService.pickOneTask(taskType);
         handleCommand(taskInfo, false);
     }
 }

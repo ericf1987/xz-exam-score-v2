@@ -25,6 +25,10 @@ public class AreaService {
 
     public void saveProjectAreas(String projectId, Collection<String> areas) {
 
+        if (areas.isEmpty()) {
+            return;
+        }
+
         List<Document> documents = areas.stream()
                 .map(area -> MongoUtils.doc("project", projectId).append("area", area))
                 .collect(Collectors.toList());

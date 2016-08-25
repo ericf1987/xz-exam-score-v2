@@ -4,7 +4,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -41,7 +41,7 @@ public class RankLevelTask extends AggrTask {
     ProjectConfigService projectConfigService;
 
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {     // 一个 task 代表一个学生
+    protected void runTask(AggrTaskMessage taskInfo) {     // 一个 task 代表一个学生
         String projectId = taskInfo.getProjectId();
         Range stuRange = taskInfo.getRange();
         String studentId = stuRange.getId();

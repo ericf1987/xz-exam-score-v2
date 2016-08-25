@@ -462,7 +462,7 @@ public class ImportProjectService {
 
         schoolService.saveProjectSchool(projectId, schoolList);
         projectService.updateProjectSchools(projectId, schoolList);
-        provinceService.saveProjectProvince(projectId, provinces.iterator().next());
+        provinceService.saveProjectProvince(projectId, provinces.isEmpty()? null: provinces.iterator().next());
         cityService.saveProjectCities(projectId, cities);
         areaService.saveProjectAreas(projectId, areas);
     }
@@ -495,7 +495,13 @@ public class ImportProjectService {
 
     private void importSubjects(String projectId) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
+
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+        if (jsonArray == null) {
+            LOG.info("没有项目 " + projectId + " 的科目信息。");
+            return;
+        }
+
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
 
@@ -521,7 +527,13 @@ public class ImportProjectService {
 
     protected void importProjectInfo(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 基本信息...");
-        JSONObject projectObj = interfaceClient.queryProjectById(projectId);  // 找不到项目则抛出异常
+        JSONObject projectObj = interfaceClient.queryProjectById(projectId);
+
+        if (projectObj == null) {
+            LOG.info("没有找到项目 " + projectId);
+            return;
+        }
+
         ExamProject project = new ExamProject();
         project.setId(projectId);
         project.setName(projectObj.getString("name"));

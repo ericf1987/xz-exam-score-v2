@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
@@ -58,7 +58,7 @@ public class RankSegmentTask extends AggrTask {
     }
 
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {
+    protected void runTask(AggrTaskMessage taskInfo) {
         //1.获取该学校下面的所有班级
         //2.查询每个班级的的所有学生
         //3.家算出学生在学校的排名和排名段

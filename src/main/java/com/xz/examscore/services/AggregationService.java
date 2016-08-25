@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.examscore.asynccomponents.QueueService;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
 import com.xz.examscore.bean.AggregationConfig;
@@ -55,15 +56,27 @@ public class AggregationService {
     @Autowired
     ProjectService projectService;
 
+    @Autowired
+    QueueService queueService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * 开始执行项目统计
      *
-     * @param projectId         项目ID
-     * @param aggregationConfig 选项配置
+     * @param projectId 项目ID
+     * @param config    选项配置
      */
-    public void startAggregation(String projectId, AggregationConfig aggregationConfig, boolean async) {
+    public void startAggregation(String projectId, AggregationConfig config, boolean async) {
+
+/*
+        if (config.isReimportProject() || config.isReimportScore()) {
+            queueService.addToQueue(ImportTaskList, new ImportTaskMessage(
+                    projectId, config.isReimportProject(), config.isReimportScore(), true));
+        } else {
+            queueService.addToQueue(DispatchTaskList, new DispatchTaskMessage(projectId));
+        }
+*/
 
         Runnable runnable = () -> {
             try {
@@ -71,17 +84,17 @@ public class AggregationService {
                 projectStatusService.setProjectStatus(projectId, AggregationStarted);
 
                 // 导入考生信息和试题信息
-                if (aggregationConfig.isReimportProject()) {
+                if (config.isReimportProject()) {
                     importProjectInfo(projectId);
                 }
 
                 // 导入成绩信息（网阅）
-                if (aggregationConfig.isReimportScore()) {
+                if (config.isReimportScore()) {
                     importScannerScore(projectId);
                 }
 
                 // 导出成绩到阿里云
-                if (aggregationConfig.isExportScore()) {
+                if (config.isExportScore()) {
                     exportScore(projectId);
                 }
 
@@ -90,7 +103,7 @@ public class AggregationService {
 
                 // 统计成绩
                 try {
-                    runAggregation0(projectId, aggregationConfig);
+                    runAggregation0(projectId, config);
                 } finally {
                     //更新统计时间到project_list表
                     projectService.updateAggregationTime(projectId);
@@ -98,7 +111,7 @@ public class AggregationService {
                 }
 
                 // 生成报表
-                if (aggregationConfig.isGenerateReport()) {
+                if (config.isGenerateReport()) {
                     generateReports(projectId);
                 }
 

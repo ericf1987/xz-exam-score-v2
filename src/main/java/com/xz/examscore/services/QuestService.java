@@ -104,7 +104,10 @@ public class QuestService {
     public void saveProjectQuests(String projectId, List<Document> quests) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
         collection.deleteMany(doc("project", projectId));
-        collection.insertMany(quests);
+
+        if (!quests.isEmpty()) {
+            collection.insertMany(quests);
+        }
     }
 
     public void clearQuests(String projectId, String subjectId) {

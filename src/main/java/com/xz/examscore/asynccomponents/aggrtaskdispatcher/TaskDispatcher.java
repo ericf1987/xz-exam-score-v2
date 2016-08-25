@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtaskdispatcher;
 import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Value;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.AggregationRoundService;
@@ -72,11 +72,11 @@ public abstract class TaskDispatcher {
         taskDispatcherFactory.registerTaskDispatcher(this);
     }
 
-    protected AggrTaskInfo createTask(String projectId, String aggregationId) {
-        return new AggrTaskInfo(projectId, aggregationId, this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
+    protected AggrTaskMessage createTask(String projectId, String aggregationId) {
+        return new AggrTaskMessage(projectId, aggregationId, this.getClass().getAnnotation(TaskDispatcherInfo.class).taskType());
     }
 
-    protected void dispatchTask(AggrTaskInfo task) {
+    protected void dispatchTask(AggrTaskMessage task) {
         Value<Integer> counterValue = taskCounter.get();
         counterValue.set(counterValue.get() + 1);
 

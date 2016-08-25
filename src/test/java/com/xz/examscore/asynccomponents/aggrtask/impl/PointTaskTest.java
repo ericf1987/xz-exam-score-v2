@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.PointService;
 import com.xz.examscore.services.StudentService;
@@ -24,7 +24,7 @@ public class PointTaskTest extends XzExamScoreV2ApplicationTests{
     @Test
     public void testRunTask() throws Exception {
         task.runTask(
-                new AggrTaskInfo("430100-e7bd093d92d844819c7eda8b641ab6ee", "1", "point")
+                new AggrTaskMessage("430100-e7bd093d92d844819c7eda8b641ab6ee", "1", "point")
                 .setRange(Range.student("f6f290e7-3aaa-46dd-b169-c7d7edbf0516")));
     }
 }

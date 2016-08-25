@@ -32,7 +32,7 @@ public abstract class AggrTask {
         this.aggrTaskManager.register(this);
     }
 
-    public void taskReceived(AggrTaskInfo task) {
+    public void taskReceived(AggrTaskMessage task) {
         try {
             runTask(task);
         } catch (Exception e) {
@@ -43,5 +43,5 @@ public abstract class AggrTask {
         }
     }
 
-    protected abstract void runTask(AggrTaskInfo taskInfo);
+    protected abstract void runTask(AggrTaskMessage taskInfo);
 }
