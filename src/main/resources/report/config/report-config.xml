@@ -1,77 +1,78 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <report-config>
-    <report-set id="default">
+
+    <report-set id="default" base="com.xz.examscore.asynccomponents.report">
 
         <report-category name="总体成绩分析" range="province">
             <report-category name="基础分析">
-                <report name="分数分析" class="com.xz.report.total.TotalBasicScoreReport"/>
-                <report name="排名统计" class="com.xz.report.total.TotalBasicRankReport"/>
-                <report name="分数段统计" class="com.xz.report.total.TotalBasicScoreSegmentReport"/>
-                <report name="学科分析" class="com.xz.report.total.TotalBasicSubjectReport"/>
+                <report name="分数分析" class=".total.TotalBasicScoreReport"/>
+                <report name="排名统计" class=".total.TotalBasicRankReport"/>
+                <report name="分数段统计" class=".total.TotalBasicScoreSegmentReport"/>
+                <report name="学科分析" class=".total.TotalBasicSubjectReport"/>
             </report-category>
             <report-category name="试卷分析">
-                <report name="试卷题型分析" class="com.xz.report.total.TotalPaperQuestTypeReport"/>
-                <report name="客观题分析" class="com.xz.report.total.TotalPaperObjectiveReport"/>
-                <report name="主观题分析" class="com.xz.report.total.TotalPaperSubjectiveReport"/>
+                <report name="试卷题型分析" class=".total.TotalPaperQuestTypeReport"/>
+                <report name="客观题分析" class=".total.TotalPaperObjectiveReport"/>
+                <report name="主观题分析" class=".total.TotalPaperSubjectiveReport"/>
             </report-category>
             <report-category name="尖子生情况">
-                <report name="尖子生统计" class="com.xz.report.total.TotalTopStudentReport"/>
-                <report name="高分段竞争力分析" class="com.xz.report.total.TotalTopStudentHScoreReport"/>
-                <report name="尖子生试卷情况分析" class="com.xz.report.total.TotalTopStudentQuestTypeReport"/>
+                <report name="尖子生统计" class=".total.TotalTopStudentReport"/>
+                <report name="高分段竞争力分析" class=".total.TotalTopStudentHScoreReport"/>
+                <report name="尖子生试卷情况分析" class=".total.TotalTopStudentQuestTypeReport"/>
             </report-category>
             <report-category name="基础数据">
-                <report name="学生各科成绩明细" class="com.xz.report.total.TotalBasicDataReport"/>
-                <report name="各科试卷题目得分明细" class="com.xz.report.total.TotalQuestScoreDetailReport"/>
+                <report name="学生各科成绩明细" class=".total.TotalBasicDataReport"/>
+                <report name="各科试卷题目得分明细" class=".total.TotalQuestScoreDetailReport"/>
             </report-category>
         </report-category>
 
         <report-category name="学校成绩分析" range="school">
             <report-category name="基础分析">
-                <report name="分数分析" class="com.xz.report.schools.SchoolBasicScoreReport"/>
-                <report name="排名统计" class="com.xz.report.schools.SchoolBasicRankReport"/>
-                <report name="分数段统计" class="com.xz.report.schools.SchoolBasicScoreSegmentReport"/>
-                <report name="学科分析" class="com.xz.report.schools.SchoolBasicSubjectReport"/>
-                <report name="等第报表" class="com.xz.report.schools.SchoolRankLevelReport"/>
+                <report name="分数分析" class=".schools.SchoolBasicScoreReport"/>
+                <report name="排名统计" class=".schools.SchoolBasicRankReport"/>
+                <report name="分数段统计" class=".schools.SchoolBasicScoreSegmentReport"/>
+                <report name="学科分析" class=".schools.SchoolBasicSubjectReport"/>
+                <report name="等第报表" class=".schools.SchoolRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
-                <report name="试卷题型分析" class="com.xz.report.schools.SchoolPaperQuestTypeReport"/>
-                <report name="客观题分析" class="com.xz.report.schools.SchoolPaperObjectiveReport"/>
-                <report name="主观题分析" class="com.xz.report.schools.SchoolPaperSubjectiveReport"/>
-                <report name="双向细目分析" class="com.xz.report.schools.SchoolPointAbilityLevelReport"/>
+                <report name="试卷题型分析" class=".schools.SchoolPaperQuestTypeReport"/>
+                <report name="客观题分析" class=".schools.SchoolPaperObjectiveReport"/>
+                <report name="主观题分析" class=".schools.SchoolPaperSubjectiveReport"/>
+                <report name="双向细目分析" class=".schools.SchoolPointAbilityLevelReport"/>
             </report-category>
             <report-category name="尖子生情况">
-                <report name="尖子生统计" class="com.xz.report.schools.SchoolTopStudentReport"/>
-                <report name="高分段竞争力分析" class="com.xz.report.schools.SchoolPaperHScoreReport"/>
-                <report name="尖子生试卷情况分析" class="com.xz.report.schools.SchoolTopStudentQuestTypeReport"/>
+                <report name="尖子生统计" class=".schools.SchoolTopStudentReport"/>
+                <report name="高分段竞争力分析" class=".schools.SchoolPaperHScoreReport"/>
+                <report name="尖子生试卷情况分析" class=".schools.SchoolTopStudentQuestTypeReport"/>
             </report-category>
             <report-category name="基础数据">
-                <report name="学生各科成绩明细" class="com.xz.report.schools.SchoolBasicDataReport"/>
-                <report name="各科试卷题目得分明细" class="com.xz.report.schools.SchoolQuestScoreDetailReport"/>
+                <report name="学生各科成绩明细" class=".schools.SchoolBasicDataReport"/>
+                <report name="各科试卷题目得分明细" class=".schools.SchoolQuestScoreDetailReport"/>
             </report-category>
             <report-category name="历次考试对比">
-                <report name="平均分对比" class="com.xz.report.schools.compare.SchoolAverageCompareReport"/>
-                <report name="优秀率对比" class="com.xz.report.schools.compare.SchoolExcellentCompareReport"/>
-                <report name="及格率对比" class="com.xz.report.schools.compare.SchoolAverageCompareReport"/>
+                <report name="平均分对比" class=".schools.compare.SchoolAverageCompareReport"/>
+                <report name="优秀率对比" class=".schools.compare.SchoolExcellentCompareReport"/>
+                <report name="及格率对比" class=".schools.compare.SchoolAverageCompareReport"/>
             </report-category>
         </report-category>
 
         <report-category name="班级成绩分析" range="class">
             <report-category name="基础分析">
-                <report name="分数排名统计" class="com.xz.report.classes.ClassBasicRankReport"/>
-                <report name="等第报表" class="com.xz.report.classes.ClassRankLevelReport"/>
+                <report name="分数排名统计" class=".classes.ClassBasicRankReport"/>
+                <report name="等第报表" class=".classes.ClassRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
-                <report name="题型分析" class="com.xz.report.classes.ClassQuestTypeReport"/>
-                <report name="知识点分析" class="com.xz.report.classes.ClassPointReport"/>
-                <report name="能力层级分析" class="com.xz.report.classes.ClassAbilityLevelReport"/>
-                <report name="双向细目分析" class="com.xz.report.classes.ClassPointAbilityLevelReport"/>
+                <report name="题型分析" class=".classes.ClassQuestTypeReport"/>
+                <report name="知识点分析" class=".classes.ClassPointReport"/>
+                <report name="能力层级分析" class=".classes.ClassAbilityLevelReport"/>
+                <report name="双向细目分析" class=".classes.ClassPointAbilityLevelReport"/>
             </report-category>
             <report-category name="基础数据">
-                <report name="学生各科成绩明细" class="com.xz.report.classes.ClassBasicDataReport"/>
-                <report name="各科试卷题目得分明细" class="com.xz.report.classes.ClassQuestScoreDetailReport"/>
+                <report name="学生各科成绩明细" class=".classes.ClassBasicDataReport"/>
+                <report name="各科试卷题目得分明细" class=".classes.ClassQuestScoreDetailReport"/>
             </report-category>
             <report-category name="历次考试对比">
-                <report name="学生历史成绩" class="com.xz.report.classes.compare.ClassScoreCompareReport"/>
+                <report name="学生历史成绩" class=".classes.compare.ClassScoreCompareReport"/>
             </report-category>
         </report-category>
 
