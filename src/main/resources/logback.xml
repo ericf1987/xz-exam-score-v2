@@ -13,5 +13,5 @@
     <logger name="java.io.mina" level="ERROR"/>
     <logger name="org" level="ERROR"/>
     <logger name="net" level="ERROR"/>
-    <logger name="com.xz.aggrtask.impl" level="DEBUG"/>
+    <logger name="com.xz.examscore.asynccomponents.aggrtask.impl" level="DEBUG"/>
 </configuration>
