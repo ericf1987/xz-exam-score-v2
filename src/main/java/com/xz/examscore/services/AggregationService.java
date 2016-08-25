@@ -2,10 +2,8 @@ package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.examscore.asynccomponents.QueueService;
-import com.xz.examscore.asynccomponents.aggrtaskdispatcher.DispatchTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
-import com.xz.examscore.asynccomponents.importproject.ImportTaskMessage;
 import com.xz.examscore.bean.AggregationConfig;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.scanner.ScannerDBService;
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.xz.examscore.asynccomponents.QueueType.DispatchTaskList;
-import static com.xz.examscore.asynccomponents.QueueType.ImportTaskList;
 import static com.xz.examscore.bean.ProjectStatus.*;
 
 /**
@@ -73,12 +69,14 @@ public class AggregationService {
      */
     public void startAggregation(String projectId, AggregationConfig config, boolean async) {
 
+/*
         if (config.isReimportProject() || config.isReimportScore()) {
             queueService.addToQueue(ImportTaskList, new ImportTaskMessage(
                     projectId, config.isReimportProject(), config.isReimportScore(), true));
         } else {
             queueService.addToQueue(DispatchTaskList, new DispatchTaskMessage(projectId));
         }
+*/
 
         Runnable runnable = () -> {
             try {
