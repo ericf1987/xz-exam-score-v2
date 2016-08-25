@@ -62,7 +62,7 @@ public class PointService {
         String mapFunction = "for (var key in this.points) {emit(key, null);}";
         String reduceFunction = "return null;";
 
-        return cache.get(cacheKey, () -> {
+        return new ArrayList<>(cache.get(cacheKey, () -> {
             Document result = scoreDatabase.runCommand(
                     doc("mapreduce", "quest_list")
                             .append("query", query)
@@ -80,7 +80,7 @@ public class PointService {
             }
 
             return points;
-        });
+        }));
     }
 
     public Point getPoint(String pointId) {

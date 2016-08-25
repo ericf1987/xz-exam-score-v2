@@ -63,7 +63,7 @@ public class SubjectService {
     public List<String> querySubjects(String projectId) {
         String cacheKey = "subject_list:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        return new ArrayList<>(cache.get(cacheKey, () -> {
             ArrayList<String> targets = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("subject_list");
 
@@ -73,7 +73,7 @@ public class SubjectService {
             });
 
             return targets;
-        });
+        }));
     }
 
     public static String getSubjectName(String subjectId) {

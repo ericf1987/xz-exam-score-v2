@@ -36,6 +36,7 @@ public class SchoolService {
      *
      * @param projectId 考试项目id
      * @param schoolId  学校id
+     *
      * @return 学校名称
      */
     public String getSchoolName(String projectId, String schoolId) {
@@ -52,6 +53,7 @@ public class SchoolService {
      *
      * @param projectId 考试项目id
      * @param schoolId  学校id
+     *
      * @return 考试学校
      */
     public Document findSchool(String projectId, String schoolId) {
@@ -69,14 +71,14 @@ public class SchoolService {
      *
      * @param projectId 考试项目id
      * @param area      地区编码
+     *
      * @return 考试学校列表
      */
     public List<String> getProjectSchoolIds(String projectId, String area) {
         String cacheKey = "school_id_list:" + projectId + ":" + area;
-        return cache.get(cacheKey, () -> {
-            return new ArrayList<>(getProjectSchools(projectId, area).stream().map(
-                    document -> document.getString("school")).collect(Collectors.toList()));
-        });
+        return new ArrayList<>(cache.get(cacheKey, () ->
+                new ArrayList<>(getProjectSchools(projectId, area).stream().map(
+                        document -> document.getString("school")).collect(Collectors.toList()))));
     }
 
     /**
@@ -84,12 +86,13 @@ public class SchoolService {
      *
      * @param projectId 考试项目id
      * @param area      地区编码
+     *
      * @return 考试学校列表
      */
     public List<Document> getProjectSchools(String projectId, String area) {
         String cacheKey = "school_list:" + projectId + ":" + area;
 
-        return cache.get(cacheKey, () -> {
+        return new ArrayList<>(cache.get(cacheKey, () -> {
             ArrayList<Document> result = new ArrayList<>();
             List<Document> ands = new ArrayList<>();
 
@@ -101,13 +104,14 @@ public class SchoolService {
             result.addAll(toList(scoreDatabase.getCollection("school_list")
                     .find($and(ands)).projection(WITHOUT_INNER_ID)));
             return result;
-        });
+        }));
     }
 
     /**
      * 查询考试学校列表
      *
      * @param projectId 考试项目id
+     *
      * @return 考试学校列表
      */
     public List<Document> getProjectSchools(String projectId) {
