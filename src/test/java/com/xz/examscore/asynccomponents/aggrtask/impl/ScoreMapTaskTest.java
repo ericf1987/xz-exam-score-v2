@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class ScoreMapTaskTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testRunTask() throws Exception {
         scoreMapTask.runTask(
-                new AggrTaskInfo(XT_PROJECT_ID, "aaaa", "score_map")
+                new AggrTaskMessage(XT_PROJECT_ID, "aaaa", "score_map")
                         .setRange(Range.clazz("46d626b6-9250-4a63-9191-e790ed67a789"))
                         .setTarget(Target.project(XT_PROJECT_ID)));
     }

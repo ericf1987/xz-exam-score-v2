@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
 
 import com.mongodb.client.MongoDatabase;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
@@ -29,7 +29,7 @@ public class AverageTaskDispatcher extends TaskDispatcher {
                 projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
 
         for (Range range : ranges) {
-            AggrTaskInfo task = createTask(projectId, aggregationId).setRange(range);
+            AggrTaskMessage task = createTask(projectId, aggregationId).setRange(range);
             dispatchTask(task);
         }
     }

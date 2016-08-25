@@ -22,6 +22,7 @@ public class XzExamScoreV2ApplicationTests {
         System.setProperty("socksProxyHost", "127.0.0.1");
         System.setProperty("socksProxyPort", "2346");
         System.setProperty("unit_testing", "true");
+        System.setProperty("cluster", "heyiding");
     }
 
     @Before

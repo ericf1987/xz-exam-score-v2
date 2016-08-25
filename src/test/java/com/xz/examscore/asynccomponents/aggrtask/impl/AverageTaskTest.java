@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
@@ -21,7 +21,7 @@ public class AverageTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        averageTask.runTask(new AggrTaskInfo("430200-b73f03af1d74484f84f1aa93f583caaa", "1111", "average")
+        averageTask.runTask(new AggrTaskMessage("430200-b73f03af1d74484f84f1aa93f583caaa", "1111", "average")
                 .setTarget(Target.point("1025605"))
                 .setRange(Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700")));
     }

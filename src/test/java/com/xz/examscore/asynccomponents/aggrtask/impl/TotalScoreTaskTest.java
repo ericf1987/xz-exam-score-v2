@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.Target;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class TotalScoreTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        AggrTaskInfo task = new AggrTaskInfo(XT_PROJECT_ID, "aggr1", "total_score")
+        AggrTaskMessage task = new AggrTaskMessage(XT_PROJECT_ID, "aggr1", "total_score")
                 .setTarget(Target.subject("001"));
 
         totalScoreTask.runTask(task);

@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -38,7 +38,7 @@ public class OverAverageTask extends AggrTask {
     MongoDatabase scoreDatabase;
 
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {
+    protected void runTask(AggrTaskMessage taskInfo) {
         Range range = taskInfo.getRange();
 
         if (range.match(Range.CLASS)) {
@@ -48,7 +48,7 @@ public class OverAverageTask extends AggrTask {
         }
     }
 
-    private void processClassOverAverage(AggrTaskInfo taskInfo) {
+    private void processClassOverAverage(AggrTaskMessage taskInfo) {
         Target target = taskInfo.getTarget();
         String classId = taskInfo.getRange().getId();
         String projectId = taskInfo.getProjectId();
@@ -63,7 +63,7 @@ public class OverAverageTask extends AggrTask {
         saveOverAverage(projectId, Range.clazz(classId), target, overAverage);
     }
 
-    private void processSchoolOverAverage(AggrTaskInfo taskInfo) {
+    private void processSchoolOverAverage(AggrTaskMessage taskInfo) {
         Target target = taskInfo.getTarget();
         String schoolId = taskInfo.getRange().getId();
         String projectId = taskInfo.getProjectId();

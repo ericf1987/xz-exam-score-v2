@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
@@ -33,7 +33,7 @@ public class FullScoreTask extends AggrTask {
     MongoDatabase scoreDatabase;
 
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {
+    protected void runTask(AggrTaskMessage taskInfo) {
         Target target = taskInfo.getTarget();
 
         // 知识点/能力层级的满分统计在 PointTask 中完成
@@ -45,7 +45,7 @@ public class FullScoreTask extends AggrTask {
     }
 
     // 计算科目主客观题满分
-    private void processSubjectObjective(AggrTaskInfo taskInfo) {
+    private void processSubjectObjective(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
         Target target = taskInfo.getTarget();
         SubjectObjective subjectObjective = target.getId(SubjectObjective.class);
@@ -72,7 +72,7 @@ public class FullScoreTask extends AggrTask {
     }
 
     // 计算题型满分
-    private void processQuestType(AggrTaskInfo taskInfo) {
+    private void processQuestType(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
 
         MongoCollection<Document> questList = scoreDatabase.getCollection("quest_list");

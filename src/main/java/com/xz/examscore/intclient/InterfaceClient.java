@@ -66,15 +66,14 @@ public class InterfaceClient {
                 .setParameter("projectId", projectId)
         );
 
-        return apiResponse.get("result");
+        return apiResponse.isSuccess() ? apiResponse.get("result") : null;
     }
 
     public JSONObject queryProjectById(String projectId) {
-        ApiResponse apiResponse = apiClient.call(new ApiRequest(ApiName.QueryProjectById)
-                .setParameter("projectId", projectId)
-        );
+        ApiResponse apiResponse = apiClient.call(
+                new ApiRequest(ApiName.QueryProjectById).setParameter("projectId", projectId));
 
-        return apiResponse.get("result");
+        return apiResponse.isSuccess() ? apiResponse.get("result") : null;
     }
 
     public void importExamScoreFromOSS(String ossPath) {

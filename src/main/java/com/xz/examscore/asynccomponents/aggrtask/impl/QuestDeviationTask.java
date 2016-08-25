@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -48,7 +48,7 @@ public class QuestDeviationTask extends AggrTask {
     public static final double DEVIATION_RATE = 0.27d;
 
     @Override
-    protected void runTask(AggrTaskInfo taskInfo) {
+    protected void runTask(AggrTaskMessage taskInfo) {
         //1.查询出total_score表中的总分值
         //2.查询出前27%排名和后27%排名的平均分，相减
         //3.相减后的数值/总分值

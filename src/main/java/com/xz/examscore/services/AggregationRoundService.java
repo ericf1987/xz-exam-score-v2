@@ -3,7 +3,9 @@ package com.xz.examscore.services;
 import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.redis.Redis;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.QueueService;
+import com.xz.examscore.asynccomponents.QueueType;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class AggregationRoundService {
 
     @Autowired
     Redis redis;
+
+    @Autowired
+    QueueService queueService;
 
     @Value("${redis.task.list.key}")
     private String taskListKey;
@@ -51,7 +56,7 @@ public class AggregationRoundService {
      *
      * @param task 要发布的任务
      */
-    public void pushTask(AggrTaskInfo task) {
+    public void pushTask(AggrTaskMessage task) {
         redis.getQueue(getTaskListKey()).push(Redis.Direction.Left, JSON.toJSONString(task));
         redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(task.getType());
     }
@@ -61,7 +66,7 @@ public class AggregationRoundService {
      *
      * @param task 完成的任务
      */
-    public void taskFinished(AggrTaskInfo task) {
+    public void taskFinished(AggrTaskMessage task) {
         String aggregationId = task.getAggregationId();
 
         String taskType = task.getType();
@@ -74,23 +79,12 @@ public class AggregationRoundService {
         redis.getList("completed_tasks:" + aggregationId).append(false, taskType);
     }
 
-    /**
-     * 从队列中取一个任务（阻塞）
-     *
-     * @return 取到的任务，null 表示没有任务
-     */
-    public String pickTask() {
-        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
-        String s = queue.popBlocking(Redis.Direction.Right, 3);
-        if (s != null) {
-            logTaskQueueSize(queue.size());
-        }
-        return s;
+    public AggrTaskMessage pickTask() {
+        return queueService.readFromQueue(QueueType.AggregationTaskList, 3);
     }
 
     public void clearTask() {
-        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
-        queue.clear();
+        queueService.clearQueue(getTaskListKey());
     }
 
     /**
@@ -100,9 +94,9 @@ public class AggregationRoundService {
      *
      * @return 指定类型的任务
      */
-    public AggrTaskInfo pickOneTask(String taskType) {
+    public AggrTaskMessage pickOneTask(String taskType) {
         Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
-        AggrTaskInfo taskInfo = null;
+        AggrTaskMessage taskInfo = null;
 
         while (taskInfo == null) {
             String taskJson = queue.popBlocking(Redis.Direction.Right, 3);
@@ -110,7 +104,7 @@ public class AggregationRoundService {
                 taskJson = queue.popBlocking(Redis.Direction.Right, 3);
             }
 
-            taskInfo = JSON.parseObject(taskJson, AggrTaskInfo.class);
+            taskInfo = JSON.parseObject(taskJson, AggrTaskMessage.class);
             if (!taskInfo.getType().equals(taskType)) {
                 taskInfo = null;
             }

@@ -2,6 +2,8 @@ package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.redis.Redis;
 import com.xz.examscore.bean.ProjectStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProjectStatusService {
 
+    static final Logger LOG = LoggerFactory.getLogger(ProjectStatusService.class);
+
     @Autowired
     ProjectService projectService;
 
@@ -20,7 +24,11 @@ public class ProjectStatusService {
     Redis redis;
 
     public void setProjectStatus(String projectId, ProjectStatus status) {
-        projectService.setProjectStatus(projectId, status);
+        try {
+            projectService.setProjectStatus(projectId, status);
+        } catch (Exception e) {
+            LOG.info("修改项目 " + projectId + " 状态为 " + status + " 失败", e);
+        }
     }
 
     public ProjectStatus getProjectStatus(String projectId) {

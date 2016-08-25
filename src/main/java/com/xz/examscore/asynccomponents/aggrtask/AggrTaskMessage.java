@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask;
 
+import com.xz.examscore.asynccomponents.QueueMessage;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 
@@ -9,7 +10,7 @@ import com.xz.examscore.bean.Target;
  *
  * @author yiding_he
  */
-public class AggrTaskInfo {
+public class AggrTaskMessage implements QueueMessage {
 
     private String projectId;
 
@@ -21,23 +22,23 @@ public class AggrTaskInfo {
 
     private Target target;
 
-    public AggrTaskInfo() {
+    public AggrTaskMessage() {
     }
 
-    public AggrTaskInfo(String projectId, String aggregationId, String type) {
+    public AggrTaskMessage(String projectId, String aggregationId, String type) {
         this.projectId = projectId;
         this.aggregationId = aggregationId;
         this.type = type;
     }
 
-    public AggrTaskInfo(String projectId, String aggregationId, String type, Range range) {
+    public AggrTaskMessage(String projectId, String aggregationId, String type, Range range) {
         this.projectId = projectId;
         this.aggregationId = aggregationId;
         this.type = type;
         this.range = range;
     }
 
-    public AggrTaskInfo(String projectId, String aggregationId, String type, Target target) {
+    public AggrTaskMessage(String projectId, String aggregationId, String type, Target target) {
         this.projectId = projectId;
         this.aggregationId = aggregationId;
         this.type = type;
@@ -76,21 +77,21 @@ public class AggrTaskInfo {
         return range;
     }
 
-    public AggrTaskInfo setRange(Range range) {
+    public AggrTaskMessage setRange(Range range) {
         this.range = range;
         return this;
     }
 
-    public AggrTaskInfo setRange(String name, String id) {
+    public AggrTaskMessage setRange(String name, String id) {
         return setRange(new Range(name, id));
     }
 
-    public AggrTaskInfo setTarget(Target target) {
+    public AggrTaskMessage setTarget(Target target) {
         this.target = target;
         return this;
     }
 
-    public AggrTaskInfo setTarget(String name, Object id) {
+    public AggrTaskMessage setTarget(String name, Object id) {
         return setTarget(new Target(name, id));
     }
 

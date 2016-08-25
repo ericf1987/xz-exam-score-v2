@@ -1,7 +1,7 @@
 package com.xz.examscore.services;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,7 +20,7 @@ public class AggregationRoundServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRounds() throws Exception {
-        AggrTaskInfo task = new AggrTaskInfo(XT_PROJECT_ID, AGGR_ID, "total");
+        AggrTaskMessage task = new AggrTaskMessage(XT_PROJECT_ID, AGGR_ID, "total");
         aggregationRoundService.pushTask(task);
 
         new Thread(() -> {

@@ -1,6 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
 
-import com.xz.examscore.asynccomponents.aggrtask.AggrTaskInfo;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
@@ -36,7 +36,7 @@ public class RankLevelMapDispatcher extends TaskDispatcher {
 
         for (Range range : ranges) {
             for (Target target : targets) {
-                AggrTaskInfo task = createTask(projectId, aggregationId).setRange(range).setTarget(target);
+                AggrTaskMessage task = createTask(projectId, aggregationId).setRange(range).setTarget(target);
                 dispatchTask(task);
             }
         }
