@@ -38,7 +38,7 @@ public class CityService {
     public List<Document> listItems(String parent) {
         String cacheKey = "cities_of:" + parent;
 
-        return cache.get(cacheKey, () -> {
+        return new ArrayList<>(cache.get(cacheKey, () -> {
             ArrayList<Document> citys = new ArrayList<>();
 
             MongoCollection<Document> collection = scoreDatabase.getCollection("cities");
@@ -46,7 +46,7 @@ public class CityService {
             citys.addAll(toList(collection.find(query).sort(doc("id", 1)).projection(WITHOUT_INNER_ID)));
 
             return citys;
-        });
+        }));
     }
 
     /**

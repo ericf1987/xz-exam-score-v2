@@ -77,7 +77,7 @@ public class ClassService {
     public List<Document> listClasses(String projectId, String schoolId) {
         String cacheKey = "class_list:" + projectId + ":" + schoolId;
 
-        return cache.get(cacheKey, () -> {
+        return new ArrayList<>(cache.get(cacheKey, () -> {
             ArrayList<Document> classes = new ArrayList<>();
 
             MongoCollection<Document> collection = scoreDatabase.getCollection("class_list");
@@ -86,7 +86,7 @@ public class ClassService {
 
             classes.addAll(toList(collection.find(query).projection(MongoUtils.WITHOUT_INNER_ID)));
             return classes;
-        });
+        }));
     }
 
     //////////////////////////////////////////////////////////////

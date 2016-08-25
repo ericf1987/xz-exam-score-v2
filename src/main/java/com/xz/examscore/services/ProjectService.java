@@ -105,20 +105,7 @@ public class ProjectService {
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
-        //为了防止跳转到云报表页面，考试项目无法刷新出新增的考试项目记录，此处不用缓存加载
-/*        String cacheKey = "school_projects:" + schoolId + ":" + examMonth;
-        return cache.get(cacheKey, () -> {
-            Document query = doc("schools.school", schoolId);
-            Document projection = MongoUtils.WITHOUT_INNER_ID.append("schools", 0);
-
-            if (StringUtil.isNotBlank(examMonth)) {
-                Pattern like = Pattern.compile("^" + examMonth);
-                query.append("importDate", doc("$regex", like));
-            }
-
-            return new ArrayList<>(toList(scoreDatabase.getCollection("project_list")
-                    .find(query).projection(projection).sort(doc("importDate", -1))));
-        });*/
+        // 此处不用缓存加载以免无法及时刷新变更
         Document query = doc("schools.school", schoolId);
         Document projection = MongoUtils.WITHOUT_INNER_ID.append("schools", 0);
 
@@ -127,8 +114,8 @@ public class ProjectService {
             query.append("importDate", doc("$regex", like));
         }
 
-        return new ArrayList<>(toList(scoreDatabase.getCollection("project_list")
-                .find(query).projection(projection).sort(doc("importDate", -1))));
+        return toList(scoreDatabase.getCollection("project_list")
+                .find(query).projection(projection).sort(doc("importDate", -1)));
     }
 
     /**
@@ -163,7 +150,7 @@ public class ProjectService {
     /**
      * 更新项目统计时间
      */
-    public void updateAggregationTime(String projectId){
+    public void updateAggregationTime(String projectId) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String result = format.format(Calendar.getInstance().getTime());
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
