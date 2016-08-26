@@ -87,55 +87,6 @@ public class AggregationService {
         } else {
             queueService.addToQueue(DispatchTaskList, new DispatchTaskMessage(projectId, aggregationType));
         }
-
-/*
-        Runnable runnable = () -> {
-            try {
-                runningProjects.add(projectId);
-                projectStatusService.setProjectStatus(projectId, AggregationStarted);
-
-                // 导入考生信息和试题信息
-                if (config.isReimportProject()) {
-                    importProjectInfo(projectId);
-                }
-
-                // 导入成绩信息（网阅）
-                if (config.isReimportScore()) {
-                    importScannerScore(projectId);
-                }
-
-                // 导出成绩到阿里云
-                if (config.isExportScore()) {
-                    exportScore(projectId);
-                }
-
-                // 导入学生科目信息
-                prepareDataService.prepare(projectId);
-
-                // 统计成绩
-                runAggregationOnly(projectId, config.getAggregationType());
-
-                // 生成报表
-                if (config.isGenerateReport()) {
-                    generateReports(projectId);
-                }
-
-            } catch (Exception e) {
-                projectStatusService.setProjectStatus(projectId, AggregationFailed);
-                LOG.error("执行统计失败", e);
-            } finally {
-                runningProjects.remove(projectId);
-            }
-        };
-
-        if (async) {
-            Thread thread = new Thread(runnable);
-            thread.setDaemon(true);
-            thread.start();
-        } else {
-            runnable.run();
-        }
-*/
     }
 
     public void runAggregationOnly(String projectId, AggregationType aggregationType) {

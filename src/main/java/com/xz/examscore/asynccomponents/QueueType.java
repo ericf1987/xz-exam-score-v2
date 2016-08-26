@@ -43,4 +43,15 @@ public enum QueueType {
     public Class<?> getMessageObjectType() {
         return messageObjectType;
     }
+
+    public static QueueType valueOf(Class<? extends QueueMessage> messageType) {
+
+        for (QueueType queueType : values()) {
+            if (messageType == queueType.messageObjectType) {
+                return queueType;
+            }
+        }
+
+        return null;
+    }
 }

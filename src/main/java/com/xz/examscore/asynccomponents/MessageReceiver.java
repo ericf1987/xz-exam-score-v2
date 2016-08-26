@@ -12,7 +12,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.xz.examscore.asynccomponents.QueueType.ImportTaskList;
+import static com.xz.examscore.asynccomponents.QueueType.valueOf;
 
 /**
  * 自动拉取并执行任务
@@ -41,7 +41,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
         return queueService;
     }
 
-    @SuppressWarnings("InfiniteLoopStatement")
+    @SuppressWarnings({"InfiniteLoopStatement", "unchecked"})
     @PostConstruct
     public void init() {
 
@@ -50,7 +50,9 @@ public abstract class MessageReceiver<T extends QueueMessage> {
             return;
         }
 
+        LOG.info(this.getClass().getSimpleName() + " is up.");
         executorService = Executors.newBlockingThreadPoolExecutor(1, executorPoolSize, 1);
+        QueueType queueType = valueOf((Class<? extends QueueMessage>) getAcceptableMessageType());
 
         Runnable runnable = () -> {
             while (true) {
@@ -63,8 +65,11 @@ public abstract class MessageReceiver<T extends QueueMessage> {
                     }
                 }
 
-                T message = queueService.readFromQueue(ImportTaskList, 3);
-                executorService.submit(() -> executeTask(message));
+                T message = queueService.readFromQueue(queueType, 3);
+                if (message != null) {
+                    LOG.debug("收到消息 " + message);
+                    executorService.submit(() -> executeTask(message));
+                }
             }
         };
 
@@ -79,17 +84,8 @@ public abstract class MessageReceiver<T extends QueueMessage> {
             return false;
         }
 
-        Type genericSuperclass = getClass().getGenericSuperclass();
-        if (genericSuperclass instanceof ParameterizedType) {
-
-            String messageTypeName = getAcceptableMessageTypeName((ParameterizedType) genericSuperclass);
-
-            if (isAcceptable(messageTypeName, SERVER_TYPE_ARG)) {
-                return true;
-            }
-        }
-
-        return false;
+        String messageTypeName = getAcceptableMessageTypeName();
+        return isAcceptable(messageTypeName, SERVER_TYPE_ARG);
     }
 
     // 检查服务器的可接受消息类型与当前 MessageReceiver 对象是否一致
@@ -98,7 +94,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
             String[] serverTypeArgs = serverTypeArg.split(",");
 
             for (String type : serverTypeArgs) {
-                if (messageTypeName.startsWith(type)) {
+                if (messageTypeName.startsWith(type.trim())) {
                     return true;
                 }
             }
@@ -107,9 +103,19 @@ public abstract class MessageReceiver<T extends QueueMessage> {
     }
 
     // 获得当前 MessageReceiver 对象可接受的 QueueMessage 类型
-    private String getAcceptableMessageTypeName(ParameterizedType genericSuperclass) {
-        Type messageType = genericSuperclass.getActualTypeArguments()[0];
-        return ((Class) messageType).getSimpleName().toLowerCase();
+    private String getAcceptableMessageTypeName() {
+        Type messageType = getAcceptableMessageType();
+        return messageType == null ? null : ((Class) messageType).getSimpleName().toLowerCase();
+    }
+
+    private Type getAcceptableMessageType() {
+        Type messageType = null;
+        Type genericSuperclass = getClass().getGenericSuperclass();
+
+        if (genericSuperclass instanceof ParameterizedType) {
+            messageType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0];
+        }
+        return messageType;
     }
 
     protected abstract void executeTask(T message);

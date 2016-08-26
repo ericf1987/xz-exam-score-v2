@@ -3,6 +3,8 @@ package com.xz.examscore.asynccomponents;
 import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.redis.Redis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class QueueService {
+
+    static final Logger LOG = LoggerFactory.getLogger(QueueService.class);
 
     @Autowired
     Redis redis;
@@ -43,6 +47,8 @@ public class QueueService {
         String queueKey = getQueueKey(queueType);
         Redis.RedisQueue queue = redis.getQueue(queueKey);
         queue.push(Redis.Direction.Left, JSON.toJSONString(value));
+
+        LOG.debug("向队列 " + queueKey + " 发送消息 " + value);
     }
 
     private String getQueueKey(QueueType queueType) {
@@ -53,9 +59,10 @@ public class QueueService {
     /**
      * 清空指定队列
      *
-     * @param queueKey 队列 key
+     * @param queueType 队列类型
      */
-    public void clearQueue(String queueKey) {
+    public void clearQueue(QueueType queueType) {
+        String queueKey = getQueueKey(queueType);
         Redis.RedisQueue queue = redis.getQueue(queueKey);
         queue.clear();
     }

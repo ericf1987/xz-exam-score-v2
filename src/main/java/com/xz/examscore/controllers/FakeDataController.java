@@ -158,6 +158,8 @@ public class FakeDataController {
             idCounter.set(0);
             contextThreadLocal.set(initContext());
 
+            LOG.info("开始生成 " + projectCount + " 个模拟项目...");
+
             for (int i = 0; i < projectCount; i++) {
                 String projectId = createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
                 counter++;
