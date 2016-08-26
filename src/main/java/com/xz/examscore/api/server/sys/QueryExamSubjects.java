@@ -1,14 +1,14 @@
-package com.xz.api.server.sys;
+package com.xz.examscore.api.server.sys;
 
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.api.Param;
-import com.xz.api.annotation.*;
-import com.xz.api.server.Server;
-import com.xz.bean.Range;
-import com.xz.services.RangeService;
-import com.xz.services.StudentService;
-import com.xz.services.SubjectService;
+import com.xz.examscore.api.Param;
+import com.xz.examscore.api.annotation.*;
+import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.services.RangeService;
+import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
