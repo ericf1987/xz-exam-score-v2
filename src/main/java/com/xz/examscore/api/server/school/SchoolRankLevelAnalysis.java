@@ -96,7 +96,6 @@ public class SchoolRankLevelAnalysis implements Server {
         int others = studentCount - getCountInRankLevel(rankLevels);
 
         //等第占比
-        rankLevels.forEach(rankLevel -> rankLevel.put("rate", DoubleUtils.round(getRate2(Integer.parseInt(rankLevel.get("count").toString()), studentCount), true)));
         schoolMap.put("studentCount", studentCount);
         schoolMap.put("schoolName", schoolName);
         schoolMap.put("schoolId", schoolId);
