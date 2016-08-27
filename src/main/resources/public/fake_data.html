@@ -23,7 +23,8 @@
 <fieldset>
     <legend>统计所有模拟项目</legend>
     <form action="fake/run_aggregation" method="post">
-        <p><label><input type="checkbox" name="generateReport" value="true"> 是否生成报表文件</label></p>
+        <p><label><input type="checkbox" name="skipPrepare" value="true" checked="checked"> 跳过准备阶段</label></p>
+        <p><label><input type="checkbox" name="generateReport" value="true"> 生成报表文件</label></p>
         <p>
             <button type="submit">开始统计</button>
         </p>

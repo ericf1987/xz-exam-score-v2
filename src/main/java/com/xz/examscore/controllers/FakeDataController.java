@@ -103,6 +103,7 @@ public class FakeDataController {
     @RequestMapping(value = "/fake/run_aggregation", method = RequestMethod.POST)
     @ResponseBody
     public Result aggregateAllFakeProjects(
+            @RequestParam(name = "skipPrepare", required = false, defaultValue = "true") boolean skipPrepare,
             @RequestParam(name = "generateReport", required = false, defaultValue = "false") boolean generateReport
     ) {
 
@@ -111,6 +112,20 @@ public class FakeDataController {
 
         LOG.info("找到 " + fakeProjects.size() + " 个需要统计的模拟项目");
 
+        // 准备阶段
+        if (!skipPrepare) {
+            LOG.info("正在准备项目数据...");
+            ProgressCounter progressCounter = new ProgressCounter("准备项目", fakeProjects.size(), (c, p) -> LOG.info(c));
+
+            for (Document fakeProject : fakeProjects) {
+                String projectId = fakeProject.getString("project");
+                prepareDataService.prepareStudentList(projectId);
+                progressCounter.incre();
+            }
+        }
+
+        // 开始统计
+        LOG.info("正在分发统计任务...");
         for (Document fakeProject : fakeProjects) {
             AggregationConfig aggregationConfig = new AggregationConfig();
             aggregationConfig.setAggregationType(AggregationType.All);
@@ -120,9 +135,9 @@ public class FakeDataController {
             aggregationConfig.setExportScore(false);
 
             String projectId = fakeProject.getString("project");
-            prepareDataService.prepareStudentList(projectId);
             aggregationService.startAggregation(projectId, aggregationConfig);
         }
+        LOG.info("发统计任务分发完毕。\n");
 
         return Result.success("模拟项目统计任务分发完毕。");
     }
@@ -306,6 +321,7 @@ public class FakeDataController {
         createPointLevelFullScore(projectId);
     }
 
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unchecked"})
     private void createPointLevelFullScore(String projectId) {
         DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
         DoubleCounterMap<SubjectLevel> subjectLevelFullScore = new DoubleCounterMap<>();
