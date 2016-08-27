@@ -61,6 +61,7 @@ public class TopStudentListTask extends AggrTask {
         List<Document> scoreMap = rankService.getScoreMap(projectId, range, target);
         if (scoreMap.isEmpty()) {
             LOG.error("找不到排名信息: project={}, range={}, target={}", projectId, range, target);
+            return;
         }
 
         Value<Integer> totalCount = Value.of(0);

@@ -108,7 +108,7 @@ public class AggregationTaskController {
         aggregationConfig.setGenerateReport(Boolean.valueOf(generateReport));
         aggregationConfig.setExportScore(Boolean.valueOf(exportScore));
 
-        aggregationService.startAggregation(projectId, aggregationConfig, true);
+        aggregationService.startAggregation(projectId, aggregationConfig);
 
         return Result.success("项目 " + projectId + " 已经开始统计。");
     }

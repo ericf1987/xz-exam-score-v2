@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xz.examscore.asynccomponents.QueueType.DispatchTaskList;
 import static com.xz.examscore.asynccomponents.QueueType.ImportTaskList;
@@ -72,7 +73,7 @@ public class AggregationService {
      * @param projectId 项目ID
      * @param config    选项配置
      */
-    public void startAggregation(String projectId, AggregationConfig config, boolean async) {
+    public void startAggregation(String projectId, AggregationConfig config) {
 
         boolean reimportProject = config.isReimportProject();
         boolean reimportScore = config.isReimportScore();
@@ -85,7 +86,8 @@ public class AggregationService {
             message.setGenerateReport(generateReport);
             queueService.addToQueue(ImportTaskList, message);
         } else {
-            queueService.addToQueue(DispatchTaskList, new DispatchTaskMessage(projectId, aggregationType));
+            queueService.addToQueue(DispatchTaskList,
+                    new DispatchTaskMessage(projectId, aggregationType, generateReport));
         }
     }
 
@@ -140,7 +142,11 @@ public class AggregationService {
 
         do {
             dispatcherList = createDispatchers(aggregationId, aggregationType);
-            LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
+            List<String> dispatcherListNames = dispatcherList.stream()
+                    .map(d -> d.getClass().getSimpleName())
+                    .collect(Collectors.toList());
+
+            LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherListNames);
 
             runDispatchers(projectId, aggregationId, dispatcherList);
             LOG.info("----对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);

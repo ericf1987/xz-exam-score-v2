@@ -6,6 +6,8 @@ import com.xz.examscore.asynccomponents.QueueType;
 import com.xz.examscore.asynccomponents.report.ReportTaskMessage;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.services.AggregationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage> {
+
+    static final Logger LOG = LoggerFactory.getLogger(DispatchMessageReceiver.class);
 
     @Autowired
     AggregationService aggregationService;

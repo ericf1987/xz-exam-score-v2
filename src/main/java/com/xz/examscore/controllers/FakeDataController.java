@@ -5,9 +5,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
-import com.xz.examscore.bean.PointLevel;
-import com.xz.examscore.bean.SubjectLevel;
-import com.xz.examscore.bean.Target;
+import com.xz.examscore.asynccomponents.QueueService;
+import com.xz.examscore.asynccomponents.QueueType;
+import com.xz.examscore.bean.*;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.ChineseName;
 import org.bson.BsonUndefined;
@@ -77,6 +77,9 @@ public class FakeDataController {
     ProjectService projectService;
 
     @Autowired
+    QueueService queueService;
+
+    @Autowired
     SchoolService schoolService;
 
     @Autowired
@@ -89,7 +92,49 @@ public class FakeDataController {
     FullScoreService fullScoreService;
 
     @Autowired
+    AggregationService aggregationService;
+
+    @Autowired
+    PrepareDataService prepareDataService;
+
+    @Autowired
     MongoDatabase scoreDatabase;
+
+    @RequestMapping(value = "/fake/run_aggregation", method = RequestMethod.POST)
+    @ResponseBody
+    public Result aggregateAllFakeProjects(
+            @RequestParam(name = "generateReport", required = false, defaultValue = "false") boolean generateReport
+    ) {
+
+        List<Document> fakeProjects = MongoUtils.toList(
+                scoreDatabase.getCollection("project_list").find(doc("fake", true)));
+
+        LOG.info("找到 " + fakeProjects.size() + " 个需要统计的模拟项目");
+
+        for (Document fakeProject : fakeProjects) {
+            AggregationConfig aggregationConfig = new AggregationConfig();
+            aggregationConfig.setAggregationType(AggregationType.All);
+            aggregationConfig.setReimportProject(false);
+            aggregationConfig.setReimportScore(false);
+            aggregationConfig.setGenerateReport(generateReport);
+            aggregationConfig.setExportScore(false);
+
+            String projectId = fakeProject.getString("project");
+            prepareDataService.prepareStudentList(projectId);
+            aggregationService.startAggregation(projectId, aggregationConfig);
+        }
+
+        return Result.success("模拟项目统计任务分发完毕。");
+    }
+
+    @RequestMapping(value = "/fake/queue_clear", method = RequestMethod.POST)
+    @ResponseBody
+    public Result clearTaskQueue() {
+        for (QueueType queueType : QueueType.values()) {
+            queueService.clearQueue(queueType);
+        }
+        return Result.success("任务队列已清空。");
+    }
 
     @RequestMapping(value = "/fake/data_clear", method = RequestMethod.POST)
     @ResponseBody

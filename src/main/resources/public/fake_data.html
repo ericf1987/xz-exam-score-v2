@@ -19,11 +19,31 @@
         </p>
     </form>
 </fieldset>
+
+<fieldset>
+    <legend>统计所有模拟项目</legend>
+    <form action="fake/run_aggregation" method="post">
+        <p><label><input type="checkbox" name="generateReport" value="true"> 是否生成报表文件</label></p>
+        <p>
+            <button type="submit">开始统计</button>
+        </p>
+    </form>
+</fieldset>
+
 <fieldset>
     <legend>删除模拟数据</legend>
     <form action="fake/data_clear" method="post">
         <p>
             <button type="submit">清除数据</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>删除任务队列</legend>
+    <form action="fake/queue_clear" method="post">
+        <p>
+            <button type="submit">删除任务队列</button>
         </p>
     </form>
 </fieldset>
