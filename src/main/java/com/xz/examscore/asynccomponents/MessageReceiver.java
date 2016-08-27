@@ -5,7 +5,6 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.ParameterizedType;
@@ -29,11 +28,11 @@ public abstract class MessageReceiver<T extends QueueMessage> {
         LOG.info("服务器类型: " + SERVER_TYPE_ARG);
     }
 
-    @Value("${task.executor.poolsize}")
-    int executorPoolSize;
-
     @Autowired
     QueueService queueService;
+
+    @Autowired
+    ExecutorConfig executorConfig;
 
     private ThreadPoolExecutor executorService;
 
@@ -50,9 +49,11 @@ public abstract class MessageReceiver<T extends QueueMessage> {
             return;
         }
 
-        LOG.info(this.getClass().getSimpleName() + " is up.");
+        int executorPoolSize = executorConfig.getPoolSize(getAcceptableMessageType());
         executorService = Executors.newBlockingThreadPoolExecutor(1, executorPoolSize, 1);
-        QueueType queueType = valueOf((Class<? extends QueueMessage>) getAcceptableMessageType());
+        QueueType queueType = valueOf(getAcceptableMessageType());
+
+        LOG.info(this.getClass().getSimpleName() + " is up with pool size " + executorPoolSize);
 
         Runnable runnable = () -> {
             while (true) {
@@ -108,14 +109,15 @@ public abstract class MessageReceiver<T extends QueueMessage> {
         return messageType == null ? null : ((Class) messageType).getSimpleName().toLowerCase();
     }
 
-    private Type getAcceptableMessageType() {
+    @SuppressWarnings("unchecked")
+    private Class<? extends QueueMessage> getAcceptableMessageType() {
         Type messageType = null;
         Type genericSuperclass = getClass().getGenericSuperclass();
 
         if (genericSuperclass instanceof ParameterizedType) {
             messageType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0];
         }
-        return messageType;
+        return (Class<? extends QueueMessage>) messageType;
     }
 
     protected abstract void executeTask(T message);

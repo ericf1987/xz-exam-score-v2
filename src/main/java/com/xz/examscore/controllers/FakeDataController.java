@@ -98,6 +98,9 @@ public class FakeDataController {
     PrepareDataService prepareDataService;
 
     @Autowired
+    ProjectStatusService projectStatusService;
+
+    @Autowired
     MongoDatabase scoreDatabase;
 
     @RequestMapping(value = "/fake/run_aggregation", method = RequestMethod.POST)
@@ -135,6 +138,7 @@ public class FakeDataController {
             aggregationConfig.setExportScore(false);
 
             String projectId = fakeProject.getString("project");
+            projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationStarted);
             aggregationService.startAggregation(projectId, aggregationConfig);
         }
         LOG.info("发统计任务分发完毕。\n");
