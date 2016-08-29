@@ -4,6 +4,8 @@ import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.services.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
 
+    static final Logger LOG = LoggerFactory.getLogger(CombinedSubjectScoreDispatcher.class);
+
     @Autowired
     StudentService studentService;
 
@@ -21,6 +25,7 @@ public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         if (!projectConfig.isCombineCategorySubjects()) {
+            LOG.info("项目" + projectId + "不存在文理科合并，无需统计");
             return;
         }
 

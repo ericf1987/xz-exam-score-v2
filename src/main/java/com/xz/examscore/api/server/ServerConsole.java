@@ -1,6 +1,5 @@
 package com.xz.examscore.api.server;
 
-import com.alibaba.fastjson.JSON;
 import com.xz.examscore.AppException;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.utils.PackageUtil;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 服务控制台
@@ -61,7 +61,8 @@ public class ServerConsole {
             throw new AppException("server api start is Exception", e.fillInStackTrace());
         }
 
-        LOG.info("load Servers:{}", JSON.toJSONString(loadClasses));
+        List<String> classNames = loadClasses.stream().map(Class::getSimpleName).collect(Collectors.toList());
+        LOG.info("load Servers:{}", classNames);
     }
 
     /**

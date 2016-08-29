@@ -19,11 +19,42 @@
         </p>
     </form>
 </fieldset>
+
+<fieldset>
+    <legend>统计所有模拟项目</legend>
+    <form action="fake/run_aggregation" method="post">
+        <p><label><input type="checkbox" name="skipPrepare" value="true" checked="checked"> 跳过准备阶段</label></p>
+        <p><label><input type="checkbox" name="generateReport" value="true"> 生成报表文件</label></p>
+        <p>
+            <button type="submit">开始统计</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>对所有模拟项目生成报表</legend>
+    <form action="fake/generate_report" method="post">
+        <p>
+            <button type="submit">生成报表</button>
+        </p>
+    </form>
+</fieldset>
+
 <fieldset>
     <legend>删除模拟数据</legend>
     <form action="fake/data_clear" method="post">
+        <p>要删除的项目个数（0表示全部）：<input type="text" name="projectCount" value="1"/></p>
         <p>
-            <button type="submit">清除数据</button>
+            <button type="submit">删除模拟项目数据</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>删除任务队列</legend>
+    <form action="fake/queue_clear" method="post">
+        <p>
+            <button type="submit">删除任务队列</button>
         </p>
     </form>
 </fieldset>

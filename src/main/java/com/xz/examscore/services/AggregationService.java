@@ -1,9 +1,12 @@
 package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.lang.Context;
+import com.xz.examscore.AppException;
 import com.xz.examscore.asynccomponents.QueueService;
+import com.xz.examscore.asynccomponents.aggrtaskdispatcher.DispatchTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
+import com.xz.examscore.asynccomponents.importproject.ImportTaskMessage;
 import com.xz.examscore.bean.AggregationConfig;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.scanner.ScannerDBService;
@@ -13,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.xz.examscore.asynccomponents.QueueType.DispatchTaskList;
+import static com.xz.examscore.asynccomponents.QueueType.ImportTaskList;
 import static com.xz.examscore.bean.ProjectStatus.*;
 
 /**
@@ -67,68 +73,34 @@ public class AggregationService {
      * @param projectId 项目ID
      * @param config    选项配置
      */
-    public void startAggregation(String projectId, AggregationConfig config, boolean async) {
+    public void startAggregation(String projectId, AggregationConfig config) {
 
-/*
-        if (config.isReimportProject() || config.isReimportScore()) {
-            queueService.addToQueue(ImportTaskList, new ImportTaskMessage(
-                    projectId, config.isReimportProject(), config.isReimportScore(), true));
+        boolean reimportProject = config.isReimportProject();
+        boolean reimportScore = config.isReimportScore();
+        boolean generateReport = config.isGenerateReport();
+        AggregationType aggregationType = config.getAggregationType();
+
+        if (reimportProject || reimportScore) {
+            ImportTaskMessage message = new ImportTaskMessage(projectId, reimportProject, reimportScore, true);
+            message.setAggregationType(aggregationType);
+            message.setGenerateReport(generateReport);
+            queueService.addToQueue(ImportTaskList, message);
         } else {
-            queueService.addToQueue(DispatchTaskList, new DispatchTaskMessage(projectId));
+            queueService.addToQueue(DispatchTaskList,
+                    new DispatchTaskMessage(projectId, aggregationType, generateReport));
         }
-*/
+    }
 
-        Runnable runnable = () -> {
-            try {
-                runningProjects.add(projectId);
-                projectStatusService.setProjectStatus(projectId, AggregationStarted);
-
-                // 导入考生信息和试题信息
-                if (config.isReimportProject()) {
-                    importProjectInfo(projectId);
-                }
-
-                // 导入成绩信息（网阅）
-                if (config.isReimportScore()) {
-                    importScannerScore(projectId);
-                }
-
-                // 导出成绩到阿里云
-                if (config.isExportScore()) {
-                    exportScore(projectId);
-                }
-
-                // 导入学生科目信息
-                prepareDataService.prepare(projectId);
-
-                // 统计成绩
-                try {
-                    runAggregation0(projectId, config);
-                } finally {
-                    //更新统计时间到project_list表
-                    projectService.updateAggregationTime(projectId);
-                    projectStatusService.setProjectStatus(projectId, AggregationCompleted);
-                }
-
-                // 生成报表
-                if (config.isGenerateReport()) {
-                    generateReports(projectId);
-                }
-
-            } catch (Exception e) {
-                projectStatusService.setProjectStatus(projectId, AggregationFailed);
-                LOG.error("执行统计失败", e);
-            } finally {
-                runningProjects.remove(projectId);
-            }
-        };
-
-        if (async) {
-            Thread thread = new Thread(runnable);
-            thread.setDaemon(true);
-            thread.start();
-        } else {
-            runnable.run();
+    public void runAggregationOnly(String projectId, AggregationType aggregationType) {
+        try {
+            projectStatusService.setProjectStatus(projectId, AggregationStarted);
+            runAggregation0(projectId, aggregationType);
+            projectService.updateAggregationTime(projectId);
+            projectStatusService.setProjectStatus(projectId, AggregationCompleted);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(e);
         }
     }
 
@@ -162,7 +134,7 @@ public class AggregationService {
         projectStatusService.setProjectStatus(projectId, ProjectImported);
     }
 
-    private void runAggregation0(String projectId, AggregationConfig aggregationConfig) {
+    private void runAggregation0(String projectId, AggregationType aggregationType) {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
@@ -170,8 +142,12 @@ public class AggregationService {
         int round = 1;
 
         do {
-            dispatcherList = createDispatchers(aggregationId, aggregationConfig.getAggregationType());
-            LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherList);
+            dispatcherList = createDispatchers(aggregationId, aggregationType);
+            List<String> dispatcherListNames = dispatcherList.stream()
+                    .map(d -> d.getClass().getSimpleName())
+                    .collect(Collectors.toList());
+
+            LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherListNames);
 
             runDispatchers(projectId, aggregationId, dispatcherList);
             LOG.info("----对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);

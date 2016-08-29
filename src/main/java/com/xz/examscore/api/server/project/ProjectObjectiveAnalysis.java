@@ -158,7 +158,7 @@ public class ProjectObjectiveAnalysis implements Server {
             map.put("isRigth", isRigth);
         } else {
             map.put("count", document.getInteger("count"));
-            map.put("rate", DoubleUtils.round(document.getDouble("rate"), true));
+            map.put("rate", DoubleUtils.round(DocumentUtils.getDouble(document, "rate", 0d), true));
             map.put("answer", key);
             map.put("isRigth", isRigth);
         }

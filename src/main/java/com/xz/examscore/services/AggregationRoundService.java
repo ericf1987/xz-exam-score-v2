@@ -1,7 +1,5 @@
 package com.xz.examscore.services;
 
-import com.alibaba.fastjson.JSON;
-import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.redis.Redis;
 import com.xz.examscore.asynccomponents.QueueService;
 import com.xz.examscore.asynccomponents.QueueType;
@@ -37,9 +35,6 @@ public class AggregationRoundService {
     @Value("${redis.task.counter.key}")
     private String taskCounterKey;
 
-    // 上次输出队列长度的时间
-    private long lastQueueSizeLogTime = System.currentTimeMillis();
-
     /**
      * 查询已经完成的任务类型
      *
@@ -57,7 +52,7 @@ public class AggregationRoundService {
      * @param task 要发布的任务
      */
     public void pushTask(AggrTaskMessage task) {
-        redis.getQueue(getTaskListKey()).push(Redis.Direction.Left, JSON.toJSONString(task));
+        queueService.addToQueue(QueueType.AggregationTaskList, task);
         redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(task.getType());
     }
 
@@ -79,51 +74,12 @@ public class AggregationRoundService {
         redis.getList("completed_tasks:" + aggregationId).append(false, taskType);
     }
 
-    public AggrTaskMessage pickTask() {
-        return queueService.readFromQueue(QueueType.AggregationTaskList, 3);
-    }
-
     public void clearTask() {
-        queueService.clearQueue(getTaskListKey());
-    }
-
-    /**
-     * 从队列中取指定类型的任务，会一直阻塞直到取到任务为止。用于单元测试
-     *
-     * @param taskType 指定类型
-     *
-     * @return 指定类型的任务
-     */
-    public AggrTaskMessage pickOneTask(String taskType) {
-        Redis.RedisQueue queue = redis.getQueue(getTaskListKey());
-        AggrTaskMessage taskInfo = null;
-
-        while (taskInfo == null) {
-            String taskJson = queue.popBlocking(Redis.Direction.Right, 3);
-            while (taskJson == null) {
-                taskJson = queue.popBlocking(Redis.Direction.Right, 3);
-            }
-
-            taskInfo = JSON.parseObject(taskJson, AggrTaskMessage.class);
-            if (!taskInfo.getType().equals(taskType)) {
-                taskInfo = null;
-            }
-        }
-
-        logTaskQueueSize(queue.size());
-        return taskInfo;
-    }
-
-    // 记录任务队列长度（每三秒钟记录一次）
-    private void logTaskQueueSize(long size) {
-        if (System.currentTimeMillis() - lastQueueSizeLogTime > 3000) {
-            lastQueueSizeLogTime = System.currentTimeMillis();
-            LOG.info("Redis 任务队列长度：" + size);
-        }
+        queueService.clearQueue(QueueType.AggregationTaskList);
     }
 
     // 等待本轮统计完成
-    public void waitForRoundCompletion(String aggregationId) {
+    void waitForRoundCompletion(String aggregationId) {
         Redis.RedisHash hash = redis.getHash(taskCounterKey + ":" + aggregationId);
         while (!allValuesAreZero(hash)) {
             try {
@@ -144,11 +100,4 @@ public class AggregationRoundService {
         return true;
     }
 
-    /**
-     * 任务队列 key。任务队列是所有项目和所有统计共用的
-     */
-    public String getTaskListKey() {
-        String suffix = StringUtil.or(System.getProperty("cluster"), "");
-        return taskListKey + ":" + suffix;
-    }
 }

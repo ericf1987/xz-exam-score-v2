@@ -1,6 +1,7 @@
 package com.xz.examscore.asynccomponents.importproject;
 
 import com.xz.examscore.asynccomponents.QueueMessage;
+import com.xz.examscore.bean.AggregationType;
 
 /**
  * 对消息队列记录的包装：导入项目任务
@@ -29,7 +30,21 @@ public class ImportTaskMessage implements QueueMessage {
      */
     private boolean inAggrProcess;
 
+    /**
+     * 统计方式，仅当 inAggrProcess 为 true 时有效
+     */
+    private AggregationType aggregationType;
+
+    /**
+     * 是否要生成报表，仅当 inAggrProcess 为 true 时有效
+     */
+    private boolean generateReport;
+
     public ImportTaskMessage() {
+    }
+
+    public ImportTaskMessage(String projectId, boolean importProjectInfo, boolean importProjectScore) {
+        this(projectId, importProjectInfo, importProjectScore, false);
     }
 
     public ImportTaskMessage(String projectId, boolean importProjectInfo, boolean importProjectScore, boolean inAggrProcess) {
@@ -37,6 +52,22 @@ public class ImportTaskMessage implements QueueMessage {
         this.importProjectInfo = importProjectInfo;
         this.importProjectScore = importProjectScore;
         this.inAggrProcess = inAggrProcess;
+    }
+
+    public boolean isGenerateReport() {
+        return generateReport;
+    }
+
+    public void setGenerateReport(boolean generateReport) {
+        this.generateReport = generateReport;
+    }
+
+    public AggregationType getAggregationType() {
+        return aggregationType;
+    }
+
+    public void setAggregationType(AggregationType aggregationType) {
+        this.aggregationType = aggregationType;
     }
 
     public boolean isInAggrProcess() {

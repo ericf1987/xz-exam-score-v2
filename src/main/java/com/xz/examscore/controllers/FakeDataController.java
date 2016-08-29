@@ -5,9 +5,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.*;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
-import com.xz.examscore.bean.PointLevel;
-import com.xz.examscore.bean.SubjectLevel;
-import com.xz.examscore.bean.Target;
+import com.xz.examscore.asynccomponents.QueueService;
+import com.xz.examscore.asynccomponents.QueueType;
+import com.xz.examscore.bean.*;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.ChineseName;
 import org.bson.BsonUndefined;
@@ -77,6 +77,9 @@ public class FakeDataController {
     ProjectService projectService;
 
     @Autowired
+    QueueService queueService;
+
+    @Autowired
     SchoolService schoolService;
 
     @Autowired
@@ -89,17 +92,81 @@ public class FakeDataController {
     FullScoreService fullScoreService;
 
     @Autowired
+    AggregationService aggregationService;
+
+    @Autowired
+    PrepareDataService prepareDataService;
+
+    @Autowired
+    ProjectStatusService projectStatusService;
+
+    @Autowired
     MongoDatabase scoreDatabase;
+
+    @RequestMapping(value = "/fake/run_aggregation", method = RequestMethod.POST)
+    @ResponseBody
+    public Result aggregateAllFakeProjects(
+            @RequestParam(name = "skipPrepare", required = false, defaultValue = "true") boolean skipPrepare,
+            @RequestParam(name = "generateReport", required = false, defaultValue = "false") boolean generateReport
+    ) {
+
+        List<Document> fakeProjects = MongoUtils.toList(
+                scoreDatabase.getCollection("project_list").find(doc("fake", true)));
+
+        LOG.info("找到 " + fakeProjects.size() + " 个需要统计的模拟项目");
+
+        // 准备阶段
+        if (!skipPrepare) {
+            LOG.info("正在准备项目数据...");
+            ProgressCounter progressCounter = new ProgressCounter("准备项目", fakeProjects.size(), (c, p) -> LOG.info(c));
+
+            for (Document fakeProject : fakeProjects) {
+                String projectId = fakeProject.getString("project");
+                prepareDataService.prepareStudentList(projectId);
+                progressCounter.incre();
+            }
+        }
+
+        // 开始统计
+        LOG.info("正在分发统计任务...");
+        for (Document fakeProject : fakeProjects) {
+            AggregationConfig aggregationConfig = new AggregationConfig();
+            aggregationConfig.setAggregationType(AggregationType.All);
+            aggregationConfig.setReimportProject(false);
+            aggregationConfig.setReimportScore(false);
+            aggregationConfig.setGenerateReport(generateReport);
+            aggregationConfig.setExportScore(false);
+
+            String projectId = fakeProject.getString("project");
+            projectStatusService.setProjectStatus(projectId, ProjectStatus.AggregationStarted);
+            aggregationService.startAggregation(projectId, aggregationConfig);
+        }
+        LOG.info("发统计任务分发完毕。\n");
+
+        return Result.success("模拟项目统计任务分发完毕。");
+    }
+
+    @RequestMapping(value = "/fake/queue_clear", method = RequestMethod.POST)
+    @ResponseBody
+    public Result clearTaskQueue() {
+        for (QueueType queueType : QueueType.values()) {
+            queueService.clearQueue(queueType);
+        }
+        return Result.success("任务队列已清空。");
+    }
 
     @RequestMapping(value = "/fake/data_clear", method = RequestMethod.POST)
     @ResponseBody
-    public Result clearFakeData() {
+    public Result clearFakeData(
+            @RequestParam(value = "projectCount", required = false, defaultValue = "1") final int projectCount
+    ) {
 
         List<Document> fakeProjects = MongoUtils.toList(
                 scoreDatabase.getCollection("project_list").find(doc("fake", true)));
 
         LOG.info("找到 " + fakeProjects.size() + " 个需要清除的模拟项目");
 
+        int counter = 0;
         for (Document fakeProject : fakeProjects) {
             String projectId = fakeProject.getString("project");
             LOG.info("....正在清除模拟项目 " + projectId + " 数据");
@@ -137,6 +204,11 @@ public class FakeDataController {
             scoreDatabase.getCollection("total_score").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("total_score_combined").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("project_list").deleteMany(doc("project", projectId));
+
+            counter++;
+            if (projectCount > 0 && counter >= projectCount) {
+                break;
+            }
         }
 
         LOG.info("模拟数据删除完毕。");
@@ -157,6 +229,8 @@ public class FakeDataController {
             int counter = 0;
             idCounter.set(0);
             contextThreadLocal.set(initContext());
+
+            LOG.info("开始生成 " + projectCount + " 个模拟项目...");
 
             for (int i = 0; i < projectCount; i++) {
                 String projectId = createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
@@ -259,6 +333,7 @@ public class FakeDataController {
         createPointLevelFullScore(projectId);
     }
 
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "unchecked"})
     private void createPointLevelFullScore(String projectId) {
         DoubleCounterMap<String> pointFullScore = new DoubleCounterMap<>();
         DoubleCounterMap<SubjectLevel> subjectLevelFullScore = new DoubleCounterMap<>();
