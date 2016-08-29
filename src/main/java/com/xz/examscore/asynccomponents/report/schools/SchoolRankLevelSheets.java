@@ -11,6 +11,7 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.util.DoubleUtils;
+import com.xz.examscore.util.RankLevelFormater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ public class SchoolRankLevelSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("schoolId", schoolRange.getId());
 
-        List<String> rankLevelParam = classRankLevelAnalysis.getRankLevelParams(projectId, subjectId);
+        List<String> rankLevelParam = projectConfigService.getRankLevelParams(projectId, subjectId);
 
 /*        System.out.println("排序前-->" + rankLevelParam.toString());
         Collections.sort(rankLevelParam, (String s1, String s2) -> s1.compareTo(s2));
@@ -83,11 +84,10 @@ public class SchoolRankLevelSheets extends SheetGenerator {
     private void fillSchoolData(ExcelWriter excelWriter, Result result, List<String> rankLevelParam) {
         AtomicInteger column = new AtomicInteger(-1);
         Map<String, Object> schoolMap = result.get("school");
-        int studentCount = Integer.parseInt(schoolMap.get("studentCount").toString());
         List<Map<String, Object>> rankLevels = (List<Map<String, Object>>) schoolMap.get("rankLevels");
         excelWriter.set(2, column.incrementAndGet(), "本校");
         for (String param : rankLevelParam) {
-            String rankLevelString = schoolRankLevelAnalysis.format(param);
+            String rankLevelString = RankLevelFormater.format(param);
             for (Map<String, Object> rankLevel : rankLevels) {
                 if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                     excelWriter.set(2, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));
@@ -101,14 +101,12 @@ public class SchoolRankLevelSheets extends SheetGenerator {
     private void fillClassData(ExcelWriter excelWriter, Result result, List<String> rankLevelParam) {
         int row = 3;
         AtomicInteger column = new AtomicInteger(-1);
-        Map<String, Object> schoolMap = result.get("school");
-        int studentCount = Integer.parseInt(schoolMap.get("studentCount").toString());
         List<Map<String, Object>> classList = result.get("classes");
         for (Map<String, Object> clazz : classList) {
             List<Map<String, Object>> rankLevels = (List<Map<String, Object>>) clazz.get("rankLevels");
             excelWriter.set(row, column.incrementAndGet(), clazz.get("className"));
             for (String param : rankLevelParam) {
-                String rankLevelString = schoolRankLevelAnalysis.format(param);
+                String rankLevelString = RankLevelFormater.format(param);
                 for (Map<String, Object> rankLevel : rankLevels) {
                     if (rankLevel.get("rankLevel").equals(rankLevelString)) {
                         excelWriter.set(row, column.incrementAndGet(), rankLevel.get("count") == null ? 0 : rankLevel.get("count"));

@@ -9,6 +9,8 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -174,5 +176,19 @@ public class ProjectConfigService {
         }
 
         return projectConfig;
+    }
+
+    public List<String> getRankLevelParams(String projectId, String subjectId) {
+        ProjectConfig projectConfig = getProjectConfig(projectId);
+        Map<String, Double> rankLevels = projectConfig.getRankLevels();
+
+        Iterator<String> it = rankLevels.keySet().iterator();
+
+        List<String> rankLevelParam = new ArrayList<>();
+        while (it.hasNext()) {
+            rankLevelParam.add(it.next());
+        }
+
+        return subjectId == null ? projectConfig.getRankLevelCombines() : rankLevelParam;
     }
 }

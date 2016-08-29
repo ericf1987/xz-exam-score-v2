@@ -13,12 +13,12 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
+import com.xz.examscore.util.RankLevelFormater;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +63,7 @@ public class SchoolRankLevelAnalysis implements Server {
         Target target = targetService.getTarget(projectId, subjectId);
 
         //查询考试配置表中的等级配置参数
-        List<String> rankLevelParam = classRankLevelAnalysis.getRankLevelParams(projectId, subjectId);
+        List<String> rankLevelParam = projectConfigService.getRankLevelParams(projectId, subjectId);
         Map<String, Double> rankLevelsConfig = projectConfigService.getProjectConfig(projectId).getRankLevels();
         Map<String, Object> school = getSchoolMap(projectId, target, schoolId, rankLevelParam);
         List<Map<String, Object>> classes = getClassList(projectId, target, schoolId, rankLevelParam, school);
@@ -84,8 +84,8 @@ public class SchoolRankLevelAnalysis implements Server {
         CounterMap inMap = new CounterMap();
         for (String param : rankLevelParam) {
             rankLevelList.forEach(rankLevel -> {
-                if (format(param).equals(rankLevel.get("rankLevel").toString())) {
-                    inMap.incre(format(param), Integer.parseInt(rankLevel.get("count").toString()));
+                if (RankLevelFormater.format(param).equals(rankLevel.get("rankLevel").toString())) {
+                    inMap.incre(RankLevelFormater.format(param), Integer.parseInt(rankLevel.get("count").toString()));
                 }
             });
         }
@@ -161,9 +161,9 @@ public class SchoolRankLevelAnalysis implements Server {
     private List<Map<String, Object>> convert(List<String> rankLevelParam, CounterMap map, int studentCount) {
         List<Map<String, Object>> list = new ArrayList<>();
         for (String rankLevel : rankLevelParam) {
-            int count = map.get(format(rankLevel)) == null ? 0 : Integer.parseInt(map.get(format(rankLevel)).toString());
+            int count = map.get(RankLevelFormater.format(rankLevel)) == null ? 0 : Integer.parseInt(map.get(RankLevelFormater.format(rankLevel)).toString());
             Map<String, Object> m = new HashMap<>();
-            m.put("rankLevel", format(rankLevel));
+            m.put("rankLevel", RankLevelFormater.format(rankLevel));
             m.put("count", count);
             m.put("rate", DoubleUtils.round(getRate2(count, studentCount), true));
             list.add(m);
@@ -175,11 +175,11 @@ public class SchoolRankLevelAnalysis implements Server {
         List<Map<String, Object>> list = new ArrayList<>();
         List<Map<String, Object>> studentRankLevels = (List<Map<String, Object>>) school.get("rankLevels");
         for (int i = 0; i < rankLevelParam.size(); i++) {
-            int count = map.get(format(rankLevelParam.get(i))) == null ? 0 : Integer.parseInt(map.get(format(rankLevelParam.get(i))).toString());
+            int count = map.get(RankLevelFormater.format(rankLevelParam.get(i))) == null ? 0 : Integer.parseInt(map.get(RankLevelFormater.format(rankLevelParam.get(i))).toString());
             //班级所在学校在该等第内的人数
             int studentCount = Integer.parseInt(studentRankLevels.get(i).get("count").toString());
             Map<String, Object> m = new HashMap<>();
-            m.put("rankLevel", format(rankLevelParam.get(i)));
+            m.put("rankLevel", RankLevelFormater.format(rankLevelParam.get(i)));
             m.put("count", count);
             m.put("studentCount", studentCount);
             m.put("rate", DoubleUtils.round(getRate2(count, studentCount), true));
@@ -193,52 +193,6 @@ public class SchoolRankLevelAnalysis implements Server {
                 m1.get("rankLevel").toString().compareTo(m2.get("rankLevel").toString())
         );
         return list;
-    }
-
-    //格式化等第参数 例如将4A1B1C转化成AAAABC
-    public String format(String str) {
-        StringBuilder builder = new StringBuilder();
-
-        //匹配数字
-        Pattern p_number = Pattern.compile("\\d+");
-
-        //匹配字母
-        Pattern p_char = Pattern.compile("[a-zA-Z]+");
-        //["4", "1", "1"]
-        String[] numbers = p_char.split(str);
-        //["", "A", "B", "C"]
-        String[] chars = p_number.split(str);
-
-        if (numbers.length == 0) {
-            return str;
-        } else {
-            for (int i = 0; i < numbers.length; i++) {
-                int pos = Integer.parseInt(numbers[i]);
-                for (int j = 0; j < pos; j++)
-                    builder.append(chars[i + 1]);
-            }
-            return builder.toString();
-        }
-    }
-
-    //格式化等第参数 例如将AAAABC转化成4A1B1C
-    public String format2(String str){
-        //数组存放对应26个字母的出现次数比如a[0]的值对应字母A出现的次数，a[2]的值对应C出现的次数。。。
-        int[] arr = new int[26];
-
-        for(int i = 0; i < str.length();i++){
-            char c = str.charAt(i);
-            int index = c - 'A';
-            arr[index] = arr[index] + 1;
-        }
-
-        StringBuilder builder = new StringBuilder();
-        for(int j = 0; j < arr.length; j++){
-            if(arr[j] != 0){
-                builder.append(arr[j]).append("").append((char) (j + 'A'));
-            }
-        }
-        return builder.toString();
     }
 
     public double getRate2(int count, int studentCount) {

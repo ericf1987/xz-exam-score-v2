@@ -6,6 +6,8 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.project.ProjectHighSegmentAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,11 +29,16 @@ public class TotalTopStudentHScoreSheets extends SheetGenerator {
     @Autowired
     SchoolService schoolService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         List<String> schoolIds = schoolService.getProjectSchools(projectId).stream().
                 map(d -> d.getString("school")).collect(Collectors.toList());
-        Param param = new Param().setParameter("projectId", projectId).setParameter("percent", 0.3d)
+        ProjectConfig projectConfig =  projectConfigService.getProjectConfig(projectId);
+        //获取高分段参数
+        Param param = new Param().setParameter("projectId", projectId).setParameter("percent", projectConfig.getHighScoreRate())
                 .setParameter("schoolIds", schoolIds.toArray(new String[schoolIds.size()]));
         Result result = projectHighSegmentAnalysis.execute(param);
         setupHeader(excelWriter, result.get("totals"));

@@ -6,8 +6,10 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.school.SchoolHighSegmentAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,12 +32,17 @@ public class SchoolPaperHScoreSheets extends SheetGenerator {
     @Autowired
     SchoolService schoolService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
         String subjectId = target.getId().toString();
         Range schoolRange = sheetTask.getRange();
-        Param param = new Param().setParameter("projectId", projectId).setParameter("percent", 0.3d)
+        ProjectConfig projectConfig =  projectConfigService.getProjectConfig(projectId);
+        //获取高分段参数
+        Param param = new Param().setParameter("projectId", projectId).setParameter("percent", projectConfig.getHighScoreRate())
                 .setParameter("schoolId", schoolRange.getId()).setParameter("subjectId", subjectId);
         Result result = schoolHighSegmentAnalysis.execute(param);
         setupHeader(excelWriter, result);

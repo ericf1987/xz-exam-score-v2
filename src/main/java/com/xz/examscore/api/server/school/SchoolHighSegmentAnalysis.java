@@ -6,8 +6,10 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.ClassService;
+import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.services.SubjectService;
 import com.xz.examscore.services.TopAverageService;
 import org.bson.Document;
@@ -45,11 +47,17 @@ public class SchoolHighSegmentAnalysis implements Server {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
-        double percent = param.getDouble("percent");
+
+        //获取高分段
+        ProjectConfig projectConfig =  projectConfigService.getProjectConfig(projectId);
+        double percent = projectConfig.getHighScoreRate();
 
         List<Map<String, Object>> classHighSegmentAnalysis =
                 getClassHighSegmentAnalysis(projectId, schoolId, percent);

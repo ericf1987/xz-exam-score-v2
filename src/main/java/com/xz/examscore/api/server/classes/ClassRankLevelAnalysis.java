@@ -11,6 +11,7 @@ import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.RankLevelFormater;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,7 +91,7 @@ public class ClassRankLevelAnalysis implements Server {
             double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
             studentInfo.put("projectScore", score);
             String projectRankLevel = rankLevelService.getRankLevel(projectId, studentId, Target.project(projectId), Range.SCHOOL, lastRankLevel);
-            studentInfo.put("ProjectRankLevel", scholRankLevelAnalysis.format2(projectRankLevel));
+            studentInfo.put("ProjectRankLevel", RankLevelFormater.format2(projectRankLevel));
 
 
             for(String subjectId : subjectIds){
@@ -123,19 +124,5 @@ public class ClassRankLevelAnalysis implements Server {
                 .set("studentInfos", studentInfos)
                 .set("rankLevelsConfig", rankLevelsConfig)
                 .set("hasHeader", !studentInfos.isEmpty());
-    }
-
-    public List<String> getRankLevelParams(String projectId, String subjectId) {
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        Map<String, Double> rankLevels = projectConfig.getRankLevels();
-
-        Iterator<String> it = rankLevels.keySet().iterator();
-
-        List<String> rankLevelParam = new ArrayList<>();
-        while (it.hasNext()) {
-            rankLevelParam.add(it.next());
-        }
-
-        return subjectId == null ? projectConfig.getRankLevelCombines() : rankLevelParam;
     }
 }
