@@ -157,13 +157,16 @@ public class FakeDataController {
 
     @RequestMapping(value = "/fake/data_clear", method = RequestMethod.POST)
     @ResponseBody
-    public Result clearFakeData() {
+    public Result clearFakeData(
+            @RequestParam(value = "projectCount", required = false, defaultValue = "1") final int projectCount
+    ) {
 
         List<Document> fakeProjects = MongoUtils.toList(
                 scoreDatabase.getCollection("project_list").find(doc("fake", true)));
 
         LOG.info("找到 " + fakeProjects.size() + " 个需要清除的模拟项目");
 
+        int counter = 0;
         for (Document fakeProject : fakeProjects) {
             String projectId = fakeProject.getString("project");
             LOG.info("....正在清除模拟项目 " + projectId + " 数据");
@@ -201,6 +204,11 @@ public class FakeDataController {
             scoreDatabase.getCollection("total_score").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("total_score_combined").deleteMany(doc("project", projectId));
             scoreDatabase.getCollection("project_list").deleteMany(doc("project", projectId));
+
+            counter++;
+            if (projectCount > 0 && counter >= projectCount) {
+                break;
+            }
         }
 
         LOG.info("模拟数据删除完毕。");

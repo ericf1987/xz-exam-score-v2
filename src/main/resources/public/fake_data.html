@@ -32,10 +32,20 @@
 </fieldset>
 
 <fieldset>
+    <legend>对所有模拟项目生成报表</legend>
+    <form action="fake/generate_report" method="post">
+        <p>
+            <button type="submit">生成报表</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>删除模拟数据</legend>
     <form action="fake/data_clear" method="post">
+        <p>要删除的项目个数（0表示全部）：<input type="text" name="projectCount" value="1"/></p>
         <p>
-            <button type="submit">清除数据</button>
+            <button type="submit">删除模拟项目数据</button>
         </p>
     </form>
 </fieldset>
