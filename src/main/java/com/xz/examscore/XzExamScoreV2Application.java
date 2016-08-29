@@ -14,6 +14,12 @@ public class XzExamScoreV2Application {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(XzExamScoreV2Application.class, args);
+        SpringApplication application = new SpringApplication(XzExamScoreV2Application.class);
+
+        if ("true".equals(System.getProperty("noweb"))) {
+            application.setWebEnvironment(false);
+        }
+
+        application.run(args);
     }
 }
