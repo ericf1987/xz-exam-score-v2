@@ -9,6 +9,8 @@ import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.services.SchoolService;
 import com.xz.examscore.services.TopStudentListService;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +39,16 @@ public class TotalTopStudentSheets extends SheetGenerator {
             "成绩", "总体排名"
     };
 
+    static final Logger LOG = LoggerFactory.getLogger(TotalTopStudentSheets.class);
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         //查询尖子生表总人数
         Document doc = topStudentListService.getTopStudentLastOne(projectId, sheetTask.getRange(), sheetTask.getTarget());
+        if(null == doc || doc.isEmpty()){
+            LOG.error("找不到尖子生信息, project={}, range={}, target={}", projectId, sheetTask.getRange(), sheetTask.getTarget());
+            return;
+        }
         String[] rankSegment = new String[]{"1", doc.get("rank").toString()};
         Param param = new Param().setParameter("projectId", projectId).setParameter("rankSegment", rankSegment);
         Result result = projectTopStudentStat.execute(param);

@@ -10,8 +10,11 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.SchoolService;
 import com.xz.examscore.services.TopStudentListService;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -34,10 +37,16 @@ public class TotalTopStudentQuestTypeSheets extends SheetGenerator {
     @Autowired
     TopStudentListService topStudentListService;
 
+    static final Logger LOG = LoggerFactory.getLogger(TotalTopStudentQuestTypeSheets.class);
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target subjectTarget = sheetTask.get("target");
         Document doc = topStudentListService.getTopStudentLastOne(projectId, sheetTask.getRange(), sheetTask.getTarget());
+        if(null == doc || doc.isEmpty()){
+            LOG.error("找不到尖子生试卷题型信息, project={}, range={}, target={}", projectId, sheetTask.getRange(), sheetTask.getTarget());
+            return;
+        }
         String[] rankSegment = new String[]{"1", doc.get("rank").toString()};
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectTarget.getId().toString())
