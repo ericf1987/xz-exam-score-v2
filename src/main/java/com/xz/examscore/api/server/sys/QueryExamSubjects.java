@@ -9,7 +9,6 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.RangeService;
 import com.xz.examscore.services.StudentService;
 import com.xz.examscore.services.SubjectService;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,17 +58,11 @@ public class QueryExamSubjects implements Server {
         }
 
         // 科目信息
-/*        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
         subjectIds.sort(String::compareTo);
 
         examSubjects.addAll(subjectIds.stream().map(subjectId ->
-                getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));*/
-
-        List<Document> subjects = studentService.getSubjectAggrByRange(projectId, range);
-
-        examSubjects.addAll(
-                subjects.stream().map(this::getSubjectInfo2).collect(Collectors.toList())
-        );
+                getSubjectInfo(projectId, subjectId, range)).collect(Collectors.toList()));
 
         Collections.sort(examSubjects, (Map<String, String> m1, Map<String, String> m2) -> m1.get("subjectId").compareTo(m2.get("subjectId")));
 
@@ -78,26 +71,16 @@ public class QueryExamSubjects implements Server {
         return Result.success().set("subjects", examSubjects).set("totals", projectInfo);
     }
 
-/*    private Map<String, String> getSubjectInfo(String projectId, String subjectId, Range range) {
+    private Map<String, String> getSubjectInfo(String projectId, String subjectId, Range range) {
         Map<String, String> subjectInfo = new HashMap<>();
 
         subjectInfo.put("subjectId", subjectId);
-        subjectInfo.put("subjectName", getSubjectName(subjectId));
+        subjectInfo.put("subjectName", SubjectService.getSubjectName(subjectId));
 
         int studentCount = studentService.getStudentCount(projectId, subjectId, range);
         subjectInfo.put("studentCount", String.valueOf(studentCount));
 
         return subjectInfo;
-    }*/
-
-    private Map<String, String> getSubjectInfo2(Document doc) {
-        Map<String, String> subjectMap = new HashMap<>();
-        Document one = (Document)doc.get("_id");
-        String subjectId = one.getString("subjectId");
-        subjectMap.put("subjectId", subjectId);
-        subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
-        subjectMap.put("studentCount", doc.getInteger("count").toString());
-        return subjectMap;
     }
 
     public Map<String, String> getProjectInfo(String projectId, Range range) {
