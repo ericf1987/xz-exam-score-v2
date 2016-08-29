@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents;
 
 import com.xz.ajiaedu.common.concurrent.Executors;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.context.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
         executorService = Executors.newBlockingThreadPoolExecutor(1, executorPoolSize, 1);
         QueueType queueType = valueOf(getAcceptableMessageType());
 
-        LOG.info(this.getClass().getSimpleName() + " is up with pool size " + executorPoolSize);
+        LOG.info(this.getClass().getSimpleName() + " 已上线，线程池大小 " + executorPoolSize);
 
         Runnable runnable = () -> {
             while (true) {
@@ -75,7 +76,9 @@ public abstract class MessageReceiver<T extends QueueMessage> {
         };
 
         Thread thread = new Thread(runnable);
-        thread.setDaemon(true);
+        if (App.WEB_ENABLED) {
+            thread.setDaemon(true);
+        }
         thread.start();
     }
 

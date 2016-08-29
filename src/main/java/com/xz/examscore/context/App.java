@@ -9,7 +9,9 @@ import org.springframework.context.ApplicationContext;
  */
 public class App {
 
-    protected static ApplicationContext applicationContext;
+    private static ApplicationContext applicationContext;
+
+    public static boolean WEB_ENABLED = !"true".equals(System.getProperty("noweb"));
 
     public static void setApplicationContext(ApplicationContext applicationContext) {
         App.applicationContext = applicationContext;
