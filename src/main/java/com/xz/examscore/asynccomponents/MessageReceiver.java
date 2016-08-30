@@ -70,7 +70,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
                 T message = queueService.readFromQueue(queueType, 3);
                 if (message != null) {
                     LOG.debug("收到消息 " + message);
-                    executorService.submit(() -> executeTask(message));
+                    executorService.submit(() -> executeTaskSafe(message));
                 }
             }
         };
@@ -80,6 +80,14 @@ public abstract class MessageReceiver<T extends QueueMessage> {
             thread.setDaemon(true);
         }
         thread.start();
+    }
+
+    private void executeTaskSafe(T message) {
+        try {
+            executeTask(message);
+        } catch (Exception e) {
+            LOG.error("执行消息失败", e);
+        }
     }
 
     private boolean isAcceptable() {
