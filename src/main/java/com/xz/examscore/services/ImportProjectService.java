@@ -347,6 +347,8 @@ public class ImportProjectService {
             questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
+            //是否直接给分
+            questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
 
             fixQuest(questDoc);
 
@@ -449,8 +451,6 @@ public class ImportProjectService {
             schoolDoc.put("province", schoolObj.getString("province"));
 
 
-            List<Document> tags = new ArrayList<>();
-
             areas.add(schoolObj.getString("area"));
             cities.add(schoolObj.getString("city"));
             provinces.add(schoolObj.getString("province"));
@@ -484,10 +484,7 @@ public class ImportProjectService {
     private Boolean isObjective(String questType, String subObjTag) {
         if (questType == null) {
             //如果questType为空，则根据subObjTag来判断是否为客观题
-            if(null != subObjTag){
-                return subObjTag.equals("o");
-            }
-            return false;
+            return null != subObjTag && subObjTag.equals("o");
         } else {
             return "0".equals(questType) || "1".equals(questType) || "2".equals(questType);
         }

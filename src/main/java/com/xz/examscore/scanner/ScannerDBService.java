@@ -156,7 +156,9 @@ public class ScannerDBService {
                         projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
             }
 
-            ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer);
+            Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
+
+            ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
 
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
@@ -201,28 +203,26 @@ public class ScannerDBService {
         }
     }
 
-    protected static ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent) {
-/*
-        boolean isSingleAnswer = standardAnswer.length() == 1;  // 单选题
-
-        if (isSingleAnswer) {
-            if (answerContent.equals(standardAnswer)) {
+    protected static ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent, Boolean awardScoreTag) {
+        //如果给分标记为空，则根据给分规则来判断
+        if(null == awardScoreTag){
+            if(answerContent.equals(standardAnswer)){
                 return new ScoreAndRight(fullScore, true);
-            } else {
-                return new ScoreAndRight(0, false);
+            }else{
+                ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
+                double score = scorePattern.getScore(answerContent);
+                return new ScoreAndRight(score, score > 0);
             }
-        } else {
-
-            ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
-            double score = scorePattern.getScore(answerContent);
-            return new ScoreAndRight(score, score > 0);
-        }*/
-        if(answerContent.equals(standardAnswer)){
-            return new ScoreAndRight(fullScore, true);
-        }else{
-            ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
-            double score = scorePattern.getScore(answerContent);
-            return new ScoreAndRight(score, score > 0);
+        }
+        //如果给分标记为true，则直接给分
+        else {
+            if (awardScoreTag) {
+                return new ScoreAndRight(fullScore, true);
+            }
+            //如果给分标记为false，则不给分
+            else {
+                return new ScoreAndRight(0, true);
+            }
         }
     }
 

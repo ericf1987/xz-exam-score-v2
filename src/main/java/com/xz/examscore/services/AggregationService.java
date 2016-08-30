@@ -93,6 +93,7 @@ public class AggregationService {
 
     public void runAggregationOnly(String projectId, AggregationType aggregationType) {
         try {
+            prepareDataService.prepare(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationStarted);
             runAggregation0(projectId, aggregationType);
             projectService.updateAggregationTime(projectId);
