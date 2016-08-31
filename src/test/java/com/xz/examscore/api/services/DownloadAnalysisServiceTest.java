@@ -1,6 +1,8 @@
 package com.xz.examscore.api.services;
 
+import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.services.DownloadAnalysisService;
 import org.junit.Test;
@@ -39,5 +41,20 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 /*        String s = downloadAnalysisService.getZipFilePrefix("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68");
         System.out.println(s);*/
+    }
+
+    @Test
+    public void testMain1() throws Exception{
+        String projectId = "430100-cb04005aa5ae460fae6b9d87df797066";
+        String[] param = new String[]{"总体成绩分析","基础分析","分数分析.xlsx"};
+        String result = getSaveFilePath(projectId, "F://", StringUtil.joinPaths(param));
+        System.out.println(result);
+    }
+
+    private String getSaveFilePath(String projectId, String savePath, String filePath) {
+        String md5 = MD5.digest(projectId);
+        // /E0/20/430100-2df3f3ad199042c39c5f4b69f5dc7840/总体成绩分析/基础分析/分数分析
+        return StringUtil.joinPaths(savePath,
+                md5.substring(0, 2), md5.substring(2, 4), projectId, filePath);
     }
 }

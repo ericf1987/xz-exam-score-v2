@@ -57,7 +57,11 @@ public class TestLamdar {
 
     public static void main(String[] args) {
         //new TestLamdar().test3();
-        List<String> list1 = Arrays.asList("1", "2", "4");
+        for (int i = 0; i < 100; i++){
+            char c = (char)('\"' + i);
+            int in = (int)('\"' + i);
+            System.out.println(c + "-->" + in);
+        }
 
 //        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
 //        Converter<String, Integer> converter = Integer::valueOf;
