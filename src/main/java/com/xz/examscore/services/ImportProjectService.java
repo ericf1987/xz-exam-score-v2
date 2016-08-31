@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -117,10 +118,11 @@ public class ImportProjectService {
 
     protected void importProjectReportConfig(String projectId, Context context) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
-        JSONObject rankLevel = result.get("rankLevel");
-        JSONObject scoreLevels = result.get("scoreLevels");
-        JSONObject topStudentRatio = result.get("topStudentRatio");
-        JSONObject highScoreRatio = result.get("highScoreRatio");
+        JSONObject reportJSON = result.get("report");
+        JSONObject rankLevel = reportJSON.getJSONObject("rankLevel");
+        JSONObject scoreLevels = reportJSON.getJSONObject("scoreLevels");
+        String topStudentRatio = reportJSON.getString("topStudentRatio");
+        String highScoreRatio = reportJSON.getString("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
 
         if (null != rankLevel) {
@@ -142,14 +144,14 @@ public class ImportProjectService {
             }
 
             //获取尖子生比例
-            if (null != topStudentRatio && !topStudentRatio.isEmpty()) {
+            if (StringUtils.isEmpty(topStudentRatio)) {
                 //topStudentRate = Double.parseDouble(topStudentRatio.get("ratio").toString());
-                topStudentRate = (Double) topStudentRatio.get("ratio");
+                topStudentRate = Double.parseDouble(topStudentRatio);
             }
 
             //获取高分段比例
-            if (null != highScoreRatio && !highScoreRatio.isEmpty()) {
-                highScoreRate = (Double) highScoreRatio.get("ratio");
+            if (StringUtils.isEmpty(highScoreRatio)) {
+                highScoreRate = Double.parseDouble(highScoreRatio);
             }
 
             //构建新的考试配置

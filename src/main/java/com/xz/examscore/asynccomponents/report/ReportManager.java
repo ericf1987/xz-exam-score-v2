@@ -114,7 +114,7 @@ public class ReportManager implements ApplicationContextAware {
         return System.getProperty("unit_testing") != null;
     }
 
-    private List<ReportTask> createReportGenerators(String projectId) {
+    public List<ReportTask> createReportGenerators(String projectId) {
 
         List<XmlNode> reportSets = reportConfig.getChildren(xmlNode ->
                 xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals(projectId));
@@ -129,8 +129,8 @@ public class ReportManager implements ApplicationContextAware {
 
         try {
             String province = provinceService.getProjectProvince(projectId);
-            Context context = new Context().put("projectId", projectId).put("category", "");
-            iterateReportSet(context, reportSet, reportTasks, Range.province(province));
+            Context context = new Context().put("projectId", projectId);
+            iterateReportSet(context, reportSet, "", reportTasks, Range.province(province));
         } catch (Exception e) {
             throw new AppException(e);
         }
@@ -138,10 +138,9 @@ public class ReportManager implements ApplicationContextAware {
     }
 
     private void iterateReportSet(
-            Context context, XmlNode xmlNode, List<ReportTask> reportTasks, Range range) throws Exception {
+            Context context, XmlNode xmlNode, String category, List<ReportTask> reportTasks, Range range) throws Exception {
 
         String projectId = context.get("projectId");
-        String category = context.get("category");
         String nodeName = xmlNode.getString("name");
         String nodeRange = xmlNode.getString("range");
 
@@ -150,14 +149,13 @@ public class ReportManager implements ApplicationContextAware {
                 List<Range> rangeList = rangeService.queryRanges(projectId, nodeRange);
                 for (Range _r : rangeList) {
                     for (XmlNode child : xmlNode.getChildren()) {
-                        context.put("category", category + "/" + nodeName + "/" + _r.getId());
-                        iterateReportSet(context, child, reportTasks, _r);
+                        iterateReportSet(context, child, category + "/" + nodeName + "/" + _r.getId(), reportTasks, _r);
                     }
                 }
             } else {
                 for (XmlNode child : xmlNode.getChildren()) {
                     context.put("category", category + "/" + nodeName);
-                    iterateReportSet(context, child, reportTasks, range);
+                    iterateReportSet(context, child, category + "/" + nodeName, reportTasks, range);
                 }
             }
 
@@ -178,7 +176,7 @@ public class ReportManager implements ApplicationContextAware {
             String basePackage = xmlNode.getString("base");
             for (XmlNode child : xmlNode.getChildren()) {
                 context.put("basePackage", basePackage);
-                iterateReportSet(context, child, reportTasks, range);
+                iterateReportSet(context, child, category, reportTasks, range);
             }
 
         }

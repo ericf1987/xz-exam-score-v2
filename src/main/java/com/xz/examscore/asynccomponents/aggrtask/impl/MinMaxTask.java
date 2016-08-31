@@ -66,8 +66,13 @@ public class MinMaxTask extends AggrTask {
     private void queryMinMax(
             String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
 
-        for (String studentId : studentIds) {
-            double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentId), target);
+        for (int i = 0; i < studentIds.size(); i++) {
+            double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentIds.get(i)), target);
+
+            if(i == 0){
+                min.set(totalScore);
+                max.set(totalScore);
+            }
 
             if (totalScore < min.get()) {
                 min.set(totalScore);
