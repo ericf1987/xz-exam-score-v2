@@ -183,10 +183,10 @@ public class ScannerDBService {
         String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
 
         Boolean isObjective = quest.getBoolean("isObjective");
-        if(isObjective != null && isObjective){
-            if(!StringUtils.isEmpty(quest.getString("scoreRule"))){
+        if (isObjective != null && isObjective) {
+            if (!StringUtils.isEmpty(quest.getString("scoreRule"))) {
                 standardAnswer = quest.getString("scoreRule");
-            }else{
+            } else {
                 standardAnswer = quest.getString("answer");
             }
         }
@@ -203,12 +203,24 @@ public class ScannerDBService {
         }
     }
 
-    protected static ScoreAndRight calculateScore(double fullScore, String standardAnswer, String answerContent, Boolean awardScoreTag) {
+    /**
+     * 计算分数
+     *
+     * @param fullScore      题目满分值
+     * @param standardAnswer 题目的标准答案
+     * @param answerContent  考生作答
+     * @param awardScoreTag  是否为给分题（一律给满分/一律不给分）：true=给满分，false=不给分，null=按照规则给分
+     *
+     * @return 分数
+     */
+    protected static ScoreAndRight calculateScore(
+            double fullScore, String standardAnswer, String answerContent, Boolean awardScoreTag) {
+
         //如果给分标记为空，则根据给分规则来判断
-        if(null == awardScoreTag){
-            if(answerContent.equals(standardAnswer)){
+        if (null == awardScoreTag) {
+            if (answerContent.equals(standardAnswer)) {
                 return new ScoreAndRight(fullScore, true);
-            }else{
+            } else {
                 ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
                 double score = scorePattern.getScore(answerContent);
                 return new ScoreAndRight(score, score > 0);

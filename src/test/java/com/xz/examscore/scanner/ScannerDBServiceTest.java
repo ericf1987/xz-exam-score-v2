@@ -27,10 +27,11 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testCalculateScore() throws Exception {
-        boolean awardScoreTag = false;
-        assertEquals(1, calculateScore(1, "A,D", "AD", awardScoreTag).score, 0.1);
-        assertEquals(1, calculateScore(1, "A,D", "DA", awardScoreTag).score, 0.1);
-        assertEquals(0, calculateScore(1, "A,D", "", awardScoreTag).score, 0.1);
+        assertEquals(1, calculateScore(1, "A,D", "AD", null).score, 0.1);
+        assertEquals(0, calculateScore(1, "A,D", "AD", false).score, 0.1);
+        assertEquals(1, calculateScore(1, "A,D", "DA", null).score, 0.1);
+        assertEquals(0, calculateScore(1, "A,D", "", null).score, 0.1);
+        assertEquals(1, calculateScore(1, "A,D", "", true).score, 0.1);
     }
 
     @Test
