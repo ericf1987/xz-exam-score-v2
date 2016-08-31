@@ -216,24 +216,18 @@ public class ScannerDBService {
     protected static ScoreAndRight calculateScore(
             double fullScore, String standardAnswer, String answerContent, Boolean awardScoreTag) {
 
-        //如果给分标记为空，则根据给分规则来判断
-        if (null == awardScoreTag) {
+        //如果给分标记为true，则直接给分
+        if (awardScoreTag) {
+            return new ScoreAndRight(fullScore, true);
+        }
+        //其他情况则根据给分规则来判断
+        else{
             if (answerContent.equals(standardAnswer)) {
                 return new ScoreAndRight(fullScore, true);
             } else {
                 ScorePattern scorePattern = new ScorePattern(standardAnswer, fullScore);
                 double score = scorePattern.getScore(answerContent);
                 return new ScoreAndRight(score, score > 0);
-            }
-        }
-        //如果给分标记为true，则直接给分
-        else {
-            if (awardScoreTag) {
-                return new ScoreAndRight(fullScore, true);
-            }
-            //如果给分标记为false，则不给分
-            else {
-                return new ScoreAndRight(0, true);
             }
         }
     }
