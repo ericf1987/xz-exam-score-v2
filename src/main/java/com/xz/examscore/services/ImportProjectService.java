@@ -118,11 +118,10 @@ public class ImportProjectService {
 
     protected void importProjectReportConfig(String projectId, Context context) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
-        JSONObject reportJSON = result.get("report");
-        JSONObject rankLevel = reportJSON.getJSONObject("rankLevel");
-        JSONObject scoreLevels = reportJSON.getJSONObject("scoreLevels");
-        String topStudentRatio = reportJSON.getString("topStudentRatio");
-        String highScoreRatio = reportJSON.getString("highScoreRatio");
+        JSONObject rankLevel = result.get("rankLevel");
+        JSONObject scoreLevels = result.get("scoreLevels");
+        String topStudentRatio = result.get("topStudentRatio");
+        String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
 
         if (null != rankLevel) {
@@ -145,7 +144,6 @@ public class ImportProjectService {
 
             //获取尖子生比例
             if (StringUtils.isEmpty(topStudentRatio)) {
-                //topStudentRate = Double.parseDouble(topStudentRatio.get("ratio").toString());
                 topStudentRate = Double.parseDouble(topStudentRatio);
             }
 
