@@ -97,6 +97,12 @@ public class InterfaceClient {
         );
     }
 
+    public ApiResponse setProjectConfig(Param param) {
+        ApiRequest apiRequest = new ApiRequest(ApiName.SetProjectConfig);
+        apiRequest.setParameters(param.getParameters());
+        return apiClient.call(apiRequest);
+    }
+
     public void addRpApplyOpen(Param param) {
         ApiRequest apiRequest = new ApiRequest(ApiName.AddRpApplyOpen);
         apiRequest.setParameters(param.getParameters());
