@@ -136,10 +136,10 @@ public class ImportProjectService {
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
-                scoreLevelsMap.put(Excellent.name(), (Double) scoreLevels.get("excellent"));
-                scoreLevelsMap.put(Good.name(), (Double) scoreLevels.get("good"));
-                scoreLevelsMap.put(Pass.name(), (Double) scoreLevels.get("pass"));
-                scoreLevelsMap.put(Fail.name(), (Double) scoreLevels.get("fail"));
+                scoreLevelsMap.put(Excellent.name(), Double.parseDouble(scoreLevels.get("excellent").toString()));
+                scoreLevelsMap.put(Good.name(), Double.parseDouble(scoreLevels.get("good").toString()));
+                scoreLevelsMap.put(Pass.name(), Double.parseDouble(scoreLevels.get("pass").toString()));
+                scoreLevelsMap.put(Fail.name(), Double.parseDouble(scoreLevels.get("fail").toString()));
             }
 
             //获取尖子生比例
@@ -193,8 +193,11 @@ public class ImportProjectService {
 
     //判断是否文理分科
     private boolean JudgeCombine(List<String> modelSubjects) {
-        for (String subject : modelSubjects) {
-            if (subject.equals("004005006") || subject.equals("007008009")) return true;
+        if(null != modelSubjects && !modelSubjects.isEmpty()){
+            for (String subject : modelSubjects) {
+                if (subject.equals("004005006") || subject.equals("007008009")) return true;
+            }
+            return false;
         }
         return false;
     }
