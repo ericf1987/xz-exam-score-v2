@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -13,10 +14,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -66,6 +64,6 @@ public class ScoreLevelMapTask extends AggrTask {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_level_map");
         Document query = doc("project", projectId).append("range", range2Doc(range)).append("target", target2Doc(target));
         collection.deleteMany(query);
-        collection.insertOne(doc(query).append("scoreLevels", scoreLevelRate));
+        collection.insertOne(doc(query).append("scoreLevels", scoreLevelRate).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 }

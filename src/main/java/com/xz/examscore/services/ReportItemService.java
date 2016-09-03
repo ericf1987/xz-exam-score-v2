@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -14,10 +15,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.DocumentUtils.addList;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$or;
@@ -223,7 +221,8 @@ public class ReportItemService {
         addList(document, "collection_names", collectionNames);
         document.append("server_name", serverName);
         document.append("tag", tag);
-        document.append("position", queryMaxPosition() + 1);
+        document.append("position", queryMaxPosition() + 1)
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
         scoreDatabase.getCollection("report_item_list").insertOne(document);
     }
@@ -255,7 +254,7 @@ public class ReportItemService {
             document.put("position", NumberUtils.toInt(position));
         }
 
-        Document update = new Document("$set", document);
+        Document update = new Document("$set", document).append("md5", MD5.digest(UUID.randomUUID().toString()));
         collection.updateOne(query, update);
     }
 

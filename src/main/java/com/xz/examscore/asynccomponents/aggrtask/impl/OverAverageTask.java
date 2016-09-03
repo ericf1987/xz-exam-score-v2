@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -13,6 +14,8 @@ import com.xz.examscore.services.SchoolService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -85,7 +88,7 @@ public class OverAverageTask extends AggrTask {
                 .append("range", range2Doc(range)).append("target", target2Doc(target));
 
         collection.deleteMany(query);
-        collection.insertOne(doc(query).append("overAverage", overAverage));
+        collection.insertOne(doc(query).append("overAverage", overAverage).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
 }

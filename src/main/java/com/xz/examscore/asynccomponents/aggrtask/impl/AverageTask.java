@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -16,6 +17,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
@@ -64,7 +66,8 @@ public class AverageTask extends AggrTask {
             double average = calculateAverage(projectId, rangeDoc, targetDoc, totalScore, query);
 
             // 保存平均分
-            averageCollection.updateOne(query, $set("average", average), MongoUtils.UPSERT);
+            averageCollection.updateOne(query, $set("average", average).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    , MongoUtils.UPSERT);
             averageService.deleteCache(projectId, range, Target.parse(targetDoc));
         });
     }

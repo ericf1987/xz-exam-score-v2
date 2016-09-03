@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -14,10 +15,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -225,7 +223,8 @@ public class ScoreService {
 
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
-        Document update = doc("totalScore", score);
+        Document update = doc("totalScore", score).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ;
 
         if (parent != null) {
             update.append("parent", range2Doc(parent));

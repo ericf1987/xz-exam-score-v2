@@ -1,5 +1,6 @@
 package com.xz.examscore.scorearchive.processor;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Context;
 import org.bson.Document;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 考试学生列表数据处理
@@ -37,7 +39,7 @@ public class StudentListProcessor extends DataProcessor {
 
     @Override
     protected void processLine(Context context, String line) {
-        Document document = Document.parse(line);
+        Document document = Document.parse(line).append("md5", MD5.digest(UUID.randomUUID().toString()));
         List<Document> students = context.get("students");
         students.add(document);
 
@@ -51,6 +53,7 @@ public class StudentListProcessor extends DataProcessor {
     @Override
     protected void after(Context context) {
         List<Document> students = context.get("students");
+        students.forEach(student -> student.append("md5", MD5.digest(UUID.randomUUID().toString())));
         scoreDatabase.getCollection("student_list").insertMany(students);
         context.put("students", new ArrayList<>());
     }

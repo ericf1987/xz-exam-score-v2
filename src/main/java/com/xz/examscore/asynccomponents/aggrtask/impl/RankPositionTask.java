@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
@@ -86,7 +88,8 @@ public class RankPositionTask extends AggrTask {
         }
 
         rankPositionCollection.deleteMany(query);
-        rankPositionCollection.updateMany(query, $set("positions", positions), UPSERT);
+        rankPositionCollection.updateMany(query, $set("positions", positions).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                , UPSERT);
     }
 
     private Double parsePosition(String positionName) {

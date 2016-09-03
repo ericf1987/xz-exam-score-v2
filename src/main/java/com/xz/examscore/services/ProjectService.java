@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
@@ -130,7 +131,9 @@ public class ProjectService {
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
-                .append("startDate", project.getExamStartDate());
+                .append("startDate", project.getExamStartDate())
+                .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ;
 
         c.updateOne(query, $set(update), UPSERT);
     }

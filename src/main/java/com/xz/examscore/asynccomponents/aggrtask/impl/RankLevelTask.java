@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
@@ -87,7 +88,8 @@ public class RankLevelTask extends AggrTask {
                     .append("student", studentId);
 
             String levels = StringUtil.join(rankLevelList, "");
-            collection.updateOne(query, $set("rankLevel." + rangeName, levels), UPSERT);
+            collection.updateOne(query, $set("rankLevel." + rangeName, levels).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    , UPSERT);
         }
     }
 
@@ -145,7 +147,8 @@ public class RankLevelTask extends AggrTask {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        collection.updateOne(query, $set("rankLevel." + rankRange.getName(), rankLevel), UPSERT);
+        collection.updateOne(query, $set("rankLevel." + rankRange.getName(), rankLevel).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                , UPSERT);
 
         return rankLevel;
     }

@@ -1,5 +1,6 @@
 package com.xz.examscore.controllers;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.io.FileUtils;
@@ -105,6 +106,7 @@ public class ZipScoreUploadController {
         scoreDoc.put("area", school.get("area"));
         scoreDoc.put("city", school.get("city"));
         scoreDoc.put("province", school.get("province"));
+        scoreDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
 
         // 保存
         collection.insertOne(scoreDoc);

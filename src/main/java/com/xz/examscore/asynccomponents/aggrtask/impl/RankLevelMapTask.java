@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.query;
@@ -50,7 +52,7 @@ public class RankLevelMapTask extends AggrTask {
 
         // 保存新记录
         List<Document> rankLevelMap = generateRankLevelMap(projectId, range, target);
-        rankLevelMapCollection.insertOne(doc(key).append("rankLevelMap", rankLevelMap));
+        rankLevelMapCollection.insertOne(doc(key).append("rankLevelMap", rankLevelMap).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
     private List<Document> generateRankLevelMap(String projectId, Range range, Target target) {

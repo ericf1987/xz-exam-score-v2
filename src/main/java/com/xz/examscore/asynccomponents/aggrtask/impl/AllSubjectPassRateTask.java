@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CounterMap;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
@@ -96,6 +98,8 @@ public class AllSubjectPassRateTask extends AggrTask {
                 .append("allPassRate", allPassRate)
                 .append("allFailRate", allFailRate)
                 .append("allExcellentRate", allExcellentRate)
-                .append("allGoodRate", allGoodRate));
+                .append("allGoodRate", allGoodRate)
+                .append("md5", MD5.digest(UUID.randomUUID().toString())));
+
     }
 }

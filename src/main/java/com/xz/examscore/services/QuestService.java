@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.lang.CollectionUtils.asArrayList;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -121,6 +123,7 @@ public class QuestService {
                 .append("subject", quest.getString("subject"))
                 .append("questNo", quest.getString("questNo"))
         );
+        quest.append("md5", MD5.digest(UUID.randomUUID().toString()));
         collection.insertOne(quest);
     }
 

@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
@@ -11,8 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.*;
 
 /**
@@ -70,7 +74,8 @@ public class TScoreService {
     public void saveTScore(String projectId, Target target, Range range, double tscore) {
 
         scoreDatabase.getCollection("t_score").updateOne(
-                query(projectId, range, target), $set("tScore", tscore), UPSERT);
+                query(projectId, range, target), $set(doc("tScore", tscore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ), UPSERT);
 
         String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);

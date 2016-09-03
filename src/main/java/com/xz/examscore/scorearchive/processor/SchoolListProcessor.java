@@ -1,10 +1,13 @@
 package com.xz.examscore.scorearchive.processor;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Context;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 /**
  * 考试学校列表数据处理
@@ -30,6 +33,6 @@ public class SchoolListProcessor extends DataProcessor {
 
     @Override
     protected void processLine(Context context, String line) {
-        scoreDatabase.getCollection("school_list").insertOne(Document.parse(line.trim()));
+        scoreDatabase.getCollection("school_list").insertOne(Document.parse(line.trim()).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 }

@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -68,7 +70,7 @@ public class FullScoreTask extends AggrTask {
         Document query = doc("project", projectId).append("target", target2Doc(target));
         MongoCollection<Document> fullScoreCollection = scoreDatabase.getCollection("full_score");
         fullScoreCollection.deleteMany(query);
-        fullScoreCollection.insertOne(doc(query).append("fullScore", fullScore));
+        fullScoreCollection.insertOne(doc(query).append("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
     // 计算题型满分
@@ -89,7 +91,8 @@ public class FullScoreTask extends AggrTask {
 
             fullScores.updateOne(
                     doc("project", projectId).append("target", target2Doc(Target.questType(questType))),
-                    $set("fullScore", fullScore), UPSERT);
+                    $set("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    , UPSERT);
         });
 
     }

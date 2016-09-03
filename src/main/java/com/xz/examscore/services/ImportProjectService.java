@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.io.ZipFileReader;
@@ -352,6 +353,7 @@ public class ImportProjectService {
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
             //是否直接给分
             questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
+            questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
 
             fixQuest(questDoc);
 
@@ -387,7 +389,8 @@ public class ImportProjectService {
                         .append("school", schoolId)
                         .append("area", school.getString("area"))
                         .append("city", school.getString("city"))
-                        .append("province", school.getString("province"));
+                        .append("province", school.getString("province"))
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
                 schoolClasses.add(schoolClass);
                 classes.add(schoolClass);               // 之后查询学生用
@@ -424,7 +427,8 @@ public class ImportProjectService {
                         .append("school", classDoc.get("school"))
                         .append("area", classDoc.get("area"))
                         .append("city", classDoc.get("city"))
-                        .append("province", classDoc.get("province"));
+                        .append("province", classDoc.get("province"))
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
                 classStudents.add(studentDoc);
             });
@@ -452,6 +456,8 @@ public class ImportProjectService {
             schoolDoc.put("area", schoolObj.getString("area"));
             schoolDoc.put("city", schoolObj.getString("city"));
             schoolDoc.put("province", schoolObj.getString("province"));
+            schoolDoc.put("province", schoolObj.getString("province"));
+            schoolDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
 
 
             areas.add(schoolObj.getString("area"));

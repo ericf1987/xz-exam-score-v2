@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
@@ -91,7 +93,8 @@ public class QuestDeviationTask extends AggrTask {
                 new Document("project", projectId).
                         append("range", Mongo.range2Doc(range)).
                         append("quest", questId),
-                $set("deviation", deviation),
+                $set("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ,
                 UPSERT
         );
     }

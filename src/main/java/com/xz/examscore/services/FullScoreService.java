@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.Mongo;
@@ -9,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -92,11 +95,13 @@ public class FullScoreService {
             String questId = target.getId().toString();
             scoreDatabase.getCollection("quest_list").updateOne(
                     doc("project", projectId).append("questId", questId),
-                    $set("score", fullScore), UPSERT);
+                    $set("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    , UPSERT);
         } else {
             scoreDatabase.getCollection("full_score").updateOne(
                     doc("project", projectId).append("target", Mongo.target2Doc(target)),
-                    $set("fullScore", fullScore), UPSERT);
+                    $set("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    , UPSERT);
         }
 
         // 2. 删除缓存

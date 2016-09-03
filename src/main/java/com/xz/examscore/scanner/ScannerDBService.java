@@ -1,5 +1,6 @@
 package com.xz.examscore.scanner;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -131,7 +129,8 @@ public class ScannerDBService {
                     .append("school", student.getString("school"))
                     .append("area", student.getString("area"))
                     .append("city", student.getString("city"))
-                    .append("province", student.getString("province"));
+                    .append("province", student.getString("province"))
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
@@ -172,7 +171,8 @@ public class ScannerDBService {
                     .append("school", student.getString("school"))
                     .append("area", student.getString("area"))
                     .append("city", student.getString("city"))
-                    .append("province", student.getString("province"));
+                    .append("province", student.getString("province"))
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }

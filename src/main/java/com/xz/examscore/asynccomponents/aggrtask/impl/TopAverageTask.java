@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * (description)
@@ -80,7 +82,8 @@ public class TopAverageTask extends AggrTask {
         //查询该平均分统计项是否存在
         top_averageCol.updateMany(
                 query,
-                MongoUtils.$set("topAverages", resultList),
+                MongoUtils.$set("topAverages", resultList).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ,
                 MongoUtils.UPSERT
         );
     }

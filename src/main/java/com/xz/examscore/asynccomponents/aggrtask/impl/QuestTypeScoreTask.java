@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -85,7 +87,9 @@ public class QuestTypeScoreTask extends AggrTask {
                     .append("school", studentDoc.getString("school"))
                     .append("area", studentDoc.getString("area"))
                     .append("city", studentDoc.getString("city"))
-                    .append("province", studentDoc.getString("province"));
+                    .append("province", studentDoc.getString("province"))
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    ;
 
             collection.updateOne(query, $set(update), UPSERT);
         }

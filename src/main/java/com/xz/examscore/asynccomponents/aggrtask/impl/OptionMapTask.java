@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -57,7 +59,7 @@ public class OptionMapTask extends AggrTask {
 
         aggregate.forEach((Consumer<Document>) document -> {
             List<Document> newOptionMapList = convertOneDoc(document);
-            for(Document newOptionMap : newOptionMapList){
+            for (Document newOptionMap : newOptionMapList) {
                 String answer = ((Document) newOptionMap.get("_id")).getString("answer");
                 int count;
                 double rate;
@@ -75,7 +77,8 @@ public class OptionMapTask extends AggrTask {
         });
 
         Document query = query(projectId, range).append("quest", questId);
-        Document update = $set(doc("optionMap", optionMapList).append("count", studentCount));
+        Document update = $set(doc("optionMap", optionMapList).append("count", studentCount).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        );
         optionMapCollection.updateOne(query, update, UPSERT);
     }
 
@@ -95,12 +98,12 @@ public class OptionMapTask extends AggrTask {
     }
 
     //将answer为多个选项的doc转化成多个单选项的组成的list
-    public List<Document> convertOneDoc(Document optionMap){
+    public List<Document> convertOneDoc(Document optionMap) {
         List<Document> newOptionMapList = new ArrayList<>();
         String answer = ((Document) optionMap.get("_id")).getString("answer");
         int count = optionMap.getInteger("count");
         char[] arr = answer.toCharArray();
-        for (char a : arr){
+        for (char a : arr) {
             newOptionMapList.add(new Document().append("_id", doc("answer", String.valueOf(a))).append("count", count));
         }
         return newOptionMapList;

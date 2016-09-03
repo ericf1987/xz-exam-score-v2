@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -54,7 +56,11 @@ public class ScoreMapTask extends AggrTask {
         Document query = Mongo.query(projectId, range, target);
 
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
-        collection.updateOne(query, $set(doc("scoreMap", scoreCountList).append("count", studentIds.size())), UPSERT);
+        collection.updateOne(query,
+                $set(doc("scoreMap", scoreCountList).append("count", studentIds.size())
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ),
+                UPSERT);
     }
 
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {

@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.alibaba.fastjson.JSON;
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.ProjectConfig;
@@ -9,10 +10,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -50,7 +48,8 @@ public class ProjectConfigService {
      * @param projectConfig 要保存的项目配置
      */
     public void replaceProjectConfig(ProjectConfig projectConfig) {
-        Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig));
+        Document projectConfigDoc = Document.parse(JSON.toJSONString(projectConfig))
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
         Document query = doc("projectId", projectConfig.getProjectId());
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
 
@@ -72,6 +71,7 @@ public class ProjectConfigService {
                         .append("lastRankLevel", projectConfig.getLastRankLevel())
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("highScoreRate", projectConfig.getHighScoreRate())
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
         ), UPSERT);
     }
 
@@ -101,6 +101,7 @@ public class ProjectConfigService {
                         .append("lastRankLevel", lastRankLevel)
                         .append("rankSegmentCount", rankSegmentCount)
                         .append("highScoreRate", highScoreRate)
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
         ), UPSERT);
     }
 

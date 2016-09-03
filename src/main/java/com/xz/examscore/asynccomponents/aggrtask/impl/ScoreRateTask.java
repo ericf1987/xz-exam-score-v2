@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -77,6 +79,6 @@ public class ScoreRateTask extends AggrTask {
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_rate");
         collection.deleteMany(query);
-        collection.insertOne(doc(query).append("scoreRate", scoreRate).append("scoreLevel", scoreLevel));
+        collection.insertOne(doc(query).append("scoreRate", scoreRate).append("scoreLevel", scoreLevel).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 }

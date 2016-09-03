@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -14,10 +15,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
@@ -101,7 +99,8 @@ public class RankSegmentTask extends AggrTask {
             if (resultMap != null && !resultMap.isEmpty()) {
                 rankSegmentCol.updateMany(
                         query(projectId, currentRange, target),
-                        $set("rankSegments", resultMap.get("rankSegments")),
+                        $set("rankSegments", resultMap.get("rankSegments")).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                        ,
                         UPSERT
                 );
             }

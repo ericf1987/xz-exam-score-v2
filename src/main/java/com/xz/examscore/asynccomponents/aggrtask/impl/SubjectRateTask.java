@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @AggrTaskMeta(taskType = "subject_rate")
 @Component
@@ -62,7 +64,8 @@ public class SubjectRateTask extends AggrTask {
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates),
+                MongoUtils.$set("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ,
                 MongoUtils.UPSERT
         );
     }
@@ -83,7 +86,8 @@ public class SubjectRateTask extends AggrTask {
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates),
+                MongoUtils.$set("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                ,
                 MongoUtils.UPSERT
         );
     }

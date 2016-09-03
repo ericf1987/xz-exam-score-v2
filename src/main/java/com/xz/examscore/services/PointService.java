@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Point;
 import org.bson.Document;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -101,7 +103,7 @@ public class PointService {
 
     public void savePoint(String pointId, String pointName, String parentPointId) {
         Document query = doc("id", pointId);
-        Document update = doc("name", pointName).append("parent", parentPointId);
+        Document update = doc("name", pointName).append("parent", parentPointId).append("md5", MD5.digest(UUID.randomUUID().toString()));
         scoreDatabase.getCollection("points").updateOne(query, $set(update), UPSERT);
     }
 }

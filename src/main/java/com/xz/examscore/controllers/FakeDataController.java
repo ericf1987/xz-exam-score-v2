@@ -1,5 +1,6 @@
 package com.xz.examscore.controllers;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -302,7 +303,8 @@ public class FakeDataController {
         createAreas(projectId);
 
         projectDoc.append("schools", createSchools(
-                projectId, schoolsPerProject, classesPerSchool, studentsPerClass));
+                projectId, schoolsPerProject, classesPerSchool, studentsPerClass))
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
         scoreDatabase.getCollection("project_list").insertOne(projectDoc);
 
@@ -319,9 +321,9 @@ public class FakeDataController {
     }
 
     private void createAreas(String projectId) {
-        scoreDatabase.getCollection("province_list").insertOne(doc("project", projectId).append("province", PROVINCE));
-        scoreDatabase.getCollection("city_list").insertOne(doc("project", projectId).append("city", CITY));
-        scoreDatabase.getCollection("area_list").insertOne(doc("project", projectId).append("area", AREA));
+        scoreDatabase.getCollection("province_list").insertOne(doc("project", projectId).append("province", PROVINCE).append("md5", MD5.digest(UUID.randomUUID().toString())));
+        scoreDatabase.getCollection("city_list").insertOne(doc("project", projectId).append("city", CITY).append("md5", MD5.digest(UUID.randomUUID().toString())));
+        scoreDatabase.getCollection("area_list").insertOne(doc("project", projectId).append("area", AREA).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
     private void createQuests(String projectId, int subjectCount) {
@@ -403,7 +405,8 @@ public class FakeDataController {
                     .append("questType", QUEST_TYPE_SELECT).append("score", 1.0)
                     .append("answer", randomSelectAnswer()).append("items", OPTIONS_LIST)
                     .append("questionTypeId", QUESTION_TYPE_SELECT_ID)
-                    .append("questionTypeName", QUESTION_TYPE_SELECT_NAME);
+                    .append("questionTypeName", QUESTION_TYPE_SELECT_NAME)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             injectPoints(objQuest);
             injectQuestType(objQuest);
@@ -418,7 +421,8 @@ public class FakeDataController {
                     .append("subject", subjectId).append("isObjective", false)
                     .append("questType", QUEST_TYPE_ANSWER).append("score", 4.0)
                     .append("questionTypeId", QUESTION_TYPE_BLANK_ID)
-                    .append("questionTypeName", QUESTION_TYPE_BLANK_NAME);
+                    .append("questionTypeName", QUESTION_TYPE_BLANK_NAME)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             injectPoints(sbjQuest);
             injectQuestType(sbjQuest);
@@ -442,7 +446,7 @@ public class FakeDataController {
 
         for (KeyValue<String, String> questType : questTypeList) {
             collection.insertOne(doc("project", projectId).append("subject", subjectId)
-                    .append("questTypeId", questType.getKey()).append("questTypeName", questType.getValue()));
+                    .append("questTypeId", questType.getKey()).append("questTypeName", questType.getValue()).append("md5", MD5.digest(UUID.randomUUID().toString())));
         }
 
     }
@@ -527,7 +531,8 @@ public class FakeDataController {
                 .append("school", student.getString("school"))
                 .append("area", student.getString("area"))
                 .append("city", student.getString("city"))
-                .append("province", student.getString("province"));
+                .append("province", student.getString("province"))
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
         return scoreDoc;
     }
@@ -567,15 +572,16 @@ public class FakeDataController {
             fullScoreCollection.insertOne(doc("project", projectId)
                     .append("target", doc("name", Target.SUBJECT).append("id", subjectId))
                     .append("fullScore", subjectFullScore)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
 
-        Document subject = doc("project", projectId).append("subjects", subjects);
+        Document subject = doc("project", projectId).append("subjects", subjects).append("md5", MD5.digest(UUID.randomUUID().toString()));
         scoreDatabase.getCollection("subject_list").insertOne(subject);
 
         fullScoreCollection.insertOne(doc("project", projectId)
                 .append("target", doc("name", Target.PROJECT).append("id", projectId))
-                .append("fullScore", projectFullScore));
+                .append("fullScore", projectFullScore).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
     private List<Document> createSchools(String projectId, int schoolsPerProject, int classesPerSchool, int studentsPerClass) {
@@ -594,7 +600,8 @@ public class FakeDataController {
         }
 
         Document school = doc("project", projectId).append("school", schoolId).append("name", schoolId)
-                .append("area", AREA).append("city", CITY).append("province", PROVINCE);
+                .append("area", AREA).append("city", CITY).append("province", PROVINCE)
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
         scoreDatabase.getCollection("school_list").insertOne(school);
         return school;
     }
@@ -608,7 +615,8 @@ public class FakeDataController {
 
         Document _class = doc("project", projectId).append("school", schoolId)
                 .append("class", classId).append("name", classId).append("grade", GRADE)
-                .append("area", AREA).append("city", CITY).append("province", PROVINCE);
+                .append("area", AREA).append("city", CITY).append("province", PROVINCE)
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
         scoreDatabase.getCollection("class_list").insertOne(_class);
     }
 
@@ -618,7 +626,8 @@ public class FakeDataController {
         Document student = doc("project", projectId).append("name", ChineseName.nextRandomName())
                 .append("student", studentId).append("class", classId).append("school", schoolId)
                 .append("area", AREA).append("city", CITY).append("province", PROVINCE)
-                .append("examNo", studentId);
+                .append("examNo", studentId)
+                .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
         List<Document> students = getContext().get("students");
         if (students == null) {

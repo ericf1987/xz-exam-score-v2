@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -92,7 +94,7 @@ public class CityService {
         }
 
         List<Document> documents = cities.stream()
-                .map(city -> doc("project", projectId).append("city", city))
+                .map(city -> doc("project", projectId).append("city", city).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 .collect(Collectors.toList());
 
         MongoCollection<Document> c = scoreDatabase.getCollection("city_list");

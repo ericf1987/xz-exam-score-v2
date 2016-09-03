@@ -1,10 +1,13 @@
 package com.xz.examscore.scorearchive.processor;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Context;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 /**
  * 考试科目列表数据处理
@@ -30,6 +33,6 @@ public class SubjectListProcessor extends DataProcessor {
 
     @Override
     protected void processLine(Context context, String line) {
-        scoreDatabase.getCollection("subject_list").insertOne(Document.parse(line));
+        scoreDatabase.getCollection("subject_list").insertOne(Document.parse(line).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 }

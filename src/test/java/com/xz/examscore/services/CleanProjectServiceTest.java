@@ -1,11 +1,13 @@
 package com.xz.examscore.services;
 
+import com.hyd.simplecache.utils.MD5;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author by fengye on 2016/9/3.
@@ -26,4 +28,5 @@ public class CleanProjectServiceTest extends XzExamScoreV2ApplicationTests {
         Collections.sort(list, (String s1, String s2) -> s1.compareTo(s2));
         System.out.println(list.toString());
     }
+
 }

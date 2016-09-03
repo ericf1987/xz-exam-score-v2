@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -56,7 +58,8 @@ public class QuestTypeScoreAverageTask extends AggrTask {
                     .append("range", range2Doc(range))
                     .append("questType", questType);
 
-            Document update = doc("average", average).append("rate", rate);
+            Document update = doc("average", average).append("rate", rate).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    ;
 
             dstCollection.updateOne(query, $set(update), UPSERT);
         });

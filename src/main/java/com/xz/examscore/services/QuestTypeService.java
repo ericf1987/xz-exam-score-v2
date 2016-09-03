@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -129,7 +131,7 @@ public class QuestTypeService {
     public void saveQuestType(String projectId, String subjectId, String questTypeId, String questTypeName) {
         MongoCollection<Document> c = scoreDatabase.getCollection("quest_type_list");
         Document query = doc("project", projectId).append("subject", subjectId).append("questTypeId", questTypeId);
-        Document update = $set("questTypeName", questTypeName);
+        Document update = $set("questTypeName", questTypeName).append("md5", MD5.digest(UUID.randomUUID().toString()));
         c.updateMany(query, update, UPSERT);
     }
 

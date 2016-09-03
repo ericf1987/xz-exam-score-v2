@@ -1,5 +1,7 @@
 package javalang;
 
+import com.hyd.simplecache.utils.MD5;
+
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,17 +58,8 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-        //new TestLamdar().test3();
-        for (int i = 0; i < 100; i++){
-            char c = (char)('\"' + i);
-            int in = (int)('\"' + i);
-            System.out.println(c + "-->" + in);
-        }
-
-//        Converter<String, Integer> converter = (from) -> Integer.valueOf(from);
-//        Converter<String, Integer> converter = Integer::valueOf;
-//        Integer integer = converter.convert("1980");
-//        System.out.println(integer.getClass());
+        String md5 = MD5.digest(UUID.randomUUID().toString());
+        System.out.println(md5);
     }
 
     public void test2() {

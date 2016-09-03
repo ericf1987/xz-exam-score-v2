@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Value;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -123,7 +125,8 @@ public class TopStudentListTask extends AggrTask {
                     .append("student", studentId)
                     .append("class", student.getString("class"))
                     .append("school", student.getString("school"))
-                    .append("score", totalScore).append("rank", rank));
+                    .append("score", totalScore).append("rank", rank)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString())));
         });
     }
 }
