@@ -71,7 +71,7 @@ public class MinMaxTask extends AggrTask {
         for (int i = 0; i < studentIds.size(); i++) {
             double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentIds.get(i)), target);
 
-            if(i == 0){
+            if (i == 0) {
                 min.set(totalScore);
                 max.set(totalScore);
             }
@@ -87,8 +87,13 @@ public class MinMaxTask extends AggrTask {
     private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
         Document id = Mongo.query(projectId, range, target);
         scoreDatabase.getCollection("score_minmax")
-                .updateOne(id, $set(doc("min", min.get()).append("max", max.get()).append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ), UPSERT);
+                .updateOne(id,
+                        $set(
+                                doc("min", min.get())
+                                        .append("max", max.get())
+                                        .append("md5", MD5.digest(UUID.randomUUID().toString())
+                                        )
+                        ), UPSERT);
     }
 
 }

@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.query;
 
 @AggrTaskMeta(taskType = "std_deviation")
@@ -53,7 +54,7 @@ public class StdDeviationTask extends AggrTask {
 
         double deviation = Math.sqrt(delta / studentIds.size());
         scoreDatabase.getCollection("std_deviation").updateOne(
-                query(projectId, range, target), $set("stdDeviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                query(projectId, range, target), $set(doc("stdDeviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 , UPSERT);
     }
 }

@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 @Component
 @AggrTaskMeta(taskType = "score_segment")
@@ -49,7 +50,7 @@ public class ScoreSegmentTask extends AggrTask {
     // 保存成绩分段
     private void saveScoreSegments(String projectId, Range range, Target target, ScoreSegmentCounter counter) {
         Document query = Mongo.query(projectId, range, target);
-        Document update = $set("scoreSegments", counter.toDocuments()).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        Document update = $set(doc("scoreSegments", counter.toDocuments()).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 ;
         scoreDatabase.getCollection("score_segment").updateOne(query, update, UPSERT);
     }

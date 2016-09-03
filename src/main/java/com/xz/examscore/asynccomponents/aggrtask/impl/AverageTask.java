@@ -66,7 +66,7 @@ public class AverageTask extends AggrTask {
             double average = calculateAverage(projectId, rangeDoc, targetDoc, totalScore, query);
 
             // 保存平均分
-            averageCollection.updateOne(query, $set("average", average).append("md5", MD5.digest(UUID.randomUUID().toString()))
+            averageCollection.updateOne(query, $set(doc("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())))
                     , MongoUtils.UPSERT);
             averageService.deleteCache(projectId, range, Target.parse(targetDoc));
         });

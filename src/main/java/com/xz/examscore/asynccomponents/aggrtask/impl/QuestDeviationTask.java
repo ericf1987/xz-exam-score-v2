@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * @author by fengye on 2016/5/29.
@@ -93,7 +94,7 @@ public class QuestDeviationTask extends AggrTask {
                 new Document("project", projectId).
                         append("range", Mongo.range2Doc(range)).
                         append("quest", questId),
-                $set("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                $set(doc("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 ,
                 UPSERT
         );

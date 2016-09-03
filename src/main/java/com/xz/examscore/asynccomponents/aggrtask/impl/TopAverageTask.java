@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+
 /**
  * (description)
  * created at 2016/5/25
@@ -82,7 +84,7 @@ public class TopAverageTask extends AggrTask {
         //查询该平均分统计项是否存在
         top_averageCol.updateMany(
                 query,
-                MongoUtils.$set("topAverages", resultList).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                MongoUtils.$set(doc("topAverages", resultList).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 ,
                 MongoUtils.UPSERT
         );

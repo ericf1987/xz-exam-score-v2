@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * @author by fengye on 2016/5/27.
@@ -88,7 +89,7 @@ public class RankPositionTask extends AggrTask {
         }
 
         rankPositionCollection.deleteMany(query);
-        rankPositionCollection.updateMany(query, $set("positions", positions).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        rankPositionCollection.updateMany(query, $set(doc("positions", positions).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 , UPSERT);
     }
 

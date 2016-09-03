@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+
 @AggrTaskMeta(taskType = "subject_rate")
 @Component
 public class SubjectRateTask extends AggrTask {
@@ -59,12 +61,12 @@ public class SubjectRateTask extends AggrTask {
 
         for (String subjectId : subjectAverages.keySet()) {
             Double avg = subjectAverages.get(subjectId);
-            subjectRates.add(MongoUtils.doc("subject", subjectId).append("rate", avg / totalAverage));
+            subjectRates.add(doc("subject", subjectId).append("rate", avg / totalAverage));
         }
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                MongoUtils.$set(doc("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 ,
                 MongoUtils.UPSERT
         );
@@ -81,12 +83,12 @@ public class SubjectRateTask extends AggrTask {
 
         for (String subjectId : subjectAverages.keySet()) {
             Double avg = subjectAverages.get(subjectId);
-            subjectRates.add(MongoUtils.doc("subject", subjectId).append("rate", avg / totalAverage));
+            subjectRates.add(doc("subject", subjectId).append("rate", avg / totalAverage));
         }
 
         scoreDatabase.getCollection("subject_rate").updateOne(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                MongoUtils.$set(doc("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 ,
                 MongoUtils.UPSERT
         );

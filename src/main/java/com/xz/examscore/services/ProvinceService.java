@@ -29,7 +29,7 @@ public class ProvinceService {
         }
 
         scoreDatabase.getCollection("province_list").updateOne(
-                doc("project", projectId), $set("province", province).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                doc("project", projectId), $set(doc("province", province).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 , UPSERT);
     }
 

@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -99,7 +100,7 @@ public class RankSegmentTask extends AggrTask {
             if (resultMap != null && !resultMap.isEmpty()) {
                 rankSegmentCol.updateMany(
                         query(projectId, currentRange, target),
-                        $set("rankSegments", resultMap.get("rankSegments")).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                        $set(MongoUtils.doc("rankSegments", resultMap.get("rankSegments")).append("md5", MD5.digest(UUID.randomUUID().toString())))
                         ,
                         UPSERT
                 );

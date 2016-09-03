@@ -58,8 +58,9 @@ public class QuestTypeScoreAverageTask extends AggrTask {
                     .append("range", range2Doc(range))
                     .append("questType", questType);
 
-            Document update = doc("average", average).append("rate", rate).append("md5", MD5.digest(UUID.randomUUID().toString()))
-                    ;
+            Document update = doc("average", average)
+                    .append("rate", rate)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             dstCollection.updateOne(query, $set(update), UPSERT);
         });

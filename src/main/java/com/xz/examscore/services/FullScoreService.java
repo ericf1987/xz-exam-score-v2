@@ -95,12 +95,12 @@ public class FullScoreService {
             String questId = target.getId().toString();
             scoreDatabase.getCollection("quest_list").updateOne(
                     doc("project", projectId).append("questId", questId),
-                    $set("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    $set(doc("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())))
                     , UPSERT);
         } else {
             scoreDatabase.getCollection("full_score").updateOne(
                     doc("project", projectId).append("target", Mongo.target2Doc(target)),
-                    $set("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    $set(doc("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())))
                     , UPSERT);
         }
 

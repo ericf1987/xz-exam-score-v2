@@ -57,8 +57,10 @@ public class ScoreMapTask extends AggrTask {
 
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
         collection.updateOne(query,
-                $set(doc("scoreMap", scoreCountList).append("count", studentIds.size())
-                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                $set(
+                        doc("scoreMap", scoreCountList)
+                                .append("count", studentIds.size())
+                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
                 ),
                 UPSERT);
     }

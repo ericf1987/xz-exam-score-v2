@@ -89,7 +89,7 @@ public class SubjectService {
     public void saveProjectSubjects(String projectId, List<String> subjects) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
         Document query = doc("project", projectId);
-        c.updateOne(query, $set("subjects", subjects).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        c.updateOne(query, $set(doc("subjects", subjects).append("md5", MD5.digest(UUID.randomUUID().toString())))
                 , UPSERT);
     }
 }

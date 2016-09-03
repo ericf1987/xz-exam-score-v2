@@ -131,7 +131,7 @@ public class QuestTypeService {
     public void saveQuestType(String projectId, String subjectId, String questTypeId, String questTypeName) {
         MongoCollection<Document> c = scoreDatabase.getCollection("quest_type_list");
         Document query = doc("project", projectId).append("subject", subjectId).append("questTypeId", questTypeId);
-        Document update = $set("questTypeName", questTypeName).append("md5", MD5.digest(UUID.randomUUID().toString()));
+        Document update = $set(doc("questTypeName", questTypeName).append("md5", MD5.digest(UUID.randomUUID().toString())));
         c.updateMany(query, update, UPSERT);
     }
 

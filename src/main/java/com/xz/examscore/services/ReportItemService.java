@@ -249,12 +249,13 @@ public class ReportItemService {
         DocumentUtils.addList(document, "collection_names", collectionNames);
         DocumentUtils.addTo(document, "server_name", serverName);
         DocumentUtils.addTo(document, "tag", tag);
+        DocumentUtils.addTo(document, "md5", MD5.digest(UUID.randomUUID().toString()));
 
         if (StringUtil.isNotBlank(position)) {
             document.put("position", NumberUtils.toInt(position));
         }
 
-        Document update = new Document("$set", document).append("md5", MD5.digest(UUID.randomUUID().toString()));
+        Document update = new Document("$set", document);
         collection.updateOne(query, update);
     }
 

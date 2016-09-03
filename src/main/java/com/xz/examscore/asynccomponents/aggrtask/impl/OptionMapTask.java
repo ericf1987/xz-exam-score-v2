@@ -77,7 +77,11 @@ public class OptionMapTask extends AggrTask {
         });
 
         Document query = query(projectId, range).append("quest", questId);
-        Document update = $set(doc("optionMap", optionMapList).append("count", studentCount).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        Document update = $set(
+                doc("optionMap", optionMapList)
+                        .append("count", studentCount)
+                        .append("md5", MD5.digest(UUID.randomUUID().toString())
+                        )
         );
         optionMapCollection.updateOne(query, update, UPSERT);
     }
