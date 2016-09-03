@@ -46,6 +46,9 @@ public class AggregationTaskController {
     @Autowired
     AggregationRoundService aggregationRoundService;
 
+    @Autowired
+    CleanProjectService cleanProjectService;
+
     /**
      * 开始统计任务
      *
@@ -129,5 +132,12 @@ public class AggregationTaskController {
     public Result clearRedisQueue() {
         aggregationRoundService.clearTask();
         return Result.success();
+    }
+
+    @RequestMapping(value = "/project/cleanData", method = RequestMethod.POST)
+    @ResponseBody
+    public Result cleanProjectData(@RequestParam("project") String projectId){
+        cleanProjectService.doCleanSchedule(projectId);
+        return Result.success("项目 " + projectId + " 开始执行清理...");
     }
 }

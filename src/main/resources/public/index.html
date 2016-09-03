@@ -130,5 +130,15 @@
     </form>
 </fieldset>
 
+<fieldset>
+    <legend>删除所有队列中的任务</legend>
+    <form action="aggr/project/cleanData" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">开始清理</button>
+        </p>
+    </form>
+</fieldset>
+
 </body>
 </html>

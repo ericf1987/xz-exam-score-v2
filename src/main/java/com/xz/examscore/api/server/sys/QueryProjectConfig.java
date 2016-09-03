@@ -1,7 +1,5 @@
 package com.xz.examscore.api.server.sys;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
@@ -29,6 +27,6 @@ public class QueryProjectConfig implements Server{
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
-        return Result.success().set("projectConfig", JSON.toJSONString(result.getData()));
+        return Result.success().set("projectConfig", result.getData());
     }
 }
