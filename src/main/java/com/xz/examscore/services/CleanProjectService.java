@@ -24,12 +24,11 @@ public class CleanProjectService {
     @Autowired
     MongoDatabase scoreDatabase;
 
-
     public void doCleanSchedule(String projectId) {
         List<String> collections = getAllCollections();
-        LOG.warn("----------开始执行数据清理----------");
+        LOG.warn("----------当前考试ID为：{}，开始执行数据清理----------", projectId);
         collections.forEach(collection -> doClean(collection, projectId));
-        LOG.warn("----------执行完成----------");
+        LOG.warn("----------当前考试ID为：{}，执行完成----------",projectId);
     }
 
     private void doClean(String collection, String projectId) {
