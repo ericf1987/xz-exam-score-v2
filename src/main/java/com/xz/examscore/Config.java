@@ -110,7 +110,7 @@ public class Config {
 
     @Bean
     public MongoDatabase scoreDatabase() throws Exception {
-        return mongoClient().getDatabase("project_scores");
+        return mongoClient().getDatabase("project_data");
     }
 
     @Bean
