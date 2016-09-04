@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -59,10 +60,17 @@ public class QuestTypeScoreAverageTask extends AggrTask {
                     .append("questType", questType);
 
             Document update = doc("average", average)
-                    .append("rate", rate)
-                    .append("md5", MD5.digest(UUID.randomUUID().toString()));
+                    .append("rate", rate);
 
-            dstCollection.updateOne(query, $set(update), UPSERT);
+            UpdateResult result = dstCollection.updateMany(query, $set(update));
+            if (result.getModifiedCount() == 0) {
+                dstCollection.insertOne(
+                        query.append("average", average)
+                                .append("rate", rate)
+                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
+
+                );
+            }
         });
     }
 }

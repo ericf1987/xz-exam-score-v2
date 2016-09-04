@@ -31,8 +31,7 @@ public class SchoolServiceTest extends XzExamScoreV2ApplicationTests {
 
         c.find(doc("project", projectId)).forEach((Consumer<Document>) document -> {
             c.updateOne(doc("project", projectId).append("school", document.getString("school")),
-                    $set("tags", getRandomValue()),
-                    UPSERT);
+                    $set("tags", getRandomValue()));
         });
     }
 

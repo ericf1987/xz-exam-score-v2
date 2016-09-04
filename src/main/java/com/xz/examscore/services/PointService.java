@@ -3,6 +3,7 @@ package com.xz.examscore.services;
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Point;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -36,7 +37,6 @@ public class PointService {
      * 查询指定项目的所有知识点
      *
      * @param projectId 项目ID
-     *
      * @return 知识点列表
      */
     public List<Point> getPoints(String projectId) {
@@ -50,7 +50,6 @@ public class PointService {
      *
      * @param projectId 项目ID
      * @param subjectId 科目ID
-     *
      * @return 知识点列表
      */
     public List<Point> getPoints(String projectId, String subjectId) {
@@ -103,7 +102,14 @@ public class PointService {
 
     public void savePoint(String pointId, String pointName, String parentPointId) {
         Document query = doc("id", pointId);
-        Document update = doc("name", pointName).append("parent", parentPointId).append("md5", MD5.digest(UUID.randomUUID().toString()));
-        scoreDatabase.getCollection("points").updateOne(query, $set(update), UPSERT);
+        Document update = doc("name", pointName).append("parent", parentPointId);
+        UpdateResult result = scoreDatabase.getCollection("points").updateMany(query, $set(update));
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("points").insertOne(
+                    query.append("name", pointName)
+                            .append("parent", parentPointId)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 }

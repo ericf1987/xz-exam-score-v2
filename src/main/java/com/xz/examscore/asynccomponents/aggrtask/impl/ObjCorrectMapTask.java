@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -46,14 +47,19 @@ public class ObjCorrectMapTask extends AggrTask {
         int correctCount = scoreService.getQuestCorrentCount(projectId, questId, range);
 
         double correctRate = studentCount == 0 ? 0 : ((double) correctCount / studentCount);
-        scoreDatabase.getCollection("obj_correct_map").updateOne(
+        UpdateResult result = scoreDatabase.getCollection("obj_correct_map").updateMany(
                 query(projectId, range, target),
                 $set(
                         doc("correctCount", correctCount)
                                 .append("correctRate", correctRate)
-                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ),
-                UPSERT
+                )
         );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("obj_correct_map").insertOne(
+                    query(projectId, range, target).append("correctCount", correctCount)
+                            .append("correctRate", correctRate)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -87,11 +88,21 @@ public class QuestTypeScoreTask extends AggrTask {
                     .append("school", studentDoc.getString("school"))
                     .append("area", studentDoc.getString("area"))
                     .append("city", studentDoc.getString("city"))
-                    .append("province", studentDoc.getString("province"))
-                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                    ;
+                    .append("province", studentDoc.getString("province"));
 
-            collection.updateOne(query, $set(update), UPSERT);
+            UpdateResult result = collection.updateMany(query, $set(update));
+            if (result.getModifiedCount() == 0) {
+                collection.insertOne(
+                        query.append("score", score)
+                                .append("rate", rate)
+                                .append("class", studentDoc.getString("class"))
+                                .append("school", studentDoc.getString("school"))
+                                .append("area", studentDoc.getString("area"))
+                                .append("city", studentDoc.getString("city"))
+                                .append("province", studentDoc.getString("province"))
+                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         }
     }
 }

@@ -1,8 +1,10 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import org.bson.Document;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.DocumentUtils.addTo;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -35,7 +38,6 @@ public class ClassService {
      *
      * @param projectId 考试项目id
      * @param classId   班级id
-     *
      * @return 学校名称
      */
     public String getClassName(String projectId, String classId) {
@@ -71,7 +73,6 @@ public class ClassService {
      *
      * @param projectId 考试项目id
      * @param schoolId  学校id
-     *
      * @return 班级列表
      */
     public List<Document> listClasses(String projectId, String schoolId) {
@@ -103,7 +104,13 @@ public class ClassService {
                 .append("project", update.remove("project"))
                 .append("class", update.remove("class"));
 
-        scoreDatabase.getCollection("class_list").updateOne(query, $set(update), UPSERT);
+        UpdateResult result = scoreDatabase.getCollection("class_list").updateMany(query, $set(update));
+        if (result.getModifiedCount() == 0) {
+            query.putAll(update);
+            scoreDatabase.getCollection("class_list").insertOne(
+                    query.append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     /**

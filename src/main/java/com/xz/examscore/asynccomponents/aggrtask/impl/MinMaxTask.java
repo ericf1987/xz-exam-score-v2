@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -86,14 +87,19 @@ public class MinMaxTask extends AggrTask {
 
     private void saveMinMax(String projectId, Target target, Range range, Value<Double> min, Value<Double> max) {
         Document id = Mongo.query(projectId, range, target);
-        scoreDatabase.getCollection("score_minmax")
-                .updateOne(id,
+        UpdateResult result = scoreDatabase.getCollection("score_minmax")
+                .updateMany(id,
                         $set(
                                 doc("min", min.get())
                                         .append("max", max.get())
-                                        .append("md5", MD5.digest(UUID.randomUUID().toString())
-                                        )
-                        ), UPSERT);
+                        )
+                );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("score_minmax").insertOne(
+                    id.append("min", min.get()).append("max", max.get())
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.ProjectConfig;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +61,9 @@ public class ProjectConfigService {
     /**
      * 更新报表配置中的等第配置
      */
-    public void updateRankLevelConfig(ProjectConfig projectConfig){
+    public void updateRankLevelConfig(ProjectConfig projectConfig) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
-        collection.updateMany(doc("projectId", projectConfig.getProjectId()), $set(
+        UpdateResult result = collection.updateMany(doc("projectId", projectConfig.getProjectId()), $set(
                 doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
                         .append("rankLevels", projectConfig.getRankLevels())
                         .append("rankLevelCombines", projectConfig.getRankLevelCombines())
@@ -71,8 +72,20 @@ public class ProjectConfigService {
                         .append("lastRankLevel", projectConfig.getLastRankLevel())
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("highScoreRate", projectConfig.getHighScoreRate())
-                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
-        ), UPSERT);
+        ));
+        if (result.getModifiedCount() == 0) {
+            collection.insertOne(doc("projectId", projectConfig.getProjectId())
+                    .append("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
+                    .append("rankLevels", projectConfig.getRankLevels())
+                    .append("rankLevelCombines", projectConfig.getRankLevelCombines())
+                    .append("scoreLevels", projectConfig.getScoreLevels())
+                    .append("topStudentRate", projectConfig.getTopStudentRate())
+                    .append("lastRankLevel", projectConfig.getLastRankLevel())
+                    .append("rankSegmentCount", projectConfig.getRankSegmentCount())
+                    .append("highScoreRate", projectConfig.getHighScoreRate())
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     /**
@@ -85,14 +98,13 @@ public class ProjectConfigService {
      * @param scoreLevels       展示的分数等级
      * @param topStudentRate    展示的尖子生比例
      * @param highScoreRate     展示的高分段比例
-     *
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
             String lastRankLevel, int rankSegmentCount, Double highScoreRate) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
-        collection.updateMany(doc("projectId", projectId), $set(
+        UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
                         .append("rankLevels", rankLevels)
                         .append("rankLevelCombines", rankLevelCombines)
@@ -101,8 +113,20 @@ public class ProjectConfigService {
                         .append("lastRankLevel", lastRankLevel)
                         .append("rankSegmentCount", rankSegmentCount)
                         .append("highScoreRate", highScoreRate)
-                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
-        ), UPSERT);
+        ));
+        if (result.getModifiedCount() == 0) {
+            collection.insertOne(doc("projectId", projectId)
+                    .append("combineCategorySubjects", isCombine)
+                    .append("rankLevels", rankLevels)
+                    .append("rankLevelCombines", rankLevelCombines)
+                    .append("scoreLevels", scoreLevels)
+                    .append("topStudentRate", topStudentRate)
+                    .append("lastRankLevel", lastRankLevel)
+                    .append("rankSegmentCount", rankSegmentCount)
+                    .append("highScoreRate", highScoreRate)
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     /**

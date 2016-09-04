@@ -4,6 +4,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -66,8 +67,10 @@ public class AverageTask extends AggrTask {
             double average = calculateAverage(projectId, rangeDoc, targetDoc, totalScore, query);
 
             // 保存平均分
-            averageCollection.updateOne(query, $set(doc("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                    , MongoUtils.UPSERT);
+            UpdateResult result = averageCollection.updateMany(query, $set(doc("average", average)));
+            if(result.getModifiedCount() == 0){
+                averageCollection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
+            }
             averageService.deleteCache(projectId, range, Target.parse(targetDoc));
         });
     }

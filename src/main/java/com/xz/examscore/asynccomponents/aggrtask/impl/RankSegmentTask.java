@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -46,12 +47,12 @@ public class RankSegmentTask extends AggrTask {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    public double[] getPieceWise(String projectId){
+    public double[] getPieceWise(String projectId) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         int rankSegmentCount = projectConfig.getRankSegmentCount();
         double[] pieses = new double[rankSegmentCount];
-        for (int i = 0;i < rankSegmentCount;i++){
-            pieses[i] = DoubleUtils.round((double)(i + 1) / rankSegmentCount, false);
+        for (int i = 0; i < rankSegmentCount; i++) {
+            pieses[i] = DoubleUtils.round((double) (i + 1) / rankSegmentCount, false);
         }
         return pieses;
     }
@@ -98,12 +99,17 @@ public class RankSegmentTask extends AggrTask {
                     generateSectionRate(rangeCount, currentRange, range, projectId, target, getPieceWise(projectId));
 
             if (resultMap != null && !resultMap.isEmpty()) {
-                rankSegmentCol.updateMany(
+                UpdateResult result = rankSegmentCol.updateMany(
                         query(projectId, currentRange, target),
-                        $set(MongoUtils.doc("rankSegments", resultMap.get("rankSegments")).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                        ,
-                        UPSERT
+                        $set(MongoUtils.doc("rankSegments", resultMap.get("rankSegments")))
                 );
+                if (result.getModifiedCount() == 0) {
+                    rankSegmentCol.insertOne(
+                            query(projectId, currentRange, target)
+                                    .append("rankSegments", resultMap.get("rankSegments"))
+                                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    );
+                }
             }
         }
 

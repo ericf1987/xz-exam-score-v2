@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -88,8 +89,15 @@ public class RankLevelTask extends AggrTask {
                     .append("student", studentId);
 
             String levels = StringUtil.join(rankLevelList, "");
-            collection.updateOne(query, $set(doc("rankLevel." + rangeName, levels).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                    , UPSERT);
+            UpdateResult result = collection.updateMany(query,
+                    $set(doc("raupnkLevel." + rangeName, levels))
+            );
+            if (result.getModifiedCount() == 0) {
+                collection.insertOne(
+                        query.append("raupnkLevel." + rangeName, levels)
+                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         }
     }
 
@@ -123,7 +131,7 @@ public class RankLevelTask extends AggrTask {
                 // 保存排名等级
                 String rankLevel = saveRankLevel(projectId, studentId, rankRange, sbjTarget);
                 // 缺考考生没有排名等级
-                if(null == rankLevel){
+                if (null == rankLevel) {
                     continue;
                 }
 
@@ -147,8 +155,15 @@ public class RankLevelTask extends AggrTask {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        collection.updateOne(query, $set(doc("rankLevel." + rankRange.getName(), rankLevel).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                , UPSERT);
+        UpdateResult result = collection.updateMany(query,
+                $set(doc("rankLevel." + rankRange.getName(), rankLevel))
+        );
+        if (result.getModifiedCount() == 0) {
+            collection.insertOne(
+                    query.append("rankLevel." + rankRange.getName(), rankLevel)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
 
         return rankLevel;
     }

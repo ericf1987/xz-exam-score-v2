@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,7 +90,12 @@ public class SubjectService {
     public void saveProjectSubjects(String projectId, List<String> subjects) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
         Document query = doc("project", projectId);
-        c.updateOne(query, $set(doc("subjects", subjects).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                , UPSERT);
+        UpdateResult result = c.updateMany(query, $set(doc("subjects", subjects)));
+        if(result.getModifiedCount() == 0){
+            c.insertOne(
+                    query.append("subjects", subjects)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 }

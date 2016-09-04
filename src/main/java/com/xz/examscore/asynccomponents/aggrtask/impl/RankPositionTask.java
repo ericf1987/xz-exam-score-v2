@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -89,8 +90,15 @@ public class RankPositionTask extends AggrTask {
         }
 
         rankPositionCollection.deleteMany(query);
-        rankPositionCollection.updateMany(query, $set(doc("positions", positions).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                , UPSERT);
+        UpdateResult result = rankPositionCollection.updateMany(query,
+                $set(doc("positions", positions))
+        );
+        if(result.getModifiedCount() == 0){
+            rankPositionCollection.insertOne(
+                    query.append("positions", positions)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private Double parsePosition(String positionName) {
@@ -102,7 +110,7 @@ public class RankPositionTask extends AggrTask {
         // 按照分数从高到低排序
         Collections.sort(scoreMap, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
         double sum = 0;
-        for(int index : indexs){
+        for (int index : indexs) {
             if (index <= 0) {
                 return 0;
             }
@@ -118,7 +126,7 @@ public class RankPositionTask extends AggrTask {
         return sum / 2;
     }
 
-    private int[] getRankPosition(int count, double rate){
+    private int[] getRankPosition(int count, double rate) {
         double r = (count + 1) * rate;
         return new int[]{
                 Double.valueOf(Math.ceil(r)).intValue(),

@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -46,7 +47,7 @@ public class TopAverageTask extends AggrTask {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    public double getHighScoreRate(String projectId){
+    public double getHighScoreRate(String projectId) {
         return projectConfigService.getProjectConfig(projectId).getHighScoreRate();
     }
 
@@ -82,12 +83,16 @@ public class TopAverageTask extends AggrTask {
         }
         top_averageCol.deleteMany(query);
         //查询该平均分统计项是否存在
-        top_averageCol.updateMany(
+        UpdateResult result = top_averageCol.updateMany(
                 query,
-                MongoUtils.$set(doc("topAverages", resultList).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                ,
-                MongoUtils.UPSERT
+                MongoUtils.$set(doc("topAverages", resultList))
         );
+        if (result.getModifiedCount() == 0) {
+            top_averageCol.insertOne(
+                    query.append("topAverages", resultList)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private double getAverage(List<Document> scoreMaps, double v, int count) {

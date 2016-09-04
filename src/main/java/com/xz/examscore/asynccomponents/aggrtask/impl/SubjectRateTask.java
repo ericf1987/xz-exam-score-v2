@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -64,12 +65,16 @@ public class SubjectRateTask extends AggrTask {
             subjectRates.add(doc("subject", subjectId).append("rate", avg / totalAverage));
         }
 
-        scoreDatabase.getCollection("subject_rate").updateOne(
+        UpdateResult result = scoreDatabase.getCollection("subject_rate").updateMany(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set(doc("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                ,
-                MongoUtils.UPSERT
+                MongoUtils.$set(doc("subjectRates", subjectRates))
         );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("subject_rate").insertOne(
+                    Mongo.query(projectId, range, target).append("subjectRates", subjectRates)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private void processNonStudentSubjectRate(AggrTaskMessage taskInfo) {
@@ -86,11 +91,15 @@ public class SubjectRateTask extends AggrTask {
             subjectRates.add(doc("subject", subjectId).append("rate", avg / totalAverage));
         }
 
-        scoreDatabase.getCollection("subject_rate").updateOne(
+        UpdateResult result = scoreDatabase.getCollection("subject_rate").updateMany(
                 Mongo.query(projectId, range, target),
-                MongoUtils.$set(doc("subjectRates", subjectRates).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                ,
-                MongoUtils.UPSERT
+                MongoUtils.$set(doc("subjectRates", subjectRates))
         );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("subject_rate").insertOne(
+                    Mongo.query(projectId, range, target).append("subjectRates", subjectRates)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 }

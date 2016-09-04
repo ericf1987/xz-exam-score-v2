@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -53,8 +54,16 @@ public class StdDeviationTask extends AggrTask {
         }
 
         double deviation = Math.sqrt(delta / studentIds.size());
-        scoreDatabase.getCollection("std_deviation").updateOne(
-                query(projectId, range, target), $set(doc("stdDeviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                , UPSERT);
+        UpdateResult result = scoreDatabase.getCollection("std_deviation").updateMany(
+                query(projectId, range, target),
+                $set(doc("stdDeviation", deviation))
+        );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("std_deviation").insertOne(
+                    query(projectId, range, target)
+                            .append("stdDeviation", deviation)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 }

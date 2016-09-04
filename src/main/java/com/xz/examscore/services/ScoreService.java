@@ -5,6 +5,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
@@ -223,8 +224,7 @@ public class ScoreService {
 
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
-        Document update = doc("totalScore", score).append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ;
+        Document update = doc("totalScore", score);
 
         if (parent != null) {
             update.append("parent", range2Doc(parent));
@@ -234,7 +234,13 @@ public class ScoreService {
             update.putAll(extra);
         }
 
-        scoreDatabase.getCollection(collectionName).updateOne(query, $set(update), UPSERT);
+        UpdateResult result = scoreDatabase.getCollection(collectionName).updateMany(query, $set(update));
+        if(result.getModifiedCount() == 0){
+            query.putAll(update);
+            scoreDatabase.getCollection(collectionName).insertOne(
+                    query.append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
     }
@@ -252,7 +258,7 @@ public class ScoreService {
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
 
         Document query = Mongo.query(projectId, range, target);
-        scoreDatabase.getCollection(collectionName).updateOne(query, $inc("totalScore", score), UPSERT);
+        scoreDatabase.getCollection(collectionName).updateOne(query, $inc("totalScore", score));
 
         cache.delete(cacheKey);
     }

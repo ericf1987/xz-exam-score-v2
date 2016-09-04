@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
@@ -41,7 +42,6 @@ public class TScoreService {
      * @param projectId 考试项目id
      * @param target    目标
      * @param range     范围
-     *
      * @return T分值
      */
     public double queryTScore(String projectId, Target target, Range range) {
@@ -73,9 +73,15 @@ public class TScoreService {
      */
     public void saveTScore(String projectId, Target target, Range range, double tscore) {
 
-        scoreDatabase.getCollection("t_score").updateOne(
-                query(projectId, range, target), $set(doc("tScore", tscore).append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ), UPSERT);
+        UpdateResult result = scoreDatabase.getCollection("t_score").updateMany(
+                query(projectId, range, target), $set(doc("tScore", tscore)
+                ));
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("t_score").insertOne(
+                    query(projectId, range, target).append("tScore", tscore)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
 
         String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);

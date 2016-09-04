@@ -4,6 +4,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -80,10 +81,15 @@ public class OptionMapTask extends AggrTask {
         Document update = $set(
                 doc("optionMap", optionMapList)
                         .append("count", studentCount)
-                        .append("md5", MD5.digest(UUID.randomUUID().toString())
-                        )
         );
-        optionMapCollection.updateOne(query, update, UPSERT);
+        UpdateResult result = optionMapCollection.updateMany(query, update);
+        if (result.getModifiedCount() == 0) {
+            optionMapCollection.insertOne(
+                    query.append("optionMap", optionMapList)
+                            .append("count", studentCount)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private void addUpToList(List<Document> optionMapList, String answer, int oneCount, double rate, int studentCount) {

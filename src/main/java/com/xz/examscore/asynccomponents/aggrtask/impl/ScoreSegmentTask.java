@@ -2,6 +2,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -50,9 +51,16 @@ public class ScoreSegmentTask extends AggrTask {
     // 保存成绩分段
     private void saveScoreSegments(String projectId, Range range, Target target, ScoreSegmentCounter counter) {
         Document query = Mongo.query(projectId, range, target);
-        Document update = $set(doc("scoreSegments", counter.toDocuments()).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                ;
-        scoreDatabase.getCollection("score_segment").updateOne(query, update, UPSERT);
+        Document update = $set(
+                doc("scoreSegments", counter.toDocuments())
+        );
+        UpdateResult result = scoreDatabase.getCollection("score_segment").updateMany(query, update);
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("score_segment").insertOne(
+                    query.append("scoreSegments", counter.toDocuments())
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     // 生成成绩分段

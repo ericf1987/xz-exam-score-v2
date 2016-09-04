@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -89,10 +90,16 @@ public class FullScoreTask extends AggrTask {
             String questType = ((Document) document.get("_id")).getString("questType");
             double fullScore = document.getDouble("fullScore");
 
-            fullScores.updateOne(
+            UpdateResult result = fullScores.updateMany(
                     doc("project", projectId).append("target", target2Doc(Target.questType(questType))),
-                    $set(doc("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                    , UPSERT);
+                    $set(doc("fullScore", fullScore))
+                    );
+            if(result.getModifiedCount() == 0){
+                fullScores.insertOne(
+                        doc("project", projectId).append("target", target2Doc(Target.questType(questType)))
+                        .append("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         });
 
     }

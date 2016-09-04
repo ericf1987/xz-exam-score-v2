@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -90,14 +91,20 @@ public class QuestDeviationTask extends AggrTask {
         double deviation = subScore / score;
 
         questDeviationCol.deleteMany(query);
-        questDeviationCol.updateMany(
+        UpdateResult result = questDeviationCol.updateMany(
                 new Document("project", projectId).
                         append("range", Mongo.range2Doc(range)).
                         append("quest", questId),
-                $set(doc("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                ,
-                UPSERT
+                $set(doc("deviation", deviation))
         );
+        if(result.getModifiedCount() == 0){
+            questDeviationCol.insertOne(
+                    new Document("project", projectId)
+                            .append("range", Mongo.range2Doc(range))
+                            .append("quest", questId).append("deviation", deviation)
+                    .append("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private double getSubScoreByRate(Document oneScoreMap, int rankCount) {

@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,15 @@ public class ProvinceService {
             return;
         }
 
-        scoreDatabase.getCollection("province_list").updateOne(
-                doc("project", projectId), $set(doc("province", province).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                , UPSERT);
+        UpdateResult result = scoreDatabase.getCollection("province_list").updateMany(
+                doc("project", projectId), $set(doc("province", province))
+        );
+        if (result.getModifiedCount() == 0) {
+            scoreDatabase.getCollection("province_list").insertOne(
+                    doc("project", projectId).append("province", province)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     public String getProjectProvince(String projectId) {

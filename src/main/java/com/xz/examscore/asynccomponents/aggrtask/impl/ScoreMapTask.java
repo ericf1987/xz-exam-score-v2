@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
@@ -56,13 +57,19 @@ public class ScoreMapTask extends AggrTask {
         Document query = Mongo.query(projectId, range, target);
 
         List<Document> scoreCountList = createScoreMap(projectId, target, studentIds);
-        collection.updateOne(query,
+        UpdateResult result = collection.updateMany(query,
                 $set(
                         doc("scoreMap", scoreCountList)
                                 .append("count", studentIds.size())
-                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ),
-                UPSERT);
+                )
+        );
+        if (result.getModifiedCount() == 0) {
+            collection.insertOne(
+                    query.append("scoreMap", scoreCountList)
+                            .append("count", studentIds.size())
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {

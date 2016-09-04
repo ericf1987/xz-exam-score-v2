@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
@@ -30,7 +31,6 @@ public class QuestTypeService {
      * 查询指定的项目中有哪些题型（项目初始化用，从 quest_list 中查询，其他方法从 quest_type_list 中查询）
      *
      * @param projectId 项目ID
-     *
      * @return 题型列表
      */
     public List<QuestType> generateQuestTypeList(String projectId) {
@@ -65,7 +65,6 @@ public class QuestTypeService {
      *
      * @param projectId   项目ID
      * @param questTypeId 题型ID
-     *
      * @return 题型信息
      */
     public QuestType getQuestType(String projectId, String questTypeId) {
@@ -93,7 +92,6 @@ public class QuestTypeService {
      *
      * @param projectId 项目ID
      * @param subjectId 科目ID（可选）
-     *
      * @return 题型列表
      */
     public List<QuestType> getQuestTypeList(String projectId, String subjectId) {
@@ -131,8 +129,15 @@ public class QuestTypeService {
     public void saveQuestType(String projectId, String subjectId, String questTypeId, String questTypeName) {
         MongoCollection<Document> c = scoreDatabase.getCollection("quest_type_list");
         Document query = doc("project", projectId).append("subject", subjectId).append("questTypeId", questTypeId);
-        Document update = $set(doc("questTypeName", questTypeName).append("md5", MD5.digest(UUID.randomUUID().toString())));
-        c.updateMany(query, update, UPSERT);
+        Document update = $set(
+                doc("questTypeName", questTypeName));
+        UpdateResult result = c.updateMany(query, update);
+        if (result.getModifiedCount() == 0) {
+            c.insertOne(
+                    query.append("questTypeName", questTypeName)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     public void saveQuestType(Document doc) {

@@ -3,6 +3,7 @@ package com.xz.examscore.services;
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
@@ -93,15 +94,27 @@ public class FullScoreService {
         // 1. 更新数据库
         if (target.match(Target.QUEST)) {
             String questId = target.getId().toString();
-            scoreDatabase.getCollection("quest_list").updateOne(
+            UpdateResult result = scoreDatabase.getCollection("quest_list").updateMany(
                     doc("project", projectId).append("questId", questId),
-                    $set(doc("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                    , UPSERT);
+                    $set(doc("score", fullScore))
+                    );
+            if(result.getModifiedCount() == 0){
+                scoreDatabase.getCollection("quest_list").insertOne(
+                        doc("project", projectId).append("questId", questId)
+                        .append("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         } else {
-            scoreDatabase.getCollection("full_score").updateOne(
+            UpdateResult result = scoreDatabase.getCollection("full_score").updateMany(
                     doc("project", projectId).append("target", Mongo.target2Doc(target)),
-                    $set(doc("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString())))
-                    , UPSERT);
+                    $set(doc("fullScore", fullScore))
+                    );
+            if(result.getModifiedCount() == 0){
+                scoreDatabase.getCollection("full_score").insertOne(
+                        doc("project", projectId).append("target", Mongo.target2Doc(target))
+                        .append("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         }
 
         // 2. 删除缓存

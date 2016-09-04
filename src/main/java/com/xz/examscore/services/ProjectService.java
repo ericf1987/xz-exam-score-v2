@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
@@ -63,7 +64,6 @@ public class ProjectService {
      * 通过考试项目id查询项目所属学段
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public String findProjectStudyStage(String projectId) {
@@ -84,7 +84,6 @@ public class ProjectService {
      * 通过考试项目id查询考试项目
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public Document findProject(String projectId) {
@@ -102,7 +101,6 @@ public class ProjectService {
      *
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
-     *
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String schoolId, String examMonth) {
@@ -131,11 +129,17 @@ public class ProjectService {
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
-                .append("startDate", project.getExamStartDate())
-                .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                ;
+                .append("startDate", project.getExamStartDate());
 
-        c.updateOne(query, $set(update), UPSERT);
+        UpdateResult result = c.updateMany(query, $set(update));
+        if (result.getModifiedCount() == 0) {
+            c.insertOne(query.append("name", project.getName())
+                    .append("grade", project.getGrade())
+                    .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
+                    .append("startDate", project.getExamStartDate())
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
     }
 
     /**
@@ -147,7 +151,7 @@ public class ProjectService {
     public void updateProjectSchools(String projectId, List<Document> schoolList) {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
-        c.updateOne(query, $set("schools", schoolList));
+        c.updateMany(query, $set("schools", schoolList));
     }
 
     /**
@@ -158,7 +162,7 @@ public class ProjectService {
         String result = format.format(Calendar.getInstance().getTime());
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
-        c.updateOne(query, $set("aggregationTime", result));
+        c.updateMany(query, $set("aggregationTime", result));
     }
 
     /**
@@ -179,7 +183,7 @@ public class ProjectService {
     public void setProjectStatus(String projectId, ProjectStatus status) {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
-        c.updateOne(query, $set("status", status.name()));
+        c.updateMany(query, $set("status", status.name()));
 
         // 清除缓存
         String cacheKey = "project_info:" + projectId;
@@ -190,7 +194,6 @@ public class ProjectService {
      * 查询项目状态
      *
      * @param projectId 项目ID
-     *
      * @return 状态
      */
     public ProjectStatus getProjectStatus(String projectId) {
