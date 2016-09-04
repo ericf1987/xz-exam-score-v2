@@ -90,11 +90,11 @@ public class RankLevelTask extends AggrTask {
 
             String levels = StringUtil.join(rankLevelList, "");
             UpdateResult result = collection.updateMany(query,
-                    $set(doc("raupnkLevel." + rangeName, levels))
+                    $set(doc("rankLevel." + rangeName, levels))
             );
             if (result.getModifiedCount() == 0) {
                 collection.insertOne(
-                        query.append("raupnkLevel." + rangeName, levels)
+                        query.append("rankLevel." + rangeName, levels)
                                 .append("md5", MD5.digest(UUID.randomUUID().toString()))
                 );
             }
@@ -158,12 +158,7 @@ public class RankLevelTask extends AggrTask {
         UpdateResult result = collection.updateMany(query,
                 $set(doc("rankLevel." + rankRange.getName(), rankLevel))
         );
-        if (result.getModifiedCount() == 0) {
-            collection.insertOne(
-                    query.append("rankLevel." + rankRange.getName(), rankLevel)
-                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
-            );
-        }
+        if(result.getModifiedCount() == 0){}
 
         return rankLevel;
     }

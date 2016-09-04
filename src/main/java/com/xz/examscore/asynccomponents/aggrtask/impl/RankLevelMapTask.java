@@ -48,7 +48,7 @@ public class RankLevelMapTask extends AggrTask {
         // 删除旧记录
         MongoCollection<Document> rankLevelMapCollection = scoreDatabase.getCollection("rank_level_map");
         Document key = query(projectId, range, target);
-        rankLevelMapCollection.deleteOne(key);
+        rankLevelMapCollection.deleteMany(key);
 
         // 保存新记录
         List<Document> rankLevelMap = generateRankLevelMap(projectId, range, target);

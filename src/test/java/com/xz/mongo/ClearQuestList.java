@@ -34,7 +34,7 @@ public class ClearQuestList extends XzExamScoreV2ApplicationTests {
         int counter = 0;
         for (Document document : documents) {
             if (document.getString("questId").equals(lastQuestId)) {
-                c.deleteOne(doc("_id", document.getObjectId("_id")));
+                c.deleteMany(doc("_id", document.getObjectId("_id")));
                 counter++;
             } else {
                 lastQuestId = document.getString("questId");
