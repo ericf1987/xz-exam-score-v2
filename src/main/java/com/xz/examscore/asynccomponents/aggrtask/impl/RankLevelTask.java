@@ -3,7 +3,6 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -17,7 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
 @AggrTaskMeta(taskType = "rank_level")
@@ -54,8 +54,38 @@ public class RankLevelTask extends AggrTask {
         // rankRangeName -> {subjectName -> subjectRankLevel}
         Map<String, Map<String, String>> rankLevelsMap = new HashMap<>();
 
-        saveSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);
-        saveProjectRankLevels(projectId, studentId, rankLevelsMap);
+        //先删除原有学生的相关统计条目，再新增一条
+        deleteRankLevels(projectId, studentId);
+        insertSubjectRankLevels(projectId, studentId, sbjTargets);
+        uodateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);
+
+        insertProjectRankLevels(projectId, studentId);
+        updateProjectRankLevels(projectId, studentId, rankLevelsMap);
+    }
+
+    private void deleteRankLevels(String projectId, String studentId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+        Document query = doc("project", projectId).append("student", studentId);
+        collection.deleteMany(query);
+    }
+
+    private void insertProjectRankLevels(String projectId, String studentId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+        Document query = doc("project", projectId).
+                append("target", target2Doc(Target.project(projectId))).
+                append("student", studentId).
+                append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()));
+        collection.insertOne(query);
+    }
+
+    private void insertSubjectRankLevels(String projectId, String studentId, List<Target> sbjTargets) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+        List<Document> querys = new ArrayList<>();
+        sbjTargets.forEach(target -> querys.add(doc("project", projectId)
+                .append("target", target2Doc(target))
+                .append("student", studentId).append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        ));
+        collection.insertMany(querys);
     }
 
     /**
@@ -65,9 +95,8 @@ public class RankLevelTask extends AggrTask {
      * @param studentId     学生ID
      * @param rankLevelsMap 排名等级信息
      */
-    private void saveProjectRankLevels(String projectId, String studentId, Map<String, Map<String, String>> rankLevelsMap) {
+    private void updateProjectRankLevels(String projectId, String studentId, Map<String, Map<String, String>> rankLevelsMap) {
 
-        Range student = Range.student(studentId);
         Target project = Target.project(projectId);
 
         boolean combinedSubjects =
@@ -89,15 +118,9 @@ public class RankLevelTask extends AggrTask {
                     .append("student", studentId);
 
             String levels = StringUtil.join(rankLevelList, "");
-            UpdateResult result = collection.updateMany(query,
+            collection.updateMany(query,
                     $set(doc("rankLevel." + rangeName, levels))
             );
-            if (result.getModifiedCount() == 0) {
-                collection.insertOne(
-                        query.append("rankLevel." + rangeName, levels)
-                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                );
-            }
         }
     }
 
@@ -120,7 +143,7 @@ public class RankLevelTask extends AggrTask {
      * @param rankRanges    排名范围列表
      * @param rankLevelsMap 将科目的排名等级放入这里，用于构造考试项目排名等级（例如 "AAAAA"）
      */
-    private void saveSubjectRankLevels(
+    private void uodateSubjectRankLevels(
             String projectId, String studentId,
             List<Target> sbjTargets, Range[] rankRanges,
             Map<String, Map<String, String>> rankLevelsMap) {
@@ -155,10 +178,9 @@ public class RankLevelTask extends AggrTask {
                 .append("target", target2Doc(sbjTarget));
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        UpdateResult result = collection.updateMany(query,
+        collection.updateMany(query,
                 $set(doc("rankLevel." + rankRange.getName(), rankLevel))
         );
-        if(result.getModifiedCount() == 0){}
 
         return rankLevel;
     }
