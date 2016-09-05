@@ -14,10 +14,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.DocumentUtils.addList;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$or;
@@ -75,7 +72,7 @@ public class ReportItemService {
         return instantCache.get(cacheKey, () -> {
             HashMap<String, Object> reportItems = new HashMap<>();
             for (ReportRange reportRange : ReportRange.values()) {
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new LinkedHashMap<>();
                 String rangeName = reportRange.name();
 
                 Range range = new Range(rangeName, projectId);
@@ -173,7 +170,7 @@ public class ReportItemService {
             Range commonRange = new Range(range.getName(), COMMON_RANGE_ID);
             Document query = new Document($or(doc("range", range2Doc(range)), doc("range", range2Doc(commonRange))));
 
-            HashMap<String, List<Document>> map = new HashMap<>();
+            HashMap<String, List<Document>> map = new LinkedHashMap<>();
             FindIterable<Document> iterable = collection.find(query).sort(doc("position", 1));
             for (Document document : iterable) {
                 String type = document.getString("type");
