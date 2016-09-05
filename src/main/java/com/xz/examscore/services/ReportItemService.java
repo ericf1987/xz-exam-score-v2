@@ -71,7 +71,7 @@ public class ReportItemService {
     public Map<String, Object> querySchoolReportItems(String projectId) {
         String cacheKey = "school_report_items:" + projectId;
         return instantCache.get(cacheKey, () -> {
-            HashMap<String, Object> reportItems = new HashMap<>();
+            HashMap<String, Object> reportItems = new LinkedHashMap<>();
             for (ReportRange reportRange : ReportRange.values()) {
                 Map<String, Object> map = new HashMap<>();
                 String rangeName = reportRange.name();
@@ -171,7 +171,7 @@ public class ReportItemService {
             Range commonRange = new Range(range.getName(), COMMON_RANGE_ID);
             Document query = new Document($or(doc("range", range2Doc(range)), doc("range", range2Doc(commonRange))));
 
-            HashMap<String, List<Document>> map = new HashMap<>();
+            HashMap<String, List<Document>> map = new LinkedHashMap<>();
             FindIterable<Document> iterable = collection.find(query).sort(doc("position", 1));
             for (Document document : iterable) {
                 String type = document.getString("type");
