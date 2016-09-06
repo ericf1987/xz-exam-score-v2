@@ -82,7 +82,7 @@ public class AggregationService {
         AggregationType aggregationType = config.getAggregationType();
 
         if (reimportProject || reimportScore) {
-            ImportTaskMessage message = new ImportTaskMessage(projectId, reimportProject, reimportScore, true);
+            ImportTaskMessage message = new ImportTaskMessage(projectId, reimportProject, reimportScore, exportScore);
             message.setAggregationType(aggregationType);
             message.setGenerateReport(generateReport);
             queueService.addToQueue(ImportTaskList, message);

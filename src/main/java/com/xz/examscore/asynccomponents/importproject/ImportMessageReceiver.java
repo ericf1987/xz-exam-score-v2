@@ -56,9 +56,10 @@ public class ImportMessageReceiver extends MessageReceiver<ImportTaskMessage> {
             // 如果需要，则发送开始统计命令
             if (message.isInAggrProcess()) {
                 boolean generateReport = message.isGenerateReport();
+                boolean exportScore = message.isExportScore();
 
                 getQueueService().addToQueue(DispatchTaskList,
-                        new DispatchTaskMessage(projectId, aggregationType, generateReport));
+                        new DispatchTaskMessage(projectId, aggregationType, generateReport, exportScore));
             }
         } catch (Exception e) {
             LOG.error("导入项目失败", e);

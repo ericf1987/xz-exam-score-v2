@@ -40,6 +40,19 @@ public class ImportTaskMessage implements QueueMessage {
      */
     private boolean generateReport;
 
+    /**
+     * 是否要上传成绩到阿里云，仅当 inAggrProcess 为 true 时有效
+     */
+    private boolean exportScore;
+
+    public boolean isExportScore() {
+        return exportScore;
+    }
+
+    public void setExportScore(boolean exportScore) {
+        this.exportScore = exportScore;
+    }
+
     public ImportTaskMessage() {
     }
 
