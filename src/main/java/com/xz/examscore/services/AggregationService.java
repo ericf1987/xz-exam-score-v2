@@ -85,6 +85,7 @@ public class AggregationService {
             ImportTaskMessage message = new ImportTaskMessage(projectId, reimportProject, reimportScore, exportScore);
             message.setAggregationType(aggregationType);
             message.setGenerateReport(generateReport);
+            message.setExportScore(exportScore);
             queueService.addToQueue(ImportTaskList, message);
         } else {
             queueService.addToQueue(DispatchTaskList,
@@ -109,7 +110,9 @@ public class AggregationService {
     public void exportScore(String projectId) {
         Runnable runnable = () -> {
             try {
+                LOG.info("开始导出项目到阿里云：" + projectId);
                 exportScoreService.exportScore(projectId, true);
+                LOG.info("导出成功：" + projectId);
             } catch (Exception e) {
                 LOG.error("导出成绩失败", e);
             }

@@ -6,6 +6,7 @@ import com.xz.examscore.asynccomponents.QueueType;
 import com.xz.examscore.asynccomponents.report.ReportTaskMessage;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.services.AggregationService;
+import com.xz.examscore.services.ExportScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage
 
     @Autowired
     QueueService queueService;
+
+    @Autowired
+    ExportScoreService exportScoreService;
 
     @Override
     protected void executeTask(DispatchTaskMessage message) {
