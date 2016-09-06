@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -111,9 +112,37 @@ public class ScannerDBService {
         }
     }
 
+
+    private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
+        //网阅题目ID列表
+        List<String> subjectiveIds = subjectiveList.stream().map(subQuestItem -> subQuestItem.getString("questionNo")).collect(Collectors.toList());
+
+        //统计库题目ID列表
+        List<String> subQuestIds = subQuestList.stream().map(subQuestItem -> subQuestItem.getString("questNo")).collect(Collectors.toList());
+
+        for (int i = 0; i < subQuestIds.size(); i++) {
+            //判断是否网阅题目ID中存在遗漏
+            if (!subjectiveIds.contains(subQuestIds.get(i))) {
+                Document subQuest = subQuestList.get(i);
+                subjectiveList.add(
+                        doc("questionNo", subQuest.getString("questNo"))
+                                .append("score", 0)
+                                .append("fullScore", subQuest.getString("score"))
+                                .append("missing", true)
+                );
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
+
+        //获取统计集合中主观题信息
+        List<Document> subQuestList = questService.getQuests(projectId, subjectId, false);
+
+        //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
+        fixMissingSubjectQuest(subQuestList, subjectiveList);
 
         for (Document subjectiveItem : subjectiveList) {
             String questionNo = subjectiveItem.getString("questionNo");
@@ -210,7 +239,6 @@ public class ScannerDBService {
      * @param standardAnswer 题目的标准答案
      * @param answerContent  考生作答
      * @param awardScoreTag  是否为给分题（一律给满分/一律不给分）：true=给满分，false=不给分，null=按照规则给分
-     *
      * @return 分数
      */
     protected static ScoreAndRight calculateScore(
@@ -221,7 +249,7 @@ public class ScannerDBService {
             return new ScoreAndRight(fullScore, true);
         }
         //其他情况则根据给分规则来判断
-        else{
+        else {
             if (answerContent.equals(standardAnswer)) {
                 return new ScoreAndRight(fullScore, true);
             } else {
