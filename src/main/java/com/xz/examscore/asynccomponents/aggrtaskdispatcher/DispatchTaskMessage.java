@@ -16,6 +16,16 @@ public class DispatchTaskMessage implements QueueMessage {
 
     private boolean generateReport;
 
+    private boolean exportScore;
+
+    public boolean isExportScore() {
+        return exportScore;
+    }
+
+    public void setExportScore(boolean exportScore) {
+        this.exportScore = exportScore;
+    }
+
     public DispatchTaskMessage() {
     }
 
@@ -24,10 +34,11 @@ public class DispatchTaskMessage implements QueueMessage {
         this.aggregationType = aggregationType;
     }
 
-    public DispatchTaskMessage(String projectId, AggregationType aggregationType, boolean generateReport) {
+    public DispatchTaskMessage(String projectId, AggregationType aggregationType, boolean generateReport, boolean exportScore) {
         this.projectId = projectId;
         this.aggregationType = aggregationType;
         this.generateReport = generateReport;
+        this.exportScore = exportScore;
     }
 
     public boolean isGenerateReport() {

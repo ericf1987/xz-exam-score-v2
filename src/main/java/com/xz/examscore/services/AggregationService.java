@@ -78,6 +78,7 @@ public class AggregationService {
         boolean reimportProject = config.isReimportProject();
         boolean reimportScore = config.isReimportScore();
         boolean generateReport = config.isGenerateReport();
+        boolean exportScore = config.isExportScore();
         AggregationType aggregationType = config.getAggregationType();
 
         if (reimportProject || reimportScore) {
@@ -87,7 +88,7 @@ public class AggregationService {
             queueService.addToQueue(ImportTaskList, message);
         } else {
             queueService.addToQueue(DispatchTaskList,
-                    new DispatchTaskMessage(projectId, aggregationType, generateReport));
+                    new DispatchTaskMessage(projectId, aggregationType, generateReport, exportScore));
         }
     }
 
@@ -105,7 +106,7 @@ public class AggregationService {
         }
     }
 
-    private void exportScore(String projectId) {
+    public void exportScore(String projectId) {
         Runnable runnable = () -> {
             try {
                 exportScoreService.exportScore(projectId, true);
@@ -113,7 +114,6 @@ public class AggregationService {
                 LOG.error("导出成绩失败", e);
             }
         };
-
         new Thread(runnable).start();
     }
 
