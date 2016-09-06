@@ -73,7 +73,7 @@ public class ProjectConfigService {
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("highScoreRate", projectConfig.getHighScoreRate())
         ));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
                     .append("combineCategorySubjects", projectConfig.isCombineCategorySubjects())
                     .append("rankLevels", projectConfig.getRankLevels())
@@ -114,7 +114,7 @@ public class ProjectConfigService {
                         .append("rankSegmentCount", rankSegmentCount)
                         .append("highScoreRate", highScoreRate)
         ));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
                     .append("combineCategorySubjects", isCombine)
                     .append("rankLevels", rankLevels)

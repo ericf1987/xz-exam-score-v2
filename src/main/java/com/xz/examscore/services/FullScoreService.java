@@ -98,7 +98,7 @@ public class FullScoreService {
                     doc("project", projectId).append("questId", questId),
                     $set(doc("score", fullScore))
                     );
-            if(result.getModifiedCount() == 0){
+            if(result.getMatchedCount() == 0){
                 scoreDatabase.getCollection("quest_list").insertOne(
                         doc("project", projectId).append("questId", questId)
                         .append("score", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))
@@ -109,7 +109,7 @@ public class FullScoreService {
                     doc("project", projectId).append("target", Mongo.target2Doc(target)),
                     $set(doc("fullScore", fullScore))
                     );
-            if(result.getModifiedCount() == 0){
+            if(result.getMatchedCount() == 0){
                 scoreDatabase.getCollection("full_score").insertOne(
                         doc("project", projectId).append("target", Mongo.target2Doc(target))
                         .append("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))

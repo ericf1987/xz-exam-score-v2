@@ -55,7 +55,7 @@ public class ScoreSegmentTask extends AggrTask {
                 doc("scoreSegments", counter.toDocuments())
         );
         UpdateResult result = scoreDatabase.getCollection("score_segment").updateMany(query, update);
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("score_segment").insertOne(
                     query.append("scoreSegments", counter.toDocuments())
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

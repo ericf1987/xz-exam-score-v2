@@ -87,7 +87,7 @@ public class TopAverageTask extends AggrTask {
                 query,
                 MongoUtils.$set(doc("topAverages", resultList))
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             top_averageCol.insertOne(
                     query.append("topAverages", resultList)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

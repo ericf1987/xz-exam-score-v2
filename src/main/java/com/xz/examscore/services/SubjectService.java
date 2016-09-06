@@ -91,7 +91,7 @@ public class SubjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
         Document query = doc("project", projectId);
         UpdateResult result = c.updateMany(query, $set(doc("subjects", subjects)));
-        if(result.getModifiedCount() == 0){
+        if(result.getMatchedCount()== 0){
             c.insertOne(
                     query.append("subjects", subjects)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

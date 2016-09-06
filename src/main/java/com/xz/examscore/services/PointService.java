@@ -104,7 +104,7 @@ public class PointService {
         Document query = doc("id", pointId);
         Document update = doc("name", pointName).append("parent", parentPointId);
         UpdateResult result = scoreDatabase.getCollection("points").updateMany(query, $set(update));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("points").insertOne(
                     query.append("name", pointName)
                             .append("parent", parentPointId)

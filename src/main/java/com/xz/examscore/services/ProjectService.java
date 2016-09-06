@@ -132,7 +132,7 @@ public class ProjectService {
                 .append("startDate", project.getExamStartDate());
 
         UpdateResult result = c.updateMany(query, $set(update));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             c.insertOne(query.append("name", project.getName())
                     .append("grade", project.getGrade())
                     .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))

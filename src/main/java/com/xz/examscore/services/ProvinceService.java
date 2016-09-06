@@ -32,7 +32,7 @@ public class ProvinceService {
         UpdateResult result = scoreDatabase.getCollection("province_list").updateMany(
                 doc("project", projectId), $set(doc("province", province))
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("province_list").insertOne(
                     doc("project", projectId).append("province", province)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

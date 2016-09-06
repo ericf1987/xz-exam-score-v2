@@ -58,7 +58,7 @@ public class StdDeviationTask extends AggrTask {
                 query(projectId, range, target),
                 $set(doc("stdDeviation", deviation))
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("std_deviation").insertOne(
                     query(projectId, range, target)
                             .append("stdDeviation", deviation)

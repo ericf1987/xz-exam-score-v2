@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.*;
 
@@ -76,7 +75,7 @@ public class TScoreService {
         UpdateResult result = scoreDatabase.getCollection("t_score").updateMany(
                 query(projectId, range, target), $set(doc("tScore", tscore)
                 ));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("t_score").insertOne(
                     query(projectId, range, target).append("tScore", tscore)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

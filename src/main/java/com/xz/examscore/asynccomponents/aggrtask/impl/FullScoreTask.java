@@ -94,7 +94,7 @@ public class FullScoreTask extends AggrTask {
                     doc("project", projectId).append("target", target2Doc(Target.questType(questType))),
                     $set(doc("fullScore", fullScore))
                     );
-            if(result.getModifiedCount() == 0){
+            if(result.getMatchedCount() == 0){
                 fullScores.insertOne(
                         doc("project", projectId).append("target", target2Doc(Target.questType(questType)))
                         .append("fullScore", fullScore).append("md5", MD5.digest(UUID.randomUUID().toString()))

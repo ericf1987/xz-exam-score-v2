@@ -63,7 +63,7 @@ public class ScoreMapTask extends AggrTask {
                                 .append("count", studentIds.size())
                 )
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             collection.insertOne(
                     query.append("scoreMap", scoreCountList)
                             .append("count", studentIds.size())

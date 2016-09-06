@@ -54,7 +54,7 @@ public class ObjCorrectMapTask extends AggrTask {
                                 .append("correctRate", correctRate)
                 )
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("obj_correct_map").insertOne(
                     query(projectId, range, target).append("correctCount", correctCount)
                             .append("correctRate", correctRate)

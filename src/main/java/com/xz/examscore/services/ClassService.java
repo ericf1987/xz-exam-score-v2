@@ -105,7 +105,7 @@ public class ClassService {
                 .append("class", update.remove("class"));
 
         UpdateResult result = scoreDatabase.getCollection("class_list").updateMany(query, $set(update));
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             query.putAll(update);
             scoreDatabase.getCollection("class_list").insertOne(
                     query.append("md5", MD5.digest(UUID.randomUUID().toString()))

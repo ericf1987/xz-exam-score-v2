@@ -97,7 +97,7 @@ public class QuestDeviationTask extends AggrTask {
                         append("quest", questId),
                 $set(doc("deviation", deviation))
         );
-        if(result.getModifiedCount() == 0){
+        if(result.getMatchedCount() == 0){
             questDeviationCol.insertOne(
                     new Document("project", projectId)
                             .append("range", Mongo.range2Doc(range))

@@ -68,7 +68,7 @@ public class AverageTask extends AggrTask {
 
             // 保存平均分
             UpdateResult result = averageCollection.updateMany(query, $set(doc("average", average)));
-            if(result.getModifiedCount() == 0){
+            if(result.getMatchedCount() == 0){
                 averageCollection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
             }
             averageService.deleteCache(projectId, range, Target.parse(targetDoc));

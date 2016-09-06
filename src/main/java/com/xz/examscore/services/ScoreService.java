@@ -235,7 +235,7 @@ public class ScoreService {
         }
 
         UpdateResult result = scoreDatabase.getCollection(collectionName).updateMany(query, $set(update));
-        if(result.getModifiedCount() == 0){
+        if(result.getMatchedCount() == 0){
             query.putAll(update);
             scoreDatabase.getCollection(collectionName).insertOne(
                     query.append("md5", MD5.digest(UUID.randomUUID().toString()))

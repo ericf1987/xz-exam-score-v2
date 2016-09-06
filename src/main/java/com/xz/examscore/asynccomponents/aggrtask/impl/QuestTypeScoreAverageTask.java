@@ -63,7 +63,7 @@ public class QuestTypeScoreAverageTask extends AggrTask {
                     .append("rate", rate);
 
             UpdateResult result = dstCollection.updateMany(query, $set(update));
-            if (result.getModifiedCount() == 0) {
+            if (result.getMatchedCount() == 0) {
                 dstCollection.insertOne(
                         query.append("average", average)
                                 .append("rate", rate)

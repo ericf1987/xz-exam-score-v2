@@ -103,7 +103,7 @@ public class RankSegmentTask extends AggrTask {
                         query(projectId, currentRange, target),
                         $set(MongoUtils.doc("rankSegments", resultMap.get("rankSegments")))
                 );
-                if (result.getModifiedCount() == 0) {
+                if (result.getMatchedCount() == 0) {
                     rankSegmentCol.insertOne(
                             query(projectId, currentRange, target)
                                     .append("rankSegments", resultMap.get("rankSegments"))

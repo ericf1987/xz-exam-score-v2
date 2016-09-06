@@ -132,7 +132,7 @@ public class QuestTypeService {
         Document update = $set(
                 doc("questTypeName", questTypeName));
         UpdateResult result = c.updateMany(query, update);
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             c.insertOne(
                     query.append("questTypeName", questTypeName)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

@@ -94,7 +94,7 @@ public class MinMaxTask extends AggrTask {
                                         .append("max", max.get())
                         )
                 );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("score_minmax").insertOne(
                     id.append("min", min.get()).append("max", max.get())
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

@@ -93,7 +93,7 @@ public class RankPositionTask extends AggrTask {
         UpdateResult result = rankPositionCollection.updateMany(query,
                 $set(doc("positions", positions))
         );
-        if(result.getModifiedCount() == 0){
+        if(result.getMatchedCount() == 0){
             rankPositionCollection.insertOne(
                     query.append("positions", positions)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

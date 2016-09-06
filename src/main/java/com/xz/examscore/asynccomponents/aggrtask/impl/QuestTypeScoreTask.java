@@ -91,7 +91,7 @@ public class QuestTypeScoreTask extends AggrTask {
                     .append("province", studentDoc.getString("province"));
 
             UpdateResult result = collection.updateMany(query, $set(update));
-            if (result.getModifiedCount() == 0) {
+            if (result.getMatchedCount() == 0) {
                 collection.insertOne(
                         query.append("score", score)
                                 .append("rate", rate)

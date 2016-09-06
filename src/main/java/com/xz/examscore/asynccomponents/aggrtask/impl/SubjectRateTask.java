@@ -69,7 +69,7 @@ public class SubjectRateTask extends AggrTask {
                 Mongo.query(projectId, range, target),
                 MongoUtils.$set(doc("subjectRates", subjectRates))
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("subject_rate").insertOne(
                     Mongo.query(projectId, range, target).append("subjectRates", subjectRates)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
@@ -95,7 +95,7 @@ public class SubjectRateTask extends AggrTask {
                 Mongo.query(projectId, range, target),
                 MongoUtils.$set(doc("subjectRates", subjectRates))
         );
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("subject_rate").insertOne(
                     Mongo.query(projectId, range, target).append("subjectRates", subjectRates)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))

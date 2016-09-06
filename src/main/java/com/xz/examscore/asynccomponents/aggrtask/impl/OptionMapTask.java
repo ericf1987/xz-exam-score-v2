@@ -83,7 +83,7 @@ public class OptionMapTask extends AggrTask {
                         .append("count", studentCount)
         );
         UpdateResult result = optionMapCollection.updateMany(query, update);
-        if (result.getModifiedCount() == 0) {
+        if (result.getMatchedCount() == 0) {
             optionMapCollection.insertOne(
                     query.append("optionMap", optionMapList)
                             .append("count", studentCount)
