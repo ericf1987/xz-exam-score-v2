@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -109,14 +110,43 @@ public class ScannerDBService {
         }
     }
 
+
+    private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
+        //网阅题目ID列表
+        List<String> subjectiveIds = subjectiveList.stream().map(subQuestItem -> subQuestItem.getString("questionNo")).collect(Collectors.toList());
+
+        //统计库题目ID列表
+        List<String> subQuestIds = subQuestList.stream().map(subQuestItem -> subQuestItem.getString("questNo")).collect(Collectors.toList());
+
+        for (int i = 0; i < subQuestIds.size(); i++) {
+            //判断是否网阅题目ID中存在遗漏
+            if (!subjectiveIds.contains(subQuestIds.get(i))) {
+                Document subQuest = subQuestList.get(i);
+                subjectiveList.add(
+                        doc("questionNo", subQuest.getString("questNo"))
+                                .append("score", 0)
+                                .append("fullScore", subQuest.getDouble("score"))
+                                .append("missing", true)
+                );
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
+
+        //获取统计集合中主观题信息
+        List<Document> subQuestList = questService.getQuests(projectId, subjectId, false);
+
+        //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
+        fixMissingSubjectQuest(subQuestList, subjectiveList);
 
         for (Document subjectiveItem : subjectiveList) {
             String questionNo = subjectiveItem.getString("questionNo");
             double score = Double.parseDouble(subjectiveItem.get("score").toString());
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
+            Boolean missing = subjectiveItem.getBoolean("missing");
 
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
@@ -131,6 +161,9 @@ public class ScannerDBService {
                     .append("city", student.getString("city"))
                     .append("province", student.getString("province"))
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
+            if(null != missing && missing){
+                scoreDoc.append("missing", true);
+            }
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
