@@ -32,7 +32,9 @@ public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage
         String projectId = message.getProjectId();
         AggregationType aggregationType = message.getAggregationType();
         aggregationService.runAggregationOnly(projectId, aggregationType);
-
+        if (message.isExportScore()) {
+            aggregationService.exportScore(projectId);
+        }
         if (message.isGenerateReport()) {
             queueService.addToQueue(QueueType.ReportTaskList, new ReportTaskMessage(projectId));
         }
