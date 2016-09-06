@@ -40,9 +40,11 @@ public class TotalBasicDataSheets extends SheetGenerator {
         //设置表头
         Result result = projectBasicDataAnalysis.execute(param);
         List<Map<String, Object>> studentBasicData = result.get("studentBasicData");
-        setupHeader(excelWriter, studentBasicData);
-        setupSecondaryHeader(excelWriter, studentBasicData);
-        fillSchoolData(excelWriter, studentBasicData);
+        if(!studentBasicData.isEmpty()){
+            setupHeader(excelWriter, studentBasicData);
+            setupSecondaryHeader(excelWriter, studentBasicData);
+            fillSchoolData(excelWriter, studentBasicData);
+        }
     }
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
