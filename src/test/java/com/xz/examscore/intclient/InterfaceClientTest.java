@@ -3,10 +3,14 @@ package com.xz.examscore.intclient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -35,7 +39,16 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject(PROJECT_ID);
+        JSONArray quests = interfaceClient.queryQuestionByProject("433100-4cf7b0ef86574a1598481ba3e3841e42");
+        System.out.println(quests.toString());
+        Map<String, Double> map = new HashMap<>();
+        map.put("score", 0d);
+        quests.forEach(quest -> {
+            JSONObject obj = (JSONObject)quest;
+            if(obj.getString("subjectId").equals("001"))
+                map.put("score", map.get("score") + Double.parseDouble(obj.getString("score")));
+        });
+        System.out.println(map.get("score"));
         assertNotNull(quests);
         assertFalse(quests.isEmpty());
     }
@@ -63,7 +76,8 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySubjectListByProjectId() throws Exception {
-        JSONArray subjects = interfaceClient.querySubjectListByProjectId(PROJECT_ID);
+        JSONArray subjects = interfaceClient.querySubjectListByProjectId("433100-4cf7b0ef86574a1598481ba3e3841e42");
+        System.out.println(subjects.toString());
         assertNotNull(subjects);
         assertFalse(subjects.isEmpty());
     }

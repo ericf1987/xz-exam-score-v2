@@ -17,9 +17,9 @@ public class SchoolPassCompareAnalysisTest extends XzExamScoreV2ApplicationTests
     @Test
     public void testExecute() throws Exception {
         Param param = new Param()
-                .setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
-                .setParameter("schoolId", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0")
-                .setParameter("subjectId", "001");
+                .setParameter("projectId", "433100-4cf7b0ef86574a1598481ba3e3841e42")
+                .setParameter("schoolId", "64a1c8cd-a9b9-4755-a973-e1ce07f3f70a")
+                .setParameter("subjectId", "");
         Result result = schoolPassCompareAnalysis.execute(param);
         System.out.println(result.getData());
     }
