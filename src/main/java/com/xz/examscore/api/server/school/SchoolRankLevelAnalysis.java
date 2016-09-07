@@ -77,7 +77,7 @@ public class SchoolRankLevelAnalysis implements Server {
         Range schoolRange = Range.school(schoolId);
         Map<String, Object> schoolMap = new HashMap<>();
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
-        int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
+        int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId), target);
 
         //获取给定等第配置参数对应的人数
         List<Map<String, Object>> rankLevelList = rankLevelService.getRankLevelMap(projectId, schoolRange, target);

@@ -46,7 +46,7 @@ public class SetProjectConfig implements Server{
                 return Result.fail("配置保存失败!");
             }
         }else{
-            return Result.fail("配置保存失败!");
+            return Result.fail("配置保存失败，网络连接异常!");
         }
     }
 
