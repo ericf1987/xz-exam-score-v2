@@ -29,10 +29,18 @@ public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage
 
     @Override
     protected void executeTask(DispatchTaskMessage message) {
+
+        ////////////////////////////////////////////////////////////// 开始统计(每个项目一个 message)
+
         String projectId = message.getProjectId();
         AggregationType aggregationType = message.getAggregationType();
         aggregationService.runAggregationOnly(projectId, aggregationType);
 
+        ////////////////////////////////////////////////////////////// 统计完成
+
+        if (message.isExportScore()) {
+            aggregationService.exportScore(projectId);
+        }
         if (message.isGenerateReport()) {
             queueService.addToQueue(QueueType.ReportTaskList, new ReportTaskMessage(projectId));
         }
