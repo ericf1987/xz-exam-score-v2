@@ -258,7 +258,12 @@ public class ScoreService {
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
 
         Document query = Mongo.query(projectId, range, target);
-        scoreDatabase.getCollection(collectionName).updateMany(query, $inc("totalScore", score));
+        MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);
+        col.deleteMany(query);
+        col.insertOne(
+                query.append("md5", MD5.digest(UUID.randomUUID().toString()))
+        );
+        col.updateMany(query, $inc("totalScore", score));
 
         cache.delete(cacheKey);
     }

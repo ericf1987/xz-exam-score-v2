@@ -19,7 +19,7 @@ public class SchoolPassCompareAnalysisTest extends XzExamScoreV2ApplicationTests
         Param param = new Param()
                 .setParameter("projectId", "433100-4cf7b0ef86574a1598481ba3e3841e42")
                 .setParameter("schoolId", "64a1c8cd-a9b9-4755-a973-e1ce07f3f70a")
-                .setParameter("subjectId", "");
+                .setParameter("subjectId", "001");
         Result result = schoolPassCompareAnalysis.execute(param);
         System.out.println(result.getData());
     }
