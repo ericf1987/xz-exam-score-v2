@@ -73,7 +73,7 @@ public class ReportItemService {
         return instantCache.get(cacheKey, () -> {
             HashMap<String, Object> reportItems = new LinkedHashMap<>();
             for (ReportRange reportRange : ReportRange.values()) {
-                Map<String, Object> map = new HashMap<>();
+                Map<String, Object> map = new LinkedHashMap<>();
                 String rangeName = reportRange.name();
 
                 Range range = new Range(rangeName, projectId);

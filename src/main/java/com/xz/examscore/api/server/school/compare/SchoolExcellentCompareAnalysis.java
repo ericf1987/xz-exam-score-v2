@@ -69,10 +69,8 @@ public class SchoolExcellentCompareAnalysis implements Server {
         //List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectDocs = projectDocs.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
 
-        Target target = targetService.getTarget(projectId, subjectId);
-
-        Map<String, Object> schoolExcellentMap = getSchoolExcellentMap(projectId, schoolId, target, projectDocs);
-        List<Map<String, Object>> classExcellentList = getClassExcellentList(projectId, schoolId, target, projectDocs);
+        Map<String, Object> schoolExcellentMap = getSchoolExcellentMap(projectId, schoolId, subjectId, projectDocs);
+        List<Map<String, Object>> classExcellentList = getClassExcellentList(projectId, schoolId, subjectId, projectDocs);
         return Result.success()
                 .set("school", schoolExcellentMap)
                 .set("classes", classExcellentList)
@@ -80,7 +78,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
                 .set("hasHeader", !schoolExcellentMap.isEmpty());
     }
 
-    private Map<String, Object> getSchoolExcellentMap(String projectId, String schoolId, Target target, List<Document> projectList) {
+    private Map<String, Object> getSchoolExcellentMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> excellents = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -91,6 +89,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
             Map<String, Object> excellent = new HashMap<>();
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");
+            Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
             List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.school(schoolId), target);
             double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
             excellent.put("projectName", projectName);
@@ -106,7 +105,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
         return map;
     }
 
-    private List<Map<String, Object>> getClassExcellentList(String projectId, String schoolId, Target target, List<Document> projectList) {
+    private List<Map<String, Object>> getClassExcellentList(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         List<Document> classList = classService.listClasses(projectId, schoolId);
 
         List<Map<String, Object>> classes = new ArrayList<>();
@@ -120,6 +119,7 @@ public class SchoolExcellentCompareAnalysis implements Server {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 String currentDate = format.format(Calendar.getInstance().getTime());
                 String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
+                Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
                 List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.clazz(classId), target);
                 double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
                 excellent.put("projectName", projectDoc.getString("name"));

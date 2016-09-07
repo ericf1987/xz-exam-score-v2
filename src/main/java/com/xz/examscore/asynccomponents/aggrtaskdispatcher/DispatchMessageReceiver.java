@@ -6,7 +6,6 @@ import com.xz.examscore.asynccomponents.QueueType;
 import com.xz.examscore.asynccomponents.report.ReportTaskMessage;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.services.AggregationService;
-import com.xz.examscore.services.ExportScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +27,12 @@ public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage
     @Autowired
     QueueService queueService;
 
-    @Autowired
-    ExportScoreService exportScoreService;
-
     @Override
     protected void executeTask(DispatchTaskMessage message) {
         String projectId = message.getProjectId();
         AggregationType aggregationType = message.getAggregationType();
         aggregationService.runAggregationOnly(projectId, aggregationType);
-        if (message.isExportScore()) {
-            aggregationService.exportScore(projectId);
-        }
+
         if (message.isGenerateReport()) {
             queueService.addToQueue(QueueType.ReportTaskList, new ReportTaskMessage(projectId));
         }

@@ -65,10 +65,8 @@ public class SchoolPassCompareAnalysis implements Server {
         //List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectDocs = projectDocs.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
 
-        Target target = targetService.getTarget(projectId, subjectId);
-
-        Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, target, projectDocs);
-        List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, target, projectDocs);
+        Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, subjectId, projectDocs);
+        List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, subjectId, projectDocs);
         return Result.success()
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
@@ -76,24 +74,26 @@ public class SchoolPassCompareAnalysis implements Server {
                 .set("hasHeader", !schoolPassRateMap.isEmpty());
     }
 
-    private Map<String, Object> getSchoolPassRateMap(String projectId, String schoolId, Target target, List<Document> projectList) {
+    private Map<String, Object> getSchoolPassRateMap(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> excellents = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         String currentDate = format.format(Calendar.getInstance().getTime());
         //查询学校的考试记录
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
-        projectList.stream().forEach(projectDoc -> {
+
+        for(Document projectDoc : projectList){
             Map<String, Object> excellent = new HashMap<>();
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");
+            Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
             List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.school(schoolId), target);
             double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
             excellent.put("projectName", projectName);
             excellent.put("startDate", startDate);
             excellent.put("rate", DoubleUtils.round(rate, true));
             excellents.add(excellent);
-        });
+        }
 
         map.put("schoolId", schoolId);
         map.put("schoolName", schoolName);
@@ -102,7 +102,7 @@ public class SchoolPassCompareAnalysis implements Server {
         return map;
     }
 
-    private List<Map<String, Object>> getClassPassRateList(String projectId, String schoolId, Target target, List<Document> projectList) {
+    private List<Map<String, Object>> getClassPassRateList(String projectId, String schoolId, String subjectId, List<Document> projectList) {
         List<Document> classList = classService.listClasses(projectId, schoolId);
 
         List<Map<String, Object>> classes = new ArrayList<>();
@@ -116,6 +116,7 @@ public class SchoolPassCompareAnalysis implements Server {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 String currentDate = format.format(Calendar.getInstance().getTime());
                 String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
+                Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
                 List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.clazz(classId), target);
                 double rate = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
                 excellent.put("projectName", projectDoc.getString("name"));
