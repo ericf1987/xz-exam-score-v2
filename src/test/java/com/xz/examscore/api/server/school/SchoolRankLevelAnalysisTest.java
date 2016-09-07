@@ -19,7 +19,7 @@ public class SchoolRankLevelAnalysisTest extends XzExamScoreV2ApplicationTests{
         String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("schoolId", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0")
-                .setParameter("subjectId", "");
+                .setParameter("subjectId", "004");
         Result result = schoolRankLevelAnalysis.execute(param);
         System.out.println(result.getData());
     }
