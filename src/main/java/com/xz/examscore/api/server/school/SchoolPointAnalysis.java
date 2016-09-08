@@ -29,7 +29,8 @@ import java.util.Map;
 @Function(description = "学校成绩-知识点分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目id,默认第一个科目", required = false),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true)
+        @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class SchoolPointAnalysis implements Server{
@@ -53,10 +54,11 @@ public class SchoolPointAnalysis implements Server{
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String schoolId = param.getString("schoolId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 初始化科目id
         if (StringUtil.isBlank(subjectId)) {
-            subjectId = ClassPointAnalysis.initSubject(projectId, subjectService);
+            subjectId = ClassPointAnalysis.initSubject(projectId, authSubjectIds, subjectService);
         }
 
         if (StringUtil.isBlank(subjectId)) {
