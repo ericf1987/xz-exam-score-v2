@@ -64,6 +64,7 @@ public class SchoolAverageCompareAnalysis implements Server {
         //学校考试列表
         //List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
         projectDocs = projectDocs.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
+        Collections.sort(projectDocs, (Document d1, Document d2) -> d1.getString("startDate").compareTo(d2.getString("startDate")));
 
         Map<String, Object> schoolAverageMap = getSchoolAverageMap(projectId, schoolId, subjectId, projectDocs);
         List<Map<String, Object>> classAverageList = getClassAverageList(projectId, schoolId, subjectId, projectDocs);

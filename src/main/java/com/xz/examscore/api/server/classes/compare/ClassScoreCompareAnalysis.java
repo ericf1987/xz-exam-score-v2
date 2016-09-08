@@ -14,10 +14,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author by fengye on 2016/7/26.
@@ -53,6 +50,8 @@ public class ClassScoreCompareAnalysis implements Server{
         String classId = param.getString("classId");
 
         List<Document> projectList = projectService.listProjectsByRange(Range.clazz(classId));
+        Collections.sort(projectList, (Document d1, Document d2) -> d1.getString("startDate").compareTo(d2.getString("startDate")));
+
 
         List<Map<String, Object>> studentList = getStudentList(projectId, subjectId, classId, projectList);
 
