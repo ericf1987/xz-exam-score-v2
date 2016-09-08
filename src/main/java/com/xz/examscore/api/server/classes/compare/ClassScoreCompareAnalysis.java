@@ -60,7 +60,6 @@ public class ClassScoreCompareAnalysis implements Server{
     }
 
     private List<Map<String, Object>> getStudentList(String projectId, String subjectId, String classId, List<Document> projectList) {
-        Target target = targetService.getTarget(projectId, subjectId);
         List<Document> students = studentService.getStudentList(projectId, Range.clazz(classId));
         List<Map<String, Object>> studentList = new ArrayList<>();
         for (Document student : students){
@@ -70,6 +69,7 @@ public class ClassScoreCompareAnalysis implements Server{
             studentMap.put("studentId", student.getString("student"));
             for (Document project : projectList){
                 String currentProject = project.getString("project");
+                Target target = targetService.getTarget(currentProject, subjectId);
                 double score = scoreService.getScore(currentProject, Range.student(student.getString("student")), target);
                 scores.add(getScoreMap(currentProject, score));
             }
