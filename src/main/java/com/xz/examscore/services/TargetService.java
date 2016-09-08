@@ -37,6 +37,9 @@ public class TargetService {
     PointService pointService;
 
     @Autowired
+    AbilityLevelService abilityLevelService;
+
+    @Autowired
     SubjectService subjectService;
 
     @Autowired
@@ -78,15 +81,7 @@ public class TargetService {
             targetList.addAll(querySubjectObjectives(projectId));
         }
 
-        if (targetNameList.contains(SUBJECT_LEVEL)) {
-            targetList.addAll(quertSubjectLevel(projectId));
-        }
-
         return targetList;
-    }
-
-    private Collection<? extends Target> quertSubjectLevel(String projectId) {
-        return null;
     }
 
     private List<Target> queryPoints(String projectId) {
@@ -188,6 +183,14 @@ public class TargetService {
                         throw new IllegalArgumentException("Subject does not exist in Point:" + point.getId());
                 } else {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                }
+            case SUBJECT_LEVEL:
+                Document subjectLevel = (Document)target.getId();
+                String subject = subjectLevel.getString("subject");
+                if(!StringUtils.isEmpty(subject)){
+                    return subject;
+                }else{
+                    throw new IllegalArgumentException("Subject does not exist in subjectLevel:" + subjectLevel);
                 }
         }
 
