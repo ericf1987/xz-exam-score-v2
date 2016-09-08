@@ -18,12 +18,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static com.xz.examscore.api.server.project.ProjectTopStudentStat.filterSubject;
+
 /**
  * @author by fengye on 2016/7/21.
  */
 @Function(description = "班级成绩-等第统计分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "classId", type = Type.String, description = "班级Id", required = false)
+        @Parameter(name = "classId", type = Type.String, description = "班级Id", required = false),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ClassRankLevelAnalysis implements Server {
@@ -56,13 +59,15 @@ public class ClassRankLevelAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String classId = param.getString("classId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         String lastRankLevel = projectConfig.getLastRankLevel();
         Map<String, Double> rankLevelsConfig = projectConfig.getRankLevels();
         List<Map<String, Object>> studentInfos = new ArrayList<>();
 
-        List<String> subjectIds = subjectService.querySubjects(projectId);
+        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjectIds = filterSubject(subjectIds, authSubjectIds);
 
         List<Map<String, Object>> subjectScoreList = new ArrayList<>();
 

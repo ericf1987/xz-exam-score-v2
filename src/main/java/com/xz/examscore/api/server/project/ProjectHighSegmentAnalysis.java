@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.examscore.api.server.project.ProjectTopStudentStat.filterSubject;
 import static com.xz.examscore.services.SubjectService.getSubjectName;
 
 /**
@@ -34,6 +35,7 @@ import static com.xz.examscore.services.SubjectService.getSubjectName;
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校id列表", required = true),
         @Parameter(name = "percent", type = Type.Decimal, description = "总分前百分比", required = false, defaultValue = "0.3"),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ProjectHighSegmentAnalysis implements Server {
@@ -59,15 +61,16 @@ public class ProjectHighSegmentAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String[] schoolIds = param.getStringValues("schoolIds");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         //获取高分段
         ProjectConfig projectConfig =  projectConfigService.getProjectConfig(projectId);
         double percent = projectConfig.getHighScoreRate();
 
         List<Map<String, Object>> schoolHighSegmentAnalysis =
-                getSchoolHighSegmentAnalysis(projectId, schoolIds, percent);
+                getSchoolHighSegmentAnalysis(projectId, schoolIds, percent, authSubjectIds);
         List<Map<String, Object>> totalHighSegmentAnalysis =
-                getTotalHighSegmentAnalysis(projectId, percent);
+                getTotalHighSegmentAnalysis(projectId, percent, authSubjectIds);
 
         return Result.success()
                 .set("totals", totalHighSegmentAnalysis)
@@ -76,7 +79,8 @@ public class ProjectHighSegmentAnalysis implements Server {
     }
 
     // 学校高分段竞争力分析
-    private List<Map<String, Object>> getSchoolHighSegmentAnalysis(String projectId, String[] schoolIds, double percent) {
+    private List<Map<String, Object>> getSchoolHighSegmentAnalysis(
+            String projectId, String[] schoolIds, double percent, String[] authSubjectIds) {
         List<Map<String, Object>> list = new ArrayList<>();
 
         for (String schoolId : schoolIds) {
@@ -91,7 +95,7 @@ public class ProjectHighSegmentAnalysis implements Server {
 
             Range range = Range.school(schoolId);
             List<Map<String, Object>> subjects = getHighSegmentAnalysis(projectId, range, percent,
-                    subjectService, topAverageService);
+                    authSubjectIds, subjectService, topAverageService);
             map.put("subjects", subjects);
 
             list.add(map);
@@ -101,18 +105,22 @@ public class ProjectHighSegmentAnalysis implements Server {
     }
 
     // 总体高分段竞争力分析
-    private List<Map<String, Object>> getTotalHighSegmentAnalysis(String projectId, double percent) {
+    private List<Map<String, Object>> getTotalHighSegmentAnalysis(
+            String projectId, double percent, String[] authSubjectIds) {
         Range range = rangeService.queryProvinceRange(projectId);
-        return getHighSegmentAnalysis(projectId, range, percent, subjectService, topAverageService);
+        return getHighSegmentAnalysis(projectId, range, percent, authSubjectIds, subjectService, topAverageService);
     }
 
     // 高分段竞争力（各校总分前30%）分析
     public static List<Map<String, Object>> getHighSegmentAnalysis(String projectId, Range range, double percent,
+                                                                   String[] authSubjectIds,
                                                                    SubjectService subjectService,
                                                                    TopAverageService topAverageService) {
         // 各科分析
         List<Map<String, Object>> list = new ArrayList<>();
-        List<String> subjectIds = subjectService.querySubjects(projectId);
+        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjectIds = filterSubject(subjectIds, authSubjectIds);
+
         for (String subjectId : subjectIds) {
             Map<String, Object> subjectInfo = new HashMap<>();
 

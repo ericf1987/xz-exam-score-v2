@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.examscore.api.server.project.ProjectTopStudentStat.filterSubject;
+
 /**
  * 总体成绩-学科分析
  *
@@ -30,7 +32,8 @@ import java.util.Map;
 
 @Function(description = "总体成绩-学科分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校id列表", required = true)
+        @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校id列表", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ProjectSubjectAnalysis implements Server {
@@ -65,14 +68,15 @@ public class ProjectSubjectAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String[] schoolIds = param.getStringValues("schoolIds");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 学校学科分析
-        List<Map<String, Object>> schoolSubjectMaps = getSchoolSubjectAnalysis(projectId, schoolIds);
+        List<Map<String, Object>> schoolSubjectMaps = getSchoolSubjectAnalysis(projectId, schoolIds, authSubjectIds);
 
         // 总体学科分析
         Range range = rangeService.queryProvinceRange(projectId);
-        Map<String, Object> totalSubjectMap = getSubjectAnalysis(projectId, range, studentService, averageService,
-                subjectService, subjectRateService, fullScoreService, tScoreService);
+        Map<String, Object> totalSubjectMap = getSubjectAnalysis(projectId, range, authSubjectIds, studentService,
+                averageService, subjectService, subjectRateService, fullScoreService, tScoreService);
 
         return Result.success()
                 .set("totals", totalSubjectMap)
@@ -80,7 +84,8 @@ public class ProjectSubjectAnalysis implements Server {
                 .set("hasHeader", !((List) totalSubjectMap.get("subjects")).isEmpty());
     }
 
-    private List<Map<String, Object>> getSchoolSubjectAnalysis(String projectId, String[] schoolIds) {
+    private List<Map<String, Object>> getSchoolSubjectAnalysis(
+            String projectId, String[] schoolIds, String[] authSubjectIds) {
         List<Map<String, Object>> schoolSubjectMaps = new ArrayList<>();
 
         for (String schoolId : schoolIds) {
@@ -91,8 +96,8 @@ public class ProjectSubjectAnalysis implements Server {
             }
 
             Range range = Range.school(schoolId);
-            Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, studentService, averageService,
-                    subjectService, subjectRateService, fullScoreService, tScoreService);
+            Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, authSubjectIds, studentService,
+                    averageService, subjectService, subjectRateService, fullScoreService, tScoreService);
 
             subjectAnalysis.put("schoolName", schoolName);
             schoolSubjectMaps.add(subjectAnalysis);
@@ -103,6 +108,7 @@ public class ProjectSubjectAnalysis implements Server {
 
     // 获取学科分析
     public static Map<String, Object> getSubjectAnalysis(String projectId, Range range,
+                                                         String[] authSubjectIds,
                                                          StudentService studentService,
                                                          AverageService averageService,
                                                          SubjectService subjectService,
@@ -122,7 +128,9 @@ public class ProjectSubjectAnalysis implements Server {
         // 科目分析
         Map<String, Document> subjectRateMap = subjectRateService.querySubjectRateMap(projectId, range);
         List<Map<String, Object>> subjectList = new ArrayList<>();
-        List<String> subjects = subjectService.querySubjects(projectId);
+        List<String> subjects = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjects = filterSubject(subjects, authSubjectIds);
+
         for (String subject : subjects) {
             Map<String, Object> map = new HashMap<>();
             Target target = Target.subject(subject);

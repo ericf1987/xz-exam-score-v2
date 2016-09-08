@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.examscore.api.server.project.ProjectTopStudentStat.filterSubject;
+
 /**
  * 班级成绩-排名分析
  *
@@ -30,7 +32,8 @@ import java.util.Map;
 @Function(description = "班级成绩-排名分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
-        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)
+        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ClassRankAnalysis implements Server {
@@ -60,6 +63,7 @@ public class ClassRankAnalysis implements Server {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
         String classId = param.getString("classId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         List<Map<String, Object>> rankstats = new ArrayList<>();
         List<Document> studentList = studentService.getStudentList(projectId, Range.clazz(classId));
@@ -79,7 +83,8 @@ public class ClassRankAnalysis implements Server {
             map.put("projectRankStat", projectRankMap);
 
             // 科目排行分析
-            List<Map<String, Object>> subjectRankList = getSubjectRankList(projectId, schoolId, classId, studentId);
+            List<Map<String, Object>> subjectRankList = getSubjectRankList(
+                    projectId, schoolId, classId, studentId, authSubjectIds);
             map.put("subjectRankStat", subjectRankList);
 
             rankstats.add(map);
@@ -98,13 +103,14 @@ public class ClassRankAnalysis implements Server {
     }
 
     private List<Map<String, Object>> getSubjectRankList(
-            String projectId, String schoolId, String classId, String studentId) {
+            String projectId, String schoolId, String classId, String studentId, String[] authSubjectIds) {
         List<Map<String, Object>> subjectRankList = new ArrayList<>();
 
         // 复制查询结果，以免发生 ConcurrentModificationException 异常
-        List<String> subjects = subjectService.querySubjects(projectId);
-        for (String subjectId : subjects) {
+        List<String> subjects = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjects = filterSubject(subjects, authSubjectIds);
 
+        for (String subjectId : subjects) {
             Map<String, Object> rankAnalysisMap = getRankAnalysisMap(
                     projectId, Target.subject(subjectId), schoolId, classId, studentId);
             rankAnalysisMap.put("subjectId", subjectId);

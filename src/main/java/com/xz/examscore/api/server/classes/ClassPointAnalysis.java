@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.examscore.api.server.project.ProjectTopStudentStat.filterSubject;
+
 /**
  * 班级成绩-知识点分析
  *
@@ -30,7 +32,8 @@ import java.util.Map;
 @Function(description = "班级成绩-知识点分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目id,默认第一个科目", required = false),
-        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)
+        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ClassPointAnalysis implements Server {
@@ -58,10 +61,11 @@ public class ClassPointAnalysis implements Server {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String classId = param.getString("classId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 初始化科目id
         if (StringUtil.isBlank(subjectId)) {
-            subjectId = initSubject(projectId, subjectService);
+            subjectId = initSubject(projectId, authSubjectIds, subjectService);
         }
 
         if (StringUtil.isBlank(subjectId)) {
@@ -134,8 +138,10 @@ public class ClassPointAnalysis implements Server {
         return pointStats;
     }
 
-    public static String initSubject(String projectId, SubjectService subjectService) {
-        List<String> subjectIds = subjectService.querySubjects(projectId);
+    public static String initSubject(String projectId, String[] authSubjectIds, SubjectService subjectService) {
+        List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjectIds = filterSubject(subjectIds, authSubjectIds);
+
         subjectIds.sort(String::compareTo);
 
         if (!subjectIds.isEmpty()) {
