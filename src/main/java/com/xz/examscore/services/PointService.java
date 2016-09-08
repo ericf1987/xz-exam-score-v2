@@ -37,6 +37,7 @@ public class PointService {
      * 查询指定项目的所有知识点
      *
      * @param projectId 项目ID
+     *
      * @return 知识点列表
      */
     public List<Point> getPoints(String projectId) {
@@ -50,6 +51,7 @@ public class PointService {
      *
      * @param projectId 项目ID
      * @param subjectId 科目ID
+     *
      * @return 知识点列表
      */
     public List<Point> getPoints(String projectId, String subjectId) {
@@ -89,9 +91,9 @@ public class PointService {
         return cache.get(cacheKey, () -> {
             Document document = scoreDatabase.getCollection("points").find(doc("id", pointId)).first();
             if (document == null) {
-                return new Point(pointId, "(知识点" + pointId + ")");
+                return new Point(pointId, "(知识点" + pointId + ")", document.getString("subject"));
             } else {
-                return new Point(pointId, document.getString("name"));
+                return new Point(pointId, document.getString("name"), document.getString("subject"));
             }
         });
     }

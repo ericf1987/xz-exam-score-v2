@@ -14,12 +14,23 @@ public class Point implements Serializable {
 
     private String name;
 
+    private String subject;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
     public Point() {
     }
 
-    public Point(String id, String name) {
+    public Point(String id, String name, String subject) {
         this.id = id;
         this.name = name;
+        this.subject = subject;
     }
 
     public String getId() {

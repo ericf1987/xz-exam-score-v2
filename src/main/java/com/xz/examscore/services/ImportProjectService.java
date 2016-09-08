@@ -194,7 +194,7 @@ public class ImportProjectService {
 
     //判断是否文理分科
     private boolean JudgeCombine(List<String> modelSubjects) {
-        if(null != modelSubjects && !modelSubjects.isEmpty()){
+        if (null != modelSubjects && !modelSubjects.isEmpty()) {
             for (String subject : modelSubjects) {
                 if (subject.equals("004005006") || subject.equals("007008009")) return true;
             }
@@ -258,7 +258,7 @@ public class ImportProjectService {
                 if (point != null) {
                     pointService.savePoint(pointId,
                             point.getString("point_name"),
-                            point.getString("parent_point_id"));
+                            point.getString("parent_point_id"), subject);
                 }
             }
 
@@ -471,7 +471,7 @@ public class ImportProjectService {
 
         schoolService.saveProjectSchool(projectId, schoolList);
         projectService.updateProjectSchools(projectId, schoolList);
-        provinceService.saveProjectProvince(projectId, provinces.isEmpty()? null: provinces.iterator().next());
+        provinceService.saveProjectProvince(projectId, provinces.isEmpty() ? null : provinces.iterator().next());
         cityService.saveProjectCities(projectId, cities);
         areaService.saveProjectAreas(projectId, areas);
     }

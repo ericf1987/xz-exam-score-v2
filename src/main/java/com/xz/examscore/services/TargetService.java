@@ -10,9 +10,11 @@ import com.xz.examscore.bean.Target;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,7 +78,15 @@ public class TargetService {
             targetList.addAll(querySubjectObjectives(projectId));
         }
 
+        if (targetNameList.contains(SUBJECT_LEVEL)) {
+            targetList.addAll(quertSubjectLevel(projectId));
+        }
+
         return targetList;
+    }
+
+    private Collection<? extends Target> quertSubjectLevel(String projectId) {
+        return null;
     }
 
     private List<Target> queryPoints(String projectId) {
@@ -165,6 +175,17 @@ public class TargetService {
                 Document quest = questService.findQuest(projectId, questId);
                 if (quest != null) {
                     return quest.getString("subject");
+                } else {
+                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                }
+            case POINT:
+                String pointId = target.getId().toString();
+                Point point = pointService.getPoint(pointId);
+                if (point != null) {
+                    if(!StringUtils.isEmpty(point.getSubject()))
+                        return point.getSubject();
+                    else
+                        throw new IllegalArgumentException("Subject does not exist in Point:" + point.getId());
                 } else {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
