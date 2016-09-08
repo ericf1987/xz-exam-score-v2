@@ -12,6 +12,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.AverageService;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.TargetService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,9 @@ public class AverageTask extends AggrTask {
 
     @Autowired
     ScoreService scoreService;
+
+    @Autowired
+    TargetService targetService;
 
     @Override
     public void runTask(AggrTaskMessage taskInfo) {
@@ -76,8 +80,10 @@ public class AverageTask extends AggrTask {
                 .append("target", targetDoc)
                 .append("project", projectId);
 
+        String subjectId = targetService.getTargetSubjectId(projectId, Target.parse(targetDoc));
+
         // 计算平均分
-        int studentCount = studentService.getStudentCount(projectId, Range.parse(rangeDoc));
+        int studentCount = studentService.getStudentCount(projectId, subjectId, Range.parse(rangeDoc));
         double average;
 
         if (studentCount == 0) {
