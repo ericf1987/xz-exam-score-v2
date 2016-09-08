@@ -184,12 +184,21 @@ public class TargetService {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
             case SUBJECT_LEVEL:
-                Document subjectLevel = (Document)target.getId();
+                Document subjectLevel = (Document)target.idToParam();
                 String subject = subjectLevel.getString("subject");
                 if(!StringUtils.isEmpty(subject)){
                     return subject;
                 }else{
-                    throw new IllegalArgumentException("Subject does not exist in subjectLevel:" + subjectLevel);
+                    throw new IllegalArgumentException("Subject does not exist in subjectLevel:" + target.toString());
+                }
+            case POINT_LEVEL:
+                Document pointLevel = (Document)target.idToParam();
+                String pointString = pointLevel.getString("point");
+                String subjectId = pointService.getPoint(pointString).getSubject();
+                if(!StringUtils.isEmpty(subjectId)){
+                    return subjectId;
+                }else{
+                    throw new IllegalArgumentException("Subject does not exist in PointLevel:" + target.toString());
                 }
         }
 

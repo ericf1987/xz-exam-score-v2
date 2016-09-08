@@ -247,7 +247,7 @@ public class ImportProjectService {
                     continue;
                 }
 
-                if (pointService.exists(pointId)) {
+                if (pointService.exists(pointId, subject)) {
                     existPoints.add(pointId);
                     continue;
                 }

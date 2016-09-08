@@ -34,4 +34,9 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
         importProjectService.importProjectInfo("430200-b73f03af1d74484f84f1aa93f583caaa", new Context());
     }
 
+    @Test
+    public void testimportProject() throws Exception{
+        importProjectService.importProject("430100-a05db0d05ad14010a5c782cd31c0283f", false);
+    }
+
 }

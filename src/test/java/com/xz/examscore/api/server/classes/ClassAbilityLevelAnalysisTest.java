@@ -19,9 +19,9 @@ public class ClassAbilityLevelAnalysisTest extends XzExamScoreV2ApplicationTests
     @Test
     public void execute() throws Exception {
         classAbilityLevelAnalysis.execute(new Param()
-                .setParameter("projectId", "FAKE_PROJ_1471937125364_0")
-                .setParameter("subjectId", "001")
-                .setParameter("classId", "CLASS_1471937125373_2")
+                .setParameter("projectId", "430100-a05db0d05ad14010a5c782cd31c0283f")
+                .setParameter("subjectId", "006")
+                .setParameter("classId", "6343c455-31f8-413a-97fe-5e2ad0dd8379")
         );
     }
 

@@ -33,7 +33,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryKnowledgePointById() throws Exception {
-        JSONObject jsonObject = interfaceClient.queryKnowledgePointById("1007323");
+        JSONObject jsonObject = interfaceClient.queryKnowledgePointById("1007348");
         System.out.println(jsonObject);
     }
 

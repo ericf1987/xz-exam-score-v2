@@ -2,8 +2,8 @@ package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Point;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * 知识点与能力层级
@@ -98,20 +98,18 @@ public class PointService {
         });
     }
 
-    public boolean exists(String pointId) {
-        return scoreDatabase.getCollection("points").count(doc("id", pointId)) > 0;
+    public boolean exists(String pointId, String subject) {
+        return scoreDatabase.getCollection("points").count(doc("id", pointId).append("subject", subject)) > 0;
     }
 
     public void savePoint(String pointId, String pointName, String parentPointId, String subject) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("points");
         Document query = doc("id", pointId);
-        Document update = doc("name", pointName).append("parent", parentPointId).append("subject", subject);
-        UpdateResult result = scoreDatabase.getCollection("points").updateMany(query, $set(update));
-        if (result.getMatchedCount() == 0) {
-            scoreDatabase.getCollection("points").insertOne(
-                    query.append("name", pointName).append("subject", subject)
-                            .append("parent", parentPointId)
-                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
-            );
-        }
+        collection.deleteMany(query);
+        collection.insertOne(
+                query.append("name", pointName).append("subject", subject)
+                        .append("parent", parentPointId)
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()))
+        );
     }
 }
