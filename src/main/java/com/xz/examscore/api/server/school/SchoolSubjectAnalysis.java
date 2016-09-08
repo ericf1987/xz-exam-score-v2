@@ -86,6 +86,7 @@ public class SchoolSubjectAnalysis implements Server {
             Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, studentService, averageService,
                     subjectService, subjectRateService, fullScoreService, tScoreService);
 
+            subjectAnalysis.put("classId", classId);
             subjectAnalysis.put("className", getFullClassName(listClass));
             classsSubjectMaps.add(subjectAnalysis);
         }

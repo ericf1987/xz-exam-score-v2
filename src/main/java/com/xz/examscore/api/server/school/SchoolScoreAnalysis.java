@@ -91,6 +91,7 @@ public class SchoolScoreAnalysis implements Server {
             Map<String, Object> schoolMap = getScoreAnalysisStatInfo(projectId, range, target,
                     studentService, minMaxScoreService, averageService, stdDeviationService, scoreLevelService,
                     passAndUnPassService, rankPositionService, overAverageService);
+            schoolMap.put("classId", classId);
             schoolMap.put("className", getFullClassName(listClass));
 
             classStats.add(schoolMap);
