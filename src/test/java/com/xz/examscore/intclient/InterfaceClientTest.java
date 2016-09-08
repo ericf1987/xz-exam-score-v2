@@ -33,13 +33,13 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryKnowledgePointById() throws Exception {
-        JSONObject jsonObject = interfaceClient.queryKnowledgePointById("1022505");
+        JSONObject jsonObject = interfaceClient.queryKnowledgePointById("1007323");
         System.out.println(jsonObject);
     }
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("433100-4cf7b0ef86574a1598481ba3e3841e42");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430100-a05db0d05ad14010a5c782cd31c0283f");
         System.out.println(quests.toString());
         Map<String, Double> map = new HashMap<>();
         map.put("score", 0d);

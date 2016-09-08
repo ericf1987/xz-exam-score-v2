@@ -258,7 +258,8 @@ public class ImportProjectService {
                 if (point != null) {
                     pointService.savePoint(pointId,
                             point.getString("point_name"),
-                            point.getString("parent_point_id"), subject);
+                            point.getString("parent_point_id"),
+                            point.getString("subject"));
                 }
             }
 

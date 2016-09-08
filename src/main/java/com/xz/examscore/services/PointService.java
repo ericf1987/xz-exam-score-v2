@@ -104,7 +104,7 @@ public class PointService {
 
     public void savePoint(String pointId, String pointName, String parentPointId, String subject) {
         Document query = doc("id", pointId);
-        Document update = doc("name", pointName).append("parent", parentPointId);
+        Document update = doc("name", pointName).append("parent", parentPointId).append("subject", subject);
         UpdateResult result = scoreDatabase.getCollection("points").updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("points").insertOne(
