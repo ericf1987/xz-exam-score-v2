@@ -71,6 +71,7 @@ public class SchoolRankStat implements Server {
             String classId = listClass.getString("class");
 
             Map<String, Object> map = new HashMap<>();
+            map.put("classId", classId);
             map.put("className", getFullClassName(listClass));
 
             // 考生人数

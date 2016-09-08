@@ -56,6 +56,7 @@ public class SchoolPointCompare implements Server {
         for (Document listClass : listClasses) {
             Map<String, Object> map = new HashMap<>();
             String classId = listClass.getString("class");
+            map.put("classId", classId);
             map.put("className", getFullClassName(listClass));
 
             // 知识点得分率

@@ -32,7 +32,8 @@ import static com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalys
 @Function(description = "班级成绩-能力层级分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目id,默认第一个科目", required = false),
-        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)
+        @Parameter(name = "classId", type = Type.String, description = "班级id", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ClassAbilityLevelAnalysis implements Server {
@@ -63,10 +64,11 @@ public class ClassAbilityLevelAnalysis implements Server {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String classId = param.getString("classId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 初始化科目id
         if (StringUtil.isBlank(subjectId)) {
-            subjectId = initSubject(projectId, subjectService);
+            subjectId = initSubject(projectId, authSubjectIds, subjectService);
         }
 
         if (StringUtil.isBlank(subjectId)) {

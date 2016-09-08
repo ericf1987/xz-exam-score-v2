@@ -99,14 +99,24 @@ public class ProjectService {
     /**
      * 查询指定学校的考试项目
      *
+     * @param city      地市id
+     * @param area      区县id
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
      *
      * @return 考试项目列表
      */
-    public List<Document> querySchoolProjects(String schoolId, String examMonth) {
+    public List<Document> querySchoolProjects(String city, String area, String schoolId, String examMonth) {
         // 此处不用缓存加载以免无法及时刷新变更
-        Document query = doc("schools.school", schoolId);
+        Document query = new Document();
+        if (StringUtil.isNotBlank(schoolId)) {
+            query.put("schools.school", schoolId);
+        } else if (StringUtil.isNotBlank(area)) {
+            query.put("schools.area", area);
+        } else {
+            query.put("schools.city", city);
+        }
+
         Document projection = MongoUtils.WITHOUT_INNER_ID.append("schools", 0);
 
         if (StringUtil.isNotBlank(examMonth)) {
