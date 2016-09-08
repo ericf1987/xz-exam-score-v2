@@ -1,5 +1,6 @@
 package com.xz.examscore.api.server.project;
 
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.examscore.api.Param;
@@ -10,6 +11,7 @@ import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -17,10 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.examscore.services.SubjectService.getSubjectName;
 
@@ -32,7 +31,8 @@ import static com.xz.examscore.services.SubjectService.getSubjectName;
 
 @Function(description = "总体成绩-尖子生统计", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段", required = true)
+        @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ProjectTopStudentStat implements Server {
@@ -67,10 +67,12 @@ public class ProjectTopStudentStat implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String[] rankSegment = param.getStringValues("rankSegment");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         Range range = rangeService.queryProvinceRange(projectId);
         Target target = Target.project(projectId);
         List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
+        subjectIds = filterSubject(subjectIds, authSubjectIds);
         subjectIds.sort(String::compareTo);
 
         List<Map<String, Object>> topStudents = getTopStudents(projectId, rankSegment, range, target, subjectIds,
@@ -160,5 +162,23 @@ public class ProjectTopStudentStat implements Server {
             subjectInfo.put("subjectName", getSubjectName(subjectId));
             list.add(subjectInfo);
         }
+    }
+
+    public static List<String> filterSubject(List<String> subjectIds, String[] authSubjects) {
+
+        if (ArrayUtils.isEmpty(authSubjects) || CollectionUtils.isEmpty(subjectIds)) {
+            return subjectIds;
+        }
+
+        Iterator<String> iterator = subjectIds.iterator();
+        while (iterator.hasNext()) {
+            String subjectId = iterator.next();
+
+            if (!Arrays.asList(authSubjects).contains(subjectId)) {
+                iterator.remove();
+            }
+        }
+
+        return subjectIds;
     }
 }

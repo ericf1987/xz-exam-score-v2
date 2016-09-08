@@ -27,7 +27,8 @@ import static com.xz.examscore.api.server.sys.QueryExamClasses.getFullClassName;
 
 @Function(description = "学校成绩-学科分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true)
+        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class SchoolSubjectAnalysis implements Server {
@@ -60,14 +61,15 @@ public class SchoolSubjectAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 班级学科分析
-        List<Map<String, Object>> classsSubjectMaps = getClassSubjectAnalysis(projectId, schoolId);
+        List<Map<String, Object>> classsSubjectMaps = getClassSubjectAnalysis(projectId, schoolId, authSubjectIds);
 
         // 学校学科分析
         Range range = Range.school(schoolId);
-        Map<String, Object> schoolSubjectMaps = getSubjectAnalysis(projectId, range, studentService, averageService,
-                subjectService, subjectRateService, fullScoreService, tScoreService);
+        Map<String, Object> schoolSubjectMaps = getSubjectAnalysis(projectId, range, authSubjectIds, studentService,
+                averageService, subjectService, subjectRateService, fullScoreService, tScoreService);
 
         return Result.success()
                 .set("schools", schoolSubjectMaps)
@@ -75,7 +77,8 @@ public class SchoolSubjectAnalysis implements Server {
                 .set("hasHeader", !((List) schoolSubjectMaps.get("subjects")).isEmpty());
     }
 
-    private List<Map<String, Object>> getClassSubjectAnalysis(String projectId, String schoolId) {
+    private List<Map<String, Object>> getClassSubjectAnalysis(
+            String projectId, String schoolId, String[] authSubjectIds) {
         List<Map<String, Object>> classsSubjectMaps = new ArrayList<>();
 
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
@@ -83,8 +86,8 @@ public class SchoolSubjectAnalysis implements Server {
             String classId = listClass.getString("class");
 
             Range range = Range.clazz(classId);
-            Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, studentService, averageService,
-                    subjectService, subjectRateService, fullScoreService, tScoreService);
+            Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, authSubjectIds, studentService,
+                    averageService, subjectService, subjectRateService, fullScoreService, tScoreService);
 
             subjectAnalysis.put("classId", classId);
             subjectAnalysis.put("className", getFullClassName(listClass));
