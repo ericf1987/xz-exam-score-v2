@@ -102,13 +102,13 @@ public class PointService {
         return scoreDatabase.getCollection("points").count(doc("id", pointId)) > 0;
     }
 
-    public void savePoint(String pointId, String pointName, String parentPointId) {
+    public void savePoint(String pointId, String pointName, String parentPointId, String subject) {
         Document query = doc("id", pointId);
         Document update = doc("name", pointName).append("parent", parentPointId);
         UpdateResult result = scoreDatabase.getCollection("points").updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
             scoreDatabase.getCollection("points").insertOne(
-                    query.append("name", pointName)
+                    query.append("name", pointName).append("subject", subject)
                             .append("parent", parentPointId)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
