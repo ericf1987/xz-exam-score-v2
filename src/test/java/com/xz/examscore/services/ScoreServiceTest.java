@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
+    public static final String PROJECT = "430100-a05db0d05ad14010a5c782cd31c0283f";
+
     @Autowired
     ScoreService scoreService;
 
@@ -35,5 +37,12 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         );
 
         System.out.println(count);
+    }
+
+    @Test
+    public void testGetSubjectLevelTotalScore() throws Exception {
+        Range range = Range.clazz("a1895cd9-d82c-4b12-a698-164fb5ceb1f3");
+        double totalScore = scoreService.getScore(PROJECT, range, Target.subjectLevel("003", "B"));
+        System.out.println(totalScore);
     }
 }

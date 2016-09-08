@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xz.examscore.bean.Target.*;
@@ -40,6 +41,9 @@ public class TargetService {
 
     @Autowired
     SubjectService subjectService;
+
+    @Autowired
+    ProjectService projectService;
 
     @Autowired
     SimpleCache cache;
@@ -76,11 +80,57 @@ public class TargetService {
             targetList.addAll(queryPoints(projectId));
         }
 
+        if (targetNameList.contains(POINT_LEVEL)) {
+            targetList.addAll(queryPointLevels(projectId));
+        }
+
         if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
             targetList.addAll(querySubjectObjectives(projectId));
         }
 
+        if (targetNameList.contains(SUBJECT_LEVEL)) {
+            targetList.addAll(querySubjectLevels(projectId));
+        }
+
         return targetList;
+    }
+
+    private List<Target> queryPointLevels(String projectId) {
+        List<Target> pointLevels = new ArrayList<>();
+        String studyStage = projectService.findProjectStudyStage(projectId);
+
+        pointService.getPoints(projectId).forEach(point -> {
+            if (StringUtil.isEmpty(point.getSubject())) {
+                return;
+            }
+
+            String subject = point.getSubject();
+            Map<String, Document> map = abilityLevelService.queryAbilityLevels(studyStage, subject);
+
+            map.keySet().forEach(levelId -> {
+                Target pointLevel = Target.pointLevel(point.getId(), levelId);
+                pointLevels.add(pointLevel);
+            });
+        });
+
+        return pointLevels;
+    }
+
+    private List<Target> querySubjectLevels(String projectId) {
+        List<Target> subjectLevels = new ArrayList<>();
+        List<String> subjects = subjectService.querySubjects(projectId);
+        String studyStage = projectService.findProjectStudyStage(projectId);
+
+        for (String subject : subjects) {
+            Map<String, Document> map = abilityLevelService.queryAbilityLevels(studyStage, subject);
+
+            map.keySet().forEach(levelId -> {
+                Target subjectLevel = Target.subjectLevel(subject, levelId);
+                subjectLevels.add(subjectLevel);
+            });
+        }
+
+        return subjectLevels;
     }
 
     private List<Target> queryPoints(String projectId) {
@@ -172,32 +222,35 @@ public class TargetService {
                 } else {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
+
             case POINT:
                 String pointId = target.getId().toString();
                 Point point = pointService.getPoint(pointId);
-                if (point != null) {
-                    if(!StringUtils.isEmpty(point.getSubject()))
-                        return point.getSubject();
-                    else
-                        throw new IllegalArgumentException("Subject does not exist in Point:" + point.getId());
+
+                if (point != null && !StringUtils.isEmpty(point.getSubject())) {
+                    return point.getSubject();
                 } else {
                     throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
                 }
+
             case SUBJECT_LEVEL:
-                Document subjectLevel = (Document)target.idToParam();
+                Document subjectLevel = (Document) target.idToParam();
                 String subject = subjectLevel.getString("subject");
-                if(!StringUtils.isEmpty(subject)){
+
+                if (!StringUtils.isEmpty(subject)) {
                     return subject;
-                }else{
+                } else {
                     throw new IllegalArgumentException("Subject does not exist in subjectLevel:" + target.toString());
                 }
+
             case POINT_LEVEL:
-                Document pointLevel = (Document)target.idToParam();
+                Document pointLevel = (Document) target.idToParam();
                 String pointString = pointLevel.getString("point");
                 String subjectId = pointService.getPoint(pointString).getSubject();
-                if(!StringUtils.isEmpty(subjectId)){
+
+                if (!StringUtils.isEmpty(subjectId)) {
                     return subjectId;
-                }else{
+                } else {
                     throw new IllegalArgumentException("Subject does not exist in PointLevel:" + target.toString());
                 }
         }

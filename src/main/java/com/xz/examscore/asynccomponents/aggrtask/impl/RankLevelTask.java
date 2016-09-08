@@ -54,13 +54,16 @@ public class RankLevelTask extends AggrTask {
         // rankRangeName -> {subjectName -> subjectRankLevel}
         Map<String, Map<String, String>> rankLevelsMap = new HashMap<>();
 
-        //先删除原有学生的相关统计条目，再新增一条
+        // 先删除原有学生的相关统计条目，再新增一条
         deleteRankLevels(projectId, studentId);
-        insertSubjectRankLevels(projectId, studentId, sbjTargets);
-        uodateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);
 
+        // 统计单科等第
+        insertSubjectRankLevels(projectId, studentId, sbjTargets);
+        updateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);  // 存入 rankLevelsMap
+
+        // 统计总分等第
         insertProjectRankLevels(projectId, studentId);
-        updateProjectRankLevels(projectId, studentId, rankLevelsMap);
+        updateProjectRankLevels(projectId, studentId, rankLevelsMap);   // 读取 rankLevelsMap
     }
 
     private void deleteRankLevels(String projectId, String studentId) {
@@ -143,7 +146,7 @@ public class RankLevelTask extends AggrTask {
      * @param rankRanges    排名范围列表
      * @param rankLevelsMap 将科目的排名等级放入这里，用于构造考试项目排名等级（例如 "AAAAA"）
      */
-    private void uodateSubjectRankLevels(
+    private void updateSubjectRankLevels(
             String projectId, String studentId,
             List<Target> sbjTargets, Range[] rankRanges,
             Map<String, Map<String, String>> rankLevelsMap) {
@@ -171,7 +174,11 @@ public class RankLevelTask extends AggrTask {
 
     // 计算并保存科目排名等级
     private String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
+
         String rankLevel = rankService.getRankLevel(projectId, rankRange, sbjTarget, studentId);
+        if (rankLevel == null) {
+            return null;
+        }
 
         Document query = doc("project", projectId)
                 .append("student", studentId)

@@ -15,12 +15,20 @@ import java.util.List;
  */
 public class TargetServiceTest extends XzExamScoreV2ApplicationTests {
 
+    public static final String PROJECT = "430100-a05db0d05ad14010a5c782cd31c0283f";
+
     @Autowired
     TargetService targetService;
 
     @Test
     public void testQueryTargets() throws Exception {
-        List<Target> targets = targetService.queryTargets(UNION_PROJECT_ID, Target.POINT);
+        List<Target> targets = targetService.queryTargets(PROJECT, Target.SUBJECT_LEVEL);
         targets.forEach(System.out::println);
+    }
+
+    @Test
+    public void testGetTargetSubject() throws Exception {
+        String subjectId = targetService.getTargetSubjectId(PROJECT, Target.subjectLevel("003", "A"));
+        System.out.println(subjectId);
     }
 }

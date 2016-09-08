@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandom;
 import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandomWithout;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$exists;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -251,7 +252,7 @@ public class FakeDataController {
 
     private Context initContext() {
         Context context = new Context();
-        context.put("points", MongoUtils.toList(scoreDatabase.getCollection("points").find(doc())));
+        context.put("points", MongoUtils.toList(scoreDatabase.getCollection("points").find(doc("subject", $exists(true)))));
         context.put("questTypes", getTotalQuestTypes());
         context.put("usedQuestTypes", new HashMap<String, KeyValue<String, String>>());
         return context;

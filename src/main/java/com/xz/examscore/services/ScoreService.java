@@ -1,7 +1,6 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
-import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -16,7 +15,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -197,7 +199,9 @@ public class ScoreService {
 
         double result = 0;
         for (Document doc : docs) {
-            result += doc.getDouble("totalScore");
+            if (doc.get("totalScore") != null) {
+                result += doc.getDouble("totalScore");
+            }
         }
 
         return result;
@@ -237,16 +241,20 @@ public class ScoreService {
         UpdateResult result = scoreDatabase.getCollection(collectionName).updateMany(query, $set(update));
         if(result.getMatchedCount() == 0){
             query.putAll(update);
-            scoreDatabase.getCollection(collectionName).insertOne(
-                    query.append("md5", MD5.digest(UUID.randomUUID().toString()))
-            );
+            scoreDatabase.getCollection(collectionName).insertOne(query.append("md5", Mongo.md5()));
         }
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
     }
 
+    public void createTotalScore(String projectId, Range range, Target target) {
+        String collectionName = getTotalScoreCollection(projectId, target);
+        scoreDatabase.getCollection(collectionName).insertOne(
+                Mongo.query(projectId, range, target).append("score", 0.0).append("md5", Mongo.md5()));
+    }
+
     /**
-     * 累加总分
+     * 累加总分（必须事先创建该条记录）
      *
      * @param projectId 项目ID
      * @param range     范围
@@ -259,10 +267,6 @@ public class ScoreService {
 
         Document query = Mongo.query(projectId, range, target);
         MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);
-        col.deleteMany(query);
-        col.insertOne(
-                query.append("md5", MD5.digest(UUID.randomUUID().toString()))
-        );
         col.updateMany(query, $inc("totalScore", score));
 
         cache.delete(cacheKey);

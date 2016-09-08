@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
+    public static final String PROJECT = "430100-a05db0d05ad14010a5c782cd31c0283f";
+
     @Autowired
     StudentService studentService;
 
@@ -31,7 +33,7 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetStudentCount() throws Exception {
         Range range = Range.province("430000");
-        int studentCount = studentService.getStudentCount(XT_PROJECT_ID, range);
+        int studentCount = studentService.getStudentCount(PROJECT, range);
         System.out.println(studentCount);
     }
 
@@ -43,9 +45,16 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
+    public void testGetClassSubjectStudentCount() throws Exception {
+        Range range = Range.clazz("a1895cd9-d82c-4b12-a698-164fb5ceb1f3");
+        int studentCount = studentService.getStudentCount(PROJECT, "003", range);
+        System.out.println(studentCount);
+    }
+
+    @Test
     public void testGetStudentList() throws Exception {
-        Range range = new Range("class", "SCHOOL_001_CLASS_01");
-        List<String> studentList = studentService.getStudentIds(XT_PROJECT_ID, "004005006", range);
+        Range range = new Range("class", "a1895cd9-d82c-4b12-a698-164fb5ceb1f3");
+        List<String> studentList = studentService.getStudentIds(PROJECT, "003", range);
         studentList.forEach(System.out::println);
     }
 

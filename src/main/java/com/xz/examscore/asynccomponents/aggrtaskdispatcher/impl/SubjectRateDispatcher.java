@@ -35,6 +35,6 @@ public class SubjectRateDispatcher extends TaskDispatcher {
         }
 
         // 为每个学生发布任务需要调用单独的方法，否则可能导致效率低下
-        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
+        dispatchTaskForEveryStudent(projectId, aggregationId);
     }
 }

@@ -62,7 +62,8 @@ public class AbilityLevelService {
             MongoCollection<Document> collection = scoreDatabase.getCollection("ability_levels");
             Document query = doc("study_stage", studyStage).append("subject", subjectId);
 
-            return new HashMap<>(CollectionUtils.toMap(toList(collection.find(query)),
+            return new HashMap<>(CollectionUtils.toMap(
+                    toList(collection.find(query)),
                     document -> document.getString("level_id")));
         });
     }

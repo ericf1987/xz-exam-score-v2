@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -34,6 +35,9 @@ public abstract class TaskDispatcher {
 
     @Autowired
     AggregationRoundService aggregationRoundService;
+
+    @Autowired
+    StudentService studentService;
 
     public void dispatch(Context context) {
         String projectId = context.get("projectId");
@@ -100,12 +104,28 @@ public abstract class TaskDispatcher {
 
     //////////////////////////////////////////////////////////////
 
-    // 每个考生发布一个任务，这个任务只有 Range
-    protected void dispatchTaskForEveryStudent(String projectId, String aggregationId, StudentService studentService) {
-        FindIterable<Document> list = studentService.getProjectStudentList(projectId, null, 0, doc("student", 1));
+    /**
+     * 每个考生发布一个任务，这个任务只有 Range
+     *
+     * @param projectId      项目ID
+     * @param aggregationId  统计ID
+     * @param beforeDispatch 发布每个任务之前需要进行的处理
+     */
+    protected void dispatchTaskForEveryStudent(
+            String projectId, String aggregationId, Consumer<String> beforeDispatch) {
+
+        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, 0, doc("student", 1));
         for (Document document : list) {
             String studentId = document.getString("student");
+            if (beforeDispatch != null) {
+                beforeDispatch.accept(studentId);
+            }
             dispatchTask(createTask(projectId, aggregationId).setRange(Range.student(studentId)));
         }
+    }
+
+    // 每个考生发布一个任务，这个任务只有 Range
+    protected void dispatchTaskForEveryStudent(String projectId, String aggregationId) {
+        dispatchTaskForEveryStudent(projectId, aggregationId, null);
     }
 }
