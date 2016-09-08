@@ -76,6 +76,7 @@ public class SchoolScoreSegment implements Server {
             List<Map<String, Object>> scoreSegments = scoreSegmentService.queryFullScoreSegment(projectId, target, range);
 
             map.put("scoreSegments", scoreSegments);
+            map.put("classId", classId);
             map.put("className", getFullClassName(listClass));
             classSegments.add(map);
         }
