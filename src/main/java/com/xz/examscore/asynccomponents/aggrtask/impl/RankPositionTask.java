@@ -95,23 +95,28 @@ public class RankPositionTask extends AggrTask {
     }
 
     private double getRankPositionScore(List<Document> scoreMap, int[] indexs) {
-        // 按照分数从高到低排序
-        Collections.sort(scoreMap, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
-        double sum = 0;
-        for(int index : indexs){
-            if (index <= 0) {
-                return 0;
-            }
-            int counter = 0;
-            for (Document item : scoreMap) {
-                counter += item.getInteger("count");
-                if (counter >= index) {
-                    sum += item.getDouble("score");
-                    break;
+        if(scoreMap.size() == 1){
+            //如果只有一个学生参考，则中位数就是得分
+            return scoreMap.get(0).getDouble("score");
+        }else{
+            // 按照分数从高到低排序
+            Collections.sort(scoreMap, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
+            double sum = 0;
+            for (int index : indexs) {
+                if (index <= 0) {
+                    return 0;
+                }
+                int counter = 0;
+                for (Document item : scoreMap) {
+                    counter += item.getInteger("count");
+                    if (counter >= index) {
+                        sum += item.getDouble("score");
+                        break;
+                    }
                 }
             }
+            return sum / 2;
         }
-        return sum / 2;
     }
 
     private int[] getRankPosition(int count, double rate){
