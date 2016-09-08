@@ -15,6 +15,6 @@ public class ClassScoreCompareSheetsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classScoreCompareReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.clazz("0c738247-b62c-4c90-9016-1cc1163fd0b1"), "target/class-score-compare.xlsx");
+        classScoreCompareReport.generate("433100-fef19389d6ce4b1f99847ab96d2cfeba", Range.clazz("f8259b31-7c8b-47ba-90d5-c5c15763660f"), "target/class-score-compare.xlsx");
     }
 }
