@@ -239,7 +239,7 @@ public class ScoreService {
         }
 
         UpdateResult result = scoreDatabase.getCollection(collectionName).updateMany(query, $set(update));
-        if(result.getMatchedCount() == 0){
+        if (result.getMatchedCount() == 0) {
             query.putAll(update);
             scoreDatabase.getCollection(collectionName).insertOne(query.append("md5", Mongo.md5()));
         }
@@ -247,10 +247,17 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
+    /**
+     * 创建一条空的总分记录
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     */
     public void createTotalScore(String projectId, Range range, Target target) {
         String collectionName = getTotalScoreCollection(projectId, target);
         scoreDatabase.getCollection(collectionName).insertOne(
-                Mongo.query(projectId, range, target).append("score", 0.0).append("md5", Mongo.md5()));
+                Mongo.query(projectId, range, target).append("totalScore", 0.0).append("md5", Mongo.md5()));
     }
 
     /**
