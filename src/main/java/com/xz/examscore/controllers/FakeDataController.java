@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandom;
 import static com.xz.ajiaedu.common.lang.RandomUtil.pickRandomWithout;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$exists;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -234,10 +233,14 @@ public class FakeDataController {
 
             LOG.info("开始生成 " + projectCount + " 个模拟项目...");
 
-            for (int i = 0; i < projectCount; i++) {
-                String projectId = createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
-                counter++;
-                LOG.info("已生成项目 " + counter + ": " + projectId);
+            try {
+                for (int i = 0; i < projectCount; i++) {
+                    String projectId = createProject(schoolsPerProject, classesPerSchool, studentsPerClass, subjectCount);
+                    counter++;
+                    LOG.info("已生成项目 " + counter + ": " + projectId);
+                }
+            } catch (Exception e) {
+                LOG.error("生成失败", e);
             }
 
             contextThreadLocal.set(null);
@@ -252,10 +255,21 @@ public class FakeDataController {
 
     private Context initContext() {
         Context context = new Context();
-        context.put("points", MongoUtils.toList(scoreDatabase.getCollection("points").find(doc("subject", $exists(true)))));
+        context.put("points", queryPoints());
         context.put("questTypes", getTotalQuestTypes());
         context.put("usedQuestTypes", new HashMap<String, KeyValue<String, String>>());
         return context;
+    }
+
+    protected List<Document> queryPoints() {
+        MongoCollection<Document> c = scoreDatabase.getCollection("points");
+        Document query = doc("subject", doc("$exists", true));
+        List<Document> list = MongoUtils.toList(c.find(query));
+
+        if (list.isEmpty()) {
+            throw new IllegalStateException("找不到可用的知识点");
+        }
+        return list;
     }
 
     // 查询所有的题型
