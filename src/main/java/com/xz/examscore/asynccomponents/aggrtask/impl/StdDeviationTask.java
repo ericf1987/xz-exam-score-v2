@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.query;
 

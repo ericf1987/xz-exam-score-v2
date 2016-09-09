@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
 import static com.xz.examscore.util.Mongo.query;
 
 /**
