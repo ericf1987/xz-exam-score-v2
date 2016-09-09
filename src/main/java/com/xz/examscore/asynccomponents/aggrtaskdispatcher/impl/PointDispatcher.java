@@ -19,13 +19,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 @TaskDispatcherInfo(taskType = "point", isAdvanced = true)
 @Component
 public class PointDispatcher extends TaskDispatcher {
 
-    static final Logger LOG = LoggerFactory.getLogger(PointDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PointDispatcher.class);
 
     @Autowired
     StudentService studentService;
@@ -70,11 +71,10 @@ public class PointDispatcher extends TaskDispatcher {
         }
     }
 
-    protected void deleteOldData(String projectId) {
+    void deleteOldData(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("total_score");
-        c.deleteMany(doc("project", projectId).append("target.name", Target.POINT));
-        c.deleteMany(doc("project", projectId).append("target.name", Target.POINT_LEVEL));
-        c.deleteMany(doc("project", projectId).append("target.name", Target.SUBJECT_LEVEL));
+        c.deleteMany(doc("project", projectId).append("target.name",
+                $in(Target.POINT, Target.POINT_LEVEL, Target.SUBJECT_LEVEL)));
     }
 
 }
