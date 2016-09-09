@@ -44,12 +44,7 @@ public class TscoreTask extends AggrTask {
 
         double targetAverage = averageService.getAverage(projectId, range, target);
 
-        double tscore = 0;
-        if(provinceStdDeviation == 0){
-            tscore += 50;
-        }else{
-            tscore = (targetAverage - provinceAverage) / provinceStdDeviation * 10 + 50;
-        }
+        double tscore = provinceStdDeviation == 0 ? 50 : (targetAverage - provinceAverage) / provinceStdDeviation * 10 + 50;
 
         tScoreService.saveTScore(projectId, target, range, tscore);
     }
