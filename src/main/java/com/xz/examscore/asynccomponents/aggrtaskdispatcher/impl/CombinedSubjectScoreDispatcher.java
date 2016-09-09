@@ -29,6 +29,6 @@ public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
             return;
         }
 
-        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
+        dispatchTaskForEveryStudent(projectId, aggregationId);
     }
 }

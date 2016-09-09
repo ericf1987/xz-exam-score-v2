@@ -1,13 +1,21 @@
 package com.xz.examscore.util;
 
+import com.xz.ajiaedu.common.lang.StringUtil;
+
 import java.util.regex.Pattern;
 
 /**
  * @author by fengye on 2016/8/26.
  */
 public class RankLevelFormater {
+
     //格式化等第参数 例如将4A1B1C转化成AAAABC
     public static String format(String str) {
+
+        if (StringUtil.isEmpty(str)) {
+            return "";
+        }
+
         StringBuilder builder = new StringBuilder();
 
         //匹配数字
@@ -34,6 +42,11 @@ public class RankLevelFormater {
 
     //格式化等第参数 例如将AAAABC转化成4A1B1C
     public static String format2(String str){
+
+        if (StringUtil.isEmpty(str)) {
+            return "";
+        }
+
         //数组存放对应26个字母的出现次数比如a[0]的值对应字母A出现的次数，a[2]的值对应C出现的次数。。。
         int[] arr = new int[26];
 

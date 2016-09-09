@@ -23,6 +23,6 @@ public class ScoreRateDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        dispatchTaskForEveryStudent(projectId, aggregationId, studentService);
+        dispatchTaskForEveryStudent(projectId, aggregationId);
     }
 }

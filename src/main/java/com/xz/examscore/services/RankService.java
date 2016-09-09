@@ -108,13 +108,17 @@ public class RankService {
      * @param target    排名目标
      * @param studentId 学生ID
      *
-     * @return 排名等级
+     * @return 排名等级，如果考生没有参加考试则返回 null
      */
     public String getRankLevel(String projectId, Range range, Target target, String studentId) {
         int rank = getRank(projectId, range, target, studentId);
-        int studentCount = studentService.getStudentCount(projectId, range);
+        int studentCount = studentService.getStudentCount(projectId, range, target);
 
         ProjectConfig config = projectConfigService.getProjectConfig(projectId);
+
+        if (rank > studentCount) {  // 说明没有参加考试
+            return null;
+        }
 
         Map<String, Double> rankingLevels = config.getRankLevels();
         List<String> levelKeys = new ArrayList<>(rankingLevels.keySet());

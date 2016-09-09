@@ -1,8 +1,11 @@
 package com.xz.examscore.util;
 
+import com.hyd.simplecache.utils.MD5;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
+
+import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -20,6 +23,10 @@ public class Mongo {
 
     public static Document query(String projectId, Target target) {
         return query(projectId, null, target);
+    }
+
+    public static String md5() {
+        return MD5.digest(UUID.randomUUID().toString());
     }
 
     /**

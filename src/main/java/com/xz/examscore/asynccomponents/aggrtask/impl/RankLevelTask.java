@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.UPSERT;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
 @AggrTaskMeta(taskType = "rank_level")
@@ -65,7 +67,6 @@ public class RankLevelTask extends AggrTask {
      */
     private void saveProjectRankLevels(String projectId, String studentId, Map<String, Map<String, String>> rankLevelsMap) {
 
-        Range student = Range.student(studentId);
         Target project = Target.project(projectId);
 
         boolean combinedSubjects =
@@ -121,7 +122,7 @@ public class RankLevelTask extends AggrTask {
                 // 保存排名等级
                 String rankLevel = saveRankLevel(projectId, studentId, rankRange, sbjTarget);
                 // 缺考考生没有排名等级
-                if(null == rankLevel){
+                if (null == rankLevel) {
                     continue;
                 }
 
@@ -138,7 +139,11 @@ public class RankLevelTask extends AggrTask {
 
     // 计算并保存科目排名等级
     private String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
+
         String rankLevel = rankService.getRankLevel(projectId, rankRange, sbjTarget, studentId);
+        if (rankLevel == null) {
+            return null;
+        }
 
         Document query = doc("project", projectId)
                 .append("student", studentId)

@@ -76,7 +76,7 @@ public class ClassQuestTypeAnalysis implements Server {
         return Result.success()
                 .set("classes", classQuestTypeAnalysis)
                 .set("students", studentQuestTypeAnalysis)
-                .set("hasHeader", !classQuestTypeAnalysis.isEmpty());
+                .set("hasHeader", !(classQuestTypeAnalysis.isEmpty() || studentQuestTypeAnalysis.isEmpty()));
     }
 
     // 学生试题分析

@@ -198,7 +198,9 @@ public class ScoreService {
 
         double result = 0;
         for (Document doc : docs) {
-            result += doc.getDouble("totalScore");
+            if (doc.get("totalScore") != null) {
+                result += doc.getDouble("totalScore");
+            }
         }
 
         return result;
@@ -240,8 +242,14 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
+    public void createTotalScore(String projectId, Range range, Target target) {
+        String collectionName = getTotalScoreCollection(projectId, target);
+        scoreDatabase.getCollection(collectionName).insertOne(
+                Mongo.query(projectId, range, target).append("score", 0.0).append("md5", Mongo.md5()));
+    }
+
     /**
-     * 累加总分
+     * 累加总分（必须事先创建该条记录）
      *
      * @param projectId 项目ID
      * @param range     范围
@@ -253,7 +261,8 @@ public class ScoreService {
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
 
         Document query = Mongo.query(projectId, range, target);
-        scoreDatabase.getCollection(collectionName).updateOne(query, $inc("totalScore", score), UPSERT);
+        MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);
+        col.updateMany(query, $inc("totalScore", score));
 
         cache.delete(cacheKey);
     }
