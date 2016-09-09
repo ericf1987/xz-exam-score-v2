@@ -60,7 +60,7 @@ public class SchoolQuestTypeAnalysis implements Server {
         return Result.success()
                 .set("schools", schoolQuestTypeAnalysis)
                 .set("classes", classQuestTypeAnalysis)
-                .set("hasHeader", !schoolQuestTypeAnalysis.isEmpty());
+                .set("hasHeader", !(schoolQuestTypeAnalysis.isEmpty() || classQuestTypeAnalysis.isEmpty()));
     }
 
     // 班级试题分析
