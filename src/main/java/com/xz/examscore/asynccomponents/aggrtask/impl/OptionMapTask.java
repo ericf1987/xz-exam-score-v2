@@ -98,7 +98,7 @@ public class OptionMapTask extends AggrTask {
                 //如果答案选项已经存在，则累加count，同时修改rate
                 int count = StringUtil.isEmpty(document.getInteger("count").toString()) ? 0 : document.getInteger("count");
                 document.put("count", count + oneCount);
-                document.put("rate", (count + oneCount) / studentCount);
+                document.put("rate", (count + oneCount) / (double) studentCount);
                 return;
             }
         }

@@ -20,10 +20,19 @@ public class OptionMapTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
-        String schoolId = "7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52";
-        String questId = "57403a032d560287556b90ca";
+        String projectId = "430600-855904ddd05243d2a6eeb76832e7b61e";
+        String schoolId = "d1bf6d54-1e2e-40b3-b3df-fda8069e4389";
+        String questId = "57d132bb2de04306ae9f124a";
         optionMapTask.runTask(new AggrTaskMessage(projectId, "11", "option_count")
                 .setRange(Range.school(schoolId)).setTarget(Target.quest(questId)));
+    }
+
+    @Test
+    public void testAggrClassOptionCount() throws Exception {
+        String projectId = "430600-855904ddd05243d2a6eeb76832e7b61e";
+        String classId = "1563ee2a-61cb-41e5-839a-b2cc09ea54a5";
+        String questId = "57d132bb2de04306ae9f124a";
+        optionMapTask.runTask(new AggrTaskMessage(projectId, "11", "option_count")
+                .setRange(Range.clazz(classId)).setTarget(Target.quest(questId)));
     }
 }

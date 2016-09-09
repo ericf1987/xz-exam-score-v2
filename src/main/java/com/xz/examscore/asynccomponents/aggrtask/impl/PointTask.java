@@ -121,7 +121,7 @@ public class PointTask extends AggrTask {
             Document quest = questService.findQuest(projectId, questId);
 
             if (quest == null) {
-                LOG.error("找不到题目: project=" + projectId + ", questId=" + questId);
+                LOG.error("找不到题目: project=" + projectId + ", questId=" + questId + ", student=" + studentId);
                 continue;
             }
 
