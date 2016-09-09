@@ -70,9 +70,9 @@ public class PointTask extends AggrTask {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, point, score, null);
-            scoreService.addTotalScore(projectId, classRange, point, score);
-            scoreService.addTotalScore(projectId, schoolRange, point, score);
-            scoreService.addTotalScore(projectId, provinceRange, point, score);
+            addTotalScore(projectId, classRange, point, score);
+            addTotalScore(projectId, schoolRange, point, score);
+            addTotalScore(projectId, provinceRange, point, score);
         }
 
         // 统计[知识点-能力层级]得分（班级累加，学校累加，省份累加）
@@ -80,9 +80,9 @@ public class PointTask extends AggrTask {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, pointLevel, score, null);
-            scoreService.addTotalScore(projectId, classRange, pointLevel, score);
-            scoreService.addTotalScore(projectId, schoolRange, pointLevel, score);
-            scoreService.addTotalScore(projectId, provinceRange, pointLevel, score);
+            addTotalScore(projectId, classRange, pointLevel, score);
+            addTotalScore(projectId, schoolRange, pointLevel, score);
+            addTotalScore(projectId, provinceRange, pointLevel, score);
         }
 
         // 统计能力层级得分（学生，班级累加，学校累加，省份累加）
@@ -90,9 +90,18 @@ public class PointTask extends AggrTask {
             Target subjectLevel = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, subjectLevel, score, null);
-            scoreService.addTotalScore(projectId, classRange, subjectLevel, score);
-            scoreService.addTotalScore(projectId, schoolRange, subjectLevel, score);
-            scoreService.addTotalScore(projectId, provinceRange, subjectLevel, score);
+            addTotalScore(projectId, classRange, subjectLevel, score);
+            addTotalScore(projectId, schoolRange, subjectLevel, score);
+            addTotalScore(projectId, provinceRange, subjectLevel, score);
+        }
+    }
+
+    private void addTotalScore(String projectId, Range range, Target target, double score) {
+        int modifiedCount = scoreService.addTotalScore(projectId, range, target, score);
+        if (modifiedCount == 0 && score != 0) {
+            throw new IllegalStateException(
+                    String.format("分数累加失败: project=%s, range=%s, target=%s, score=%s",
+                            projectId, range, target, score));
         }
     }
 

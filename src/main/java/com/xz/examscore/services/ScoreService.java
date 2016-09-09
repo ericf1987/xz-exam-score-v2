@@ -268,15 +268,16 @@ public class ScoreService {
      * @param target    目标
      * @param score     分数
      */
-    public void addTotalScore(String projectId, Range range, Target target, double score) {
+    public int addTotalScore(String projectId, Range range, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
 
         Document query = Mongo.query(projectId, range, target);
         MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);
-        col.updateMany(query, $inc("totalScore", score));
+        UpdateResult result = col.updateMany(query, $inc("totalScore", score));
 
         cache.delete(cacheKey);
+        return (int) result.getModifiedCount();
     }
 
     public String getTotalScoreCollection(String projectId, Target target) {
