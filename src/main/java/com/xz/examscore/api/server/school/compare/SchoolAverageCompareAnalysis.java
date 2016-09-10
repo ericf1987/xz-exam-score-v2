@@ -68,6 +68,8 @@ public class SchoolAverageCompareAnalysis implements Server {
 
         Map<String, Object> schoolAverageMap = getSchoolAverageMap(projectId, schoolId, subjectId, projectDocs);
         List<Map<String, Object>> classAverageList = getClassAverageList(projectId, schoolId, subjectId, projectDocs);
+        Collections.sort(classAverageList, (Map<String, Object> m1, Map<String, Object> m2) -> m1.get("className").toString().compareTo(m2.get("className").toString()));
+
         return Result.success()
                 .set("school", schoolAverageMap)
                 .set("classes", classAverageList)

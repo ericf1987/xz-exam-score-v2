@@ -54,6 +54,7 @@ public class ClassScoreCompareAnalysis implements Server{
 
 
         List<Map<String, Object>> studentList = getStudentList(projectId, subjectId, classId, projectList);
+        Collections.sort(studentList, (Map<String, Object> m1, Map<String, Object> m2) -> m1.get("studentName").toString().compareTo(m2.get("studentName").toString()));
 
         return Result.success().set("projectList", projectList).set("studentList", studentList).set("hasHeader", !projectList.isEmpty());
     }

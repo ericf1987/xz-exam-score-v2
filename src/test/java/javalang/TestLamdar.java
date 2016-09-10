@@ -58,8 +58,10 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-        String md5 = MD5.digest(UUID.randomUUID().toString());
-        System.out.println(md5);
+/*        String md5 = MD5.digest(UUID.randomUUID().toString());
+        System.out.println(md5);*/
+        double a = Math.ceil(13.75d);
+        System.out.println(a);
     }
 
     public void test2() {

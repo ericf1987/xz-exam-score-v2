@@ -9,9 +9,8 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.FullScoreService;
-import com.xz.examscore.services.RangeService;
-import com.xz.examscore.services.TargetService;
+import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -19,9 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -48,94 +46,109 @@ public class QuestDeviationTask extends AggrTask {
     @Autowired
     FullScoreService fullScoreService;
 
+    @Autowired
+    StudentService studentService;
+
+    @Autowired
+    ScoreService scoreService;
+
     public static final double DEVIATION_RATE = 0.27d;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
-        //1.查询出total_score表中的总分值
-        //2.查询出前27%排名和后27%排名的平均分，相减
-        //3.相减后的数值/总分值
         String projectId = taskInfo.getProjectId();
         Range range = taskInfo.getRange();
         Target target = taskInfo.getTarget();
-
-        // 无效的任务
-        if (target == null || target.getId() == null) {
-            LOG.error("Invalid target: " + target);
-            return;
-        }
-
         String questId = target.getId().toString();
+        //1.查询题目所在的科目的学生总分信息
 
-        Document query = new Document("project", projectId).
-                append("range", Mongo.range2Doc(range)).
-                append("target", Mongo.target2Doc(target));
+        Target subjectTarget = Target.subject(targetService.getTargetSubjectId(projectId, target));
 
-        MongoCollection<Document> scoreMapCol = scoreDatabase.getCollection("score_map");
         MongoCollection<Document> questDeviationCol = scoreDatabase.getCollection("quest_deviation");
 
-        Document oneScoreMap = scoreMapCol.find(query).first();
-        if (oneScoreMap == null) {  // 可能对应的 range 考生全部没有分数
+        List<Map<String, Object>> students = new ArrayList();
+        //获取每个学生的总分
+        studentService.getStudentIds(projectId, range, subjectTarget).forEach(studentId -> {
+            double totalScore = scoreService.getScore(projectId, Range.student(studentId), subjectTarget);
+            Map<String, Object> studentMap = new HashMap<>();
+            studentMap.put("student", studentId);
+            studentMap.put("totalScore", totalScore);
+            students.add(studentMap);
+        });
+        System.out.println("总人数为：" + students.size() + "，列表：" + students.toString());
+
+        if (students.isEmpty()) {
+            LOG.warn("找不到学生总得分!: project={}, range={}, target={}", projectId, range.getId(), target.getId().toString());
             return;
         }
 
-        int count = oneScoreMap.getInteger("count");
-        //排名27%所占的人数
-        int rankCount = (int) Math.ceil(count * DEVIATION_RATE);
-        //题目总分
-        double score = fullScoreService.getFullScore(projectId, target);
+        //获取科目排名前27%的学生
+        List<String> topStudentIds = getTopOrButton(students, true);
+        System.out.println("top-->" + topStudentIds.toString());
+        //获取科目排名后27%的学生
+        List<String> buttomStudentIds = getTopOrButton(students, false);
+        System.out.println("buttom-->" + buttomStudentIds.toString());
 
-        //double score = getScore(oneScoreMap);
-        double subScore = getSubScoreByRate(oneScoreMap, rankCount);
-        double deviation = subScore / score;
+        double subScore = getSubScore(topStudentIds, buttomStudentIds, projectId, questId);
 
-        questDeviationCol.deleteMany(query);
-        UpdateResult result = questDeviationCol.updateMany(
+        double questFullScore = fullScoreService.getFullScore(projectId, target);
+
+        if (questFullScore == 0) {
+            LOG.warn("题目满分值为0，数据异常！: quest={}", questId);
+            return;
+        }
+
+        double deviation = questFullScore == 0 ? 0 : DoubleUtils.round(subScore / questFullScore, false);
+        System.out.println("区分度为:" + deviation );
+
+/*        UpdateResult result = questDeviationCol.updateMany(
                 new Document("project", projectId).
                         append("range", Mongo.range2Doc(range)).
                         append("quest", questId),
                 $set(doc("deviation", deviation))
         );
-        if(result.getMatchedCount() == 0){
+        if (result.getMatchedCount() == 0) {
             questDeviationCol.insertOne(
                     new Document("project", projectId)
                             .append("range", Mongo.range2Doc(range))
                             .append("quest", questId).append("deviation", deviation)
-                    .append("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+                            .append("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }*/
+
+    }
+
+    private List<String> getTopOrButton(List<Map<String, Object>> students, boolean isTop) {
+        //按得分从高到低排序
+        if (isTop) {
+            Collections.sort(students, (Map<String, Object> d1, Map<String, Object> d2) ->
+                    Double.valueOf(d2.get("totalScore").toString()).compareTo(Double.valueOf(d1.get("totalScore").toString()))
+            );
+        } else {
+            Collections.sort(students, (Map<String, Object> d1, Map<String, Object> d2) ->
+                    Double.valueOf(d1.get("totalScore").toString()).compareTo(Double.valueOf(d2.get("totalScore").toString()))
             );
         }
+        int deviationCount = (int) Math.ceil(students.size() * DEVIATION_RATE);
+        return students.subList(0, deviationCount).stream().map(student -> student.get("student").toString()).collect(Collectors.toList());
     }
 
-    private double getSubScoreByRate(Document oneScoreMap, int rankCount) {
-        List<Document> scoreMap = (List<Document>) oneScoreMap.get("scoreMap");
-        double top = average(scoreMap, rankCount, false);
-        double bottom = average(scoreMap, rankCount, true);
-        //return Math.abs(top - bottom);
-        return top - bottom;
+    private double getSubScore(List<String> topStudentIds, List<String> buttomStudentIds, String projectId, String questId) {
+        return getQuestAver(topStudentIds, projectId, questId) - getQuestAver(buttomStudentIds, projectId, questId);
     }
 
-    private double average(List<Document> scoreMap, int rankCount, boolean asc) {
-        int count = 0;
+    //计算题目平均得分
+    private double getQuestAver(List<String> studentIds, String projectId, String questId) {
+        MongoCollection<Document> scoreCol = scoreDatabase.getCollection("score");
         double sum = 0;
-        if (asc) {
-            //从低到高
-            Collections.sort(scoreMap, (Document d1, Document d2) -> d1.getDouble("score").compareTo(d2.getDouble("score")));
-            //LOG.debug("排名人数-->{}, 从低到高-->{}", rankCount, scoreMap.toString());
-        } else {
-            //从高到低
-            Collections.sort(scoreMap, (Document d1, Document d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
-            //LOG.debug("排名人数-->{}, 从高到低-->{}", rankCount, scoreMap.toString());
+        int count = studentIds.size();
+        for (String studentId : studentIds) {
+            Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
+            Document doc = scoreCol.find(query).first();
+            sum += doc.getDouble("score");
         }
-        for (Document d : scoreMap) {
-            count += d.getInteger("count");
-            sum += d.getDouble("score") * d.getInteger("count");
-            if (count >= rankCount) {
-                count = count - d.getInteger("count");
-                int offset = rankCount - count;
-                sum = sum - d.getDouble("score") * d.getInteger("count") + d.getDouble("score") * offset;
-                return rankCount == 0 ? 0d : sum / (double) rankCount;
-            }
-        }
-        return rankCount == 0 ? 0d : sum / (double) rankCount;
+        System.out.println("学生总分：" + sum + ", 学生人数：" + count + ", 平均得分：" + DoubleUtils.round(sum / count, false));
+        return count == 0 ? 0 : DoubleUtils.round(sum / count, false);
     }
+
 }

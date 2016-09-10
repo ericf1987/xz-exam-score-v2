@@ -68,6 +68,8 @@ public class SchoolPassCompareAnalysis implements Server {
 
         Map<String, Object> schoolPassRateMap = getSchoolPassRateMap(projectId, schoolId, subjectId, projectDocs);
         List<Map<String, Object>> classPassRateList = getClassPassRateList(projectId, schoolId, subjectId, projectDocs);
+        Collections.sort(classPassRateList, (Map<String, Object> m1, Map<String, Object> m2) -> m1.get("className").toString().compareTo(m2.get("className").toString()));
+
         return Result.success()
                 .set("school", schoolPassRateMap)
                 .set("classes", classPassRateList)
@@ -83,7 +85,7 @@ public class SchoolPassCompareAnalysis implements Server {
         //查询学校的考试记录
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
 
-        for(Document projectDoc : projectList){
+        for (Document projectDoc : projectList) {
             Map<String, Object> excellent = new HashMap<>();
             String startDate = projectDoc.getString("startDate") == null ? currentDate : projectDoc.getString("startDate");
             String projectName = projectDoc.getString("name");

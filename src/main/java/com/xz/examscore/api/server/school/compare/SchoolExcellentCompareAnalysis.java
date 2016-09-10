@@ -72,6 +72,8 @@ public class SchoolExcellentCompareAnalysis implements Server {
 
         Map<String, Object> schoolExcellentMap = getSchoolExcellentMap(projectId, schoolId, subjectId, projectDocs);
         List<Map<String, Object>> classExcellentList = getClassExcellentList(projectId, schoolId, subjectId, projectDocs);
+        Collections.sort(classExcellentList, (Map<String, Object> m1, Map<String, Object> m2) -> m1.get("className").toString().compareTo(m2.get("className").toString()));
+
         return Result.success()
                 .set("school", schoolExcellentMap)
                 .set("classes", classExcellentList)

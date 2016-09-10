@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class PointTaskTest extends XzExamScoreV2ApplicationTests{
 
-    public static final String PROJECT = "430100-a05db0d05ad14010a5c782cd31c0283f";
+    public static final String PROJECT = "433100-0372aa59ae4841618138c65e9ee18314";
 
     @Autowired
     StudentService studentService;
@@ -29,6 +29,6 @@ public class PointTaskTest extends XzExamScoreV2ApplicationTests{
     public void testRunTask() throws Exception {
         task.runTask(
                 new AggrTaskMessage(PROJECT, "1", Target.SUBJECT_LEVEL)
-                .setRange(Range.clazz("a1895cd9-d82c-4b12-a698-164fb5ceb1f3")));
+                .setRange(Range.student("76b39443-8792-407e-bb2c-24c3aaa3eca0")));
     }
 }
