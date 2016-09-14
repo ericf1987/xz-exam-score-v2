@@ -81,8 +81,8 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
         for(Map<String, Object> student : studentList){
             excelWriter.set(row, column.incrementAndGet(), student.get("examNo"));
             excelWriter.set(row, column.incrementAndGet(), student.get("schoolName"));
-            excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), student.get("className"));
+            excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), student.get("questScore"));
             excelWriter.set(row, column.incrementAndGet(), student.get("objectiveScore"));
             excelWriter.set(row, column.incrementAndGet(), student.get("subjectiveScore"));
