@@ -43,9 +43,6 @@ public class SchoolSubjectAnalysis implements Server {
     AverageService averageService;
 
     @Autowired
-    RangeService rangeService;
-
-    @Autowired
     SubjectService subjectService;
 
     @Autowired
