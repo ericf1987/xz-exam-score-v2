@@ -10,6 +10,7 @@ import com.xz.examscore.services.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -109,6 +110,9 @@ public class TotalBasicDataSheets extends SheetGenerator {
     }
 
     private List<Map<String, Object>> getSubjects(List<Map<String, Object>> studentBasicData) {
+        if(studentBasicData.isEmpty()){
+            return Collections.emptyList();
+        }
         Map<String, Object> one = studentBasicData.get(0);
         List<Map<String, Object>> subjects = (List<Map<String, Object>>) one.get("subjectAnalysis");
         return subjects;
