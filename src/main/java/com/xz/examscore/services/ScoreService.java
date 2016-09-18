@@ -261,7 +261,7 @@ public class ScoreService {
     }
 
     /**
-     * 累加总分（必须事先创建该条记录）
+     * 累加总分
      *
      * @param projectId 项目ID
      * @param range     范围

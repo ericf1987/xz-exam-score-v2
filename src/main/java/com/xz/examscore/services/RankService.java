@@ -92,6 +92,37 @@ public class RankService {
     }
 
     /**
+     * 查询排名位置的得分
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param rankIndex     分数
+     *
+     * @return 查询排名位置的得分
+     */
+    public double getRankScore(String projectId, Range range, Target target, int rankIndex){
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
+        Document id = Mongo.query(projectId, range, target);
+        Document doc = collection.find(id).first();
+        if(null != doc && !doc.isEmpty()){
+            List<Document> scoreMap = (List<Document>)doc.get("scoreMap");
+            Collections.sort(scoreMap, (Map<String, Object> m1, Map<String, Object> m2) -> {
+                Double s1 = (Double)m1.get("score");
+                Double s2 = (Double)m2.get("score");
+                return s2.compareTo(s1);
+            });
+            int rankCount = 0;
+            for(Document one : scoreMap){
+                rankCount += one.getInteger("count");
+                if(rankCount >= rankIndex){
+                    return one.getDouble("score");
+                }
+            }
+        }
+        return 0d;
+    }
+
+    /**
      * 删除指定项目的排名统计结果（为了重新统计排名）
      *
      * @param projectId 项目ID

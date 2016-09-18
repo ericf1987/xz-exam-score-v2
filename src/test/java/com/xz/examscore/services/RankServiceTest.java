@@ -60,4 +60,14 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
         int rank = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), studentId);
         System.out.println("学生总人数-->" + count + "排名-->" + rank);
     }
+
+    @Test
+    public void testRankScore() throws Exception {
+        String projectId = "430600-95e565c247574dd3b935ae9912c8eca5";
+        String classId = "649e603f-1e27-43bb-89ca-5970efb76710";
+        String schoolId = "d1bf6d54-1e2e-40b3-b3df-fda8069e4389";
+        String subjectId = "001";
+        double score = rankService.getRankScore(projectId, Range.clazz(classId), Target.subject(subjectId), 10);
+        System.out.println(score);
+    }
 }

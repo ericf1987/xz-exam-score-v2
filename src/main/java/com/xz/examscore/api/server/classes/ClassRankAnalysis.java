@@ -144,6 +144,11 @@ public class ClassRankAnalysis implements Server {
         int rankSchoolIndex = rankService.getRank(projectId, Range.school(schoolId), target, score);
         rankMaps.put("rankSchoolIndex", rankSchoolIndex);
 
+        // 学校同名次得分率
+        double scoreInSchool = rankService.getRankScore(projectId, Range.school(schoolId), target, rankClassIndex);
+        rankMaps.put("rankInSchoolScore", scoreInSchool);
+        rankMaps.put("rankInSchoolRate", DoubleUtils.round(fullScore == 0 ? 0 : scoreInSchool / fullScore, true));
+
         // 班级平均分/得分率
         double classAvg = averageService.getAverage(projectId, Range.clazz(classId), target);
         rankMaps.put("classAvg", DoubleUtils.round(classAvg));
