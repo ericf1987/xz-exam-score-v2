@@ -4,6 +4,7 @@ import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.TargetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     @Autowired
     TargetService targetService;
 
+    @Autowired
+    ScoreService scoreService;
+
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
@@ -30,6 +34,10 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
 
         int counter = 0;
             for (Target target : targets) {
+                if(target.getName().equals(Target.QUEST)){
+                    //在统计target为quest的时候，需要将total_score表中target为quest的记录清理一次
+                    scoreService.clearTotalScore(projectId, target);
+                }
                 dispatchTask(createTask(projectId, aggregationId).setTarget(target));
                 counter++;
                 if (counter % 1000 == 0) {

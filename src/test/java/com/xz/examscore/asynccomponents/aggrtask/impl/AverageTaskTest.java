@@ -38,10 +38,10 @@ public class AverageTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testCalculateAverage() throws Exception {
-        String project = "430200-b73f03af1d74484f84f1aa93f583caaa";
-        Document range = new Document("name", "class").append("id", "0c738247-b62c-4c90-9016-1cc1163fd0b1");
-        Document target = new Document("name", "point").append("id", "1005983");
-        double average = averageTask.calculateAverage(project, range, target, 2718d, new Document());
+        String project = "430600-7d752ed75272481ebe035b896874194e";
+        Document range = new Document("name", "class").append("id", "4fbe3a69-bd50-488f-a4f6-a4c2d98f932e");
+        Document target = new Document("name", "subject").append("id", "003");
+        double average = averageTask.calculateAverage(project, range, target, 3461.5d, new Document());
         System.out.println(average);
     }
 

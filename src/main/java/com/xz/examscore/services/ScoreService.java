@@ -288,4 +288,10 @@ public class ScoreService {
             return "total_score";
         }
     }
+
+    public void clearTotalScore(String projectId, Target target){
+        String collectionName = getTotalScoreCollection(projectId, target);
+        Document query = doc("project", projectId).append("target", target2Doc(target));
+        scoreDatabase.getCollection(collectionName).deleteMany(query);
+    }
 }
