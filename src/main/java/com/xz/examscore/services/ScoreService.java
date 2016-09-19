@@ -174,6 +174,18 @@ public class ScoreService {
         });
     }
 
+    public Document getScoreDoc(String projectId, String studentId, String questId, boolean isObjective){
+        String cacheKey = "quest_score:" + projectId + ":" + studentId + ":" + questId + ":" + isObjective;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId)
+                    .append("student", studentId)
+                    .append("quest", questId)
+                    .append("isObjective", isObjective);
+            return collection.find(query).first();
+        });
+    }
+
     private double getTotalScore(String projectId, Range range, Target target) {
         String collectionName = getTotalScoreCollection(projectId, target);
         return getTotalScore(collectionName, projectId, range, target);

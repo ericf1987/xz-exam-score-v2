@@ -147,6 +147,8 @@ public class ScannerDBService {
             double score = Double.parseDouble(subjectiveItem.get("score").toString());
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
             Boolean missing = subjectiveItem.getBoolean("missing");
+            //主观题学生作答的切图所在的URL
+            Map<String, Object> url = (Map<String, Object>)subjectiveItem.get("url");
 
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
@@ -160,6 +162,7 @@ public class ScannerDBService {
                     .append("area", student.getString("area"))
                     .append("city", student.getString("city"))
                     .append("province", student.getString("province"))
+                    .append("url", url)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
             if(null != missing && missing){
                 scoreDoc.append("missing", true);
