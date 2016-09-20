@@ -62,6 +62,7 @@ public class ProjectConfigService {
      * 更新报表配置中的等第配置
      */
     public void updateRankLevelConfig(ProjectConfig projectConfig) {
+        fixProjectConfig(projectConfig);
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectConfig.getProjectId()), $set(
                 doc("combineCategorySubjects", projectConfig.isCombineCategorySubjects())

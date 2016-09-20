@@ -3,6 +3,7 @@ package javalang;
 import com.hyd.simplecache.utils.MD5;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,15 @@ public class TestLamdar {
     class Person {
         private String name;
         private int num;
+        private int age;
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
 
         public String getName() {
             return name;
@@ -46,9 +56,24 @@ public class TestLamdar {
         public Person() {
         }
 
-        public Person(String name, int num) {
+        public Person(String name, int num, int age) {
             this.name = name;
             this.num = num;
+            this.age = age;
+        }
+
+        public void isMature(Person person, Predicate<Person> p){
+            if(p.test(person)){
+                System.out.println(person.getName() + "is Mature at the age of" + person.getAge());
+            }else{
+                System.out.println(person.getName() + "is not Mature at the age of" + person.getAge());
+            }
+        }
+
+        public void isMultiple(Person person, Predicate<Person> p){
+            if(p.test(person)){
+                System.out.println(person.getName() + "is Multiple");
+            }
         }
     }
 
@@ -58,10 +83,13 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-/*        String md5 = MD5.digest(UUID.randomUUID().toString());
-        System.out.println(md5);*/
-        double a = Math.ceil(13.75d);
-        System.out.println(a);
+        Predicate<Person> p1 = p -> p.getAge() >= 16;
+        Predicate<Person> p2 = p -> p.getName().length() > 2;
+        TestLamdar t = new TestLamdar();
+        Person person1 = t.new Person("冯也", 1, 28);
+        Person person2 = t.new Person("冯也111", 2, 10);
+        person1.isMature(person1, p1);
+        person1.isMature(person2, p1);
     }
 
     public void test2() {

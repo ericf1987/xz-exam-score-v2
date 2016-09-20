@@ -5,6 +5,7 @@ package com.xz.examscore.api.server.classes;
  */
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.QuestNoComparator;
 import com.xz.examscore.api.Param;
@@ -13,16 +14,16 @@ import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
-import com.xz.examscore.services.ClassService;
-import com.xz.examscore.services.QuestService;
-import com.xz.examscore.services.ScoreService;
-import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.*;
 import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import static com.xz.examscore.api.server.classes.ClassPointAnalysis.initSubject;
 
 /**
  * 学校成绩-主观题分析
@@ -32,7 +33,8 @@ import java.util.*;
 @Function(description = "班级成绩-主观题分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
-        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true)
+        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true),
+        @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
 public class ClassSubjectiveAnalysis implements Server {
@@ -48,6 +50,9 @@ public class ClassSubjectiveAnalysis implements Server {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    SubjectService subjectService;
+
     public static final Comparator<Document> QUEST_NO_COMPARATOR = new QuestNoComparator();
 
     @Override
@@ -55,6 +60,12 @@ public class ClassSubjectiveAnalysis implements Server {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String classId = param.getString("classId");
+        String[] authSubjectIds = param.getStringValues("authSubjectIds");
+
+        // 初始化科目id
+        if (StringUtil.isBlank(subjectId)) {
+            subjectId = initSubject(projectId, authSubjectIds, subjectService);
+        }
 
         List<Document> questDocs = questService.getQuests(projectId, subjectId, false);
         Collections.sort(questDocs, QUEST_NO_COMPARATOR);

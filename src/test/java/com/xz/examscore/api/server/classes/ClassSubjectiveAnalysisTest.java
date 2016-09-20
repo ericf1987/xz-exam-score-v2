@@ -24,4 +24,9 @@ public class ClassSubjectiveAnalysisTest extends XzExamScoreV2ApplicationTests {
         Result result = classSubjectiveAnalysis.execute(param);
         System.out.println(result.getData());
     }
+
+    @Test
+    public void testExecute1() throws Exception {
+
+    }
 }
