@@ -99,9 +99,8 @@ public class QuestDeviationTask extends AggrTask {
         }
 
         double deviation = questFullScore == 0 ? 0 : DoubleUtils.round(subScore / questFullScore, false);
-        System.out.println("区分度为:" + deviation );
 
-/*        UpdateResult result = questDeviationCol.updateMany(
+        UpdateResult result = questDeviationCol.updateMany(
                 new Document("project", projectId).
                         append("range", Mongo.range2Doc(range)).
                         append("quest", questId),
@@ -114,7 +113,7 @@ public class QuestDeviationTask extends AggrTask {
                             .append("quest", questId).append("deviation", deviation)
                             .append("deviation", deviation).append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
-        }*/
+        }
 
     }
 
