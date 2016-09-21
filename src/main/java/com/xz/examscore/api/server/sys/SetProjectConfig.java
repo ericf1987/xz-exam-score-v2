@@ -11,6 +11,7 @@ import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.services.ProjectConfigService;
+import com.xz.examscore.util.DoubleUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,10 @@ import java.util.Map;
 public class SetProjectConfig implements Server {
 
     public static final String[] SCORE_LEVEL_PARAM = new String[]{
+            "Excellent", "Good", "Pass", "Fail"
+    };
+
+    public static final String[] SCORE_LEVEL_PARAM_CMS = new String[]{
             "excellent", "good", "pass", "fail"
     };
 
@@ -54,7 +59,6 @@ public class SetProjectConfig implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        System.out.println(param.toString());
         ProjectConfig projectConfig = convert2Obj(param);
         String projectConfigJson = convert2JSON(param);
         Param _param = new Param().setParameter("projectId", projectId)
@@ -73,22 +77,38 @@ public class SetProjectConfig implements Server {
     }
 
     //将参数转化为json
-    private String convert2JSON(Param param) {
+    public String convert2JSON(Param param) {
         JSONObject jo = new JSONObject();
-        jo.put("scoreLevels", toScoreLevelsMap(param.getStringValues("scoreLevels")));
-        jo.put("highScoreRatio", param.getDouble("highScoreRatio"));
-        jo.put("topStudentRatio", param.getDouble("topStudentRatio"));
+        jo.put("scoreLevels", toCMSScoreLevelsMap(param.getStringValues("scoreLevels")));
+        jo.put("highScoreRatio", param.getDouble("highScoreRatio").toString());
+        jo.put("topStudentRatio", param.getDouble("topStudentRatio").toString());
         JSONObject rankLevel = new JSONObject();
-        rankLevel.put("standard", toRankLevelsMap(param.getStringValues("rankLevel")));
+        rankLevel.put("standard", toCMSRankLevelsMap(param.getStringValues("rankLevel")));
         rankLevel.put("displayOptions", Arrays.asList(param.getStringValues("displayOptions")));
         jo.put("rankLevel", rankLevel);
         return jo.toString();
     }
 
+    public Map<String, String> toCMSRankLevelsMap(String[] rankLevels) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < RANK_LEVEL_PARAM.length; i++) {
+            map.put(RANK_LEVEL_PARAM[i], rankLevels[i]);
+        }
+        return map;
+    }
+
+    public Map<String, String> toCMSScoreLevelsMap(String[] scoreLevels) {
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < SCORE_LEVEL_PARAM_CMS.length; i++) {
+            map.put(SCORE_LEVEL_PARAM_CMS[i], scoreLevels[i]);
+        }
+        return map;
+    }
+
     public Map<String, Double> toRankLevelsMap(String[] rankLevels) {
         Map<String, Double> map = new HashMap<>();
         for (int i = 0; i < RANK_LEVEL_PARAM.length; i++) {
-            map.put(RANK_LEVEL_PARAM[i], Double.parseDouble(rankLevels[i]));
+            map.put(RANK_LEVEL_PARAM[i], DoubleUtils.round(Double.parseDouble(rankLevels[i]) / 100));
         }
         return map;
     }
@@ -96,7 +116,6 @@ public class SetProjectConfig implements Server {
     public Map<String, Double> toScoreLevelsMap(String[] scoreLevels) {
         Map<String, Double> map = new HashMap<>();
         for (int i = 0; i < SCORE_LEVEL_PARAM.length; i++) {
-            System.out.println(scoreLevels[i]);
             map.put(SCORE_LEVEL_PARAM[i], Double.parseDouble(scoreLevels[i]));
         }
         return map;
