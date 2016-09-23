@@ -141,13 +141,13 @@ public class ClassRankAnalysis implements Server {
         rankMaps.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
 
         // 学生在班级排名
-        rankMaps.put("rankClassIndex", rankClassIndex);
+        rankMaps.put("rankClassIndex", rankService.getRank(projectId, Range.clazz(classId), target, score));
 
         // 学生在学校排名
         int rankSchoolIndex = rankService.getRank(projectId, Range.school(schoolId), target, score);
         rankMaps.put("rankSchoolIndex", rankSchoolIndex);
 
-        // 用学生在班级的全科排名作为参数，查询在学校范围内该排名的全科和单科分数
+        // 用学生在班级的全科排名作为参数，查询在学校范围内该排名的分数和得分率
         double scoreInSchool = rankService.getRankScore(projectId, Range.school(schoolId), target, rankClassIndex);
         rankMaps.put("rankInSchoolScore", scoreInSchool);
         rankMaps.put("rankInSchoolRate", DoubleUtils.round(fullScore == 0 ? 0 : scoreInSchool / fullScore, true));
