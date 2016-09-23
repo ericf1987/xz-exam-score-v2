@@ -70,9 +70,9 @@ public class ClassRankAnalysis implements Server {
         for (Document student : studentList) {
             Map<String, Object> map = new HashMap<>();
 
-            //先取出该同学的全科班级排名
+            //先取出该同学的全科学校排名
             double score = scoreService.getScore(projectId, Range.student(student.getString("student")), Target.project(projectId));
-            int rankClassIndex = rankService.getRank(projectId, Range.clazz(classId), Target.project(projectId), score);
+            int rankSchoolIndex = rankService.getRank(projectId, Range.school(classId), Target.project(projectId), score);
 
             String studentId = student.getString("student");
             String studentName = student.getString("name");
@@ -83,12 +83,12 @@ public class ClassRankAnalysis implements Server {
 
             // 项目排行分析
             Map<String, Object> projectRankMap = getRankAnalysisMap(
-                    projectId, Target.project(projectId), schoolId, classId, studentId, rankClassIndex);
+                    projectId, Target.project(projectId), schoolId, classId, studentId, rankSchoolIndex);
             map.put("projectRankStat", projectRankMap);
 
             // 科目排行分析
             List<Map<String, Object>> subjectRankList = getSubjectRankList(
-                    projectId, schoolId, classId, studentId, authSubjectIds, rankClassIndex);
+                    projectId, schoolId, classId, studentId, authSubjectIds, rankSchoolIndex);
             map.put("subjectRankStat", subjectRankList);
 
             rankstats.add(map);
@@ -107,7 +107,7 @@ public class ClassRankAnalysis implements Server {
     }
 
     private List<Map<String, Object>> getSubjectRankList(
-            String projectId, String schoolId, String classId, String studentId, String[] authSubjectIds, int rankClassIndex) {
+            String projectId, String schoolId, String classId, String studentId, String[] authSubjectIds, int rankSchoolIndex) {
         List<Map<String, Object>> subjectRankList = new ArrayList<>();
 
         // 复制查询结果，以免发生 ConcurrentModificationException 异常
@@ -116,7 +116,7 @@ public class ClassRankAnalysis implements Server {
 
         for (String subjectId : subjects) {
             Map<String, Object> rankAnalysisMap = getRankAnalysisMap(
-                    projectId, Target.subject(subjectId), schoolId, classId, studentId, rankClassIndex);
+                    projectId, Target.subject(subjectId), schoolId, classId, studentId, rankSchoolIndex);
             rankAnalysisMap.put("subjectId", subjectId);
             rankAnalysisMap.put("subjectName", SubjectService.getSubjectName(subjectId));
             subjectRankList.add(rankAnalysisMap);
@@ -127,7 +127,7 @@ public class ClassRankAnalysis implements Server {
 
     // 获取排行分析
     private Map<String, Object> getRankAnalysisMap(
-            String projectId, Target target, String schoolId, String classId, String studentId, int rankClassIndex) {
+            String projectId, Target target, String schoolId, String classId, String studentId, int rankSchoolIndex) {
         Map<String, Object> rankMaps = new HashMap<>();
 
         double fullScore = fullScoreService.getFullScore(projectId, target);
@@ -141,14 +141,14 @@ public class ClassRankAnalysis implements Server {
         rankMaps.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
 
         // 学生在班级排名
-        rankMaps.put("rankClassIndex", rankService.getRank(projectId, Range.clazz(classId), target, score));
+        int rankClassIndex = rankService.getRank(projectId, Range.clazz(classId), target, score);
+        rankMaps.put("rankClassIndex", rankClassIndex);
 
         // 学生在学校排名
-        int rankSchoolIndex = rankService.getRank(projectId, Range.school(schoolId), target, score);
         rankMaps.put("rankSchoolIndex", rankSchoolIndex);
 
-        // 用学生在班级的全科排名作为参数，查询在学校范围内该排名的分数和得分率
-        double scoreInSchool = rankService.getRankScore(projectId, Range.school(schoolId), target, rankClassIndex);
+        // 用学生在全校的全科排名作为参数，查询在学校范围内该排名的分数和得分率
+        double scoreInSchool = rankService.getRankScore(projectId, Range.school(schoolId), target, rankSchoolIndex);
         rankMaps.put("rankInSchoolScore", scoreInSchool);
         rankMaps.put("rankInSchoolRate", DoubleUtils.round(fullScore == 0 ? 0 : scoreInSchool / fullScore, true));
 
