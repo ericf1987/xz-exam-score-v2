@@ -75,7 +75,6 @@ public class QuestDeviationTask extends AggrTask {
             studentMap.put("totalScore", totalScore);
             students.add(studentMap);
         });
-        System.out.println("总人数为：" + students.size() + "，列表：" + students.toString());
 
         if (students.isEmpty()) {
             LOG.warn("找不到学生总得分!: project={}, range={}, target={}", projectId, range.getId(), target.getId().toString());
@@ -84,10 +83,8 @@ public class QuestDeviationTask extends AggrTask {
 
         //获取科目排名前27%的学生
         List<String> topStudentIds = getTopOrButton(students, true);
-        System.out.println("top-->" + topStudentIds.toString());
         //获取科目排名后27%的学生
         List<String> buttomStudentIds = getTopOrButton(students, false);
-        System.out.println("buttom-->" + buttomStudentIds.toString());
 
         double subScore = getSubScore(topStudentIds, buttomStudentIds, projectId, questId);
 
@@ -98,7 +95,7 @@ public class QuestDeviationTask extends AggrTask {
             return;
         }
 
-        double deviation = questFullScore == 0 ? 0 : DoubleUtils.round(subScore / questFullScore, false);
+        double deviation = DoubleUtils.round(subScore / questFullScore, false);
 
         UpdateResult result = questDeviationCol.updateMany(
                 new Document("project", projectId).

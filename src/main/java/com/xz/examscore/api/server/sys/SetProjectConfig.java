@@ -59,21 +59,34 @@ public class SetProjectConfig implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        ProjectConfig projectConfig = convert2Obj(param);
-        String projectConfigJson = convert2JSON(param);
-        Param _param = new Param().setParameter("projectId", projectId)
-                .setParameter("settings", projectConfigJson);
-        ApiResponse apiResponse = interfaceClient.setProjectConfig(_param);
-        if (apiResponse.isSuccess()) {
-            try {
+        if(!checkParam(param)){
+            return Result.fail("配置参数不合法，请重新核对！");
+        }
+        try {
+            ProjectConfig projectConfig = convert2Obj(param);
+            String projectConfigJson = convert2JSON(param);
+            Param _param = new Param().setParameter("projectId", projectId)
+                    .setParameter("settings", projectConfigJson);
+            ApiResponse apiResponse = interfaceClient.setProjectConfig(_param);
+            if(apiResponse.isSuccess()){
                 projectConfigService.updateRankLevelConfig(projectConfig);
                 return Result.success("配置保存成功!");
-            } catch (Exception e) {
-                return Result.fail("配置保存失败!");
+            }else{
+                return Result.fail("配置保存失败，网络连接异常");
             }
-        } else {
-            return Result.fail("配置保存失败，网络连接异常!");
+        } catch (Exception e) {
+            return Result.fail("配置保存失败!");
         }
+    }
+
+    private boolean checkParam(Param param) {
+        boolean flag = true;
+        if(param.getStringValues("rankLevel").length != RANK_LEVEL_PARAM.length){
+            flag = false;
+        }else if(param.getStringValues("scoreLevels").length != SCORE_LEVEL_PARAM_CMS.length){
+            flag = false;
+        }
+        return flag;
     }
 
     //将参数转化为json
@@ -83,6 +96,7 @@ public class SetProjectConfig implements Server {
         jo.put("highScoreRatio", param.getDouble("highScoreRatio").toString());
         jo.put("topStudentRatio", param.getDouble("topStudentRatio").toString());
         JSONObject rankLevel = new JSONObject();
+        rankLevel.put("model", param.getString("model"));
         rankLevel.put("standard", toCMSRankLevelsMap(param.getStringValues("rankLevel")));
         rankLevel.put("displayOptions", Arrays.asList(param.getStringValues("displayOptions")));
         jo.put("rankLevel", rankLevel);

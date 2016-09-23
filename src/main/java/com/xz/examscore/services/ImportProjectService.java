@@ -457,7 +457,6 @@ public class ImportProjectService {
             schoolDoc.put("area", schoolObj.getString("area"));
             schoolDoc.put("city", schoolObj.getString("city"));
             schoolDoc.put("province", schoolObj.getString("province"));
-            schoolDoc.put("province", schoolObj.getString("province"));
             schoolDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
 
 

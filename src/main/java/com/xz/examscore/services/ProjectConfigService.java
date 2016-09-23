@@ -30,7 +30,7 @@ public class ProjectConfigService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    SimpleCache instantCache;
 
     /**
      * 从缺省的配置模板产生一个新的项目配置
@@ -148,7 +148,7 @@ public class ProjectConfigService {
     public ProjectConfig getProjectConfig(String projectId) {
         String cacheKey = "project_config:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        return instantCache.get(cacheKey, () -> {
             Document document = scoreDatabase.getCollection("project_config")
                     .find(doc("projectId", projectId)).first();
 
