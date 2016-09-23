@@ -72,7 +72,7 @@ public class ClassRankAnalysis implements Server {
 
             //先取出该同学的全科学校排名
             double score = scoreService.getScore(projectId, Range.student(student.getString("student")), Target.project(projectId));
-            int rankSchoolIndex = rankService.getRank(projectId, Range.school(classId), Target.project(projectId), score);
+            int rankSchoolIndex = rankService.getRank(projectId, Range.school(schoolId), Target.project(projectId), score);
 
             String studentId = student.getString("student");
             String studentName = student.getString("name");
@@ -145,7 +145,7 @@ public class ClassRankAnalysis implements Server {
         rankMaps.put("rankClassIndex", rankClassIndex);
 
         // 学生在学校排名
-        rankMaps.put("rankSchoolIndex", rankSchoolIndex);
+        rankMaps.put("rankSchoolIndex", rankService.getRank(projectId, Range.school(schoolId), target, score));
 
         // 用学生在全校的全科排名作为参数，查询在学校范围内该排名的分数和得分率
         double scoreInSchool = rankService.getRankScore(projectId, Range.school(schoolId), target, rankSchoolIndex);
