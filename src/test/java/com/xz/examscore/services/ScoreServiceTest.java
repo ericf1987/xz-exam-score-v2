@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.junit.Test;
@@ -44,5 +45,15 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         Range range = Range.clazz("a1895cd9-d82c-4b12-a698-164fb5ceb1f3");
         double totalScore = scoreService.getScore(PROJECT, range, Target.subjectLevel("003", "B"));
         System.out.println(totalScore);
+    }
+
+    @Test
+    public void testAddTotalScore() throws Exception {
+        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        Range range = Range.clazz("747f3d0f-e108-4cc8-95ea-f0293b7cfc41");
+        PointLevel pointLevel = new PointLevel("1019056", "A");
+        Target target = Target.pointLevel(pointLevel);
+        int modifiedCount = scoreService.addTotalScore(projectId, range, target, 1.1);
+        System.out.println(modifiedCount);
     }
 }
