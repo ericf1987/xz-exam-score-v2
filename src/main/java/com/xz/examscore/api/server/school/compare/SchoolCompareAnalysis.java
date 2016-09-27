@@ -49,6 +49,12 @@ public class SchoolCompareAnalysis implements Server{
     @Autowired
     AverageService averageService;
 
+    @Autowired
+    ScoreService scoreService;
+
+    @Autowired
+    FullScoreService fullScoreService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -99,11 +105,13 @@ public class SchoolCompareAnalysis implements Server{
                 double pass = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
                 double excellent = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
                 double average = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), target);
+                double fullScore = fullScoreService.getFullScore(projectDoc.getString("project"), target);
                 oneRate.put("projectName", projectDoc.getString("name"));
                 oneRate.put("startDate", startDate);
                 oneRate.put("pass", DoubleUtils.round(pass, true));
                 oneRate.put("excellent", DoubleUtils.round(excellent, true));
                 oneRate.put("average", DoubleUtils.round(average, true));
+                oneRate.put("scoreRate", DoubleUtils.round(average/fullScore, true));
                 rates.add(oneRate);
             });
             map.put("projects", rates);
@@ -131,11 +139,13 @@ public class SchoolCompareAnalysis implements Server{
             double pass = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
             double excellent = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
             double average = averageService.getAverage(projectDoc.getString("project"), Range.school(schoolId), target);
+            double fullScore = fullScoreService.getFullScore(projectDoc.getString("project"), target);
             oneRate.put("projectName", projectName);
             oneRate.put("startDate", startDate);
             oneRate.put("pass", DoubleUtils.round(pass, true));
             oneRate.put("excellent", DoubleUtils.round(excellent, true));
             oneRate.put("average", DoubleUtils.round(average, true));
+            oneRate.put("scoreRate", DoubleUtils.round(average/fullScore, true));
             rates.add(oneRate);
         }
 
