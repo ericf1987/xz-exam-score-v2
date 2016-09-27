@@ -198,7 +198,7 @@ public class ReportItemService {
             return 0;
         }
 
-        return document.getInteger("position");
+        return DocumentUtils.getInt(document, "position", 0);
     }
 
     /**
