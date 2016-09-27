@@ -79,7 +79,6 @@ public class SchoolCompareAnalysis implements Server{
         return Result.success()
                 .set("school", schoolMap)
                 .set("classes", classList)
-                .set("projectList", projectDocs)
                 .set("hasHeader", !schoolMap.isEmpty());
     }
 
@@ -103,13 +102,17 @@ public class SchoolCompareAnalysis implements Server{
                 Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
                 List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.clazz(classId), target);
                 double pass = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
+                int passCount = getScoreLevelCount(scoreLevels, Keys.ScoreLevel.Pass);
                 double excellent = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
+                int excellentCount = getScoreLevelCount(scoreLevels, Keys.ScoreLevel.Excellent);
                 double average = averageService.getAverage(projectDoc.getString("project"), Range.clazz(classId), target);
                 double fullScore = fullScoreService.getFullScore(projectDoc.getString("project"), target);
                 oneRate.put("projectName", projectDoc.getString("name"));
                 oneRate.put("startDate", startDate);
-                oneRate.put("pass", DoubleUtils.round(pass, true));
-                oneRate.put("excellent", DoubleUtils.round(excellent, true));
+                oneRate.put("passRate", DoubleUtils.round(pass, true));
+                oneRate.put("passCount", passCount);
+                oneRate.put("excellentRate", DoubleUtils.round(excellent, true));
+                oneRate.put("excellentCount", excellentCount);
                 oneRate.put("average", DoubleUtils.round(average, true));
                 oneRate.put("scoreRate", DoubleUtils.round(average/fullScore, true));
                 rates.add(oneRate);
@@ -137,13 +140,18 @@ public class SchoolCompareAnalysis implements Server{
             Target target = targetService.getTarget(projectDoc.getString("project"), subjectId);
             List<Document> scoreLevels = scoreLevelService.getScoreLevelRate(projectDoc.getString("project"), Range.school(schoolId), target);
             double pass = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Pass);
+            int passCount = getScoreLevelCount(scoreLevels, Keys.ScoreLevel.Pass);
             double excellent = getScoreLevelRate(scoreLevels, Keys.ScoreLevel.Excellent);
+            int excellentCount = getScoreLevelCount(scoreLevels, Keys.ScoreLevel.Excellent);
             double average = averageService.getAverage(projectDoc.getString("project"), Range.school(schoolId), target);
             double fullScore = fullScoreService.getFullScore(projectDoc.getString("project"), target);
+
             oneRate.put("projectName", projectName);
             oneRate.put("startDate", startDate);
-            oneRate.put("pass", DoubleUtils.round(pass, true));
-            oneRate.put("excellent", DoubleUtils.round(excellent, true));
+            oneRate.put("passRate", DoubleUtils.round(pass, true));
+            oneRate.put("passCount", passCount);
+            oneRate.put("excellentRate", DoubleUtils.round(excellent, true));
+            oneRate.put("excellentCount", excellentCount);
             oneRate.put("average", DoubleUtils.round(average, true));
             oneRate.put("scoreRate", DoubleUtils.round(average/fullScore, true));
             rates.add(oneRate);
@@ -160,5 +168,14 @@ public class SchoolCompareAnalysis implements Server{
             }
         }
         return 0d;
+    }
+
+    private int getScoreLevelCount(List<Document> scoreLevels, Keys.ScoreLevel excellent) {
+        for (Document doc : scoreLevels) {
+            if (doc.getString("scoreLevel").equals(excellent.name())) {
+                return doc.getInteger("count");
+            }
+        }
+        return 0;
     }
 }
