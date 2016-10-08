@@ -33,6 +33,9 @@ public class PointService {
     @Autowired
     SimpleCache cache;
 
+    @Autowired
+    SubjectService subjectService;
+
     /**
      * 查询指定项目的所有知识点
      *

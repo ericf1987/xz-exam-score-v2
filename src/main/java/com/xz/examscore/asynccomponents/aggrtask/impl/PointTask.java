@@ -98,11 +98,12 @@ public class PointTask extends AggrTask {
 
     private void addTotalScore(String projectId, Range range, Target target, double score) {
         int modifiedCount = scoreService.addTotalScore(projectId, range, target, score);
-        if (modifiedCount == 0 && score != 0) {
+        LOG.debug("修改成功的记录条数为：{}，参数 project={}, range={}, target={}, score={}", modifiedCount, projectId, range, target, score);
+/*        if (modifiedCount == 0 && score != 0) {
             throw new IllegalStateException(
                     String.format("分数累加失败: project=%s, range=%s, target=%s, score=%s",
                             projectId, range, target, score));
-        }
+        }*/
     }
 
     @SuppressWarnings("unchecked")

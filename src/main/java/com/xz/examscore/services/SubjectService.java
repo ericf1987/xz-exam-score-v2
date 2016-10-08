@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
@@ -97,5 +98,16 @@ public class SubjectService {
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
+    }
+
+    /**
+     * 获取综合科目ID
+     * @param projectId 项目ID
+     */
+    public List<String> getCombineSubjects(String projectId){
+        MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
+        Document doc = c.find(doc("project", projectId)).first();
+        List<String> subjects = (List<String>)doc.get("subjects");
+        return subjects.stream().filter(subject -> subject.length() != ImportProjectService.SUBJECT_LENGTH).collect(Collectors.toList());
     }
 }

@@ -1,10 +1,16 @@
 package javalang;
 
-import com.hyd.simplecache.utils.MD5;
+import com.xz.ajiaedu.common.ajia.Param;
+import com.xz.ajiaedu.common.config.FileConfiguration;
+import com.xz.ajiaedu.common.cryption.HexStringConverter;
+import com.xz.ajiaedu.common.io.FileUtils;
+import com.xz.examscore.util.DoubleUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -12,103 +18,75 @@ import java.util.stream.Collectors;
  */
 public class TestLamdar {
     public void test1() {
-        List<String> strList = Arrays.asList("123", "456", "abc", null);
-        String csv = strList.stream().
-                filter(Objects::nonNull).
-                collect(Collectors.joining(","));
-        System.out.println(csv);
+        Param param = new Param().setParameter("date", new Date())
+                .setParameter("name", "fengye").setParameter("age", 20)
+                .setParameter("hobbies", new String[]{"basket", "music", "programming"});
+        System.out.println(param.getParameters().toString());
+        Arrays.asList(param.getStringValues("hobbies")).forEach(p ->
+                System.out.println(p.toString())
+        );
     }
 
-
-    interface Converter<F, T> {
-        T convert(F from);
+    public void testFileConfig() {
+        try {
+            FileConfiguration fc = new FileConfiguration("F://1.json");
+            System.out.println(fc.getString("project"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    class Person {
-        private String name;
-        private int num;
-        private int age;
-
-        public int getAge() {
-            return age;
+    public void testHexToString() {
+        try {
+            String hex = HexStringConverter.stringToHex("123");
+            System.out.println("123--" + "stringToHex-->" + hex);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
+    }
 
-        public void setAge(int age) {
-            this.age = age;
+    public void testFileUtils() {
+        String path = "F:\\mongoData\\db\\dbConf\\mongodb.log.2016-05-19T16-06-56";
+        System.out.println(new File(path).getAbsolutePath());
+        System.out.println(new File(path).getParent());
+        System.out.println(FileUtils.getFileName(path));
+        File file = new File("F://abc//content.txt");
+        try {
+            FileUtils.writeFile("狼王加内特退役", file, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getNum() {
-            return num;
-        }
-
-        public void setNum(int num) {
-            this.num = num;
-        }
-
-        public Person() {
-        }
-
-        public Person(String name, int num, int age) {
-            this.name = name;
-            this.num = num;
-            this.age = age;
-        }
-
-        public void isMature(Person person, Predicate<Person> p){
-            if(p.test(person)){
-                System.out.println(person.getName() + "is Mature at the age of" + person.getAge());
-            }else{
-                System.out.println(person.getName() + "is not Mature at the age of" + person.getAge());
+    public void test() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String[] subjects = new String[]{"001", "002", "003"};
+        for (String subject : subjects) {
+            for (int i = 1; i < 4; i++) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("subjectId", subject);
+                map.put("score", 100 * i);
+                list.add(map);
             }
         }
-
-        public void isMultiple(Person person, Predicate<Person> p){
-            if(p.test(person)){
-                System.out.println(person.getName() + "is Multiple");
-            }
-        }
+        System.out.println(list.toString());
+        Map mm = list.stream()
+                .collect(Collectors.groupingBy(foo -> foo.get("subjectId"), Collectors.summingDouble(f -> Double.parseDouble(f.get("score").toString()))));
+        System.out.println(mm.toString());
     }
-
-    interface PersonFactory<P extends Person> {
-        P createPerson(String name, int num);
-    }
-
 
     public static void main(String[] args) {
-        Predicate<Person> p1 = p -> p.getAge() >= 16;
-        Predicate<Person> p2 = p -> p.getName().length() > 2;
-        TestLamdar t = new TestLamdar();
-        Person person1 = t.new Person("冯也", 1, 28);
-        Person person2 = t.new Person("冯也111", 2, 10);
-        person1.isMature(person1, p1);
-        person1.isMature(person2, p1);
-    }
-
-    public void test2() {
-        List<String> strList = Arrays.asList("1111", "22", "3333", "4444");
-        strList.forEach(
-                a -> System.out.println(a)
-        );
-
-    }
-
-    public void test3() {
-        List<String> subjectIds = Arrays.asList("AAAAAA", "AAAAAB", "AAAABC", "BAAACA", "AAACCC", "BBBBAC", "AAAAC");
-        //subjectIds.sort(String::compareTo);
-        subjectIds.sort((String s1, String s2) -> s1.compareTo(s2));
-        System.out.println(subjectIds.toString());
-    }
-
-    public void test4(){
-        Pattern like = Pattern.compile("^" + "2016");
-        System.out.println(like);
+        new TestLamdar().test();
+        List<String> subjectList = new ArrayList<>();
+        subjectList.add("001");
+        subjectList.add("002");
+        subjectList.add("003");
+        subjectList.add("004005006");
+        subjectList.add("007008009");
+        List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != 3).collect(Collectors.toList());
+        System.out.println(combinedSubject.toString());
+        String s1 = "004005006";
+        String s2 = "400";
+        System.out.println(s1.contains(s2));
     }
 }

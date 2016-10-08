@@ -16,6 +16,7 @@ import com.xz.examscore.bean.SubjectLevel;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.scanner.ScannerDBService;
+import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -90,6 +92,8 @@ public class ImportProjectService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    public static final int SUBJECT_LENGTH = 3;
+
     /**
      * 导入项目信息
      *
@@ -102,7 +106,7 @@ public class ImportProjectService {
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
         importProjectInfo(projectId, context);
-        importSubjects(projectId);
+        importSubjects(projectId, context);
         importProjectReportConfig(projectId, context);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
@@ -335,13 +339,15 @@ public class ImportProjectService {
         List<Document> projectQuests = new ArrayList<>();
 
         context.put("questCount", jsonArray.size());
-
+        //判断是否为综合科目，是否需要合并科目ID
+        List<String> subjectList = context.get("subjectList");
+        List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
         jsonArray.forEach(o -> {
             JSONObject questObj = (JSONObject) o;
             Document questDoc = new Document();
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", questObj.getString("subjectId"));
+            questDoc.put("subject", getCombinedSubjectId(combinedSubject, questObj.getString("subjectId")));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
@@ -363,6 +369,16 @@ public class ImportProjectService {
 
         context.put("quests", projectQuests);
         questService.saveProjectQuests(projectId, projectQuests);
+    }
+
+    public String getCombinedSubjectId(List<String> combinedSubject, String subjectId) {
+        if(null != combinedSubject && !combinedSubject.isEmpty()){
+            for (String subject : combinedSubject){
+                if(subject.contains(subjectId))
+                    return subject;
+            }
+        }
+        return subjectId;
     }
 
     // 导入考试班级
@@ -499,9 +515,78 @@ public class ImportProjectService {
         }
     }
 
-    private void importSubjects(String projectId) {
+    private void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
+        ExamProject project = context.get("project");
+        //是否需要将文综或理综拆分成单个科目
+        boolean flag = sliceSubject(project);
+        if (flag) {
+            //将综合科目拆分成多个科目
+            importSlicedSubjects(projectId, context);
+        } else {
+            importNormalSubjects(projectId, context);
+        }
+        context.put("subjectSliced", flag);
+    }
 
+    private void importSlicedSubjects(String projectId, Context context) {
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+        //查询题目信息
+        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        //统计出每个考试的总分
+        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+        if (jsonArray == null) {
+            LOG.info("没有项目 " + projectId + " 的科目信息。");
+            return;
+        }
+
+        List<String> subjects = new ArrayList<>();
+        Value<Double> projectFullScore = Value.of(0d);
+        List<String> subjectIds = new ArrayList<>();
+
+        jsonArray.forEach(o -> {
+            JSONObject subjectObj = (JSONObject) o;
+            String subjectId = subjectObj.getString("subjectId");
+            //找到综合科目ID，进行拆分
+            if (subjectId.length() > SUBJECT_LENGTH) {
+                subjectIds.addAll(separateSubject(subjectId));
+            }
+            subjectIds.add(subjectObj.getString("subjectId"));
+        });
+
+        for (String subjectId : subjectIds) {
+            Double fullScore = MapUtils.getDouble(subjectScore, subjectId);
+            // 科目没有录入或没有答题卡
+            if (fullScore == null) {
+                LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
+                return;
+            }
+            projectFullScore.set(projectFullScore.get() + fullScore);
+            subjects.add(subjectId);
+            fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
+        }
+
+        subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
+        fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
+        context.put("subjectList", subjects);
+    }
+
+    public Map<String, Double> gatherQuestScoreBySubject(JSONArray jsonQuest) {
+        List<Map<String, Object>> quests = new ArrayList<>();
+        jsonQuest.forEach(quest -> {
+            JSONObject questObj = (JSONObject) quest;
+            Map<String, Object> questMap = new HashMap<>();
+            questMap.put("subjectId", questObj.getString("subjectId"));
+            questMap.put("score", questObj.getDouble("score"));
+            quests.add(questMap);
+        });
+
+        return quests.stream().collect(
+                Collectors.groupingBy(quest -> quest.get("subjectId").toString(), Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score")))
+        );
+    }
+
+    private void importNormalSubjects(String projectId, Context context) {
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
@@ -515,20 +600,37 @@ public class ImportProjectService {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
             Double fullScore = subjectObj.getDouble("totalScore");
-
             // 科目没有录入或没有答题卡
             if (fullScore == null) {
                 LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
                 return;
             }
-
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
-        subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
+        subjectService.saveProjectSubjects(projectId, subjects);  // 保存科目列表
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
+        context.put("subjectList", subjects);
+    }
+
+
+    //拆分科目并保存科目信息
+    public List<String> separateSubject(String subjectId) {
+        List<String> subjectIds = new ArrayList<>();
+        if (subjectId.length() % SUBJECT_LENGTH != 0) {
+            throw new IllegalArgumentException("综合科目ID不合法，导入科目失败：" + subjectId);
+        }
+        for (int i = 0; i < subjectId.length(); i += SUBJECT_LENGTH) {
+            subjectIds.add(subjectId.substring(i, i + SUBJECT_LENGTH));
+        }
+        return subjectIds;
+    }
+
+    private boolean sliceSubject(ExamProject project) {
+        // TODO: 2016/9/29
+        return false;
     }
 
     protected void importProjectInfo(String projectId, Context context) {
@@ -545,6 +647,8 @@ public class ImportProjectService {
         project.setName(projectObj.getString("name"));
         project.setGrade(projectObj.getInteger("grade"));
         project.setCreateTime(new Date());
+        //项目类型 文科：W，理科：L
+        project.setCategory(projectObj.getString("category"));
         //考试开始日期
         project.setExamStartDate(projectObj.getString("examStartDate"));
 

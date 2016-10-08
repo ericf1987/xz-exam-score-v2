@@ -6,6 +6,7 @@ import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.api.Param;
+import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,7 +23,7 @@ import static org.junit.Assert.*;
  */
 public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
-    public static final String PROJECT_ID = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+    public static final String PROJECT_ID = "430100-eddd6548432c4e5fab54739101c0affb";
 
     public static final String SCHOOL_ID = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
 
@@ -30,6 +31,9 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     InterfaceClient interfaceClient;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     @Test
     public void testQueryKnowledgePointById() throws Exception {
@@ -51,6 +55,15 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         System.out.println(map.get("score"));
         assertNotNull(quests);
         assertFalse(quests.isEmpty());
+    }
+
+    @Test
+    public void testQuestQuestionByProject2() throws Exception {
+        JSONArray quests = interfaceClient.queryQuestionByProject("433100-0372aa59ae4841618138c65e9ee18314");
+        System.out.println(quests.toString());
+        Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests);
+        System.out.println(importProjectService.separateSubject("004005006").toString());
+        System.out.println(mm);
     }
 
     @Test
@@ -76,7 +89,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySubjectListByProjectId() throws Exception {
-        JSONArray subjects = interfaceClient.querySubjectListByProjectId("433100-4cf7b0ef86574a1598481ba3e3841e42");
+        JSONArray subjects = interfaceClient.querySubjectListByProjectId(PROJECT_ID);
         System.out.println(subjects.toString());
         assertNotNull(subjects);
         assertFalse(subjects.isEmpty());
@@ -93,7 +106,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-98abd83a67524a7daca4b531db0742ee");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("433100-fef19389d6ce4b1f99847ab96d2cfeba");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

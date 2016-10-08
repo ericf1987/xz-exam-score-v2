@@ -7,8 +7,10 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.score.ScorePattern;
+import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.QuestService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.SubjectService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,12 @@ public class ScannerDBService {
     @Autowired
     QuestService questService;
 
+    @Autowired
+    ImportProjectService importProjectService;
+
+    @Autowired
+    SubjectService subjectService;
+
     public Document findProject(String project) {
         return scannerMongoClient.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
@@ -66,9 +74,12 @@ public class ScannerDBService {
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
         List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
+        //获取综合类科目
+        List<String> combinedSubjectIds = subjectService.getCombineSubjects(project);
 
         for (String subjectId : subjectIds) {
-            importSubjectScore(project, subjectId);
+            //如果考试ID包含在综合科目当中，则将考试ID转化为综合科目ID
+            importSubjectScore(project, importProjectService.getCombinedSubjectId(combinedSubjectIds, subjectId));
         }
     }
 
