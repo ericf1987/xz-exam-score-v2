@@ -84,7 +84,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById("430100-405f6648c79545d589687a1d0763fc9f");
+        JSONObject project = interfaceClient.queryProjectById("430100-4d4088dacbd84a34a91d37e297ce3d10");
         System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
@@ -93,7 +93,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-98abd83a67524a7daca4b531db0742ee");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("433100-fef19389d6ce4b1f99847ab96d2cfeba");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

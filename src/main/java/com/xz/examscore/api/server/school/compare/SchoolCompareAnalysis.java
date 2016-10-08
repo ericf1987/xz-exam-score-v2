@@ -67,7 +67,9 @@ public class SchoolCompareAnalysis implements Server{
         //对比类报表只对比同年级数据，即只对比当前考试项目下班级的历次考试
         List<Document> classDocs = classService.listClasses(projectId, schoolId);
         //只查询所有理科考试或者所有文科考试
-        List<Document> projectDocs = projectService.listProjectsByRange(Range.clazz(classDocs.get(0).getString("class")));
+        Document doc = projectService.findProject(projectId);
+
+        List<Document> projectDocs = projectService.listProjectsByRange(Range.clazz(classDocs.get(0).getString("class")), doc.getString("category"));
 
         projectDocs = projectDocs.stream().filter(projectDoc -> null != projectDoc && !projectDoc.isEmpty()).collect(Collectors.toList());
         Collections.sort(projectDocs, (Document d1, Document d2) -> d1.getString("startDate").compareTo(d2.getString("startDate")));

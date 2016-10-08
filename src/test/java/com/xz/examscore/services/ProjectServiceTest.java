@@ -54,7 +54,8 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testListProjectsByRange(){
+        Document doc = projectService.findProject("");
         Range schoolRange = Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47");
-        System.out.println(projectService.listProjectsByRange(schoolRange).toString());
+        System.out.println(projectService.listProjectsByRange(schoolRange, doc.getString("category")).toString());
     }
 }

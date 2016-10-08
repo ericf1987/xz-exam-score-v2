@@ -15,6 +15,7 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -139,7 +140,8 @@ public class ProjectService {
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
-                .append("startDate", project.getExamStartDate());
+                .append("startDate", project.getExamStartDate())
+                .append("category", project.getCategory());
 
         UpdateResult result = c.updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
@@ -232,12 +234,18 @@ public class ProjectService {
     /**
      * 根据range查看对应的所有考试信息
      */
-    public List<Document> listProjectsByRange(Range range) {
+    public List<Document> listProjectsByRange(Range range, String category) {
         String collectionName = range.getName() + "_list";
         Document projection = MongoUtils.doc("project", 1);
 
+        Document query = doc(range.getName(), range.getId());
+
+        if(!StringUtils.isEmpty(category)){
+            query.append("category", category);
+        }
+
         List<Document> projectDoc = toList(scoreDatabase.getCollection(collectionName)
-                .find(doc(range.getName(), range.getId())).projection(projection));
+                .find(query).projection(projection));
 
         List<Document> projects = new ArrayList<>();
         for (Document doc : projectDoc) {

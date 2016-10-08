@@ -49,7 +49,9 @@ public class ClassScoreCompareAnalysis implements Server{
         String subjectId = param.getString("subjectId");
         String classId = param.getString("classId");
 
-        List<Document> projectList = projectService.listProjectsByRange(Range.clazz(classId));
+        Document doc = projectService.findProject(projectId);
+
+        List<Document> projectList = projectService.listProjectsByRange(Range.clazz(classId), doc.getString("category"));
         Collections.sort(projectList, (Document d1, Document d2) -> d1.getString("startDate").compareTo(d2.getString("startDate")));
 
 

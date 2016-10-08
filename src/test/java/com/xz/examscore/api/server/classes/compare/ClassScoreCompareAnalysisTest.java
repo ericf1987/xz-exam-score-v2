@@ -34,7 +34,8 @@ public class ClassScoreCompareAnalysisTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void test1() throws Exception {
-        List<Document> list = projectService.listProjectsByRange(Range.clazz("f8259b31-7c8b-47ba-90d5-c5c15763660f"));
+        Document doc = projectService.findProject("");
+        List<Document> list = projectService.listProjectsByRange(Range.clazz("f8259b31-7c8b-47ba-90d5-c5c15763660f"), doc.getString("category"));
         System.out.println(list.toString());
     }
 }

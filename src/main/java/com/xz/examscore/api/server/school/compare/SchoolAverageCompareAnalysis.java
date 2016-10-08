@@ -58,8 +58,8 @@ public class SchoolAverageCompareAnalysis implements Server {
 
         //对比类报表只对比同年级数据，即只对比当前考试项目下班级的历次考试
         List<Document> classDocs = classService.listClasses(projectId, schoolId);
-
-        List<Document> projectDocs = projectService.listProjectsByRange(Range.clazz(classDocs.get(0).getString("class")));
+        Document doc = projectService.findProject(projectId);
+        List<Document> projectDocs = projectService.listProjectsByRange(Range.clazz(classDocs.get(0).getString("class")), doc.getString("category"));
 
         //学校考试列表
         //List<Document> projectList = projectService.listProjectsByRange(Range.school(schoolId));
