@@ -83,13 +83,19 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-        Predicate<Person> p1 = p -> p.getAge() >= 16;
+/*        Predicate<Person> p1 = p -> p.getAge() >= 16;
         Predicate<Person> p2 = p -> p.getName().length() > 2;
         TestLamdar t = new TestLamdar();
         Person person1 = t.new Person("冯也", 1, 28);
         Person person2 = t.new Person("冯也111", 2, 10);
         person1.isMature(person1, p1);
-        person1.isMature(person2, p1);
+        person1.isMature(person2, p1);*/
+        Boolean a = null;
+        if(a){
+            System.out.println("A");
+        }else{
+            System.out.println("B");
+        }
     }
 
     public void test2() {
