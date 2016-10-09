@@ -264,7 +264,7 @@ public class ScannerDBService {
             double fullScore, String standardAnswer, String answerContent, Boolean awardScoreTag) {
 
         //如果给分标记为true，则直接给分
-        if (awardScoreTag) {
+        if (null != awardScoreTag && awardScoreTag) {
             return new ScoreAndRight(fullScore, true);
         }
         //其他情况则根据给分规则来判断
