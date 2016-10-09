@@ -31,12 +31,12 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportProjectInfo() throws Exception {
-        importProjectService.importProjectInfo("430200-b73f03af1d74484f84f1aa93f583caaa", new Context());
+        importProjectService.importProjectInfo("430100-553137a1e78741149104526aaa84393e", new Context());
     }
 
     @Test
     public void testimportProject() throws Exception{
-        importProjectService.importProject("430100-a05db0d05ad14010a5c782cd31c0283f", false);
+        importProjectService.importProject("430100-553137a1e78741149104526aaa84393e", false);
     }
 
 }

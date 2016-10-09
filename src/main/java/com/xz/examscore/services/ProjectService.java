@@ -140,8 +140,7 @@ public class ProjectService {
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
-                .append("startDate", project.getExamStartDate())
-                .append("category", project.getCategory());
+                .append("startDate", project.getExamStartDate());
 
         UpdateResult result = c.updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {

@@ -202,6 +202,11 @@ public class ScannerDBService {
                         projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
             }
 
+            if (StringUtil.isBlank(standardAnswer)){
+                throw new IllegalStateException("客观题没有标准答案, project=" +
+                        projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
+            }
+
             Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
 
             ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
