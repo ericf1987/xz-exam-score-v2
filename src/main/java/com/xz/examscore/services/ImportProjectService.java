@@ -340,7 +340,7 @@ public class ImportProjectService {
 
         context.put("questCount", jsonArray.size());
         //判断是否为综合科目，是否需要合并科目ID
-        List<String> subjectList = context.get("subjectList");
+        //List<String> subjectList = context.get("subjectList");
         //List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
         jsonArray.forEach(o -> {
             JSONObject questObj = (JSONObject) o;
@@ -520,7 +520,7 @@ public class ImportProjectService {
         LOG.info("导入项目 " + projectId + " 科目信息...");
         ExamProject project = context.get("project");
         //是否需要将文综或理综拆分成单个科目
-        boolean flag = sliceSubject(project);
+        boolean flag = sliceSubject(projectId);
         if (flag) {
             //将综合科目拆分成多个科目
             importSlicedSubjects(projectId, context);
@@ -630,8 +630,14 @@ public class ImportProjectService {
         return subjectIds;
     }
 
-    private boolean sliceSubject(ExamProject project) {
-        // TODO: 2016/9/29
+    public boolean sliceSubject(String project) {
+        ApiResponse result = interfaceClient.queryProjectReportConfig(project);
+        if(result.isSuccess()){
+            String sliceSubject = result.getString("isSplit");
+            if(StringUtils.isEmpty(sliceSubject) && Boolean.parseBoolean(sliceSubject)){
+                return true;
+            }
+        }
         return false;
     }
 

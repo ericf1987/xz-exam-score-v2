@@ -74,12 +74,18 @@ public class ScannerDBService {
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
         List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
-        //获取综合类科目
-        //List<String> combinedSubjectIds = subjectService.getCombineSubjects(project);
+
+        boolean sliceSubject = importProjectService.sliceSubject(project);
+        if(sliceSubject){
+            subjectIds.forEach(subjectId -> {
+                if (subjectId.length() > importProjectService.SUBJECT_LENGTH) {
+                    subjectIds.remove(subjectId);
+                    subjectIds.addAll(importProjectService.separateSubject(subjectId));
+                }
+            });
+        }
 
         for (String subjectId : subjectIds) {
-            //如果考试ID包含在综合科目当中，则将考试ID转化为综合科目ID
-//            importSubjectScore(project, importProjectService.getCombinedSubjectId(combinedSubjectIds, subjectId));
             importSubjectScore(project, subjectId);
         }
     }
