@@ -1,8 +1,8 @@
 package javalang;
 
-import com.hyd.simplecache.utils.MD5;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2016/6/3.
  */
-public class TestLamdar {
+public class TestLamdar1 {
     public void test1() {
         List<String> strList = Arrays.asList("123", "456", "abc", null);
         String csv = strList.stream().
@@ -83,14 +83,13 @@ public class TestLamdar {
 
 
     public static void main(String[] args) {
-/*        Predicate<Person> p1 = p -> p.getAge() >= 16;
+        Predicate<Person> p1 = p -> p.getAge() >= 16;
         Predicate<Person> p2 = p -> p.getName().length() > 2;
-        TestLamdar t = new TestLamdar();
+        TestLamdar1 t = new TestLamdar1();
         Person person1 = t.new Person("冯也", 1, 28);
         Person person2 = t.new Person("冯也111", 2, 10);
         person1.isMature(person1, p1);
-        person1.isMature(person2, p1);*/
-        System.out.println("004005006".contains("004"));
+        person1.isMature(person2, p1);
     }
 
     public void test2() {

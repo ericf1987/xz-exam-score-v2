@@ -341,13 +341,14 @@ public class ImportProjectService {
         context.put("questCount", jsonArray.size());
         //判断是否为综合科目，是否需要合并科目ID
         List<String> subjectList = context.get("subjectList");
-        List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
+        //List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
         jsonArray.forEach(o -> {
             JSONObject questObj = (JSONObject) o;
             Document questDoc = new Document();
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", getCombinedSubjectId(combinedSubject, questObj.getString("subjectId")));
+            //questDoc.put("subject", getCombinedSubjectId(combinedSubject, questObj.getString("subjectId")));
+            questDoc.put("subject", questObj.getString("subjectId"));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
