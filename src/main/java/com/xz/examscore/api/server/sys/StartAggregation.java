@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 /**
  * @author by fengye on 2016/9/21.
  */
-@Function(description = "提交项目配置参数，并发送至阿里云", parameters = {
+@Function(description = "统计调用接口", parameters = {
         @Parameter(name = "project", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "type", type = Type.String, description = "统计类型", required = true),
         @Parameter(name = "reimportProject", type = Type.String, description = "是否要重新导入项目信息", required = false),
