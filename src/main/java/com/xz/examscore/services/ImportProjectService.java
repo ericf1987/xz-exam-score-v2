@@ -128,6 +128,7 @@ public class ImportProjectService {
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
+        boolean splitUnionSubject = result.get("splitUnionSubject") == null ? false : result.get("splitUnionSubject");
 
         if (null != rankLevel) {
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
@@ -166,6 +167,7 @@ public class ImportProjectService {
             projectConfig.setScoreLevels(scoreLevelsMap);
             projectConfig.setTopStudentRate(topStudentRate);
             projectConfig.setHighScoreRate(highScoreRate);
+            projectConfig.setSeparateCombine(splitUnionSubject);
             projectConfigService.fixProjectConfig(projectConfig);
 
             //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
@@ -180,7 +182,8 @@ public class ImportProjectService {
                     projectConfig.getRankLevels(), projectConfig.isCombineCategorySubjects(),
                     projectConfig.getRankLevelCombines(), projectConfig.getScoreLevels(),
                     projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
-                    projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate());
+                    projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate(),
+                    projectConfig.isSeparateCombine());
             //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
@@ -551,8 +554,9 @@ public class ImportProjectService {
             //找到综合科目ID，进行拆分
             if (subjectId.length() > SUBJECT_LENGTH) {
                 subjectIds.addAll(separateSubject(subjectId));
+            }else{
+                subjectIds.add(subjectObj.getString("subjectId"));
             }
-            subjectIds.add(subjectObj.getString("subjectId"));
         });
 
         for (String subjectId : subjectIds) {
@@ -633,10 +637,12 @@ public class ImportProjectService {
     public boolean sliceSubject(String project) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(project);
         if(result.isSuccess()){
-            String sliceSubject = result.getString("isSplit");
+            String sliceSubject = result.getString("splitUnionSubject");
             if(StringUtils.isEmpty(sliceSubject) && Boolean.parseBoolean(sliceSubject)){
                 return true;
             }
+        }else{
+            throw new NullPointerException("获取考试项目配置信息失败，考试项目为：" + project);
         }
         return false;
     }

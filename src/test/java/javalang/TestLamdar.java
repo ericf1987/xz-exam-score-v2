@@ -90,7 +90,7 @@ public class TestLamdar {
         Person person2 = t.new Person("冯也111", 2, 10);
         person1.isMature(person1, p1);
         person1.isMature(person2, p1);*/
-        System.out.println("004005006".contains("004"));
+        System.out.println(Boolean.parseBoolean("1"));
     }
 
     public void test2() {

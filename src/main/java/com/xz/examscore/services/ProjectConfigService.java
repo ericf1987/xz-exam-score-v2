@@ -73,6 +73,7 @@ public class ProjectConfigService {
                         .append("lastRankLevel", projectConfig.getLastRankLevel())
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("highScoreRate", projectConfig.getHighScoreRate())
+                        .append("splitUnionSubject", projectConfig.isSeparateCombine())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -84,6 +85,7 @@ public class ProjectConfigService {
                     .append("lastRankLevel", projectConfig.getLastRankLevel())
                     .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                     .append("highScoreRate", projectConfig.getHighScoreRate())
+                    .append("splitUnionSubject", projectConfig.isSeparateCombine())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -99,11 +101,12 @@ public class ProjectConfigService {
      * @param scoreLevels       展示的分数等级
      * @param topStudentRate    展示的尖子生比例
      * @param highScoreRate     展示的高分段比例
+     * @param splitUnionSubject   是否将综合科目拆分成单科统计
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
-            String lastRankLevel, int rankSegmentCount, Double highScoreRate) {
+            String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -114,6 +117,7 @@ public class ProjectConfigService {
                         .append("lastRankLevel", lastRankLevel)
                         .append("rankSegmentCount", rankSegmentCount)
                         .append("highScoreRate", highScoreRate)
+                        .append("splitUnionSubject", splitUnionSubject)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -125,6 +129,7 @@ public class ProjectConfigService {
                     .append("lastRankLevel", lastRankLevel)
                     .append("rankSegmentCount", rankSegmentCount)
                     .append("highScoreRate", highScoreRate)
+                    .append("splitUnionSubject", splitUnionSubject)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }

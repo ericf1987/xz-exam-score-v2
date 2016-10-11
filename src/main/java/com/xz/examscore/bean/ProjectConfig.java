@@ -55,6 +55,19 @@ public class ProjectConfig implements Serializable {
      */
     private double highScoreRate;
 
+    /**
+     * 是否将综合科目拆分成单科统计
+     */
+    private boolean separateCombine = false;
+
+    public boolean isSeparateCombine() {
+        return separateCombine;
+    }
+
+    public void setSeparateCombine(boolean separateCombine) {
+        this.separateCombine = separateCombine;
+    }
+
     public double getHighScoreRate() {
         return highScoreRate;
     }
