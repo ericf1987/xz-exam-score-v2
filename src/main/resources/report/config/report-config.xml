@@ -50,9 +50,7 @@
                 <report name="各科试卷题目得分明细" class=".schools.SchoolQuestScoreDetailReport"/>
             </report-category>
             <report-category name="历次考试对比">
-                <report name="平均分对比" class=".schools.compare.SchoolAverageCompareReport"/>
-                <report name="优秀率对比" class=".schools.compare.SchoolExcellentCompareReport"/>
-                <report name="及格率对比" class=".schools.compare.SchoolAverageCompareReport"/>
+                <report name="历史考试数据对比" class=".schools.compare.SchoolCompareReport"/>
             </report-category>
         </report-category>
 
