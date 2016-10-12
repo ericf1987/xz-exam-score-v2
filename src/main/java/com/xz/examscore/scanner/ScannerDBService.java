@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
@@ -74,20 +75,8 @@ public class ScannerDBService {
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
         List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
-        List<String> newIds = new ArrayList<>();
 
-        boolean sliceSubject = importProjectService.sliceSubject(project);
-        if(sliceSubject){
-            subjectIds.forEach(subjectId -> {
-                if (subjectId.length() > importProjectService.SUBJECT_LENGTH) {
-                    newIds.addAll(importProjectService.separateSubject(subjectId));
-                }else{
-                    newIds.add(subjectId);
-                }
-            });
-        }
-
-        for (String subjectId : newIds) {
+        for (String subjectId : subjectIds) {
             importSubjectScore(project, subjectId);
         }
     }
@@ -105,7 +94,7 @@ public class ScannerDBService {
         AtomicInteger counter = new AtomicInteger();
 
         collection.find(doc()).forEach(
-                (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
+        (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
 
         LOG.info("已导入 " + counter.get() + " 名学生...");
     }
@@ -114,8 +103,9 @@ public class ScannerDBService {
         String studentId = document.getString("studentId");
         Document student = studentService.findStudent(projectId, studentId);
 
+        List<String> subjectList = importProjectService.separateSubject(subjectId);
         scoreDatabase.getCollection("score").deleteMany(
-                doc("project", projectId).append("student", studentId).append("subject", subjectId)
+                doc("project", projectId).append("student", studentId).append("subject", $in(subjectList))
         );
 
         if (student == null) {

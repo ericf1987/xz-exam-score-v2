@@ -39,4 +39,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String project = "430200-b73f03af1d74484f84f1aa93f583caaa";
         scannerDBService.importSubjectScore(project, "004");
     }
+
+    @Test
+    public void testImportProject() throws Exception {
+        String project = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
+        scannerDBService.importProjectScore(project);
+    }
 }

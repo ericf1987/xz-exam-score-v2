@@ -636,7 +636,7 @@ public class ImportProjectService {
     }
 
     public boolean sliceSubject(String project) {
-        ApiResponse result = interfaceClient.queryProjectReportConfig(project);
+/*        ApiResponse result = interfaceClient.queryProjectReportConfig(project);
         if(result.isSuccess()){
             String sliceSubject = result.getString("splitUnionSubject");
             if(StringUtils.isEmpty(sliceSubject) && Boolean.parseBoolean(sliceSubject)){
@@ -645,7 +645,8 @@ public class ImportProjectService {
         }else{
             throw new NullPointerException("获取考试项目配置信息失败，考试项目为：" + project);
         }
-        return false;
+        return false;*/
+        return true;
     }
 
     protected void importProjectInfo(String projectId, Context context) {
