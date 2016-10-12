@@ -94,7 +94,7 @@ public class ScannerDBService {
         AtomicInteger counter = new AtomicInteger();
 
         collection.find(doc()).forEach(
-        (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
+                (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
 
         LOG.info("已导入 " + counter.get() + " 名学生...");
     }
@@ -149,7 +149,7 @@ public class ScannerDBService {
         //获取统计集合中主观题信息
         List<Document> subQuestList = new ArrayList<>();
 
-        for(Document subjectiveItem : subjectiveList){
+        for (Document subjectiveItem : subjectiveList) {
             String questionNo = subjectiveItem.getString("questionNo");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
             List<Document> subList = questService.getQuests(projectId, sid, false);
@@ -165,7 +165,7 @@ public class ScannerDBService {
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
             Boolean missing = subjectiveItem.getBoolean("missing");
             //主观题学生作答的切图所在的URL
-            Map<String, Object> url = (Map<String, Object>)subjectiveItem.get("url");
+            Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
@@ -181,7 +181,7 @@ public class ScannerDBService {
                     .append("province", student.getString("province"))
                     .append("url", url)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
-            if(null != missing && missing){
+            if (null != missing && missing) {
                 scoreDoc.append("missing", true);
             }
 
@@ -198,6 +198,10 @@ public class ScannerDBService {
             String questionNo = objectiveItem.getString("questionNo");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
             Document quest = questService.findQuest(projectId, sid, questionNo);
+            if (null == quest) {
+                LOG.error("题目为空：projectId={}, subjectId={}, sid={}, questionNo={}", projectId, subjectId, sid, questionNo);
+                throw new IllegalArgumentException("获取题目信息失败！统计失败");
+            }
             double fullScore = getFullScore(quest, objectiveItem);
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
             //标准答案数据从统计数据库的quest_list中获取
@@ -209,7 +213,7 @@ public class ScannerDBService {
                         projectId + ", subject=" + sid + ", quest=" + objectiveItem);
             }
 
-            if (StringUtil.isBlank(standardAnswer)){
+            if (StringUtil.isBlank(standardAnswer)) {
                 throw new IllegalStateException("客观题没有标准答案, project=" +
                         projectId + ", subject=" + sid + ", quest=" + objectiveItem);
             }
@@ -237,18 +241,18 @@ public class ScannerDBService {
         }
     }
 
-    private String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
+    public String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
         //如果科目需要拆分
-        if(subjectId.length() != importProjectService.SUBJECT_LENGTH){
+        if (subjectId.length() != importProjectService.SUBJECT_LENGTH) {
             Document q1 = questService.findQuest(projectId, subjectId, questionNo);
-            if(null != q1){
-                return q1.getString("subjectId");
-            }else {
+            if (null != q1) {
+                return q1.getString("subject");
+            } else {
                 List<String> subjectIds = importProjectService.separateSubject(subjectId);
                 Document q2 = questService.findQuest(projectId, subjectIds, questionNo);
-                return q2.getString("subjectId");
+                return q2.getString("subject");
             }
-        }else{
+        } else {
             return subjectId;
         }
     }
@@ -285,7 +289,6 @@ public class ScannerDBService {
      * @param standardAnswer 题目的标准答案
      * @param answerContent  考生作答
      * @param awardScoreTag  是否为给分题（一律给满分/一律不给分）：true=给满分，false=不给分，null=按照规则给分
-     *
      * @return 分数
      */
     protected static ScoreAndRight calculateScore(
@@ -296,7 +299,7 @@ public class ScannerDBService {
             return new ScoreAndRight(fullScore, true);
         }
         //其他情况则根据给分规则来判断
-        else{
+        else {
             if (answerContent.equals(standardAnswer)) {
                 return new ScoreAndRight(fullScore, true);
             } else {

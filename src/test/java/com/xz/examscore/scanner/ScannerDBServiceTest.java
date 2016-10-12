@@ -45,4 +45,11 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String project = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
         scannerDBService.importProjectScore(project);
     }
+
+    @Test
+    public void testgetSubjectIdInQuestList() throws Exception{
+        String project = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
+        String subjectId = scannerDBService.getSubjectIdInQuestList(project, "22", "007008009");
+        System.out.println(subjectId);
+    }
 }
