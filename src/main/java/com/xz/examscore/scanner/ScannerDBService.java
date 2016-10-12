@@ -74,18 +74,20 @@ public class ScannerDBService {
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
         List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
+        List<String> newIds = new ArrayList<>();
 
         boolean sliceSubject = importProjectService.sliceSubject(project);
         if(sliceSubject){
             subjectIds.forEach(subjectId -> {
                 if (subjectId.length() > importProjectService.SUBJECT_LENGTH) {
-                    subjectIds.remove(subjectId);
-                    subjectIds.addAll(importProjectService.separateSubject(subjectId));
+                    newIds.addAll(importProjectService.separateSubject(subjectId));
+                }else{
+                    newIds.add(subjectId);
                 }
             });
         }
 
-        for (String subjectId : subjectIds) {
+        for (String subjectId : newIds) {
             importSubjectScore(project, subjectId);
         }
     }
@@ -155,7 +157,14 @@ public class ScannerDBService {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
 
         //获取统计集合中主观题信息
-        List<Document> subQuestList = questService.getQuests(projectId, subjectId, false);
+        List<Document> subQuestList = new ArrayList<>();
+
+        for(Document subjectiveItem : subjectiveList){
+            String questionNo = subjectiveItem.getString("questionNo");
+            String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
+            List<Document> subList = questService.getQuests(projectId, sid, false);
+            subQuestList.addAll(subList);
+        }
 
         //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
         fixMissingSubjectQuest(subQuestList, subjectiveList);
@@ -167,9 +176,9 @@ public class ScannerDBService {
             Boolean missing = subjectiveItem.getBoolean("missing");
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>)subjectiveItem.get("url");
-
+            String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
             Document scoreDoc = doc("project", projectId)
-                    .append("subject", subjectId)
+                    .append("subject", sid)
                     .append("questNo", questionNo)
                     .append("score", score)
                     .append("right", NumberUtil.equals(score, fullScore))
@@ -197,7 +206,8 @@ public class ScannerDBService {
         for (Document objectiveItem : objectiveList) {
 
             String questionNo = objectiveItem.getString("questionNo");
-            Document quest = questService.findQuest(projectId, subjectId, questionNo);
+            String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
+            Document quest = questService.findQuest(projectId, sid, questionNo);
             double fullScore = getFullScore(quest, objectiveItem);
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
             //标准答案数据从统计数据库的quest_list中获取
@@ -206,12 +216,12 @@ public class ScannerDBService {
 
             if (StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" +
-                        projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
+                        projectId + ", subject=" + sid + ", quest=" + objectiveItem);
             }
 
             if (StringUtil.isBlank(standardAnswer)){
                 throw new IllegalStateException("客观题没有标准答案, project=" +
-                        projectId + ", subject=" + subjectId + ", quest=" + objectiveItem);
+                        projectId + ", subject=" + sid + ", quest=" + objectiveItem);
             }
 
             Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
@@ -219,7 +229,7 @@ public class ScannerDBService {
             ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
 
             Document scoreDoc = doc("project", projectId)
-                    .append("subject", subjectId)
+                    .append("subject", sid)
                     .append("questNo", questionNo)
                     .append("score", scoreAndRight.score)
                     .append("answer", studentAnswer)
@@ -234,6 +244,22 @@ public class ScannerDBService {
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
+        }
+    }
+
+    private String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
+        //如果科目需要拆分
+        if(subjectId.length() != importProjectService.SUBJECT_LENGTH){
+            Document q1 = questService.findQuest(projectId, subjectId, questionNo);
+            if(null != q1){
+                return q1.getString("subjectId");
+            }else {
+                List<String> subjectIds = importProjectService.separateSubject(subjectId);
+                Document q2 = questService.findQuest(projectId, subjectIds, questionNo);
+                return q2.getString("subjectId");
+            }
+        }else{
+            return subjectId;
         }
     }
 

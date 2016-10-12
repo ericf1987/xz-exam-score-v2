@@ -141,6 +141,21 @@ public class QuestService {
         });
     }
 
+    //获取拆分科目后对应的题目
+    public Document findQuest(String projectId, List<String> subjectIds, String questNo){
+        String cacheKey = "quest_by_no_in_subject:" + projectId + ":" + subjectIds.toString() + ":" + questNo;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
+
+            Document query = doc("project", projectId)
+                    .append("subject", $in(subjectIds))
+                    .append("questNo", questNo);
+
+            return collection.find(query).first();
+        });
+    }
+
     // 保存选择题答案
     public void saveQuestItems(String projectId, String questId, List<String> items) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");

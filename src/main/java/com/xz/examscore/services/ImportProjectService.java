@@ -128,7 +128,7 @@ public class ImportProjectService {
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
-        boolean splitUnionSubject = result.get("splitUnionSubject") == null ? false : result.get("splitUnionSubject");
+        boolean splitUnionSubject = result.get("splitUnionSubject") == null ? false : Boolean.parseBoolean(result.get("splitUnionSubject").toString());
 
         if (null != rankLevel) {
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
@@ -539,6 +539,7 @@ public class ImportProjectService {
         JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
         //统计出每个考试的总分
         Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+        LOG.info("计算出的科目总分为：{}", subjectScore.toString());
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
             return;
