@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
         @Parameter(name = "project", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "type", type = Type.String, description = "统计类型", required = true),
         @Parameter(name = "reimportProject", type = Type.String, description = "是否要重新导入项目信息", required = false),
-        @Parameter(name = "reimportScore", type = Type.StringArray, description = "是否要重新导入和计算成绩", required = false),
-        @Parameter(name = "generateReport", type = Type.StringArray, description = "是否要生成", required = false),
-        @Parameter(name = "exportScore", type = Type.StringArray, description = "是否要将成绩导出到阿里云", required = false)
+        @Parameter(name = "reimportScore", type = Type.String, description = "是否要重新导入和计算成绩", required = false),
+        @Parameter(name = "generateReport", type = Type.String, description = "是否要生成", required = false),
+        @Parameter(name = "exportScore", type = Type.String, description = "是否要将成绩导出到阿里云", required = false)
 
 })
 @Service

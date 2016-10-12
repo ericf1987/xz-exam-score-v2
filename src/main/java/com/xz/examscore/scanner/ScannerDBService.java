@@ -180,6 +180,10 @@ public class ScannerDBService {
 
             String questionNo = objectiveItem.getString("questionNo");
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
+            if(null == quest){
+                LOG.error("题目为空：projectId={}, subjectId={}, questionNo={}", projectId, subjectId, questionNo);
+                throw new IllegalArgumentException("获取题目信息失败！统计失败");
+            }
             double fullScore = getFullScore(quest, objectiveItem);
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
             //标准答案数据从统计数据库的quest_list中获取
