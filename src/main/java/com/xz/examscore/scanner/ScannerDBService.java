@@ -99,18 +99,25 @@ public class ScannerDBService {
         LOG.info("已导入 " + counter.get() + " 名学生...");
     }
 
+    /**
+     *
+     * @param projectId
+     * @param subjectId    网阅数据库科目ID
+     * @param document     网阅数据库学生信息
+     * @param counter
+     */
     public void importStudentScore(String projectId, String subjectId, Document document, AtomicInteger counter) {
         String studentId = document.getString("studentId");
         Document student = studentService.findStudent(projectId, studentId);
+
+        if (student == null) {
+            throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
+        }
 
         List<String> subjectList = importProjectService.separateSubject(subjectId);
         scoreDatabase.getCollection("score").deleteMany(
                 doc("project", projectId).append("student", studentId).append("subject", $in(subjectList))
         );
-
-        if (student == null) {
-            throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
-        }
 
         saveObjectiveScores(projectId, subjectId, document, student);
         saveSubjectiveScores(projectId, subjectId, document, student);
@@ -124,9 +131,11 @@ public class ScannerDBService {
     private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
         //网阅题目ID列表
         List<String> subjectiveIds = subjectiveList.stream().map(subQuestItem -> subQuestItem.getString("questionNo")).collect(Collectors.toList());
+        subjectiveIds.forEach(subjectiveId -> LOG.info("网阅题号列表：questionNo={}", subjectiveId));
 
         //统计库题目ID列表
         List<String> subQuestIds = subQuestList.stream().map(subQuestItem -> subQuestItem.getString("questNo")).collect(Collectors.toList());
+        subQuestIds.forEach(subjectiveId -> LOG.info("统计数据库列表：questNo={}", subjectiveId));
 
         for (int i = 0; i < subQuestIds.size(); i++) {
             //判断是否网阅题目ID中存在遗漏
@@ -149,12 +158,12 @@ public class ScannerDBService {
         //获取统计集合中主观题信息
         List<Document> subQuestList = new ArrayList<>();
 
-        for (Document subjectiveItem : subjectiveList) {
-            String questionNo = subjectiveItem.getString("questionNo");
-            String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
-            List<Document> subList = questService.getQuests(projectId, sid, false);
+        //获取拆分后所有综合科目的题目列表（quest_list）
+        List<String> subjectIds = importProjectService.separateSubject(subjectId);
+        subjectIds.forEach(s -> {
+            List<Document> subList = questService.getQuests(projectId, s, false);
             subQuestList.addAll(subList);
-        }
+        });
 
         //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
         fixMissingSubjectQuest(subQuestList, subjectiveList);

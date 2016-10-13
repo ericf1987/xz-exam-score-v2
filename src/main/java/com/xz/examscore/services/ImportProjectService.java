@@ -128,7 +128,7 @@ public class ImportProjectService {
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
-        boolean splitUnionSubject = result.get("splitUnionSubject") == null ? false : Boolean.parseBoolean(result.get("splitUnionSubject").toString());
+        boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
 
         if (null != rankLevel) {
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
@@ -202,9 +202,8 @@ public class ImportProjectService {
     //判断是否文理分科
     private boolean JudgeCombine(List<String> modelSubjects) {
         if (null != modelSubjects && !modelSubjects.isEmpty()) {
-            for (String subject : modelSubjects) {
+            for (String subject : modelSubjects)
                 if (subject.equals("004005006") || subject.equals("007008009")) return true;
-            }
             return false;
         }
         return false;
@@ -350,7 +349,6 @@ public class ImportProjectService {
             Document questDoc = new Document();
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
-            //questDoc.put("subject", getCombinedSubjectId(combinedSubject, questObj.getString("subjectId")));
             questDoc.put("subject", questObj.getString("subjectId"));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
@@ -373,16 +371,6 @@ public class ImportProjectService {
 
         context.put("quests", projectQuests);
         questService.saveProjectQuests(projectId, projectQuests);
-    }
-
-    public String getCombinedSubjectId(List<String> combinedSubject, String subjectId) {
-        if(null != combinedSubject && !combinedSubject.isEmpty()){
-            for (String subject : combinedSubject){
-                if(subject.contains(subjectId))
-                    return subject;
-            }
-        }
-        return subjectId;
     }
 
     // 导入考试班级
@@ -521,7 +509,6 @@ public class ImportProjectService {
 
     private void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
-        ExamProject project = context.get("project");
         //是否需要将文综或理综拆分成单个科目
         boolean flag = sliceSubject(projectId);
         if (flag) {

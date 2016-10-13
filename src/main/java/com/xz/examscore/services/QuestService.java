@@ -46,6 +46,15 @@ public class QuestService {
                 ));
     }
 
+    public List<Document> getQuests(String projectId, List<String> subjectIds, boolean isObjective) {
+        return toList(
+                scoreDatabase.getCollection("quest_list").find(
+                        doc("project", projectId)
+                                .append("subject", $in(subjectIds))
+                                .append("isObjective", isObjective)
+                ));
+    }
+
     public List<Document> getQuests(String projectId, String subjectId) {
         return toList(
                 scoreDatabase.getCollection("quest_list").find(
