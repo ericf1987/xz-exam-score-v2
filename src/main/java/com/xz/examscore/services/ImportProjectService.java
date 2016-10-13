@@ -545,6 +545,8 @@ public class ImportProjectService {
         project.setName(projectObj.getString("name"));
         project.setGrade(projectObj.getInteger("grade"));
         project.setCreateTime(new Date());
+        //项目类型 文科：W，理科：L
+        project.setCategory(projectObj.getString("category"));
         //考试开始日期
         project.setExamStartDate(projectObj.getString("examStartDate"));
 
