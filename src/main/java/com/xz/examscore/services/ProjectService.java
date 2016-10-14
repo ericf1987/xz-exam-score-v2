@@ -140,7 +140,8 @@ public class ProjectService {
         Document update = doc("name", project.getName())
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
-                .append("startDate", project.getExamStartDate());
+                .append("startDate", project.getExamStartDate())
+                .append("category", project.getCategory());
 
         UpdateResult result = c.updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
@@ -148,6 +149,7 @@ public class ProjectService {
                     .append("grade", project.getGrade())
                     .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
                     .append("startDate", project.getExamStartDate())
+                    .append("category", project.getCategory())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
