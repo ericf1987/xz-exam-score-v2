@@ -131,11 +131,9 @@ public class ScannerDBService {
     private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
         //网阅题目ID列表
         List<String> subjectiveIds = subjectiveList.stream().map(subQuestItem -> subQuestItem.getString("questionNo")).collect(Collectors.toList());
-        subjectiveIds.forEach(subjectiveId -> LOG.info("网阅题号列表：questionNo={}", subjectiveId));
 
         //统计库题目ID列表
         List<String> subQuestIds = subQuestList.stream().map(subQuestItem -> subQuestItem.getString("questNo")).collect(Collectors.toList());
-        subQuestIds.forEach(subjectiveId -> LOG.info("统计数据库列表：questNo={}", subjectiveId));
 
         for (int i = 0; i < subQuestIds.size(); i++) {
             //判断是否网阅题目ID中存在遗漏
