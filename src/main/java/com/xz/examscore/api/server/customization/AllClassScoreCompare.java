@@ -76,7 +76,7 @@ public class AllClassScoreCompare implements Server{
                         subjectsList.add(subjectInfo);
                     }
             );
-            double totalAverage = averageService.getAverage(projectId, Range.clazz(classId), Target.project(projectId));
+            double totalAverage = DoubleUtils.round(averageService.getAverage(projectId, Range.clazz(classId), Target.project(projectId)), false);
             classMap.put("schoolName", schoolName);
             classMap.put("className", clazz.getString("name"));
             classMap.put("subjects", subjectsList);
