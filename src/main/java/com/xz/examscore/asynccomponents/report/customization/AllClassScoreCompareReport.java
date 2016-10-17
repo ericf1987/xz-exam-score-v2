@@ -1,4 +1,4 @@
-package com.xz.examscore.asynccomponents.report.schools;
+package com.xz.examscore.asynccomponents.report.customization;
 
 import com.xz.examscore.asynccomponents.report.ReportGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
@@ -11,16 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author by fengye on 2016/6/24.
- * 学校成绩分析-基础数据-学生各科成绩明细
+ * @author by fengye on 2016/10/17.
  */
-@ReportGeneratorInfo(range= Range.SCHOOL)
+@ReportGeneratorInfo(range= Range.CLASS)
 @Component
-public class SchoolBasicDataReport extends ReportGenerator{
+public class AllClassScoreCompareReport extends ReportGenerator{
     @Override
     protected List<SheetTask> getSheetTasks(String projectId, Range range) {
         List<SheetTask> tasks = new ArrayList<>();
-        SheetTask projectTask = new SheetTask("全部科目", SchoolBasicDataSheets.class);
+        SheetTask projectTask = new SheetTask("全部科目", AllClassScoreCompareSheets.class);
         projectTask.setTarget(Target.project(projectId));
         tasks.add(projectTask);
         return tasks;
