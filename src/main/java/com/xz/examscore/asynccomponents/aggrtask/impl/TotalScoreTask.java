@@ -8,6 +8,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.RangeService;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.StudentService;
@@ -41,6 +42,9 @@ public class TotalScoreTask extends AggrTask {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
@@ -122,8 +126,43 @@ public class TotalScoreTask extends AggrTask {
     private void aggrStudentScores(String projectId, Target target) {
         List<Range> studentRanges = rangeService.queryRanges(projectId, Range.STUDENT);
 
+        if (target.match(Target.SUBJECT_COMBINATION)) {
+            aggrStudentSubjectCombinationScores(projectId, studentRanges, target);
+        }
+
         if (target.match(Target.SUBJECT) || target.match(Target.PROJECT)) {
             aggrStudentSubjectProjectScores(projectId, studentRanges, target);
+        }
+    }
+
+    //统计单个学生组合科目的总分
+    private void aggrStudentSubjectCombinationScores(String projectId, List<Range> studentRanges, Target target) {
+        Document group = new Document()
+                .append("_id", null)
+                .append("totalScore", new Document("$sum", "$score"));
+        MongoCollection<Document> c = scoreDatabase.getCollection("score");
+        for (Range studentRange : studentRanges) {
+            String studentId = studentRange.getId();
+            Document student = studentService.findStudent(projectId, studentId);
+            String classId = student.getString("class");
+            String subjectCombinationId = target.getId().toString();
+            List<String> subjectIds = importProjectService.separateSubject(subjectCombinationId);
+            // 统计单个考生组合科目的总分
+            AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
+                    doc("$match", doc("project", projectId)
+                            .append("student", studentId)
+                            .append("subject", $in(subjectIds))),
+                    doc("$group", group)
+            ));
+            Document aggregateResult = aggregate.first();
+
+            if (aggregateResult != null) {
+                Double score = aggregateResult.getDouble("totalScore");
+                Document extra = doc("class", student.get("class")).append("school", student.get("school"))
+                        .append("area", student.get("area")).append("city", student.get("city"))
+                        .append("province", student.get("province"));
+                scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score, extra);
+            }
         }
     }
 

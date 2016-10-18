@@ -20,6 +20,8 @@ public class Target {
 
     public static final String SUBJECT_OBJECTIVE = "subjectObjective";
 
+    public static final String SUBJECT_COMBINATION = "subjectCombination";
+
     public static final String QUEST = "quest";
 
     public static final String QUEST_TYPE = "questType";
@@ -40,6 +42,10 @@ public class Target {
 
     public static Target subjectObjective(SubjectObjective subjectObjective) {
         return new Target(Target.SUBJECT_OBJECTIVE, subjectObjective);
+    }
+
+    public static Target subjectCombination(SubjectCombination subjectCombination) {
+        return new Target(Target.SUBJECT_COMBINATION, subjectCombination);
     }
 
     public static Target quest(String quest) {
