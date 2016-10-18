@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @author by fengye on 2016/10/16.
  */
 
-@Function(description = "学校成绩-学生各科成绩明细分析", parameters = {
+@Function(description = "考试下所有班级成绩对比", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
 })
 @Service
@@ -49,9 +49,11 @@ public class AllClassScoreCompare implements Server{
     public Result execute(Param param) throws Exception {
         //查询出所有学校
         String projectId = param.getString("projectId");
+        //获取所有学校
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
         List<Document> allClasses = new ArrayList<>();
         List<Map<String, Object>> classes = new ArrayList<>();
+        //获取所有班级ID
         projectSchools.forEach(
                 school -> {
                     String schoolId = school.getString("school");
