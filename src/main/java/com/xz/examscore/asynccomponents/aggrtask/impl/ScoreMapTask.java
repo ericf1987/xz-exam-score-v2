@@ -9,6 +9,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.StudentService;
 import com.xz.examscore.util.Mongo;
@@ -22,7 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * 生成排名记录
@@ -41,6 +43,9 @@ public class ScoreMapTask extends AggrTask {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {

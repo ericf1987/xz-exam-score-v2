@@ -44,8 +44,8 @@ public class Target {
         return new Target(Target.SUBJECT_OBJECTIVE, subjectObjective);
     }
 
-    public static Target subjectCombination(SubjectCombination subjectCombination) {
-        return new Target(Target.SUBJECT_COMBINATION, subjectCombination);
+    public static Target subjectCombination(String subjectCombinationId) {
+        return new Target(Target.SUBJECT_COMBINATION, subjectCombinationId);
     }
 
     public static Target quest(String quest) {

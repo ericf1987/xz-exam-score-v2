@@ -9,6 +9,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.services.RankLevelService;
 import com.xz.examscore.services.StudentService;
@@ -39,6 +40,9 @@ public class RankLevelMapTask extends AggrTask {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    ImportProjectService importProjectService;
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
@@ -60,7 +64,9 @@ public class RankLevelMapTask extends AggrTask {
 
         // List{rankLevel -> count}
         List<Document> rankLevelMap = new ArrayList<>();
+
         List<String> studentIds = studentService.getStudentIds(projectId, range, target);
+
         String lastRankLevel = projectConfig.getLastRankLevel();
 
         for (String studentId : studentIds) {

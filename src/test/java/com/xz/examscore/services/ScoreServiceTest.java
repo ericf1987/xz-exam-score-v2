@@ -4,6 +4,7 @@ import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.util.Mongo;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,5 +56,16 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         Target target = Target.pointLevel(pointLevel);
         int modifiedCount = scoreService.addTotalScore(projectId, range, target, 1.1);
         System.out.println(modifiedCount);
+    }
+
+    @Test
+    public void testGetScore() throws Exception {
+        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
+        Range range = Range.clazz("27bb692f-a179-41b1-a57f-ab51ee42b71d");
+        Target target = Target.subjectCombination("007008009");
+        System.out.println(projectId + "|" + range.toString() + "|" + target.toString());
+        System.out.println(Mongo.target2Doc(target).toString());
+        double d = scoreService.getScore(projectId, range, target);
+        System.out.println(d);
     }
 }

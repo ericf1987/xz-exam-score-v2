@@ -10,14 +10,12 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.AverageService;
-import com.xz.examscore.services.ScoreService;
-import com.xz.examscore.services.StudentService;
-import com.xz.examscore.services.TargetService;
+import com.xz.examscore.services.*;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -46,6 +44,9 @@ public class AverageTask extends AggrTask {
 
     @Autowired
     TargetService targetService;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     @Override
     public void runTask(AggrTaskMessage taskInfo) {
@@ -87,8 +88,17 @@ public class AverageTask extends AggrTask {
 
         String subjectId = targetService.getTargetSubjectId(projectId, Target.parse(targetDoc));
 
+        int studentCount = 0;
         // 计算平均分
-        int studentCount = studentService.getStudentCount(projectId, subjectId, Range.parse(rangeDoc));
+        if(targetDoc.getString("name").equals(Target.SUBJECT_COMBINATION)){
+            String subjectCombinationId = targetDoc.getString("id");
+            List<String> subjectIds = importProjectService.separateSubject(subjectCombinationId);
+            for(String s : subjectIds){
+                studentCount += studentService.getStudentCount(projectId, s, Range.parse(rangeDoc));
+            }
+        }else{
+            studentCount = studentService.getStudentCount(projectId, subjectId, Range.parse(rangeDoc));
+        }
         double average;
 
         if (studentCount == 0) {

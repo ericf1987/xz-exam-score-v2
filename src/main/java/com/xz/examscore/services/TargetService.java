@@ -46,6 +46,9 @@ public class TargetService {
     ProjectService projectService;
 
     @Autowired
+    SubjectCombinationService subjectCombinationService;
+
+    @Autowired
     SimpleCache cache;
 
     public Target getTarget(String projectId, String subjectId) {
@@ -85,11 +88,15 @@ public class TargetService {
         }
 
         if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
-            targetList.addAll(querySubjectObjectives(projectId));
+            targetList.addAll(querySubjectCombinations(projectId));
         }
 
         if (targetNameList.contains(SUBJECT_LEVEL)) {
             targetList.addAll(querySubjectLevels(projectId));
+        }
+
+        if (targetNameList.contains(SUBJECT_COMBINATION)) {
+            targetList.addAll(querySubjectCombinations(projectId));
         }
 
         return targetList;
@@ -169,6 +176,12 @@ public class TargetService {
                 .collect(Collectors.toList());
     }
 
+    private List<Target> querySubjectCombinations(String projectId) {
+        return subjectCombinationService.getAllSubjectCombinations(projectId).stream()
+                .map(subjectCombinationId -> new Target(SUBJECT_COMBINATION, subjectCombinationId))
+                .collect(Collectors.toList());
+    }
+
     private List<Target> queryQuests(String projectId) {
 
         String cacheKey = "project_quest_target_list:" + projectId;
@@ -200,6 +213,9 @@ public class TargetService {
                 return null;
 
             case SUBJECT:
+                return target.getId().toString();
+
+            case SUBJECT_COMBINATION:
                 return target.getId().toString();
 
             case Target.SUBJECT_OBJECTIVE:

@@ -49,6 +49,9 @@ public class StudentService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    ImportProjectService importProjectService;
+
     /**
      * 查询项目考生数量
      *
@@ -171,10 +174,25 @@ public class StudentService {
      */
     public List<String> getStudentIds(String projectId, Range range, Target target) {
         String cacheKey = "student_id_list:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
-            String subjectId = targetService.getTargetSubjectId(projectId, target);
-            return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
-        });
+        //如果是科目组合，则统计至少包含参与了三科中其中至少一科的学生的人数
+        if(target.getName().equals(Target.SUBJECT_COMBINATION)){
+            return cache.get(cacheKey, () -> {
+                List<String> subjectIds = importProjectService.separateSubject(target.getId().toString());
+                List<String> studentIds = new ArrayList<>();
+                for (String subjectId : subjectIds){
+                    getStudentIds(projectId, range, Target.subject(subjectId)).forEach(id -> {
+                        if(!studentIds.contains(id))
+                            studentIds.add(id);
+                    });
+                }
+                return (ArrayList<String>) studentIds;
+            });
+        }else {
+            return cache.get(cacheKey, () -> {
+                String subjectId = targetService.getTargetSubjectId(projectId, target);
+                return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
+            });
+        }
     }
 
     /**

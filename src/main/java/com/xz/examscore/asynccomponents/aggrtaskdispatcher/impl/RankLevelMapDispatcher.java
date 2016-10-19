@@ -32,7 +32,7 @@ public class RankLevelMapDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
 
         List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
-        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT_COMBINATION, Target.SUBJECT);
 
         for (Range range : ranges) {
             for (Target target : targets) {

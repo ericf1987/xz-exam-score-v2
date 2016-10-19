@@ -11,10 +11,13 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -42,6 +45,11 @@ public class RankLevelTask extends AggrTask {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    SubjectCombinationService subjectCombinationService;
+
+    public static final Logger LOG = LoggerFactory.getLogger(RankLevelTask.class);
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {     // 一个 task 代表一个学生
         String projectId = taskInfo.getProjectId();
@@ -49,6 +57,7 @@ public class RankLevelTask extends AggrTask {
         String studentId = stuRange.getId();
 
         List<Target> sbjTargets = getSubjectTargets(projectId);
+        List<Target> sbjCombinationTargets = getSubjectCombinationTargets(projectId);
         Range[] rankRanges = getRankRanges(projectId, studentId);
 
         // rankRangeName -> {subjectName -> subjectRankLevel}
@@ -60,6 +69,10 @@ public class RankLevelTask extends AggrTask {
         // 统计单科等第
         insertSubjectRankLevels(projectId, studentId, sbjTargets);
         updateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);  // 存入 rankLevelsMap
+
+        // 统计组合科目等第
+        insertSubjectRankLevels(projectId, studentId, sbjCombinationTargets);
+        updateSubjectRankLevels(projectId, studentId, sbjCombinationTargets, rankRanges, rankLevelsMap);
 
         // 统计总分等第
         insertProjectRankLevels(projectId, studentId);
@@ -84,10 +97,13 @@ public class RankLevelTask extends AggrTask {
     private void insertSubjectRankLevels(String projectId, String studentId, List<Target> sbjTargets) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
         List<Document> querys = new ArrayList<>();
-        sbjTargets.forEach(target -> querys.add(doc("project", projectId)
-                .append("target", target2Doc(target))
-                .append("student", studentId).append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()))
-        ));
+        sbjTargets.forEach(target -> {
+            //LOG.info("开始执行RankLevel中的insertSubjectRankLevels方法，当前projectId={}, studentId={}, target={}", projectId, studentId, target.toString());
+            querys.add(doc("project", projectId)
+                    .append("target", target2Doc(target))
+                    .append("student", studentId).append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        });
         collection.insertMany(querys);
     }
 
@@ -206,7 +222,16 @@ public class RankLevelTask extends AggrTask {
             sbjTargets.add(Target.subject("004005006"));
             sbjTargets.add(Target.subject("007008009"));
         }
+
+        //获取合并的科目ID
         return sbjTargets;
+    }
+
+    private List<Target> getSubjectCombinationTargets(String projectId) {
+        //获取合并的科目ID
+        return subjectCombinationService.getAllSubjectCombinations(projectId).stream().map(
+                Target::subjectCombination
+        ).collect(Collectors.toList());
     }
 
 }

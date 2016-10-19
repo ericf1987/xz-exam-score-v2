@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -40,6 +41,9 @@ public class RankService {
 
     @Autowired
     SimpleCache cache;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     /**
      * 查询排名
@@ -142,6 +146,15 @@ public class RankService {
      * @return 排名等级，如果考生没有参加考试则返回 null
      */
     public String getRankLevel(String projectId, Range range, Target target, String studentId) {
+        if(target.getName().equals(Target.SUBJECT_COMBINATION)){
+            return getRankLevelWithSubjectCombination(projectId, range, target, studentId);
+        }else{
+            return getRankLevelNonSubjectCombination(projectId, range, target, studentId);
+        }
+    }
+
+    //获取费
+    private String getRankLevelNonSubjectCombination(String projectId, Range range, Target target, String studentId){
         int rank = getRank(projectId, range, target, studentId);
         int studentCount = studentService.getStudentCount(projectId, range, target);
 
@@ -167,6 +180,23 @@ public class RankService {
                 "project=" + projectId + ", range=" + range + ", target=" + target +
                 ", student=" + studentId + ", rank=" + rank + ", levels=" + rankingLevels +
                 ", studentCount=" + studentCount);
+    }
+
+    //获取组合科目的排名等级
+    private String getRankLevelWithSubjectCombination(String projectId, Range range, Target target, String studentId) {
+        String subjectCombinationId = target.getId().toString();
+        List<Target> subjectCombinationsTarget = importProjectService.separateSubject(subjectCombinationId).stream().map(
+                Target::subject
+        ).collect(Collectors.toList());
+        StringBuilder builder = new StringBuilder();
+        for (Target subjectTarget : subjectCombinationsTarget){
+            String levelKey = getRankLevelNonSubjectCombination(projectId, range, subjectTarget, studentId);
+            if(null == levelKey){
+                return null;
+            }
+            builder.append(levelKey);
+        }
+        return builder.toString();
     }
 
     @SuppressWarnings("unchecked")
