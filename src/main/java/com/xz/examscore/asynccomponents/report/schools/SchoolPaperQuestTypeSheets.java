@@ -54,7 +54,7 @@ public class SchoolPaperQuestTypeSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "题型");
         List<Map<String, Object>> schools = result.get("schools");
         for (Map<String, Object> school : schools) {
-            excelWriter.set(0, column.incrementAndGet(), school.get("name").toString());
+            excelWriter.set(0, column.incrementAndGet(), school.get("name") + "(" + school.get("fullScore") + "分" + ")");
             excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
         }
     }

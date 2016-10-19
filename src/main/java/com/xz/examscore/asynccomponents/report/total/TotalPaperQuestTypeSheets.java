@@ -60,7 +60,7 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
         for (Map<String, Object> total : totals) {
             //题型名称
-            excelWriter.set(0, column.incrementAndGet(), total.get("name"));
+            excelWriter.set(0, column.incrementAndGet(), total.get("name") + "(" + total.get("fullScore") + "分" + ")");
             excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
         }
     }
