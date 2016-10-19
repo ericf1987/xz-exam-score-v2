@@ -19,8 +19,8 @@ public class TotalScoreTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        AggrTaskMessage task = new AggrTaskMessage(XT_PROJECT_ID, "aggr1", "total_score")
-                .setTarget(Target.subject("001"));
+        AggrTaskMessage task = new AggrTaskMessage("430100-2c641a3e36ff492aa535da7fb4cf28cf", "aggr1", "total_score")
+                .setTarget(Target.subjectCombination("007008009"));
 
         totalScoreTask.runTask(task);
     }

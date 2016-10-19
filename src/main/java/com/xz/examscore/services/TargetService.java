@@ -88,7 +88,7 @@ public class TargetService {
         }
 
         if (targetNameList.contains(SUBJECT_OBJECTIVE)) {
-            targetList.addAll(querySubjectCombinations(projectId));
+            targetList.addAll(querySubjectObjectives(projectId));
         }
 
         if (targetNameList.contains(SUBJECT_LEVEL)) {
