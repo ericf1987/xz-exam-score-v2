@@ -46,7 +46,7 @@ public class SubjectCombinationService {
     }
 
     //获取组合科目名称
-    public String getSubjectCombinationName(String subjectCombinationId) {
+    public static String getSubjectCombinationName(String subjectCombinationId) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < subjectCombinationId.length(); i += ImportProjectService.SUBJECT_LENGTH) {
             String subjectId = subjectCombinationId.substring(i, i + ImportProjectService.SUBJECT_LENGTH);

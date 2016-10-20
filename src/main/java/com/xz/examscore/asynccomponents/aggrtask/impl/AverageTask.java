@@ -88,14 +88,13 @@ public class AverageTask extends AggrTask {
 
         String subjectId = targetService.getTargetSubjectId(projectId, Target.parse(targetDoc));
 
-        int studentCount = 0;
+        int studentCount;
         // 计算平均分
         if(targetDoc.getString("name").equals(Target.SUBJECT_COMBINATION)){
+            //组合科目时候，需要先拿到组合科目的参考学生列表，再计算人数
             String subjectCombinationId = targetDoc.getString("id");
-            List<String> subjectIds = importProjectService.separateSubject(subjectCombinationId);
-            for(String s : subjectIds){
-                studentCount += studentService.getStudentCount(projectId, s, Range.parse(rangeDoc));
-            }
+            List<String> studentList = studentService.getStudentIds(projectId, Range.parse(rangeDoc), Target.subjectCombination(subjectCombinationId));
+            studentCount = studentList.size();
         }else{
             studentCount = studentService.getStudentCount(projectId, subjectId, Range.parse(rangeDoc));
         }
