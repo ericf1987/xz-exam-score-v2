@@ -19,7 +19,7 @@ public class ReportManagerTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateReports() throws Exception {
-        String projectId = "430100-cb04005aa5ae460fae6b9d87df797066";
+        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
         List<ReportTask> list = reportManager.createReportGenerators(projectId);
         System.out.println(list.toString());
     }

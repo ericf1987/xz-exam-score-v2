@@ -3,7 +3,6 @@ package com.xz.examscore.intclient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
-import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.services.ImportProjectService;

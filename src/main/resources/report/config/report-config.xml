@@ -74,5 +74,12 @@
             </report-category>
         </report-category>
 
+        <report-category name="个性化需求" range="">
+            <report name="学生组合科目分数及排名" class=".customization.StudentSbjCbnReport"/>
+            <report name="班级组合科目分数及排名" class=".customization.ClassSbjCbnReport"/>
+            <report name="学校组合科目分数及排名" class=".customization.SchoolSbjCbnReport"/>
+            <report name="班级各学科排名" class=".customization.AllClassScoreCompareReport"/>
+        </report-category>
+
     </report-set>
 </report-config>

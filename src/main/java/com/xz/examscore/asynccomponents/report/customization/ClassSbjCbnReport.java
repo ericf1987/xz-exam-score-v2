@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author by fengye on 2016/10/20.
  */
-@ReportGeneratorInfo(range = Range.CLASS)
+@ReportGeneratorInfo(range = Range.SCHOOL)
 @Component
 public class ClassSbjCbnReport extends ReportGenerator{
     @Autowired
