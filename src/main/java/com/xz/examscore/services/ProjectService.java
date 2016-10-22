@@ -98,6 +98,25 @@ public class ProjectService {
     }
 
     /**
+     * 通过考试项目id和分科标志查询考试项目
+     * @param projectId 考试ID
+     * @param category 分科标志 文科：“W”，理科“L”
+     */
+    public Document findProject(String projectId, String category){
+        if(StringUtils.isEmpty(category)){
+            return findProject(projectId);
+        }else{
+            String cacheKey = "project_info:" + projectId + "category:" + category;
+            return cache.get(cacheKey, () -> {
+                Document query = doc("project", projectId).append("category", category);
+
+                MongoCollection<Document> collection = scoreDatabase.getCollection("project_list");
+                return collection.find(query).projection(WITHOUT_INNER_ID.append("schools", 0)).first();
+            });
+        }
+    }
+
+    /**
      * 查询指定学校的考试项目
      *
      * @param city      地市id
@@ -240,10 +259,6 @@ public class ProjectService {
         Document projection = MongoUtils.doc("project", 1);
 
         Document query = doc(range.getName(), range.getId());
-
-        if(!StringUtils.isEmpty(category)){
-            query.append("category", category);
-        }
 
         List<Document> projectDoc = toList(scoreDatabase.getCollection(collectionName)
                 .find(query).projection(projection));
