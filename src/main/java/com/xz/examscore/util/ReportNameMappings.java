@@ -20,6 +20,8 @@ public class ReportNameMappings {
 
     public static final List<String> BASIC_REPORT_ITEM = new ArrayList<>();
 
+    public static final List<String> CUSTOMIZED_REPORT_ITEM = new ArrayList<>();
+
     static {
         PRIMARY_CLASSIFY_CODE_MAP.put("100", "总体成绩分析");
         PRIMARY_CLASSIFY_CODE_MAP.put("101", "学校成绩分析");
@@ -59,6 +61,11 @@ public class ReportNameMappings {
 
         BASIC_REPORT_ITEM.add("-->基础数据-->学生各科成绩明细.xlsx");
         BASIC_REPORT_ITEM.add("-->基础数据-->各科试卷题目得分明细.xlsx");
+
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->班级各学科排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->班级组合科目分数及排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->学生组合科目分数及排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->学校组合科目分数及排名.xlsx");
     }
 
     public static String[] getFileName(String[] code) {
@@ -75,9 +82,14 @@ public class ReportNameMappings {
                 "总体成绩分析", "学校成绩分析", "班级成绩分析"
         };
 
+        //添加基础报表
         for (String seed : seeds){
             addBySeed(fileNames, seed, BASIC_REPORT_ITEM);
         }
+
+        //添加定制化报表
+        fileNames.addAll(CUSTOMIZED_REPORT_ITEM);
+
         return fileNames.toArray(new String[fileNames.size()]);
     }
 

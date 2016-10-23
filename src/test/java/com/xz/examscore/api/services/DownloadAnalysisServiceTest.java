@@ -31,7 +31,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
                 "102-201-314"
 */
 
-                "100-200-302","101-200-302","102-200-313"
+                /*"100-200-302","101-200-302","102-200-313"*/
         };
 /*        Result result = downloadAnalysisService.generateZipFiles("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68", arr);*/
