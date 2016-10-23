@@ -71,8 +71,10 @@ public class RankLevelTask extends AggrTask {
         updateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);  // 存入 rankLevelsMap
 
         // 统计组合科目等第
-        insertSubjectRankLevels(projectId, studentId, sbjCombinationTargets);
-        updateSubjectRankLevels(projectId, studentId, sbjCombinationTargets, rankRanges, rankLevelsMap);
+        if(!sbjCombinationTargets.isEmpty()){
+            insertSubjectRankLevels(projectId, studentId, sbjCombinationTargets);
+            updateSubjectRankLevels(projectId, studentId, sbjCombinationTargets, rankRanges, rankLevelsMap);
+        }
 
         // 统计总分等第
         insertProjectRankLevels(projectId, studentId);
@@ -87,6 +89,7 @@ public class RankLevelTask extends AggrTask {
 
     private void insertProjectRankLevels(String projectId, String studentId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
+        LOG.info("执行insertProjectRankLevels，target={}, student={}", target2Doc(Target.project(projectId)).toString(), studentId);
         Document query = doc("project", projectId).
                 append("target", target2Doc(Target.project(projectId))).
                 append("student", studentId).
@@ -97,13 +100,10 @@ public class RankLevelTask extends AggrTask {
     private void insertSubjectRankLevels(String projectId, String studentId, List<Target> sbjTargets) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
         List<Document> querys = new ArrayList<>();
-        sbjTargets.forEach(target -> {
-            //LOG.info("开始执行RankLevel中的insertSubjectRankLevels方法，当前projectId={}, studentId={}, target={}", projectId, studentId, target.toString());
-            querys.add(doc("project", projectId)
-                    .append("target", target2Doc(target))
-                    .append("student", studentId).append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()))
-            );
-        });
+        sbjTargets.forEach(target -> querys.add(doc("project", projectId)
+                .append("target", target2Doc(target))
+                .append("student", studentId).append("rankLevel", doc()).append("md5", MD5.digest(UUID.randomUUID().toString()))
+        ));
         collection.insertMany(querys);
     }
 
