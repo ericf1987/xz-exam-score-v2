@@ -72,6 +72,6 @@ public class ClassSbjCbnCompare implements Server{
                 result.add(classMap);
             });
         });
-        return new Result().set("classes", result);
+        return Result.success().set("classes", result);
     }
 }

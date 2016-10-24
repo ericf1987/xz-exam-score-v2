@@ -123,7 +123,7 @@ public class ClassRankLevelAnalysis implements Server {
             return s2.compareTo(s1);
         });
 
-        return new Result()
+        return Result.success()
                 .set("subjectList", subjectIds)
                 .set("subjectScoreList", subjectScoreList)
                 .set("studentInfos", studentInfos)

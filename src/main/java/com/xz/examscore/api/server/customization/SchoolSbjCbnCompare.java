@@ -59,6 +59,6 @@ public class SchoolSbjCbnCompare implements Server {
             schoolMap.put("rank", rank);
             result.add(schoolMap);
         });
-        return new Result().set("schools", result);
+        return Result.success().set("schools", result);
     }
 }

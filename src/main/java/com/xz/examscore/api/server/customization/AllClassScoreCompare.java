@@ -87,7 +87,7 @@ public class AllClassScoreCompare implements Server{
         }
         paddingRank(classes, "totalAverage", "totalRank");
 
-        return new Result().set("classes", classes);
+        return Result.success().set("classes", classes);
     }
 
     public List<Map<String, Object>> getRankBySubject(String projectId, List<String> classIds, List<String> subjectIds){

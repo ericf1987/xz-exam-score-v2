@@ -71,6 +71,6 @@ public class StudentSbjCbnCompare implements Server {
             result.add(studentMap);
         }
         Collections.sort(result, (Map<String, Object> m1, Map<String, Object> m2) -> MapUtils.getDouble(m2, "score").compareTo(MapUtils.getDouble(m1, "score")));
-        return new Result().set("students", result);
+        return Result.success().set("students", result);
     }
 }

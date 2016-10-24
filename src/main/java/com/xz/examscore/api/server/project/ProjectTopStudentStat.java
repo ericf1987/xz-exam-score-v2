@@ -75,16 +75,13 @@ public class ProjectTopStudentStat implements Server {
         subjectIds = filterSubject(subjectIds, authSubjectIds);
         subjectIds.sort(String::compareTo);
 
-        List<Map<String, Object>> topStudents = getTopStudents(projectId, rankSegment, range, target, subjectIds,
-                topStudentListService, studentService, schoolService, classService, scoreService, rankService);
+        List<Map<String, Object>> topStudents = getTopStudents(projectId, rankSegment, range, target, subjectIds);
         return Result.success().set("topStudents", topStudents).set("hasHeader", !topStudents.isEmpty());
     }
 
     // 尖子生查询
-    public static List<Map<String, Object>> getTopStudents(
-            String projectId, String[] rankSegment, Range range, Target target, List<String> subjectIds,
-            TopStudentListService topStudentListService, StudentService studentService, SchoolService schoolService,
-            ClassService classService, ScoreService scoreService, RankService rankService) {
+    public List<Map<String, Object>> getTopStudents(
+            String projectId, String[] rankSegment, Range range, Target target, List<String> subjectIds) {
 
         List<Map<String, Object>> topStudents = new ArrayList<>();
         int minIndex = NumberUtils.toInt(rankSegment[0]);
@@ -129,7 +126,7 @@ public class ProjectTopStudentStat implements Server {
             list.add(projectInfo);
 
             // 科目统计
-            subjectStat(projectId, subjectIds, scoreService, rankService, studentId, list, range);
+            subjectStat(projectId, subjectIds, studentId, list, range);
 
             map.put("subjects", list);
             topStudents.add(map);
@@ -139,8 +136,7 @@ public class ProjectTopStudentStat implements Server {
         return topStudents;
     }
 
-    private static void subjectStat(String projectId, List<String> subjectIds,
-                                    ScoreService scoreService, RankService rankService,
+    public void subjectStat(String projectId, List<String> subjectIds,
                                     String studentId, List<Map<String, Object>> list, Range range) {
         // 各科分析
         for (String subjectId : subjectIds) {
