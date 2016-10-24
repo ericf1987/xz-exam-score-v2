@@ -82,6 +82,9 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
             String studentId = studentDoc.getString("student");
             double totalScore = DocumentUtils.getDouble(studentDoc, "totalScore", 0);
             int rank = DocumentUtils.getInt(studentDoc, "rank", 0);
+            double dValue = DocumentUtils.getDouble(studentDoc, "dValue", 0);
+            Map<String, Object> entry_level = (Map<String, Object>)studentDoc.get("college_entry_level");
+            String info = getEntryLevelInfo(entry_level, dValue);
 
             Document student = studentService.findStudent(projectId, studentId);
             if (student == null) {
@@ -95,6 +98,7 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
             map.put("examNo", student.getString("examNo"));
             map.put("name", student.getString("name"));
             map.put("totalScore", totalScore);
+            map.put("entryLevelInfo", info);
 
             if (range.match(Range.PROVINCE)) {
                 map.put("schoolId", schoolId);
@@ -123,5 +127,18 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
 
         result.sort((o1, o2) -> ((Double) o2.get("totalScore")).compareTo((Double) o1.get("totalScore")));
         return result;
+    }
+
+    private String getEntryLevelInfo(Map<String, Object> entry_level, double dValue) {
+        String level = entry_level.get("level").toString();
+        switch (level) {
+            case "ONE":
+                return "超一本线" + dValue + "分";
+            case "TWO":
+                return "超二本线" + dValue + "分";
+            case "THREE":
+                return "超三本线" + dValue + "分";
+        }
+        return "";
     }
 }

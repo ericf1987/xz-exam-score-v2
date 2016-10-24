@@ -46,7 +46,7 @@ public class CollegeEntryLevelService {
             Document query = query(projectId, range, target)
                     .append("rank", doc("$gte", minIndex).append("$lte", maxIndex));
 
-            Document projection = doc("totalScore", 1).append("rank", 1).append("student", 1);  // 查询结果包含属性
+            Document projection = doc("totalScore", 1).append("rank", 1).append("student", 1).append("college_entry_level", 1).append("dValue", 1);  // 查询结果包含属性
 
             return new ArrayList<>(MongoUtils.toList(collection.find(query).projection(projection)));
         });
