@@ -62,10 +62,10 @@ public class ReportNameMappings {
         BASIC_REPORT_ITEM.add("-->基础数据-->学生各科成绩明细.xlsx");
         BASIC_REPORT_ITEM.add("-->基础数据-->各科试卷题目得分明细.xlsx");
 
-        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->班级各学科排名.xlsx");
-        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->班级组合科目分数及排名.xlsx");
-        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->学生组合科目分数及排名.xlsx");
-        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->学校组合科目分数及排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->考试班级排名-->班级各学科排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->组合科目排名-->班级组合科目分数及排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->组合科目排名-->学生组合科目分数及排名.xlsx");
+        CUSTOMIZED_REPORT_ITEM.add("个性化需求-->组合科目排名-->学校组合科目分数及排名.xlsx");
     }
 
     public static String[] getFileName(String[] code) {

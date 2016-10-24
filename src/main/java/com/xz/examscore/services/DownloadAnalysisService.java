@@ -167,6 +167,15 @@ public class DownloadAnalysisService {
                 );
                 fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
             }
+        } else if(part0.startsWith("个性化")){
+            filePath = StringUtil.joinPaths(
+                    param[0], param[1], filename
+            );
+            srcFile = getSaveFilePath(projectId, savePath, filePath);
+            zipFile = StringUtil.joinPaths(
+                    param[0], param[1], filename
+            );
+            fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
         }
         return fileCategory;
     }
