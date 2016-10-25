@@ -50,6 +50,9 @@ public class CollegeEntryLevelTask extends AggrTask{
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    CollegeEntryLevelService collegeEntryLevelService;
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
@@ -57,7 +60,7 @@ public class CollegeEntryLevelTask extends AggrTask{
         Target projectTarget = taskInfo.getTarget();
 
         //获取本科上线率
-        Map<String, Double> entry_level = getEntryLevel(projectId);
+        Map<String, Double> entry_level = collegeEntryLevelService.getEntryLevel(projectId);
         //获取当前维度下考试总成绩的排名
         List<Document> scoreMap = rankService.getScoreMap(projectId, range, projectTarget);
         if (scoreMap.isEmpty()) {
@@ -158,11 +161,4 @@ public class CollegeEntryLevelTask extends AggrTask{
         }
     }
 
-    private Map<String, Double> getEntryLevel(String projectId) {
-        Map<String, Double> map = new HashMap<>();
-        map.put("ONE", 400d);
-        map.put("TWO", 300d);
-        map.put("THREE", 200d);
-        return map;
-    }
 }
