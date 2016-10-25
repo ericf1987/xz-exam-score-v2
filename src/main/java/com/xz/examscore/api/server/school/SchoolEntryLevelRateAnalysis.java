@@ -65,7 +65,7 @@ public class SchoolEntryLevelRateAnalysis implements Server {
                 m.put("rate", rate);
                 onlineRate.add(m);
             }
-            map.put("schoolName", doc.getString("name"));
+            map.put("className", doc.getString("name"));
             map.put("studentCount", studentCount);
             map.put("onlineRate", onlineRate);
             result.add(map);
