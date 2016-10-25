@@ -45,21 +45,26 @@ public class ProjectEntryLevelRateAnalysis implements Server {
         String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
         //学校列表
         List<Document> schoolDocs = schoolService.getProjectSchools(projectId);
-        for (String key : entryLevelKey) {
-            for (Document doc : schoolDocs) {
-                Map<String, Object> map = new HashMap<>();
-                String schoolId = doc.getString("school");
-                int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
+        for (Document doc : schoolDocs) {
+            Map<String, Object> map = new HashMap<>();
+            List<Map<String, Object>> onlineRate = new ArrayList<>();
+            String schoolId = doc.getString("school");
+            int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId));
+            for(String key : entryLevelKey){
+                Map<String,Object> m = new HashMap<>();
                 int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, Range.school(schoolId), Target.project(projectId), key);
                 double rate = DoubleUtils.round((double) onlineCount / studentCount, true);
-                map.put("schoolName", doc.getString("name"));
-                map.put("studentCount", studentCount);
-                map.put("onlineCount", onlineCount);
-                map.put("rate", rate);
-                map.put("onlineDesc", collegeEntryLevelService.getEntryKeyDesc(key));
-                result.add(map);
+                m.put("onlineCount", onlineCount);
+                m.put("onlineDesc", collegeEntryLevelService.getEntryKeyDesc(key));
+                m.put("rate", rate);
+                onlineRate.add(m);
             }
+            map.put("schoolName", doc.getString("name"));
+            map.put("studentCount", studentCount);
+            map.put("onlineRate", onlineRate);
+            result.add(map);
         }
+
         return Result.success().set("schoolOnlineRate", result);
     }
 }

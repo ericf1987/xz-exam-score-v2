@@ -89,7 +89,6 @@ public class RankLevelTask extends AggrTask {
 
     private void insertProjectRankLevels(String projectId, String studentId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("rank_level");
-        LOG.info("执行insertProjectRankLevels，target={}, student={}", target2Doc(Target.project(projectId)).toString(), studentId);
         Document query = doc("project", projectId).
                 append("target", target2Doc(Target.project(projectId))).
                 append("student", studentId).

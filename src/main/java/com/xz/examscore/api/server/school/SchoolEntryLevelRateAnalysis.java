@@ -51,20 +51,24 @@ public class SchoolEntryLevelRateAnalysis implements Server {
         List<Document> classDocs = classService.listClasses(projectId, schoolId);
         String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
         List<Map<String, Object>> result = new ArrayList<>();
-        for (String key : entryLevelKey) {
-            for (Document doc : classDocs) {
-                Map<String, Object> map = new HashMap<>();
-                String classId = doc.getString("class");
-                int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId), Target.project(projectId));
+        for (Document doc : classDocs) {
+            Map<String, Object> map = new HashMap<>();
+            List<Map<String, Object>> onlineRate = new ArrayList<>();
+            String classId = doc.getString("class");
+            int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId));
+            for(String key : entryLevelKey){
+                Map<String,Object> m = new HashMap<>();
                 int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, Range.clazz(classId), Target.project(projectId), key);
                 double rate = DoubleUtils.round((double) onlineCount / studentCount, true);
-                map.put("className", doc.getString("name"));
-                map.put("studentCount", studentCount);
-                map.put("onlineCount", onlineCount);
-                map.put("rate", rate);
-                map.put("onlineDesc", collegeEntryLevelService.getEntryKeyDesc(key));
-                result.add(map);
+                m.put("onlineCount", onlineCount);
+                m.put("onlineDesc", collegeEntryLevelService.getEntryKeyDesc(key));
+                m.put("rate", rate);
+                onlineRate.add(m);
             }
+            map.put("schoolName", doc.getString("name"));
+            map.put("studentCount", studentCount);
+            map.put("onlineRate", onlineRate);
+            result.add(map);
         }
         return Result.success().set("classOnlineRate", result);
     }
