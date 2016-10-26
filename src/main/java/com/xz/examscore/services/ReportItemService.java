@@ -36,6 +36,8 @@ public class ReportItemService {
     public static final String[] POINT_LEVEL_KEYS
             = new String[]{"双向细目", "知识点", "能力层级"};    // 知识点-能力层级统计类关键字
 
+    public static final String ENTRY_LEVEL_REPORT = "上线预测"; //上线预测报表关键字
+
     @Autowired
     MongoDatabase scoreDatabase;
 
@@ -54,8 +56,7 @@ public class ReportItemService {
     /**
      * 查询指定报表条目明细
      *
-     * @param id    条目id
-     *
+     * @param id 条目id
      * @return 条目明细
      */
     public Document queryReportItemById(String id) {
@@ -110,10 +111,10 @@ public class ReportItemService {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
                 //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
-                if(name.equals("上线预测")){
+                if (name.equals(ENTRY_LEVEL_REPORT)) {
                     ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
                     reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
-                }else{
+                } else {
                     reportItem.put("dataStatus", checkItemDate(projectId, document));
                 }
             }
