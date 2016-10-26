@@ -11,6 +11,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.CollegeEntryLevelService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/10/26.
  */
-@Function(description = "学校成绩-各班本科上线率", parameters = {
+@Function(description = "班级成绩-班级本科上线率", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true)
 })
@@ -44,6 +45,7 @@ public class ClassEntryLevelRateAnalysis implements Server {
         String projectId = param.getString("projectId");
         String classId = param.getString("classId");
         Map<String, Object> result = new HashMap<>();
+        int totalCount = 0;
         //获取班级参考学生人数
         int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId), Target.project(projectId));
         String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
@@ -59,12 +61,12 @@ public class ClassEntryLevelRateAnalysis implements Server {
             map.put("onlineDesc", onlineDesc);
             map.put("rate", rate);
             map.put("onlineStudents", onlineStudents);
+            totalCount += onlineCount;
             onlineRate.add(map);
         }
         result.put("studentCount", studentCount);
         result.put("onlineRate", onlineRate);
-        //获取班级本科生录取人数
-
+        result.put("outlineRate", DoubleUtils.round((double) (studentCount - totalCount) / studentCount, true));
         return Result.success().set("classOnlineRate", result);
     }
 
