@@ -3,6 +3,7 @@ package com.xz.examscore.services;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 import static com.xz.examscore.util.Mongo.query;
 
 /**
@@ -140,6 +142,26 @@ public class CollegeEntryLevelService {
                     .append("college_entry_level.level", key);
 
             return (int) collection.count(query);
+        });
+    }
+
+    /**
+     * 查询上线率学生人数
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param key       上线率参数
+     * @return 上线率人数
+     */
+    public ArrayList<Document> getEntryLevelStudentByKey(String projectId, Range range, Target target, String key) {
+        String cacheKey = "entry_level_student:" + projectId + ":" + range + ":" + target + ":" + key;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
+            Document query = query(projectId, range, target)
+                    .append("college_entry_level.level", key);
+            Document projection = doc("totalScore", 1).append("rank", 1).append("student", 1).append("dValue", 1).append("_id", 0);  // 查询结果包含属性
+            return CollectionUtils.asArrayList(toList(collection.find(query).projection(projection)));
         });
     }
 
