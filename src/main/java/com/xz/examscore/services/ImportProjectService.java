@@ -129,6 +129,15 @@ public class ImportProjectService {
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
+        //获取本科上线率统计相关参数
+        String entryLevelStatType = "rate", entryLevelEnable = "false";
+        List<String> collegeEntryLevel = new ArrayList<>();
+        JSONObject onlineRateStat = result.get("onlineRateStat");
+        if(onlineRateStat != null){
+            entryLevelStatType = result.get("entryLevelStatType");
+            entryLevelEnable = result.get("entryLevelEnable");
+            collegeEntryLevel = (List<String>)onlineRateStat.get("values");
+        }
 
         if (null != rankLevel) {
             List<String> displayOptions = (List<String>) rankLevel.get("displayOptions");
@@ -168,6 +177,9 @@ public class ImportProjectService {
             projectConfig.setTopStudentRate(topStudentRate);
             projectConfig.setHighScoreRate(highScoreRate);
             projectConfig.setSeparateCombine(splitUnionSubject);
+            projectConfig.setEntryLevelStatType(entryLevelStatType);
+            projectConfig.setEntryLevelEnable(Boolean.parseBoolean(entryLevelEnable));
+            projectConfig.setCollegeEntryLevel(collegeEntryLevel);
             projectConfigService.fixProjectConfig(projectConfig);
 
             //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
@@ -183,7 +195,8 @@ public class ImportProjectService {
                     projectConfig.getRankLevelCombines(), projectConfig.getScoreLevels(),
                     projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
                     projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate(),
-                    projectConfig.isSeparateCombine());
+                    projectConfig.isSeparateCombine(), projectConfig.getEntryLevelStatType(),
+                    projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel());
             //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }

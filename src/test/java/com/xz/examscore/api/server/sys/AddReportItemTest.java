@@ -26,17 +26,18 @@ public class AddReportItemTest extends XzExamScoreV2ApplicationTests {
 
         String[] collectionNames = new String[]{
                 //"score", "total_score"
-                "average", "score_level_map"
+                "college_entry_level"
         };
 
         Param param = new Param()
-                .setParameter("name", "历史考试数据对比")
-                .setParameter("type", "basics")
-                .setParameter("rangeName", "school")
+                .setParameter("name", "上线预测")
+                .setParameter("type", "topStudent")
+                .setParameter("rangeName", "clazz")
                 .setParameter("rangeId", ReportItemService.COMMON_RANGE_ID)
                 .setParameter("collectionNames", collectionNames)
-                .setParameter("serverName", "SchoolCompareAnalysis")
-                .setParameter("md5", MD5.digest(UUID.randomUUID().toString()));
+                .setParameter("serverName", "ClassEntryLevelRateAnalysis")
+                .setParameter("md5", MD5.digest(UUID.randomUUID().toString()))
+                .setParameter("tag", "102-202-325");
         Result result = addReportItem.execute(param);
         System.out.println(result.getData());
     }

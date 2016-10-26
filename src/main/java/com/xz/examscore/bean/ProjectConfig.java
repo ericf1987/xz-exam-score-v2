@@ -60,6 +60,45 @@ public class ProjectConfig implements Serializable {
      */
     private boolean separateCombine = false;
 
+    /**
+     * 选择展示本科上线率
+     */
+    private List<String> collegeEntryLevel = new ArrayList<>();
+
+    /**
+     * 是否开启本科上线率报表显示
+     */
+    private boolean entryLevelEnable = false;
+
+    /**
+     * 根据上线率或者分数统计
+     */
+    private String entryLevelStatType;
+
+    public List<String> getCollegeEntryLevel() {
+        return collegeEntryLevel;
+    }
+
+    public void setCollegeEntryLevel(List<String> collegeEntryLevel) {
+        this.collegeEntryLevel = collegeEntryLevel;
+    }
+
+    public boolean isEntryLevelEnable() {
+        return entryLevelEnable;
+    }
+
+    public void setEntryLevelEnable(boolean entryLevelEnable) {
+        this.entryLevelEnable = entryLevelEnable;
+    }
+
+    public String getEntryLevelStatType() {
+        return entryLevelStatType;
+    }
+
+    public void setEntryLevelStatType(String entryLevelStatType) {
+        this.entryLevelStatType = entryLevelStatType;
+    }
+
     public boolean isSeparateCombine() {
         return separateCombine;
     }

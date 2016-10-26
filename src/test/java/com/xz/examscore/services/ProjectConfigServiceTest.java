@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * (description)
@@ -118,5 +119,11 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(projectConfig.getTopStudentRate());
         System.out.println(projectConfig.getRankLevels());
         System.out.println(projectConfig.getRankLevelCombines().toString());
+    }
+
+    @Test
+    public void getEntryLevelMap() throws Exception {
+        Map<String, Double> map = projectConfigService.getEntryLevelMap("[default]", 750d);
+        System.out.println(map.toString());
     }
 }

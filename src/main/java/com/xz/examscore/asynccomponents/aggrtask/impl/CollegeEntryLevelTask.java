@@ -59,8 +59,11 @@ public class CollegeEntryLevelTask extends AggrTask{
         Range range = taskInfo.getRange();
         Target projectTarget = taskInfo.getTarget();
 
+        //获取本次考试的满分
+        double fullScore = fullScoreService.getFullScore(projectId, projectTarget);
+
         //获取本科上线率
-        Map<String, Double> entry_level = collegeEntryLevelService.getEntryLevel(projectId);
+        Map<String, Double> entry_level = collegeEntryLevelService.getEntryLevel(projectId, fullScore);
         //获取当前维度下考试总成绩的排名
         List<Document> scoreMap = rankService.getScoreMap(projectId, range, projectTarget);
         if (scoreMap.isEmpty()) {

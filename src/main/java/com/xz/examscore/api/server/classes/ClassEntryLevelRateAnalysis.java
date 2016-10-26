@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/10/26.
@@ -45,18 +46,26 @@ public class ClassEntryLevelRateAnalysis implements Server {
         String projectId = param.getString("projectId");
         String classId = param.getString("classId");
         Map<String, Object> result = new HashMap<>();
+        Range clazzRange = Range.clazz(classId);
+        Target projectTarget = Target.project(projectId);
         int totalCount = 0;
         //获取班级参考学生人数
-        int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId), Target.project(projectId));
+        int studentCount = studentService.getStudentCount(projectId, clazzRange, projectTarget);
+        List<String> studentIds = studentService.getStudentIds(projectId, clazzRange, projectTarget);
+        //本科录取的学生
+        List<Document> entryLevelStudents = new ArrayList<>();
         String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
         List<Map<String, Object>> onlineRate = new ArrayList<>();
+        Map<String, Object> outlineMap = new HashMap<>();
         for (String key : entryLevelKey) {
             Map<String, Object> map = new HashMap<>();
-            int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, Range.clazz(classId), Target.project(projectId), key);
+            int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, clazzRange, projectTarget, key);
             double rate = (double) onlineCount / studentCount;
             String onlineDesc = collegeEntryLevelService.getEntryKeyDesc(key);
-            List<Map<String, Object>> onlineStudents = paddingStudentInfo(projectId,
-                    collegeEntryLevelService.getEntryLevelStudentByKey(projectId, Range.clazz(classId), Target.project(projectId), key));
+            //将每一批次的本科录取学生添加至录取列表
+            List<Document> part = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, clazzRange, projectTarget, key);
+            entryLevelStudents.addAll(part);
+            List<String> onlineStudents = paddingStudentInfo(projectId,part);
             map.put("onlineCount", onlineCount);
             map.put("onlineDesc", onlineDesc);
             map.put("rate", rate);
@@ -66,21 +75,21 @@ public class ClassEntryLevelRateAnalysis implements Server {
         }
         result.put("studentCount", studentCount);
         result.put("onlineRate", onlineRate);
-        result.put("outlineRate", DoubleUtils.round((double) (studentCount - totalCount) / studentCount, true));
+        outlineMap.put("rate", DoubleUtils.round((double) (studentCount - totalCount) / studentCount, true));
+        outlineMap.put("outlineCount", studentCount - totalCount);
+        outlineMap.put("outlineStudents", getOutlintStudents(projectId, studentIds, entryLevelStudents));
+        result.put("outlineRate", outlineMap);
         return Result.success().set("classOnlineRate", result);
     }
 
-    public List<Map<String, Object>> paddingStudentInfo(String projectId, List<Document> students) {
-        List<Map<String, Object>> studentList = new ArrayList<>();
-        students.forEach(student -> {
-            Map<String, Object> map = new HashMap<>();
-            String name = studentService.findStudent(projectId, student.getString("student")).getString("name");
-            map.put("name", name);
-            map.put("totalScore", student.getDouble("totalScore"));
-            map.put("dValue", student.getDouble("dValue"));
-            map.put("rank", student.getInteger("rank"));
-            studentList.add(map);
-        });
-        return studentList;
+    private List<String> getOutlintStudents(String projectId, List<String> studentIds, List<Document> entryLevelStudents) {
+        //取出所有本科录取学生ID
+        List<String> onlineIds = entryLevelStudents.stream().map(id -> id.getString("student")).collect(Collectors.toList());
+        studentIds.removeAll(onlineIds);
+        return studentIds.stream().map(id -> studentService.findStudent(projectId, id).getString("name")).collect(Collectors.toList());
+    }
+
+    public List<String> paddingStudentInfo(String projectId, List<Document> students) {
+        return students.stream().map(student -> studentService.findStudent(projectId, student.getString("student")).getString("name")).collect(Collectors.toList());
     }
 }

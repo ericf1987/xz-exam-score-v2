@@ -7,13 +7,17 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * (description)
@@ -25,6 +29,10 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 public class ProjectConfigService {
 
     public static final String DEFAULT = "[default]";
+
+    public static final String[] ENTRY_LEVEL = new String[]{
+            "ONE", "TWO", "THREE"
+    };
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -74,6 +82,9 @@ public class ProjectConfigService {
                         .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                         .append("highScoreRate", projectConfig.getHighScoreRate())
                         .append("splitUnionSubject", projectConfig.isSeparateCombine())
+                        .append("entryLevelStatType", projectConfig.getEntryLevelStatType())
+                        .append("entryLevelEnable", projectConfig.isEntryLevelEnable())
+                        .append("collegeEntryLevel", projectConfig.getCollegeEntryLevel())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -86,6 +97,9 @@ public class ProjectConfigService {
                     .append("rankSegmentCount", projectConfig.getRankSegmentCount())
                     .append("highScoreRate", projectConfig.getHighScoreRate())
                     .append("splitUnionSubject", projectConfig.isSeparateCombine())
+                    .append("entryLevelStatType", projectConfig.getEntryLevelStatType())
+                    .append("entryLevelEnable", projectConfig.isEntryLevelEnable())
+                    .append("collegeEntryLevel", projectConfig.getCollegeEntryLevel())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -94,19 +108,23 @@ public class ProjectConfigService {
     /**
      * 更新报表配置中的等第配置
      *
-     * @param projectId         项目ID
-     * @param rankLevels        等第比例配置
-     * @param isCombine         是否合并文理科
-     * @param rankLevelCombines 展示的等第组合列表
-     * @param scoreLevels       展示的分数等级
-     * @param topStudentRate    展示的尖子生比例
-     * @param highScoreRate     展示的高分段比例
-     * @param splitUnionSubject   是否将综合科目拆分成单科统计
+     * @param projectId          项目ID
+     * @param rankLevels         等第比例配置
+     * @param isCombine          是否合并文理科
+     * @param rankLevelCombines  展示的等第组合列表
+     * @param scoreLevels        展示的分数等级
+     * @param topStudentRate     展示的尖子生比例
+     * @param highScoreRate      展示的高分段比例
+     * @param splitUnionSubject  是否将综合科目拆分成单科统计
+     * @param entryLevelStatType 本科上线率参数类型
+     * @param entryLevelEnable   报表侧是否开启上线率报表
+     * @param collegeEntryLevel  本科上线率参数
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
-            String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject) {
+            String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
+            String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -118,6 +136,9 @@ public class ProjectConfigService {
                         .append("rankSegmentCount", rankSegmentCount)
                         .append("highScoreRate", highScoreRate)
                         .append("splitUnionSubject", splitUnionSubject)
+                        .append("entryLevelStatType", entryLevelStatType)
+                        .append("entryLevelEnable", entryLevelEnable)
+                        .append("collegeEntryLevel", collegeEntryLevel)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -130,6 +151,9 @@ public class ProjectConfigService {
                     .append("rankSegmentCount", rankSegmentCount)
                     .append("highScoreRate", highScoreRate)
                     .append("splitUnionSubject", splitUnionSubject)
+                    .append("entryLevelStatType", entryLevelStatType)
+                    .append("entryLevelEnable", entryLevelEnable)
+                    .append("collegeEntryLevel", collegeEntryLevel)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -206,6 +230,16 @@ public class ProjectConfigService {
             projectConfig.setHighScoreRate(defaultConfig.getHighScoreRate());
         }
 
+        //本科上线率
+        if (projectConfig.getCollegeEntryLevel().isEmpty()) {
+            projectConfig.setCollegeEntryLevel(defaultConfig.getCollegeEntryLevel());
+        }
+
+        //统计方式为上线率或分数
+        if (StringUtils.isEmpty(projectConfig.getEntryLevelStatType())) {
+            projectConfig.setEntryLevelStatType(defaultConfig.getEntryLevelStatType());
+        }
+
         return projectConfig;
     }
 
@@ -221,5 +255,27 @@ public class ProjectConfigService {
         }
 
         return subjectId == null ? projectConfig.getRankLevelCombines() : rankLevelParam;
+    }
+
+    //将上线率转化为录取分数线的分数
+    public Map<String, Double> getEntryLevelMap(String projectId, Double totalScore) {
+        ProjectConfig projectConfig = getProjectConfig(projectId);
+        Map<String, Double> map = new HashMap<>();
+        if (projectConfig.getEntryLevelStatType().equals("rate")) {
+            //转化为录取分数
+            List<Double> rates = projectConfig.getCollegeEntryLevel().stream()
+                    .map(rate -> DoubleUtils.round(totalScore * ((Double.parseDouble(rate) / 100)))).collect(Collectors.toList());
+            for (int i = 0; i < ENTRY_LEVEL.length; i++) {
+                map.put(ENTRY_LEVEL[i], rates.get(i));
+            }
+        } else {
+            //转化为得分
+            List<Double> rates = projectConfig.getCollegeEntryLevel().stream()
+                    .map(rate -> DoubleUtils.round(Double.parseDouble(rate))).collect(Collectors.toList());
+            for (int i = 0; i < ENTRY_LEVEL.length; i++) {
+                map.put(ENTRY_LEVEL[i], rates.get(i));
+            }
+        }
+        return map;
     }
 }

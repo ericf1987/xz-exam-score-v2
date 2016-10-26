@@ -7,6 +7,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.apache.commons.lang.math.NumberUtils;
@@ -46,6 +47,9 @@ public class ReportItemService {
 
     @Autowired
     SimpleCache instantCache;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     /**
      * 查询指定报表条目明细
@@ -105,7 +109,13 @@ public class ReportItemService {
             if (isPointOrLevelItem(name)) {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
-                reportItem.put("dataStatus", checkItemDate(projectId, document));
+                //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
+                if(name.equals("上线预测")){
+                    ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+                    reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
+                }else{
+                    reportItem.put("dataStatus", checkItemDate(projectId, document));
+                }
             }
 
             list.add(reportItem);

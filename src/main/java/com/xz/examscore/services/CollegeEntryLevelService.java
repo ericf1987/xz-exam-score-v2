@@ -31,6 +31,9 @@ public class CollegeEntryLevelService {
     @Autowired
     SimpleCache cache;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     /**
      * 查询本科录取学生列表
      *
@@ -113,16 +116,12 @@ public class CollegeEntryLevelService {
         });
     }
 
-    public Map<String, Double> getEntryLevel(String projectId) {
-        Map<String, Double> map = new HashMap<>();
-        map.put("ONE", 400d);
-        map.put("TWO", 300d);
-        map.put("THREE", 200d);
-        return map;
+    public Map<String, Double> getEntryLevel(String projectId, Double totalScore) {
+        return projectConfigService.getEntryLevelMap(projectId, totalScore);
     }
 
     public String[] getEntryLevelKey(String projectId) {
-        return new String[]{"ONE", "TWO", "THREE"};
+        return projectConfigService.ENTRY_LEVEL;
     }
 
     /**
