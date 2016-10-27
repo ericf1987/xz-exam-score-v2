@@ -7,6 +7,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class ProjectConfigService {
 
     @Autowired
     SimpleCache instantCache;
+
+    @Autowired
+    RankService rankService;
 
     /**
      * 从缺省的配置模板产生一个新的项目配置
@@ -258,13 +263,13 @@ public class ProjectConfigService {
     }
 
     //将上线率转化为录取分数线的分数
-    public Map<String, Double> getEntryLevelMap(String projectId, Double totalScore) {
+    public Map<String, Double> getEntryLevelMap(String projectId, Range range, Target projectTarget, int studentCount) {
         ProjectConfig projectConfig = getProjectConfig(projectId);
         Map<String, Double> map = new HashMap<>();
         if (projectConfig.getEntryLevelStatType().equals("rate")) {
-            //转化为录取分数
+            //如果录取参数为排名率，则需要计算出对应排名位置的分数，根据此分数来录取
             List<Double> rates = projectConfig.getCollegeEntryLevel().stream()
-                    .map(rate -> DoubleUtils.round(totalScore * ((Double.parseDouble(rate) / 100)))).collect(Collectors.toList());
+                    .map(rate -> getScoreByIndex(projectId, range, projectTarget, studentCount, rate)).collect(Collectors.toList());
             for (int i = 0; i < ENTRY_LEVEL.length; i++) {
                 map.put(ENTRY_LEVEL[i], rates.get(i));
             }
@@ -277,5 +282,12 @@ public class ProjectConfigService {
             }
         }
         return map;
+    }
+
+    //根据排名率计算排名位置的得分
+    private double getScoreByIndex(String projectId, Range range, Target projectTarget, int studentCount, String rate) {
+        double d = Double.parseDouble(rate) / 100;
+        int index = (int) (studentCount * d);
+        return rankService.getRankScore(projectId, range, projectTarget, index);
     }
 }

@@ -12,6 +12,7 @@ import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.util.DoubleUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,10 @@ import java.util.Map;
         @Parameter(name = "topStudentRatio", type = Type.String, description = "尖子生比例", required = true),
         @Parameter(name = "displayOptions", type = Type.StringArray, description = "报表等第参数展示", required = true),
         @Parameter(name = "scoreLevels", type = Type.StringArray, description = "分数等级", required = true),
-        @Parameter(name = "rankLevel", type = Type.StringArray, description = "排名等级", required = true)
-
+        @Parameter(name = "rankLevel", type = Type.StringArray, description = "排名等级", required = true),
+        @Parameter(name = "collegeEntryLevel", type = Type.StringArray, description = "本科上线率参数", required = false),
+        @Parameter(name = "onlineStatType", type = Type.String, description = "本科上线率参数类型", required = false),
+        @Parameter(name = "isOn", type = Type.String, description = "是否显示上线预测", required = false)
 })
 @Service
 public class SetProjectConfig implements Server {
@@ -59,7 +62,7 @@ public class SetProjectConfig implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        if(!checkParam(param)){
+        if (!checkParam(param)) {
             return Result.fail("配置参数不合法，请重新核对！");
         }
         try {
@@ -68,10 +71,10 @@ public class SetProjectConfig implements Server {
             Param _param = new Param().setParameter("projectId", projectId)
                     .setParameter("settings", projectConfigJson);
             ApiResponse apiResponse = interfaceClient.setProjectConfig(_param);
-            if(apiResponse.isSuccess()){
+            if (apiResponse.isSuccess()) {
                 projectConfigService.updateRankLevelConfig(projectConfig);
                 return Result.success("配置保存成功!");
-            }else{
+            } else {
                 return Result.fail("配置保存失败，网络连接异常");
             }
         } catch (Exception e) {
@@ -81,9 +84,9 @@ public class SetProjectConfig implements Server {
 
     private boolean checkParam(Param param) {
         boolean flag = true;
-        if(param.getStringValues("rankLevel").length != RANK_LEVEL_PARAM.length){
+        if (param.getStringValues("rankLevel").length != RANK_LEVEL_PARAM.length) {
             flag = false;
-        }else if(param.getStringValues("scoreLevels").length != SCORE_LEVEL_PARAM_CMS.length){
+        } else if (param.getStringValues("scoreLevels").length != SCORE_LEVEL_PARAM_CMS.length) {
             flag = false;
         }
         return flag;
@@ -100,6 +103,10 @@ public class SetProjectConfig implements Server {
         rankLevel.put("standard", toCMSRankLevelsMap(param.getStringValues("rankLevel")));
         rankLevel.put("displayOptions", Arrays.asList(param.getStringValues("displayOptions")));
         jo.put("rankLevel", rankLevel);
+        JSONObject onlineRateStat = new JSONObject();
+        onlineRateStat.put("values", Arrays.asList(param.getStringValues("collegeEntryLevel")));
+        onlineRateStat.put("isOn", param.getBoolean("isOn"));
+        onlineRateStat.put("onlineStatType", param.getString("onlineStatType"));
         return jo.toString();
     }
 
@@ -144,6 +151,9 @@ public class SetProjectConfig implements Server {
         projectConfig.setRankLevelCombines(Arrays.asList(param.getStringValues("displayOptions")));
         projectConfig.setScoreLevels(toScoreLevelsMap(param.getStringValues("scoreLevels")));
         projectConfig.setRankLevels(toRankLevelsMap(param.getStringValues("rankLevel")));
+        projectConfig.setEntryLevelStatType(param.getString("onlineStatType"));
+        projectConfig.setEntryLevelEnable(BooleanUtils.toBoolean(param.getBoolean("isOn")));
+        projectConfig.setCollegeEntryLevel(Arrays.asList(param.getStringValues("collegeEntryLevel")));
         return projectConfig;
     }
 }

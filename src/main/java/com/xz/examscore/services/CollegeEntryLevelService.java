@@ -116,8 +116,8 @@ public class CollegeEntryLevelService {
         });
     }
 
-    public Map<String, Double> getEntryLevel(String projectId, Double totalScore) {
-        return projectConfigService.getEntryLevelMap(projectId, totalScore);
+    public Map<String, Double> getEntryLevel(String projectId, Range range, Target projectTarget, int studentCount) {
+        return projectConfigService.getEntryLevelMap(projectId, range, projectTarget, studentCount);
     }
 
     public String[] getEntryLevelKey(String projectId) {

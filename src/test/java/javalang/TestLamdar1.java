@@ -12,7 +12,10 @@ import java.util.stream.Collectors;
  */
 public class TestLamdar1 {
     public static void main(String[] args) {
-        double d = (double)100 / 111;
-        System.out.println(d);
+        new TestLamdar1().test1(1, 2);
+    }
+
+    public void test1(int a, int b){
+        System.out.println(a + b);
     }
 }

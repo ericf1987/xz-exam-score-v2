@@ -3,6 +3,8 @@ package com.xz.examscore.services;
 import com.xz.ajiaedu.common.report.Keys.ScoreLevel;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +23,9 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     ProjectConfigService projectConfigService;
+
+    @Autowired
+    StudentService studentService;
 
     @Test
     public void testSaveProjectConfig() throws Exception {
@@ -123,7 +128,11 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void getEntryLevelMap() throws Exception {
-        Map<String, Double> map = projectConfigService.getEntryLevelMap("[default]", 750d);
+        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+        Range range = Range.province("430000");
+        Target projectTarget = Target.project(projectId);
+        int count = studentService.getStudentCount(projectId, range, projectTarget);
+        Map<String, Double> map = projectConfigService.getEntryLevelMap(projectId, range, projectTarget, count);
         System.out.println(map.toString());
     }
 }
