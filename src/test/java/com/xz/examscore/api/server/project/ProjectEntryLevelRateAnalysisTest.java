@@ -18,7 +18,7 @@ public class ProjectEntryLevelRateAnalysisTest extends XzExamScoreV2ApplicationT
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "433100-fef19389d6ce4b1f99847ab96d2cfeba");
+        Param param = new Param().setParameter("projectId", "430100-1944e9f7048b48e2b38e35db75be4980");
         Result result = projectEntryLevelRateAnalysis.execute(param);
         System.out.println(result.getData());
     }

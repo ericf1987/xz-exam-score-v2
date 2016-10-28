@@ -18,8 +18,8 @@ public class SchoolEntryLevelRateAnalysisTest extends XzExamScoreV2ApplicationTe
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "433100-fef19389d6ce4b1f99847ab96d2cfeba")
-                .setParameter("schoolId", "64a1c8cd-a9b9-4755-a973-e1ce07f3f70a");
+        Param param = new Param().setParameter("projectId", "430100-1944e9f7048b48e2b38e35db75be4980")
+                .setParameter("schoolId", "80e503de-072c-4e26-845f-271e841bf47a");
         Result result = schoolEntryLevelRateAnalysis.execute(param);
         System.out.println(result.getData());
     }

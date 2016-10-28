@@ -45,7 +45,7 @@ public class CollegeEntryLevelService {
      * @return 本科录取学生列表
      */
     public List<Document> getEntryLevelStudent(String projectId, Range range, Target target, int minRank, int maxRank) {
-        String cacheKey = "college_entry_level:" + projectId + ":" + range
+        String cacheKey = "entry_level_student:" + projectId + ":" + range
                 + ":" + target + ":" + minRank + ":" + maxRank;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
@@ -154,7 +154,7 @@ public class CollegeEntryLevelService {
      * @return 上线率人数
      */
     public ArrayList<Document> getEntryLevelStudentByKey(String projectId, Range range, Target target, String key) {
-        String cacheKey = "entry_level_student:" + projectId + ":" + range + ":" + target + ":" + key;
+        String cacheKey = "entry_level_student_by_key:" + projectId + ":" + range + ":" + target + ":" + key;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target)

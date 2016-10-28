@@ -128,7 +128,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void getEntryLevelMap() throws Exception {
-        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+        String projectId = "430100-1944e9f7048b48e2b38e35db75be4980";
         Range range = Range.province("430000");
         Target projectTarget = Target.project(projectId);
         int count = studentService.getStudentCount(projectId, range, projectTarget);

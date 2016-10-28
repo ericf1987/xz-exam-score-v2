@@ -101,11 +101,16 @@ public class CollegeEntryLevelTask extends AggrTask{
             count += scoreCount;
             index++;
         }
-
         //删除原有数据
         MongoCollection<Document> entry_level_students = scoreDatabase.getCollection("college_entry_level");
         Document query = doc("project", projectId).append("range", range2Doc(range)).append("target", target2Doc(projectTarget));
         entry_level_students.deleteMany(query);
+
+        //如果当前维度下的没有本科上线的同学，则返回
+        if(newScoreMap.isEmpty()){
+            LOG.info("没有本科上线的同学：project={}, range={}, target={}", projectId, range, projectTarget);
+            return;
+        }
 
         Document projection = doc("range", 1).append("totalScore", 1);  // 查询结果取哪几个字段
 
@@ -121,6 +126,8 @@ public class CollegeEntryLevelTask extends AggrTask{
 
             Double totalScore = document.getDouble("totalScore");
             if (!rankMap.containsKey(totalScore)) {
+                String studentId = document.getString("range.id");
+                LOG.error("找不到学生{}的分数{}对应的排名: project={}, range={}, target={}", studentId, totalScore, projectId, range, projectTarget);
                 throw new IllegalStateException("找不到分数 " + totalScore + " 的排名");
             }
 
