@@ -27,12 +27,12 @@ public class CollegeEntryLevelTaskTest extends XzExamScoreV2ApplicationTests {
     public void testRunTask() throws Exception {
         String projectId = "430100-1944e9f7048b48e2b38e35db75be4980";
         String type = "college_entry_level";
-        Range schoolRange = Range.school("64a1c8cd-a9b9-4755-a973-e1ce07f3f70a");
-        Range clazzRange = Range.clazz("0b0e704f-955b-456c-878d-015a8a621051");
+        Range schoolRange = Range.school("d00faaa0-8a9b-45c4-ae16-ea2688353cd0");
+        Range clazzRange = Range.clazz("de0bbb89-ef61-488f-b639-2a532030946a");
         Range provinceRange = rangeService.queryProvinceRange(projectId);
 
         task.runTask(new AggrTaskMessage(projectId, "aaa", type)
-                .setRange(provinceRange)
+                .setRange(clazzRange)
                 .setTarget(Target.project(projectId)));
     }
 }

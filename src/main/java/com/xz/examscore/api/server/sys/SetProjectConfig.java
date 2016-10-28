@@ -105,7 +105,7 @@ public class SetProjectConfig implements Server {
         jo.put("rankLevel", rankLevel);
         JSONObject onlineRateStat = new JSONObject();
         onlineRateStat.put("values", Arrays.asList(param.getStringValues("collegeEntryLevel")));
-        onlineRateStat.put("isOn", param.getBoolean("isOn"));
+        onlineRateStat.put("isOn", param.getBoolean("entryLevelEnable"));
         onlineRateStat.put("onlineStatType", param.getString("onlineStatType"));
         return jo.toString();
     }
@@ -152,7 +152,7 @@ public class SetProjectConfig implements Server {
         projectConfig.setScoreLevels(toScoreLevelsMap(param.getStringValues("scoreLevels")));
         projectConfig.setRankLevels(toRankLevelsMap(param.getStringValues("rankLevel")));
         projectConfig.setEntryLevelStatType(param.getString("onlineStatType"));
-        projectConfig.setEntryLevelEnable(BooleanUtils.toBoolean(param.getBoolean("isOn")));
+        projectConfig.setEntryLevelEnable(BooleanUtils.toBoolean(param.getBoolean("entryLevelEnable")));
         projectConfig.setCollegeEntryLevel(Arrays.asList(param.getStringValues("collegeEntryLevel")));
         return projectConfig;
     }

@@ -60,8 +60,8 @@ public class CollegeEntryLevelTask extends AggrTask{
         Target projectTarget = taskInfo.getTarget();
         Range provinceRange = rangeService.queryProvinceRange(projectId);
 
-        //获取考试总人数
-        int studentCount = studentService.getStudentCount(projectId, range, projectTarget);
+        //获取所有考试总人数
+        int studentCount = studentService.getStudentCount(projectId, provinceRange, projectTarget);
 
         //获取本科上线率（按所有人数排名百分比录取或）
         Map<String, Double> entry_level = collegeEntryLevelService.getEntryLevel(projectId, provinceRange, projectTarget, studentCount);
