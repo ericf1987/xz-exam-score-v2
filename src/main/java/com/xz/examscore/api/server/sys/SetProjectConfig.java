@@ -34,7 +34,7 @@ import java.util.Map;
         @Parameter(name = "rankLevel", type = Type.StringArray, description = "排名等级", required = true),
         @Parameter(name = "collegeEntryLevel", type = Type.StringArray, description = "本科上线率参数", required = false),
         @Parameter(name = "onlineStatType", type = Type.String, description = "本科上线率参数类型", required = false),
-        @Parameter(name = "isOn", type = Type.String, description = "是否显示上线预测", required = false)
+        @Parameter(name = "entryLevelEnable", type = Type.String, description = "是否显示上线预测", required = false)
 })
 @Service
 public class SetProjectConfig implements Server {
