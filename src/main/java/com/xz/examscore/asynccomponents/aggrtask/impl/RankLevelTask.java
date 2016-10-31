@@ -117,13 +117,17 @@ public class RankLevelTask extends AggrTask {
 
         Target project = Target.project(projectId);
 
+        //是否文理分科
         boolean combinedSubjects =
                 projectConfigService.getProjectConfig(projectId).isCombineCategorySubjects();
+
+        //是否有组合科目
+        List<String> subjectCombinations = subjectCombinationService.getAllSubjectCombinations(projectId);
 
         for (String rangeName : rankLevelsMap.keySet()) {
             Map<String, String> rankLevels = rankLevelsMap.get(rangeName);
 
-            if (combinedSubjects) {
+            if (combinedSubjects || !subjectCombinations.isEmpty()) {
                 removeCombiningSubjects(rankLevels);
             }
 

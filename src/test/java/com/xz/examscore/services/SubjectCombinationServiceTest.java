@@ -1,13 +1,10 @@
 package com.xz.examscore.services;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.bean.SubjectCombination;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 /**
  * @author by fengye on 2016/10/18.
@@ -30,7 +27,7 @@ public class SubjectCombinationServiceTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testSaveProjectSubjectCombinations() throws Exception {
-        String projectId = "430100-386a57cd56434c77bb4336076394c345";
+        String projectId = "430100-2e63dd5efb014a0b9a0505ad36ce8f90";
         subjectCombinationService.saveProjectSubjectCombinations(projectId, Arrays.asList("004005006"));
     }
 }
