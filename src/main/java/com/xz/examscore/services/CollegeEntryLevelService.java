@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
@@ -93,6 +94,12 @@ public class CollegeEntryLevelService {
         return cache.get(cacheKey, () -> {
             ArrayList<Map<String, Object>> list = new ArrayList<>();
             int totalTopStudentCount = getEntryLevelStudentMaxRank(projectId, range);
+
+            //如果未统计出本科生学生录取数据，则分段参数从考试配置表中取得
+            if(totalTopStudentCount == 0){
+                ProjectConfig projectConfig = new ProjectConfig(projectId);
+                totalTopStudentCount = projectConfig.getRankSegmentCount();
+            }
             int startIndex = 1;
             int endIndex = 0;
 

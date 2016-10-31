@@ -18,8 +18,8 @@ public class QueryELStudentRankSegmentTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "433100-fef19389d6ce4b1f99847ab96d2cfeba";
-        String schoolId = "64a1c8cd-a9b9-4755-a973-e1ce07f3f70a";
+        String projectId = "430100-2e63dd5efb014a0b9a0505ad36ce8f90";
+        String schoolId = "80e503de-072c-4e26-845f-271e841bf47a";
         Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId);
         Result result = queryELStudentRankSegment.execute(param);
         System.out.println(result.getData());
