@@ -5,6 +5,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
@@ -51,7 +52,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param questId   题目ID
      * @param range     范围
-     *
      * @return 答对人数
      */
     public int getQuestCorrentCount(String projectId, String questId, Range range) {
@@ -70,7 +70,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     *
      * @return 分数
      */
     public double getScore(String projectId, Range range, Target target) {
@@ -91,7 +90,6 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param questId   题目ID
-     *
      * @return 分数记录
      */
     public Document findOneJudgeQuestScore(String projectId, String questId) {
@@ -105,7 +103,6 @@ public class ScoreService {
      * @param projectId  项目ID
      * @param studentId  学生ID
      * @param targetName 目标名称
-     *
      * @return 分数列表
      */
     public List<Document> getStudentScores(String projectId, String studentId, String targetName) {
@@ -136,7 +133,6 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param studentId 学生ID
-     *
      * @return 分数记录
      */
     public FindIterable<Document> getStudentQuestScores(String projectId, String studentId) {
@@ -150,7 +146,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 科目ID
-     *
      * @return 成绩
      */
     public double getSubjectScore(String projectId, String studentId, String subjectId) {
@@ -174,7 +169,7 @@ public class ScoreService {
         });
     }
 
-    public Document getScoreDoc(String projectId, String studentId, String questId, boolean isObjective){
+    public Document getScoreDoc(String projectId, String studentId, String questId, boolean isObjective) {
         String cacheKey = "quest_score:" + projectId + ":" + studentId + ":" + questId + ":" + isObjective;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
@@ -301,9 +296,39 @@ public class ScoreService {
         }
     }
 
-    public void clearByTargetName(String projectId, String targetName){
+    public void clearByTargetName(String projectId, String targetName) {
         Document query = doc("project", projectId).append("target.name", targetName);
         scoreDatabase.getCollection("total_score_combined").deleteMany(query);
         scoreDatabase.getCollection("total_score").deleteMany(query);
+    }
+
+    public ArrayList<Document> getScoreDocs(String projectId, Range range, String subjectId, String questId, String item) {
+        String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + item;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId)
+                    .append(range.getName(), range.getId())
+                    .append("subject", subjectId)
+                    .append("quest", questId)
+                    .append("answer", item);
+            return CollectionUtils.asArrayList(toList(collection.find(query)));
+        });
+    }
+
+    public ArrayList<Document> getScoreDocsByScoreSegment(String projectId, Range range, String subjectId, String questId, Double min, Double max) {
+        String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + min + ":" + max;
+        Document query = doc("project", projectId)
+                .append(range.getName(), range.getId())
+                .append("subject", subjectId)
+                .append("quest", questId);
+        if (min == 0) {
+            query.append("score", doc("$gte", min).append("$lte", max));
+        } else {
+            query.append("score", doc("$gt", min).append("$lte", max));
+        }
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            return CollectionUtils.asArrayList(toList(collection.find(query)));
+        });
     }
 }
