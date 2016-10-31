@@ -68,6 +68,7 @@ public class SetProjectConfig implements Server {
         try {
             ProjectConfig projectConfig = convert2Obj(param);
             String projectConfigJson = convert2JSON(param);
+            LOG.info("提交至CMS的参数：{}", projectConfigJson);
             Param _param = new Param().setParameter("projectId", projectId)
                     .setParameter("settings", projectConfigJson);
             ApiResponse apiResponse = interfaceClient.setProjectConfig(_param);
@@ -105,8 +106,9 @@ public class SetProjectConfig implements Server {
         jo.put("rankLevel", rankLevel);
         JSONObject onlineRateStat = new JSONObject();
         onlineRateStat.put("values", Arrays.asList(param.getStringValues("collegeEntryLevel")));
-        onlineRateStat.put("isOn", param.getBoolean("entryLevelEnable"));
+        onlineRateStat.put("isOn", param.getBoolean("entryLevelEnable").toString());
         onlineRateStat.put("onlineStatType", param.getString("onlineStatType"));
+        jo.put("onlineRateStat", onlineRateStat);
         return jo.toString();
     }
 

@@ -41,11 +41,6 @@ public class ProjectConfig implements Serializable {
     private List<String> rankLevelCombines = new ArrayList<>();
 
     /**
-     * 考试开始日期，格式 yyyy-MM-dd
-     */
-    private String startDate;
-
-    /**
      * 尖子生比率
      */
     private double topStudentRate;
@@ -136,14 +131,6 @@ public class ProjectConfig implements Serializable {
 
     public void setRankLevelCombines(List<String> rankLevelCombines) {
         this.rankLevelCombines = rankLevelCombines;
-    }
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
     }
 
     public int getRankSegmentCount() {

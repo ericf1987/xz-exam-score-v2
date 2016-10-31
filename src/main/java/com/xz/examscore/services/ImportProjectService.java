@@ -133,7 +133,7 @@ public class ImportProjectService {
         String entryLevelStatType = "rate", entryLevelEnable = "false";
         List<String> collegeEntryLevel = new ArrayList<>();
         JSONObject onlineRateStat = result.get("onlineRateStat");
-        if(onlineRateStat != null){
+        if(onlineRateStat != null && !onlineRateStat.isEmpty()){
             entryLevelStatType = onlineRateStat.get("onlineStatType").toString();
             entryLevelEnable = onlineRateStat.get("isOn").toString();
             collegeEntryLevel = (List<String>)onlineRateStat.get("values");

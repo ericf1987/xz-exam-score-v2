@@ -10,6 +10,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -132,7 +133,7 @@ public class CollegeEntryLevelTask extends AggrTask{
             }
 
             Map<String, Object> oneEntryLevel = getOneEntryLevel(totalScore, entry_level);
-            Double dValue = totalScore - MapUtils.getDouble(oneEntryLevel, "score");
+            Double dValue = DoubleUtils.round(totalScore - MapUtils.getDouble(oneEntryLevel, "score"));
 
             int rank = rankMap.get(totalScore);
             String studentId = ((Document) document.get("range")).getString("id");
