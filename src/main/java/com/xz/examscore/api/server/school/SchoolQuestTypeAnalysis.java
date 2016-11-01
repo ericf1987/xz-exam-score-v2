@@ -1,6 +1,7 @@
 package com.xz.examscore.api.server.school;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -31,7 +32,8 @@ import static com.xz.examscore.api.server.sys.QueryExamClasses.getFullClassName;
 @Function(description = "学校成绩-试卷题型分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true)
+        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
+        @Parameter(name = "classId", type = Type.String, description = "班级id,不为空查询指定班级学科分析", required = false)
 })
 @Service
 public class SchoolQuestTypeAnalysis implements Server {
@@ -53,8 +55,9 @@ public class SchoolQuestTypeAnalysis implements Server {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String schoolId = param.getString("schoolId");
+        String classId = param.getString("classId");
 
-        List<Map<String, Object>> classQuestTypeAnalysis = getClassQuestTypeAnalysis(projectId, subjectId, schoolId);
+        List<Map<String, Object>> classQuestTypeAnalysis = getClassQuestTypeAnalysis(projectId, subjectId, schoolId, classId);
         List<Map<String, Object>> schoolQuestTypeAnalysis = getSchoolQuestTypeAnalysis(projectId, subjectId, schoolId);
 
         return Result.success()
@@ -64,17 +67,25 @@ public class SchoolQuestTypeAnalysis implements Server {
     }
 
     // 班级试题分析
-    private List<Map<String, Object>> getClassQuestTypeAnalysis(String projectId, String subjectId, String schoolId) {
+    private List<Map<String, Object>> getClassQuestTypeAnalysis(
+            String projectId, String subjectId, String schoolId, String classId) {
         List<Map<String, Object>> list = new ArrayList<>();
 
-        List<Document> listClasses = classService.listClasses(projectId, schoolId);
+        List<Document> listClasses = new ArrayList<>();
+        if (StringUtil.isNotBlank(classId)) {
+            listClasses = classService.listClasses(projectId, schoolId);
+        } else {
+            Document aClass = classService.findClass(projectId, classId);
+            listClasses.add(aClass);
+        }
+
         for (Document listClass : listClasses) {
             Map<String, Object> map = new HashMap<>();
-            String classId = listClass.getString("class");
-            map.put("classId", classId);
+            String _classId = listClass.getString("class");
+            map.put("classId", _classId);
             map.put("className", getFullClassName(listClass));
 
-            Range range = Range.clazz(classId);
+            Range range = Range.clazz(_classId);
             List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range,
                     questTypeService, fullScoreService, questTypeScoreService);
             map.put("questTypes", questTypes);

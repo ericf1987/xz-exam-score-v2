@@ -1,6 +1,7 @@
 package com.xz.examscore.api.server.school;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -28,6 +29,7 @@ import static com.xz.examscore.api.server.sys.QueryExamClasses.getFullClassName;
 @Function(description = "学校成绩-学科分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
+        @Parameter(name = "classId", type = Type.String, description = "班级id,不为空查询指定班级学科分析", required = false),
         @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
@@ -58,10 +60,11 @@ public class SchoolSubjectAnalysis implements Server {
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
+        String classId = param.getString("classId");
         String[] authSubjectIds = param.getStringValues("authSubjectIds");
 
         // 班级学科分析
-        List<Map<String, Object>> classsSubjectMaps = getClassSubjectAnalysis(projectId, schoolId, authSubjectIds);
+        List<Map<String, Object>> classsSubjectMaps = getClassSubjectAnalysis(projectId, schoolId, classId, authSubjectIds);
 
         // 学校学科分析
         Range range = Range.school(schoolId);
@@ -75,18 +78,25 @@ public class SchoolSubjectAnalysis implements Server {
     }
 
     private List<Map<String, Object>> getClassSubjectAnalysis(
-            String projectId, String schoolId, String[] authSubjectIds) {
+            String projectId, String schoolId, String classId, String[] authSubjectIds) {
         List<Map<String, Object>> classsSubjectMaps = new ArrayList<>();
 
-        List<Document> listClasses = classService.listClasses(projectId, schoolId);
-        for (Document listClass : listClasses) {
-            String classId = listClass.getString("class");
+        List<Document> listClasses = new ArrayList<>();
+        if (StringUtil.isNotBlank(classId)) {
+            listClasses = classService.listClasses(projectId, schoolId);
+        } else {
+            Document aClass = classService.findClass(projectId, classId);
+            listClasses.add(aClass);
+        }
 
-            Range range = Range.clazz(classId);
+        for (Document listClass : listClasses) {
+            String _classId = listClass.getString("class");
+
+            Range range = Range.clazz(_classId);
             Map<String, Object> subjectAnalysis = getSubjectAnalysis(projectId, range, authSubjectIds, studentService,
                     averageService, subjectService, subjectRateService, fullScoreService, tScoreService);
 
-            subjectAnalysis.put("classId", classId);
+            subjectAnalysis.put("classId", _classId);
             subjectAnalysis.put("className", getFullClassName(listClass));
             classsSubjectMaps.add(subjectAnalysis);
         }
