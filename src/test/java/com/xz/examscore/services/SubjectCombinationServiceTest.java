@@ -27,7 +27,7 @@ public class SubjectCombinationServiceTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testSaveProjectSubjectCombinations() throws Exception {
-        String projectId = "430100-2e63dd5efb014a0b9a0505ad36ce8f90";
-        subjectCombinationService.saveProjectSubjectCombinations(projectId, Arrays.asList("004005006"));
+        String projectId = "430700-caa7e02622ca402eb4a2fd071580373b";
+        subjectCombinationService.saveProjectSubjectCombinations(projectId, Arrays.asList("007008009"));
     }
 }

@@ -31,11 +31,11 @@ public class ClassSbjCbnSheets extends SheetGenerator {
                 .setParameter("subjectCombinationId", target.getId().toString());
         Result result = classSbjCbnCompare.execute(param);
         List<Map<String, Object>> list = result.get("classes");
-        setHeader(excelWriter, list);
+        setHeader(excelWriter);
         fillData(excelWriter, list);
     }
 
-    private void setHeader(ExcelWriter excelWriter, List<Map<String, Object>> list) {
+    private void setHeader(ExcelWriter excelWriter) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "班级");
         excelWriter.set(0, column.incrementAndGet(), "综合平均分");

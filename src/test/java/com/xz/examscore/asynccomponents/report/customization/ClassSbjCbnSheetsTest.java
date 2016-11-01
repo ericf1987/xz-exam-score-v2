@@ -17,6 +17,6 @@ public class ClassSbjCbnSheetsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classSbjCbnReport.generate("430100-2c641a3e36ff492aa535da7fb4cf28cf", null, "target/class-sbj-cbn-compare.xlsx");
+        classSbjCbnReport.generate("430700-caa7e02622ca402eb4a2fd071580373b", null, "target/class-sbj-cbn-compare.xlsx");
     }
 }

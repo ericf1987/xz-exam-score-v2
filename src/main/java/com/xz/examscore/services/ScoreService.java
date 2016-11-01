@@ -331,4 +331,14 @@ public class ScoreService {
             return CollectionUtils.asArrayList(toList(collection.find(query)));
         });
     }
+
+    //查询试题作答的学生数
+    public int getScoreRecordCount(String projectId, Range range, String subjectId, String questId) {
+        String cacheKey = "score_quest_count:" + projectId + ":" + range + ":" + subjectId + ":" + questId;
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append(range.getName(), range.getId())
+                    .append("subject", subjectId).append("quest", questId);
+            return (int)scoreDatabase.getCollection("score").count(query);
+        });
+    }
 }

@@ -9,6 +9,7 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  * @author by fengye on 2016/10/31.
  */
 @SuppressWarnings("unchecked")
-@Function(description = "班级分析-各式题选项及所选学生明细", parameters = {
+@Function(description = "班级分析-试题选项及所选学生明细", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "考试科目ID", required = true),
+        @Parameter(name = "questNo", type = Type.String, description = "题号", required = true),
         @Parameter(name = "classId", type = Type.String, description = "班级id", required = true)
 })
 @Service
@@ -50,33 +52,38 @@ public class ClassQuestOptionStudentAnalysis implements Server {
         String projectId = param.getString("projectId");
         Range classRange = Range.clazz(param.getString("classId"));
         String subjectId = param.getString("subjectId");
-        //获取所有试题信息
-        List<Document> questList = questService.getQuests(projectId, subjectId);
+        String questNo = param.getString("questNo");
 
-        List<Map<String, Object>> quests = getQuestOptionStudents(projectId, classRange, subjectId, questList);
+        Map<String, Object> quests = getQuestOptionStudents(projectId, classRange, subjectId, questNo);
         return Result.success().set("quests", quests);
     }
 
-    private List<Map<String, Object>> getQuestOptionStudents(String projectId, Range classRange, String subjectId, List<Document> questList) {
-        List<Map<String, Object>> quests = new ArrayList<>();
-        for (Document quest : questList) {
-            List<Map<String, Object>> optionsInfo = new ArrayList<>();
-            String questNo = quest.getString("questNo");
-            String questId = quest.getString("questId");
-            Boolean isObjective = quest.getBoolean("isObjective");
-            if (quest.getBoolean("isObjective")) {
-                optionsInfo.addAll(getObjectiveOptionsInfo(projectId, classRange, subjectId, quest));
-            } else {
-                optionsInfo.addAll(getSubjectiveScoresInfo(projectId, classRange, subjectId, quest));
-            }
-            Map<String, Object> questMap = new HashMap<>();
-            questMap.put("questNo", questNo);
-            questMap.put("questId", questId);
-            questMap.put("options", optionsInfo);
-            questMap.put("isObjective", isObjective);
-            quests.add(questMap);
+    private Map<String, Object> getQuestOptionStudents(String projectId, Range classRange, String subjectId, String questNo) {
+
+        Document questDoc = questService.findQuest(projectId, subjectId, questNo);
+
+        List<Map<String, Object>> optionsInfo = new ArrayList<>();
+        String questId = questDoc.getString("questId");
+        Boolean isObjective = questDoc.getBoolean("isObjective");
+        int count = getSubjectiveCount(projectId, classRange, subjectId, questId);
+        if (questDoc.getBoolean("isObjective")) {
+            optionsInfo.addAll(getObjectiveOptionsInfo(projectId, classRange, subjectId, questDoc));
+        } else {
+            optionsInfo.addAll(getSubjectiveScoresInfo(projectId, classRange, subjectId, questDoc, count));
         }
-        return quests;
+
+        Map<String, Object> questMap = new HashMap<>();
+        questMap.put("questNo", questNo);
+        questMap.put("questId", questId);
+        questMap.put("options", optionsInfo);
+        questMap.put("totalCount", count);
+        questMap.put("isObjective", isObjective);
+
+        return questMap;
+    }
+
+    private int getSubjectiveCount(String projectId, Range classRange, String subjectId, String questId) {
+        return scoreService.getScoreRecordCount(projectId, classRange, subjectId, questId);
     }
 
     //客观题列表
@@ -99,7 +106,7 @@ public class ClassQuestOptionStudentAnalysis implements Server {
     }
 
     //主观题列表
-    private List<Map<String, Object>> getSubjectiveScoresInfo(String projectId, Range classRange, String subjectId, Document quest) {
+    private List<Map<String, Object>> getSubjectiveScoresInfo(String projectId, Range classRange, String subjectId, Document quest, int count) {
         String questId = quest.getString("questId");
         String questNo = quest.getString("questNo");
         List<Map<String, Object>> scores = new ArrayList<>();
@@ -109,11 +116,14 @@ public class ClassQuestOptionStudentAnalysis implements Server {
             String[] seg = segment.split("-");
             Double min = Double.parseDouble(seg[0]);
             Double max = Double.parseDouble(seg[1]);
-            List<String> studentNames = getStudentNameByScoreSegment(projectId, classRange, subjectId, questId, min, max);
+            List<String> students = getStudentNameByScoreSegment(projectId, classRange, subjectId, questId, min, max);
+            Double rate = count == 0 ? 0 : DoubleUtils.round((double)students.size() / count, true);
             map.put("questNo", questNo);
             map.put("questId", questId);
             map.put("segment", segment);
-            map.put("studentNames", studentNames);
+            map.put("students", students);
+            map.put("count", students.size());
+            map.put("rate", rate);
             scores.add(map);
         }
         return scores;

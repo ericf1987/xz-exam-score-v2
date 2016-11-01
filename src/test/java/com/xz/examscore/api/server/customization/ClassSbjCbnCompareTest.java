@@ -18,8 +18,7 @@ public class ClassSbjCbnCompareTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-2c641a3e36ff492aa535da7fb4cf28cf")
-                .setParameter("subjectCombinationId", "007008009");
+        Param param = new Param().setParameter("projectId", "430700-caa7e02622ca402eb4a2fd071580373b");
         Result result = classSbjCbnCompare.execute(param);
         System.out.println(result.getData());
     }
