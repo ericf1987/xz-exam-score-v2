@@ -72,7 +72,7 @@ public class SchoolQuestTypeAnalysis implements Server {
         List<Map<String, Object>> list = new ArrayList<>();
 
         List<Document> listClasses = new ArrayList<>();
-        if (StringUtil.isNotBlank(classId)) {
+        if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
             Document aClass = classService.findClass(projectId, classId);

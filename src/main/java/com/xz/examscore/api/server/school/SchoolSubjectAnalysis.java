@@ -82,7 +82,7 @@ public class SchoolSubjectAnalysis implements Server {
         List<Map<String, Object>> classsSubjectMaps = new ArrayList<>();
 
         List<Document> listClasses = new ArrayList<>();
-        if (StringUtil.isNotBlank(classId)) {
+        if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
             Document aClass = classService.findClass(projectId, classId);

@@ -71,7 +71,7 @@ public class SchoolScoreSegment implements Server {
         List<Map<String, Object>> classSegments = new ArrayList<>();
 
         List<Document> listClasses = new ArrayList<>();
-        if (StringUtil.isNotBlank(classId)) {
+        if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
             Document aClass = classService.findClass(projectId, classId);
