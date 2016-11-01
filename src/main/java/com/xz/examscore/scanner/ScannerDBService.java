@@ -101,10 +101,10 @@ public class ScannerDBService {
 
     /**
      *
-     * @param projectId
+     * @param projectId    项目ID
      * @param subjectId    网阅数据库科目ID
      * @param document     网阅数据库学生信息
-     * @param counter
+     * @param counter      计数器
      */
     public void importStudentScore(String projectId, String subjectId, Document document, AtomicInteger counter) {
         String studentId = document.getString("studentId");
@@ -250,7 +250,7 @@ public class ScannerDBService {
 
     public String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
         //如果科目需要拆分
-        if (subjectId.length() != importProjectService.SUBJECT_LENGTH) {
+        if (subjectId.length() != ImportProjectService.SUBJECT_LENGTH) {
             Document q1 = questService.findQuest(projectId, subjectId, questionNo);
             if (null != q1) {
                 return q1.getString("subject");
