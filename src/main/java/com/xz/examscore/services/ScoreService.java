@@ -93,7 +93,7 @@ public class ScoreService {
      * @return 分数记录
      */
     public Document findOneJudgeQuestScore(String projectId, String questId) {
-        Document query = doc("project", projectId).append("quest", questId).append("answer", $ne("*"));
+        Document query = doc("project", projectId).append("quest", questId).append("answer", $nin("*", null));
         return scoreDatabase.getCollection("score").find(query).first();
     }
 
