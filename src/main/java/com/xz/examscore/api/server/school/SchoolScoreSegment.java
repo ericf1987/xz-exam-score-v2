@@ -1,6 +1,7 @@
 package com.xz.examscore.api.server.school;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -31,7 +32,8 @@ import static com.xz.examscore.api.server.sys.QueryExamClasses.getFullClassName;
 @Function(description = "学校成绩-分数段统计", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = false),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true)
+        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = true),
+        @Parameter(name = "classId", type = Type.String, description = "班级id,不为空查询指定班级学科分析", required = false)
 })
 @Service
 public class SchoolScoreSegment implements Server {
@@ -53,8 +55,9 @@ public class SchoolScoreSegment implements Server {
         String projectId = param.getString("projectId");
         String subjectId = param.getString("subjectId");
         String schoolId = param.getString("schoolId");
+        String classId = param.getString("classId");
 
-        List<Map<String, Object>> classSegments = getClassScoreSegments(projectId, subjectId, schoolId);
+        List<Map<String, Object>> classSegments = getClassScoreSegments(projectId, subjectId, schoolId, classId);
         List<Map<String, Object>> schoolSegments = getSchoolTotalScoreSegments(projectId, subjectId, schoolId);
 
         return Result.success()
@@ -63,20 +66,28 @@ public class SchoolScoreSegment implements Server {
                 .set("hasHeader", !schoolSegments.isEmpty());
     }
 
-    private List<Map<String, Object>> getClassScoreSegments(String projectId, String subjectId, String schoolId) {
+    private List<Map<String, Object>> getClassScoreSegments(
+            String projectId, String subjectId, String schoolId, String classId) {
         List<Map<String, Object>> classSegments = new ArrayList<>();
 
-        List<Document> listClasses = classService.listClasses(projectId, schoolId);
+        List<Document> listClasses = new ArrayList<>();
+        if (StringUtil.isNotBlank(classId)) {
+            listClasses = classService.listClasses(projectId, schoolId);
+        } else {
+            Document aClass = classService.findClass(projectId, classId);
+            listClasses.add(aClass);
+        }
+
         for (Document listClass : listClasses) {
             Map<String, Object> map = new HashMap<>();
-            String classId = listClass.getString("class");
+            String _classId = listClass.getString("class");
 
-            Range range = Range.clazz(classId);
+            Range range = Range.clazz(_classId);
             Target target = targetService.getTarget(projectId, subjectId);
             List<Map<String, Object>> scoreSegments = scoreSegmentService.queryFullScoreSegment(projectId, target, range);
 
             map.put("scoreSegments", scoreSegments);
-            map.put("classId", classId);
+            map.put("classId", _classId);
             map.put("className", getFullClassName(listClass));
             classSegments.add(map);
         }
