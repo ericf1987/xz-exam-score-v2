@@ -4,19 +4,19 @@ import com.xz.examscore.asynccomponents.QueueMessage;
 import com.xz.examscore.bean.AggregationType;
 
 /**
- * 对消息队列记录的包装
+ * 统计任务消息，DispatchMessageReceiver 要按照消息里的要求来执行
  *
  * @author yiding_he
  */
 public class DispatchTaskMessage implements QueueMessage {
 
-    private String projectId;
+    private String projectId;           // 要统计的项目ID
 
-    private AggregationType aggregationType;
+    private AggregationType aggregationType;    // 统计方式
 
-    private boolean generateReport;
+    private boolean generateReport;     // 是否要生成报表
 
-    private boolean exportScore;
+    private boolean exportScore;        // 是否要导出成绩
 
     public boolean isExportScore() {
         return exportScore;
