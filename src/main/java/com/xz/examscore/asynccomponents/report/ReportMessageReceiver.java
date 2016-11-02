@@ -1,6 +1,7 @@
 package com.xz.examscore.asynccomponents.report;
 
 import com.xz.examscore.asynccomponents.MessageReceiver;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.services.ProjectStatusService;
 import com.xz.examscore.services.ReportService;
 import org.slf4j.Logger;
@@ -30,9 +31,10 @@ public class ReportMessageReceiver extends MessageReceiver<ReportTaskMessage> {
 
     @Override
     protected void executeTask(ReportTaskMessage message) {
+        projectStatusService.setAggregationStatus(message.getProjectId(), AggregationStatus.Activated);
         projectStatusService.setProjectStatus(message.getProjectId(), ReportGenerating);
         reportService.generateReports(message.getProjectId(), true);
         projectStatusService.setProjectStatus(message.getProjectId(), ReportGenerated);
-
+        projectStatusService.setAggregationStatus(message.getProjectId(), AggregationStatus.Terminated);
     }
 }

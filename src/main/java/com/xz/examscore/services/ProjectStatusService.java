@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.redis.Redis;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.ProjectStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,5 +34,17 @@ public class ProjectStatusService {
 
     public ProjectStatus getProjectStatus(String projectId) {
         return projectService.getProjectStatus(projectId);
+    }
+
+    public AggregationStatus getAggregationStatus(String projectId) {
+        return projectService.getAggregationStatus(projectId);
+    }
+
+    public void setAggregationStatus(String projectId, AggregationStatus activated) {
+        try {
+            projectService.setAggregationStatus(projectId, activated);
+        } catch (Exception e) {
+            LOG.info("修改项目 " + projectId + " 统计状态为 " + activated + " 失败", e);
+        }
     }
 }

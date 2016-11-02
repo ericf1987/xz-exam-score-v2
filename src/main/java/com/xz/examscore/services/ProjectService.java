@@ -9,6 +9,7 @@ import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.bean.Range;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -271,5 +272,27 @@ public class ProjectService {
         }
 
         return projects;
+    }
+
+    /**
+     * 设置考试统计状态
+     * @param projectId 项目ID
+     * @param activated 统计状态参数
+     */
+    public void setAggregationStatus(String projectId, AggregationStatus activated) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        c.updateMany(query, $set("aggregationStatus", activated.name()));
+
+        // 清除缓存
+        String cacheKey = "project_info:" + projectId;
+        cache.delete(cacheKey);
+    }
+
+    public AggregationStatus getAggregationStatus(String projectId) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        Document project = c.find(query).projection(doc("aggregationStatus", 1)).first();
+        return project == null ? AggregationStatus.Empty : AggregationStatus.valueOf(project.getString("aggregationStatus"));
     }
 }

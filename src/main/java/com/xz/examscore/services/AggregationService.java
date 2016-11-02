@@ -8,6 +8,7 @@ import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
 import com.xz.examscore.asynccomponents.importproject.ImportTaskMessage;
 import com.xz.examscore.bean.AggregationConfig;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.slf4j.Logger;
@@ -95,11 +96,13 @@ public class AggregationService {
 
     public void runAggregationOnly(String projectId, AggregationType aggregationType) {
         try {
+            projectStatusService.setAggregationStatus(projectId, AggregationStatus.Activated);
             prepareDataService.prepare(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationStarted);
             runAggregation0(projectId, aggregationType);
             projectService.updateAggregationTime(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationCompleted);
+            projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
