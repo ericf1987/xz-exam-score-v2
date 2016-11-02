@@ -66,6 +66,7 @@ public class SchoolScoreSegment implements Server {
                 .set("hasHeader", !schoolSegments.isEmpty());
     }
 
+    @SuppressWarnings("Duplicates")
     private List<Map<String, Object>> getClassScoreSegments(
             String projectId, String subjectId, String schoolId, String classId) {
         List<Map<String, Object>> classSegments = new ArrayList<>();
@@ -74,7 +75,10 @@ public class SchoolScoreSegment implements Server {
         if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
-            listClasses.add(classService.findClass(projectId, classId));
+            Document aClass = classService.findClass(projectId, classId);
+            if (aClass != null) {
+                listClasses.add(aClass);
+            }
         }
 
         for (Document listClass : listClasses) {

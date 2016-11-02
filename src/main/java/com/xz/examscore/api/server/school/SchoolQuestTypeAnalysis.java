@@ -67,6 +67,7 @@ public class SchoolQuestTypeAnalysis implements Server {
     }
 
     // 班级试题分析
+    @SuppressWarnings("Duplicates")
     private List<Map<String, Object>> getClassQuestTypeAnalysis(
             String projectId, String subjectId, String schoolId, String classId) {
         List<Map<String, Object>> list = new ArrayList<>();
@@ -75,7 +76,10 @@ public class SchoolQuestTypeAnalysis implements Server {
         if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
-            listClasses.add(classService.findClass(projectId, classId));
+            Document aClass = classService.findClass(projectId, classId);
+            if (aClass != null) {
+                listClasses.add(aClass);
+            }
         }
 
         for (Document listClass : listClasses) {

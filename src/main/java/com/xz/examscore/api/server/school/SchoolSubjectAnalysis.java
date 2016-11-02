@@ -77,6 +77,7 @@ public class SchoolSubjectAnalysis implements Server {
                 .set("hasHeader", !((List) schoolSubjectMaps.get("subjects")).isEmpty());
     }
 
+    @SuppressWarnings("Duplicates")
     private List<Map<String, Object>> getClassSubjectAnalysis(
             String projectId, String schoolId, String classId, String[] authSubjectIds) {
         List<Map<String, Object>> classsSubjectMaps = new ArrayList<>();
@@ -85,7 +86,10 @@ public class SchoolSubjectAnalysis implements Server {
         if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
-            listClasses.add(classService.findClass(projectId, classId));
+            Document aClass = classService.findClass(projectId, classId);
+            if (aClass != null) {
+                listClasses.add(aClass);
+            }
         }
 
         for (Document listClass : listClasses) {
