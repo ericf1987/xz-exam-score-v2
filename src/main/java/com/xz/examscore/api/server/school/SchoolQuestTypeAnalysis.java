@@ -75,8 +75,7 @@ public class SchoolQuestTypeAnalysis implements Server {
         if (StringUtil.isBlank(classId)) {
             listClasses = classService.listClasses(projectId, schoolId);
         } else {
-            Document aClass = classService.findClass(projectId, classId);
-            listClasses.add(aClass);
+            listClasses.add(classService.findClass(projectId, classId));
         }
 
         for (Document listClass : listClasses) {
