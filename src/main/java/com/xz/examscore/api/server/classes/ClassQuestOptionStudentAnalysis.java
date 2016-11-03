@@ -64,12 +64,18 @@ public class ClassQuestOptionStudentAnalysis implements Server {
 
         List<Map<String, Object>> optionsInfo = new ArrayList<>();
         String questId = questDoc.getString("questId");
+        String answer = questDoc.getString("answer");
         Boolean isObjective = questDoc.getBoolean("isObjective");
         int count = getSubjectiveCount(projectId, classRange, subjectId, questId);
         if (questDoc.getBoolean("isObjective")) {
             optionsInfo.addAll(getObjectiveOptionsInfo(projectId, classRange, subjectId, questDoc));
         } else {
             optionsInfo.addAll(getSubjectiveScoresInfo(projectId, classRange, subjectId, questDoc, count));
+        }
+
+        //如果是客观题，需要在标记出正确选项
+        if(isObjective){
+            paddingAnswer(answer, optionsInfo);
         }
 
         Map<String, Object> questMap = new HashMap<>();
@@ -80,6 +86,18 @@ public class ClassQuestOptionStudentAnalysis implements Server {
         questMap.put("isObjective", isObjective);
 
         return questMap;
+    }
+
+    //拼接正确答案至选项列表
+    private List<Map<String, Object>> paddingAnswer(String answer, List<Map<String, Object>> optionsInfo) {
+        List<String> rightAnswers = Arrays.asList(answer.split(","));
+        optionsInfo.forEach(option -> {
+            String item = option.get("answer").toString();
+            if(rightAnswers.contains(item)){
+                option.put("rightAnswer", true);
+            }
+        });
+        return optionsInfo;
     }
 
     private int getSubjectiveCount(String projectId, Range classRange, String subjectId, String questId) {
@@ -94,6 +112,13 @@ public class ClassQuestOptionStudentAnalysis implements Server {
         if (items != null && !items.isEmpty()) {
             String questId = quest.getString("questId");
             List<Document> optionMap = optionMapService.getOptionList(projectId, questId, classRange);
+            //保留四位小数
+            optionMap.forEach(map -> map.put("rate", DoubleUtils.round(map.getDouble("rate"), true)));
+            Collections.sort(optionMap, (Document m1, Document m2) -> {
+                String optionItem1 = m1.getString("answer");
+                String optionItem2 = m2.getString("answer");
+                return optionItem1.compareTo(optionItem2);
+            });
             //将没有选的选项补充进去，并按照选项排序
             optionsInfo.addAll(fixOptionMap(optionMap, items));
             for (String item : items) {

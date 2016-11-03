@@ -92,6 +92,9 @@ public class ImportProjectService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    SubjectCombinationService subjectCombinationService;
+
     public static final int SUBJECT_LENGTH = 3;
 
     /**
@@ -133,10 +136,10 @@ public class ImportProjectService {
         String entryLevelStatType = "rate", entryLevelEnable = "false";
         List<String> collegeEntryLevel = new ArrayList<>();
         JSONObject onlineRateStat = result.get("onlineRateStat");
-        if(onlineRateStat != null && !onlineRateStat.isEmpty()){
+        if (onlineRateStat != null && !onlineRateStat.isEmpty()) {
             entryLevelStatType = onlineRateStat.get("onlineStatType").toString();
             entryLevelEnable = onlineRateStat.get("isOn").toString();
-            collegeEntryLevel = (List<String>)onlineRateStat.get("values");
+            collegeEntryLevel = (List<String>) onlineRateStat.get("values");
         }
 
         if (null != rankLevel) {
@@ -548,14 +551,16 @@ public class ImportProjectService {
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
         List<String> subjectIds = new ArrayList<>();
-
+        //组合科目ID列表
+        List<String> combinedSubjectIds = new ArrayList<>();
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
             //找到综合科目ID，进行拆分
             if (subjectId.length() > SUBJECT_LENGTH) {
                 subjectIds.addAll(separateSubject(subjectId));
-            }else{
+                combinedSubjectIds.add(subjectId);
+            } else {
                 subjectIds.add(subjectObj.getString("subjectId"));
             }
         });
@@ -573,6 +578,9 @@ public class ImportProjectService {
         }
 
         subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
+        if(!combinedSubjectIds.isEmpty()){
+            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
+        }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
         context.put("subjectList", subjects);
     }
@@ -602,6 +610,8 @@ public class ImportProjectService {
 
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
+        //组合科目ID列表
+        List<String> combinedSubjectIds = new ArrayList<>();
 
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
@@ -614,10 +624,16 @@ public class ImportProjectService {
             }
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);
+            if(subjectId.length() > SUBJECT_LENGTH){
+                combinedSubjectIds.add(subjectId);
+            }
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
         subjectService.saveProjectSubjects(projectId, subjects);  // 保存科目列表
+        if(!combinedSubjectIds.isEmpty()){
+            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
+        }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
         context.put("subjectList", subjects);
     }
@@ -636,16 +652,7 @@ public class ImportProjectService {
     }
 
     public boolean sliceSubject(String project) {
-/*        ApiResponse result = interfaceClient.queryProjectReportConfig(project);
-        if(result.isSuccess()){
-            String sliceSubject = result.getString("splitUnionSubject");
-            if(StringUtils.isEmpty(sliceSubject) && Boolean.parseBoolean(sliceSubject)){
-                return true;
-            }
-        }else{
-            throw new NullPointerException("获取考试项目配置信息失败，考试项目为：" + project);
-        }
-        return false;*/
+        // TODO: 2016/11/2 目前对于综合类科目，对其进行拆分统计，如果需要改变是否拆分的条件，在这里完成编写
         return true;
     }
 
