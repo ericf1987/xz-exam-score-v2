@@ -81,7 +81,7 @@ public class CollegeEntryLevelService {
     }
 
     /**
-     * 获取尖子生排名分段
+     * 获取本科生排名分段
      *
      * @param projectId 考试项目id
      * @param range     范围

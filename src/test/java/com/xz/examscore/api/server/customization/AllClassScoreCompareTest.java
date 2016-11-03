@@ -17,7 +17,7 @@ public class AllClassScoreCompareTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430200-01ef739fb0074d489f39e62a9be64629";
+        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
         Param param = new Param().setParameter("projectId", projectId);
         Result result = allClassScoreCompare.execute(param);
         System.out.println(result.getData());

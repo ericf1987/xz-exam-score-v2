@@ -89,7 +89,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySubjectListByProjectId() throws Exception {
-        JSONArray subjects = interfaceClient.querySubjectListByProjectId(PROJECT_ID);
+        JSONArray subjects = interfaceClient.querySubjectListByProjectId("430300-672a0ed23d9148e5a2a31c8bf1e08e62");
         System.out.println(subjects.toString());
         assertNotNull(subjects);
         assertFalse(subjects.isEmpty());

@@ -13,6 +13,6 @@ public class AllClassScoreCompareReportTest extends XzExamScoreV2ApplicationTest
 
     @Test
     public void testGetSheetTask() throws Exception{
-        allClassScoreCompareReport.generate("430200-01ef739fb0074d489f39e62a9be64629", null, "target/all-class-score-compare.xlsx");
+        allClassScoreCompareReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", null, "target/all-class-score-compare.xlsx");
     }
 }
