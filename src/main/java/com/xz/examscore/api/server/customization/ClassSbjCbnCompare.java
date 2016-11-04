@@ -9,6 +9,7 @@ import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class ClassSbjCbnCompare implements Server{
                 Map<String, Object> classMap = new HashMap<>();
                 classMap.put("schoolName", schoolName);
                 classMap.put("className", className);
-                classMap.put("average", average);
+                classMap.put("average", DoubleUtils.round(average, false));
                 classMap.put("schoolRank", schoolRank);
                 classMap.put("projectRank", projectRank);
                 result.add(classMap);

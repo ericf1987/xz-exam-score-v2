@@ -1,5 +1,6 @@
 package com.xz.examscore.services;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -144,8 +145,11 @@ public class CollegeEntryLevelService {
         String cacheKey = "entry_level_student_count:" + projectId + ":" + range + ":" + target + ":" + key;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
-            Document query = query(projectId, range, target)
-                    .append("college_entry_level.level", key);
+            Document query = query(projectId, range, target);
+
+            if(!StringUtils.isBlank(key)){
+                query.append("college_entry_level.level", key);
+            }
 
             return (int) collection.count(query);
         });

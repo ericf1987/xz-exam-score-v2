@@ -10,6 +10,7 @@ package com.xz.examscore.api.server.customization;
         import com.xz.examscore.bean.Range;
         import com.xz.examscore.bean.Target;
         import com.xz.examscore.services.*;
+        import com.xz.examscore.util.DoubleUtils;
         import org.apache.commons.collections.MapUtils;
         import org.bson.Document;
         import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public class StudentSbjCbnCompare implements Server {
             studentMap.put("studentName", studentName);
             studentMap.put("className", className);
             studentMap.put("examNo", examNo);
-            studentMap.put("score", score);
+            studentMap.put("score", DoubleUtils.round(score, false));
             studentMap.put("classRank", classRank);
             studentMap.put("schoolRank", schoolRank);
             result.add(studentMap);

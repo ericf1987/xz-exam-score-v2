@@ -12,6 +12,7 @@ import com.xz.examscore.services.AverageService;
 import com.xz.examscore.services.ProvinceService;
 import com.xz.examscore.services.RankService;
 import com.xz.examscore.services.SchoolService;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class SchoolSbjCbnCompare implements Server {
             int rank = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), subjectCombinationTarget, average);
             Map<String, Object> schoolMap = new HashMap<>();
             schoolMap.put("schoolName", schoolDoc.getString("name"));
-            schoolMap.put("average", average);
+            schoolMap.put("average", DoubleUtils.round(average, false));
             schoolMap.put("rank", rank);
             result.add(schoolMap);
         });

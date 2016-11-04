@@ -19,6 +19,7 @@
                 <report name="尖子生统计" class=".total.TotalTopStudentReport"/>
                 <report name="高分段竞争力分析" class=".total.TotalTopStudentHScoreReport"/>
                 <report name="尖子生试卷情况分析" class=".total.TotalTopStudentQuestTypeReport"/>
+                <report name="上线预测" class=".total.TotalCollegeEntryLevelReport"/>
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class=".total.TotalBasicDataReport"/>
@@ -44,6 +45,7 @@
                 <report name="尖子生统计" class=".schools.SchoolTopStudentReport"/>
                 <report name="高分段竞争力分析" class=".schools.SchoolPaperHScoreReport"/>
                 <report name="尖子生试卷情况分析" class=".schools.SchoolTopStudentQuestTypeReport"/>
+                <report name="上线预测" class=".schools.SchoolCollegeEntryLevelReport"/>
             </report-category>
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class=".schools.SchoolBasicDataReport"/>

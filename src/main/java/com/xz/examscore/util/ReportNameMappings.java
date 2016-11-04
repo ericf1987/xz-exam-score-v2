@@ -58,6 +58,7 @@ public class ReportNameMappings {
         FILE_NAME_CODE_MAP.put("322", "及格率对比.xlsx");
         FILE_NAME_CODE_MAP.put("323", "学生历史成绩.xlsx");
         FILE_NAME_CODE_MAP.put("324", "历史考试数据对比.xlsx");
+        FILE_NAME_CODE_MAP.put("325", "上线预测.xlsx");
 
         BASIC_REPORT_ITEM.add("-->基础数据-->学生各科成绩明细.xlsx");
         BASIC_REPORT_ITEM.add("-->基础数据-->各科试卷题目得分明细.xlsx");
