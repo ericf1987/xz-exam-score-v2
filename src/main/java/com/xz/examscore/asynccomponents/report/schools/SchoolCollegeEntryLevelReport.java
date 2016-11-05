@@ -3,7 +3,6 @@ package com.xz.examscore.asynccomponents.report.schools;
 import com.xz.examscore.asynccomponents.report.ReportGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.asynccomponents.report.classes.ReportGeneratorInfo;
-import com.xz.examscore.asynccomponents.report.total.TotalCollegeEntryLevelSheets;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.TargetService;
