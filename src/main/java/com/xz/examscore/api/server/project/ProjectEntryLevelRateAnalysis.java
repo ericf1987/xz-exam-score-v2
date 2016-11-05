@@ -12,7 +12,6 @@ import com.xz.examscore.services.CollegeEntryLevelService;
 import com.xz.examscore.services.SchoolService;
 import com.xz.examscore.services.StudentService;
 import com.xz.examscore.util.DoubleUtils;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +25,7 @@ import java.util.Map;
  */
 @Function(description = "总体成绩-各校本科上线率", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校IDS", required = true)
 })
 @Service
 public class ProjectEntryLevelRateAnalysis implements Server {
@@ -41,14 +41,13 @@ public class ProjectEntryLevelRateAnalysis implements Server {
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
+        String[] schoolIds = param.getStringValues("schoolIds");
         List<Map<String, Object>> result = new ArrayList<>();
         String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
         //学校列表
-        List<Document> schoolDocs = schoolService.getProjectSchools(projectId);
-        for (Document doc : schoolDocs) {
+        for (String schoolId : schoolIds) {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, Object>> onlineRate = new ArrayList<>();
-            String schoolId = doc.getString("school");
             Target projectTarget = Target.project(projectId);
             int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId), projectTarget);
             for(String key : entryLevelKey){
@@ -60,7 +59,7 @@ public class ProjectEntryLevelRateAnalysis implements Server {
                 m.put("rate", rate);
                 onlineRate.add(m);
             }
-            map.put("schoolName", doc.getString("name"));
+            map.put("schoolName", schoolService.findSchool(projectId, schoolId).getString("name"));
             map.put("studentCount", studentCount);
             map.put("onlineRate", onlineRate);
             result.add(map);

@@ -137,7 +137,7 @@ public class ClassRankAnalysis implements Server {
 
         // 学生得分/得分率
         double score = scoreService.getScore(projectId, Range.student(studentId), target);
-        rankMaps.put("score", score);
+        rankMaps.put("score", DoubleUtils.round(score));
         rankMaps.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
 
         // 学生在班级排名

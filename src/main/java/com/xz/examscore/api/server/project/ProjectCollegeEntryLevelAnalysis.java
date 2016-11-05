@@ -10,6 +10,7 @@ import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -17,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author by fengye on 2016/10/24.
@@ -28,10 +26,11 @@ import java.util.Map;
 @Function(description = "总体成绩-总体本科录取情况", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "rankSegment", type = Type.StringArray, description = "排名分段", required = true),
+        @Parameter(name = "schoolIds", type = Type.StringArray, description = "学校ID", required = true),
         @Parameter(name = "authSubjectIds", type = Type.StringArray, description = "可访问科目范围，为空返回所有", required = false)
 })
 @Service
-public class ProjectCollegeEntryLevelAnalysis implements Server{
+public class ProjectCollegeEntryLevelAnalysis implements Server {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectCollegeEntryLevelAnalysis.class);
 
     @Autowired
@@ -60,30 +59,41 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
         String projectId = param.getString("projectId");
         String[] rankSegment = param.getStringValues("rankSegment");
         String[] authSubjectIds = param.getStringValues("authSubjectIds");
+        String[] schoolIds = param.getStringValues("schoolIds");
 
-        Range range = rangeService.queryProvinceRange(projectId);
+        //Range range = rangeService.queryProvinceRange(projectId);
         Target target = Target.project(projectId);
         List<String> subjectIds = new ArrayList<>(subjectService.querySubjects(projectId));
         subjectIds = ProjectTopStudentStat.filterSubject(subjectIds, authSubjectIds);
         subjectIds.sort(String::compareTo);
 
-        List<Map<String, Object>> students = getEntryLevelStudents(projectId, rankSegment, range, target, subjectIds);
+        List<Map<String, Object>> students = new ArrayList<>();
+        for (String schoolId : schoolIds) {
+            Range schoolRange = Range.school(schoolId);
+            students.addAll(getEntryLevelStudents(projectId, rankSegment, schoolRange, target, subjectIds));
+        }
+        Collections.sort(students, (Map<String, Object> m1, Map<String, Object> m2) -> {
+            Double s1 = MapUtils.getDouble(m1, "totalScore");
+            Double s2 = MapUtils.getDouble(m2, "totalScore");
+            return s2.compareTo(s1);
+        });
         return Result.success().set("students", students).set("hasHeader", !students.isEmpty());
     }
 
-    public List<Map<String, Object>> getEntryLevelStudents(String projectId, String[] rankSegment, Range range, Target target, List<String> subjectIds) {
+    public List<Map<String, Object>> getEntryLevelStudents(String projectId, String[] rankSegment, Range schoolRange, Target target, List<String> subjectIds) {
         int minIndex = NumberUtils.toInt(rankSegment[0]);
         int maxIndex = NumberUtils.toInt(rankSegment[1]);
 
         List<Map<String, Object>> result = new ArrayList<>();
-        List<Document> students = collegeEntryLevelService.getEntryLevelStudent(projectId, range, target, minIndex, maxIndex);
-        for (Document studentDoc : students){
+
+        List<Document> students = collegeEntryLevelService.getEntryLevelStudent(projectId, schoolRange, target, minIndex, maxIndex);
+        for (Document studentDoc : students) {
             Map<String, Object> map = new HashMap<>();
             String studentId = studentDoc.getString("student");
             double totalScore = DocumentUtils.getDouble(studentDoc, "totalScore", 0);
             int rank = DocumentUtils.getInt(studentDoc, "rank", 0);
             double dValue = DocumentUtils.getDouble(studentDoc, "dValue", 0);
-            Map<String, Object> entry_level = (Map<String, Object>)studentDoc.get("college_entry_level");
+            Map<String, Object> entry_level = (Map<String, Object>) studentDoc.get("college_entry_level");
             String info = getEntryLevelInfo(entry_level, dValue);
 
             Document student = studentService.findStudent(projectId, studentId);
@@ -99,14 +109,10 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
             map.put("name", student.getString("name"));
             map.put("totalScore", totalScore);
             map.put("entryLevelInfo", info);
-
-            if (range.match(Range.PROVINCE)) {
-                map.put("schoolId", schoolId);
-                map.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
-            } else {
-                map.put("classId", classId);
-                map.put("className", classService.getClassName(projectId, classId));
-            }
+            map.put("schoolId", schoolId);
+            map.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
+            map.put("classId", classId);
+            map.put("className", classService.getClassName(projectId, classId));
 
             // 总分分析
             List<Map<String, Object>> list = new ArrayList<>();
@@ -118,12 +124,12 @@ public class ProjectCollegeEntryLevelAnalysis implements Server{
             list.add(projectInfo);
 
             // 科目统计
-            projectTopStudentStat.subjectStat(projectId, subjectIds, studentId, list, range);
+            projectTopStudentStat.subjectStat(projectId, subjectIds, studentId, list, schoolRange);
 
             map.put("subjects", list);
             result.add(map);
-
         }
+
 
         result.sort((o1, o2) -> ((Double) o2.get("totalScore")).compareTo((Double) o1.get("totalScore")));
         return result;
