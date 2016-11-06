@@ -17,9 +17,9 @@ public class DoubleUtils {
         if (!isValidNumber(value)) {
             return "0%";
         }
-        if(value < 0.0001d && value > 0){
+        if (value < 0.0001d && value > 0) {
             return FORMAT_PECISION.format(value * 100) + "%";
-        }else{
+        } else {
             return FORMAT.format(value * 100) + "%";
         }
     }
@@ -28,7 +28,6 @@ public class DoubleUtils {
      * double 保留两位小数
      *
      * @param f 原数值
-     *
      * @return 保留两位小数的数值
      */
     public static Double round(double f) {
@@ -38,9 +37,8 @@ public class DoubleUtils {
     /**
      * double 保留两位或四位小数
      *
-     * @param doubleValue       原数值
-     * @param percent           是否是百分比，如果为 true 则返回四位小数
-     *
+     * @param doubleValue 原数值
+     * @param percent     是否是百分比，如果为 true 则返回四位小数
      * @return 保留X位小数的数值
      */
     public static Double round(double doubleValue, boolean percent) {
@@ -57,5 +55,18 @@ public class DoubleUtils {
         return !(
                 d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY || Double.isNaN(d)
         );
+    }
+
+    /**
+     * double 如果小数点后为零显示整数否则保留精度
+     *
+     * @param num 原数值
+     * @return 保留X位小数的数值
+     */
+    public static String cutTailZero(double num) {
+        if (num % 1.0 == 0) {
+            return String.valueOf((long) num);
+        }
+        return String.valueOf(num);
     }
 }

@@ -172,7 +172,7 @@ public class ClassQuestOptionStudentAnalysis implements Server {
             return Arrays.asList("0-4", "4-8", "8-12", "12-16", "16-20");
         }
         if (score > 20) {
-            return Arrays.asList("0-5", "5-10", "10-15", "15-20", "20-" + String.valueOf(score));
+            return Arrays.asList("0-5", "5-10", "10-15", "15-20", "20-" + DoubleUtils.cutTailZero(score));
         }
         return Collections.singletonList("0-" + String.valueOf(score));
     }

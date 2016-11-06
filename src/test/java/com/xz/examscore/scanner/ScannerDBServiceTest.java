@@ -52,4 +52,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String subjectId = scannerDBService.getSubjectIdInQuestList(project, "22", "007008009");
         System.out.println(subjectId);
     }
+
+    @Test
+    public void testGetMongoClientByProject() throws Exception{
+        String project = "433100-fef19389d6ce4b1f99847ab96d2cfeba";
+        scannerDBService.getMongoClientByProject(project);
+    }
 }
