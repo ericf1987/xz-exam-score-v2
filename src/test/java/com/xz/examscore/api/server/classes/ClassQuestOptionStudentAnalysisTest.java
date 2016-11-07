@@ -18,7 +18,7 @@ public class ClassQuestOptionStudentAnalysisTest extends XzExamScoreV2Applicatio
         String projectId = "430100-2e63dd5efb014a0b9a0505ad36ce8f90";
         String classId = "01041c3e-f6f9-4ee2-8d10-e525d47dde7b";
         String subjectId = "001";
-        String questNo = "1";
+        String questNo = "10";
         Param param = new Param().setParameter("projectId", projectId).setParameter("classId", classId).setParameter("subjectId", subjectId).setParameter("questNo", questNo);
         Result result = classQuestOptionStudentAnalysis.execute(param);
         System.out.println(result.getData());

@@ -145,13 +145,23 @@ public class ClassQuestOptionStudentAnalysis implements Server {
             Double rate = count == 0 ? 0 : DoubleUtils.round((double)students.size() / count, true);
             map.put("questNo", questNo);
             map.put("questId", questId);
-            map.put("segment", segment);
+            map.put("segment", EncloseWithBrackets(segment));
             map.put("students", students);
             map.put("count", students.size());
             map.put("rate", rate);
             scores.add(map);
         }
         return scores;
+    }
+
+    private String EncloseWithBrackets(String segment) {
+        StringBuilder builder = new StringBuilder(segment);
+        if(segment.startsWith("0")){
+            builder.insert(0, '[').append("]");
+        }else{
+            builder.insert(0, '(').append("]");
+        }
+        return builder.toString();
     }
 
     private List<String> getStudentNameByScoreSegment(String projectId, Range classRange, String subjectId, String questId, Double min, Double max) {
@@ -171,8 +181,11 @@ public class ClassQuestOptionStudentAnalysis implements Server {
         if (score <= 20) {
             return Arrays.asList("0-4", "4-8", "8-12", "12-16", "16-20");
         }
-        if (score > 20) {
+        if (score > 20 && score < 60) {
             return Arrays.asList("0-5", "5-10", "10-15", "15-20", "20-" + DoubleUtils.cutTailZero(score));
+        }
+        if(score == 60){
+            return Arrays.asList("0-10", "10-20", "20-30", "30-40", "40-50", "50-60");
         }
         return Collections.singletonList("0-" + String.valueOf(score));
     }

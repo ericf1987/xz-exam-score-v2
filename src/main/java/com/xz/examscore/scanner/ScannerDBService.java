@@ -58,8 +58,17 @@ public class ScannerDBService {
     @Autowired
     SubjectService subjectService;
 
-    public Document findProject(String project) {
+    public MongoClient getMongoClient(String project){
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
+                .getCollection("project").find(doc("projectId", project)).first();
+        if(null == projectDoc){
+            return scannerMongoClient2;
+        }
+        return scannerMongoClient;
+    }
+
+    public Document findProject(String project) {
+        Document projectDoc = getMongoClient(project).getDatabase("project_database")
                     .getCollection("project").find(doc("projectId", project)).first();
         if(null == projectDoc){
             LOG.info("考试项目{}的网阅数据存在于旧数据库", project);
@@ -99,9 +108,8 @@ public class ScannerDBService {
     public void importSubjectScore(String project, String subjectId) {
         String dbName = project + "_" + subjectId;
         LOG.info("导入 " + dbName + " 的成绩...");
-        MongoCollection<Document> collection = scannerMongoClient.getDatabase(dbName).getCollection("students");
+        MongoCollection<Document> collection = getMongoClient(project).getDatabase(dbName).getCollection("students");
         AtomicInteger counter = new AtomicInteger();
-
         collection.find(doc()).forEach(
                 (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
 
