@@ -51,6 +51,9 @@ public class Config {
     @Value("${scanner.db.addr}")
     private String scannerMongoAddr;
 
+    @Value("${scanner.db.old.addr}")
+    private String scannerMongoOldAddr;
+
     @Value("${multipart.maxFileSize}")
     private String maxFileSize;
 
@@ -104,6 +107,13 @@ public class Config {
     @Bean
     public MongoClient scannerMongoClient() throws Exception {
         List<ServerAddress> seeds = readServerAddress(scannerMongoAddr);
+        MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
+        return new MongoClient(seeds, options);
+    }
+
+    @Bean
+    public MongoClient scannerMongoClient2() throws Exception {
+        List<ServerAddress> seeds = readServerAddress(scannerMongoOldAddr);
         MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
         return new MongoClient(seeds, options);
     }

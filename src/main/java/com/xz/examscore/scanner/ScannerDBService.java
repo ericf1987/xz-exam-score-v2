@@ -2,8 +2,6 @@ package com.xz.examscore.scanner;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.NumberUtil;
@@ -43,6 +41,9 @@ public class ScannerDBService {
     MongoClient scannerMongoClient;
 
     @Autowired
+    MongoClient scannerMongoClient2;
+
+    @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
@@ -57,44 +58,15 @@ public class ScannerDBService {
     @Autowired
     SubjectService subjectService;
 
-    //根据项目ID来获取数据源
-    public MongoClient getMongoClientByProject(String projectId) {
-        Document doc = scoreDatabase.getCollection("project_list").find(doc("project", projectId)).first();
-        String scannerMongoAddr = doc.getString("scannerMongoAddr");
-        if(!doc.isEmpty()){
-            if(StringUtil.isBlank(scannerMongoAddr)){
-                LOG.info("当前考试{}，使用默认数据源取网阅数据。", projectId);
-                return scannerMongoClient;
-            }else{
-                LOG.info("当前考试{}，使用注定数据源获取网阅数据：{}", projectId, scannerMongoAddr);
-                List<ServerAddress> seeds = readServerAddress(scannerMongoAddr);
-                MongoClientOptions options = MongoClientOptions.builder().build();  // 缺省连接池大小为100
-                return new MongoClient(seeds, options);
-            }
-        }else{
-            throw new NullPointerException("找不到项目信息，无法获取数据源！" + projectId);
-        }
-    }
-
-    public List<ServerAddress> readServerAddress(String serverAddress) {
-        String[] split = serverAddress.split(",");
-        List<ServerAddress> seeds = new ArrayList<>();
-
-        for (String s : split) {
-            if (s == null || s.length() == 0 || !s.contains(":")) {
-                continue;
-            }
-
-            String[] host_port = s.split(":");
-            seeds.add(new ServerAddress(host_port[0], Integer.parseInt(host_port[1])));
-        }
-        return seeds;
-    }
-
     public Document findProject(String project) {
-        MongoClient mongoClient = getMongoClientByProject(project);
-        return mongoClient.getDatabase("project_database")
-                .getCollection("project").find(doc("projectId", project)).first();
+        Document projectDoc = scannerMongoClient.getDatabase("project_database")
+                    .getCollection("project").find(doc("projectId", project)).first();
+        if(null == projectDoc){
+            LOG.info("考试项目{}的网阅数据存在于旧数据库", project);
+            projectDoc = scannerMongoClient2.getDatabase("project_database")
+                    .getCollection("project").find(doc("projectId", project)).first();
+        }
+        return projectDoc;
     }
 
     /**

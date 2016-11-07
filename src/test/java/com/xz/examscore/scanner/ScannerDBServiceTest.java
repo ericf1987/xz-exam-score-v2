@@ -1,5 +1,6 @@
 package com.xz.examscore.scanner;
 
+import com.mongodb.MongoClient;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.bson.Document;
 import org.junit.Test;
@@ -19,9 +20,12 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     ScannerDBService scannerDBService;
 
+    @Autowired
+    MongoClient mongoClient;
+
     @Test
     public void testFindProject() throws Exception {
-        Document project = scannerDBService.findProject(SCANNER_PROJECT_ID);
+        Document project = scannerDBService.findProject("430100-c9ccbcb7fcb542e3a2f278e8d2ca2c4f");
         System.out.println(project.toJson());
     }
 
@@ -47,15 +51,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
-    public void testgetSubjectIdInQuestList() throws Exception{
+    public void testgetSubjectIdInQuestList() throws Exception {
         String project = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
         String subjectId = scannerDBService.getSubjectIdInQuestList(project, "22", "007008009");
         System.out.println(subjectId);
     }
 
-    @Test
-    public void testGetMongoClientByProject() throws Exception{
-        String project = "433100-fef19389d6ce4b1f99847ab96d2cfeba";
-        scannerDBService.getMongoClientByProject(project);
-    }
 }
