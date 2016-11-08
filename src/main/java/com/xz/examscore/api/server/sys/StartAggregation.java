@@ -7,10 +7,15 @@ import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.AggregationConfig;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.services.AggregationService;
+import com.xz.examscore.services.ProjectStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.xz.examscore.bean.ProjectStatus.AggregationStarted;
+import static com.xz.examscore.bean.ProjectStatus.Initializing;
 
 /**
  * @author by fengye on 2016/9/21.
@@ -29,12 +34,22 @@ public class StartAggregation implements Server{
     @Autowired
     AggregationService aggregationService;
 
+    @Autowired
+    ProjectStatusService projectStatusService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("project");
-        if (aggregationService.isAggregationRunning(projectId)) {
-            return Result.fail("项目 " + projectId + " 正在统计当中");
+
+        //任务进入队列之前，先判断该考试项目是否正在统计
+        AggregationStatus aggregationStatus = projectStatusService.getAggregationStatus(projectId);
+        if(aggregationStatus.equals(AggregationStatus.Activated)){
+            return Result.fail("该项目的统计正在执行中，不能重复执行，请稍后执行!");
         }
+
+        //标记项目开始初始化
+        projectStatusService.setAggregationStatus(projectId,  AggregationStatus.Activated);
+        projectStatusService.setProjectStatus(projectId, Initializing);
 
         AggregationConfig aggregationConfig = new AggregationConfig();
         aggregationConfig.setAggregationType(AggregationType.valueOf(param.getString("type")));

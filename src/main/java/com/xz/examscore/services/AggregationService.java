@@ -104,8 +104,14 @@ public class AggregationService {
             projectStatusService.setProjectStatus(projectId, AggregationCompleted);
             projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
         } catch (AppException e) {
+            projectService.updateAggregationTime(projectId);
+            projectStatusService.setProjectStatus(projectId, AggregationFailed);
+            projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
             throw e;
         } catch (Exception e) {
+            projectService.updateAggregationTime(projectId);
+            projectStatusService.setProjectStatus(projectId, AggregationFailed);
+            projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
             throw new AppException(e);
         }
     }

@@ -39,9 +39,6 @@ public class DispatchMessageReceiver extends MessageReceiver<DispatchTaskMessage
 
         String projectId = message.getProjectId();
 
-        //获取到考试执行任务以后，将考试任务在数据库中标记为执行中
-        projectStatusService.setAggregationStatus(projectId, AggregationStatus.Activated);
-
         AggregationType aggregationType = message.getAggregationType();
         aggregationService.runAggregationOnly(projectId, aggregationType);
 

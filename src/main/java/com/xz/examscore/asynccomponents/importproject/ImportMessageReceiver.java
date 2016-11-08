@@ -37,9 +37,6 @@ public class ImportMessageReceiver extends MessageReceiver<ImportTaskMessage> {
     protected void executeTask(ImportTaskMessage message) {
         String projectId = message.getProjectId();
 
-        //获取到考试执行任务以后，将考试任务在数据库中标记为执行中
-        projectStatusService.setAggregationStatus(projectId, AggregationStatus.Activated);
-
         AggregationType aggregationType = message.getAggregationType();
         LOG.info("开始导入项目 " + projectId);
 

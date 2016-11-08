@@ -14,6 +14,11 @@ public enum ProjectStatus {
     Empty,
 
     /**
+     * 统计前初始化
+     */
+    Initializing,
+
+    /**
      * 正在导入项目信息
      */
     ProjectImporting,

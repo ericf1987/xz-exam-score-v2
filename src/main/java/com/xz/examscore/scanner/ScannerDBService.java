@@ -58,24 +58,18 @@ public class ScannerDBService {
     @Autowired
     SubjectService subjectService;
 
-    public MongoClient getMongoClient(String project){
+    public MongoClient getMongoClient(String project) {
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
-        if(null == projectDoc){
+        if (null == projectDoc) {
             return scannerMongoClient2;
         }
         return scannerMongoClient;
     }
 
     public Document findProject(String project) {
-        Document projectDoc = getMongoClient(project).getDatabase("project_database")
-                    .getCollection("project").find(doc("projectId", project)).first();
-        if(null == projectDoc){
-            LOG.info("考试项目{}的网阅数据存在于旧数据库", project);
-            projectDoc = scannerMongoClient2.getDatabase("project_database")
-                    .getCollection("project").find(doc("projectId", project)).first();
-        }
-        return projectDoc;
+        return getMongoClient(project).getDatabase("project_database")
+                .getCollection("project").find(doc("projectId", project)).first();
     }
 
     /**
@@ -117,11 +111,10 @@ public class ScannerDBService {
     }
 
     /**
-     *
-     * @param projectId    项目ID
-     * @param subjectId    网阅数据库科目ID
-     * @param document     网阅数据库学生信息
-     * @param counter      计数器
+     * @param projectId 项目ID
+     * @param subjectId 网阅数据库科目ID
+     * @param document  网阅数据库学生信息
+     * @param counter   计数器
      */
     public void importStudentScore(String projectId, String subjectId, Document document, AtomicInteger counter) {
         String studentId = document.getString("studentId");

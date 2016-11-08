@@ -23,10 +23,8 @@ public class SchoolEntryLevelRateAnalysisTest extends XzExamScoreV2ApplicationTe
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430100-1944e9f7048b48e2b38e35db75be4980";
+        String projectId = "430100-379be8c302a64c748f3e62cb22e5d9b5";
         String schoolId = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
-        List<Document> classDocs = classService.listClasses(projectId, schoolId);
-        classDocs.forEach(doc -> System.out.println(doc.getString("name")));
 
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("schoolId", schoolId);

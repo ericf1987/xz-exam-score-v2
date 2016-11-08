@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Collections;
 import java.util.UUID;
 
+import static com.xz.examscore.bean.ProjectStatus.Initializing;
+
 /**
  * (description)
  * created at 16/05/10
@@ -106,9 +108,13 @@ public class AggregationTaskController {
 
         //任务进入队列之前，先判断该考试项目是否正在统计
         AggregationStatus aggregationStatus = projectStatusService.getAggregationStatus(projectId);
-        if(aggregationStatus.equals(AggregationStatus.Activated)){
+        if (aggregationStatus.equals(AggregationStatus.Activated)) {
             return Result.fail("该项目的统计正在执行中，不能重复执行，请稍后执行!");
         }
+
+        //标记项目开始初始化
+        projectStatusService.setAggregationStatus(projectId, AggregationStatus.Activated);
+        projectStatusService.setProjectStatus(projectId, Initializing);
 
         AggregationConfig aggregationConfig = new AggregationConfig();
         aggregationConfig.setAggregationType(AggregationType.valueOf(type));
@@ -142,7 +148,7 @@ public class AggregationTaskController {
 
     @RequestMapping(value = "/project/cleanData", method = RequestMethod.POST)
     @ResponseBody
-    public Result cleanProjectData(@RequestParam("project") String projectId){
+    public Result cleanProjectData(@RequestParam("project") String projectId) {
         cleanProjectService.doCleanSchedule(projectId);
         return Result.success("项目 " + projectId + " 开始执行清理...");
     }

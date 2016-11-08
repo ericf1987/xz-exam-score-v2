@@ -12,10 +12,6 @@ import java.util.stream.Collectors;
  */
 public class TestLamdar1 {
     public static void main(String[] args) {
-        String s = "A";
-        String t = "A,B,C";
-        List<String> list = Arrays.asList(t.split(","));
-        System.out.println(list.toString());
     }
 
     public void test1(int a, int b){
