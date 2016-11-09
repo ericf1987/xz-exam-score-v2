@@ -11,6 +11,7 @@ import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.QuestService;
 import com.xz.examscore.services.StudentService;
 import com.xz.examscore.services.SubjectService;
+import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,56 @@ public class ScannerDBService {
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
         List<String> subjectIds = new ArrayList<>(subjectCodes.keySet());
+        //导入分数任务列表
+        List<ImportSubjectScoreTask> tasks = new ArrayList<>();
 
-        for (String subjectId : subjectIds) {
-            importSubjectScore(project, subjectId);
+        boolean result = doImportAllSubjectScore(project, subjectIds, tasks);
+
+        if (result) {
+            LOG.info("导入分数包完成！");
+        } else {
+            throw new IllegalStateException("导入分数包出现异常，请核查问题后重新导入！");
         }
+    }
+
+    public boolean doImportAllSubjectScore(String project, List<String> subjectIds, List<ImportSubjectScoreTask> tasks) {
+        for (String subjectId : subjectIds) {
+            ImportSubjectScoreTask task = runImportSubjectScore(project, subjectId);
+            tasks.add(task);
+        }
+
+        boolean success = true;
+        for (ImportSubjectScoreTask task : tasks) {
+            try {
+                task.join();
+                if (!task.isSuccess()) {
+                    success = false;
+                    LOG.error("导入考试项目{}的科目{}的分数包出现异常！");
+                }
+            } catch (InterruptedException e) {
+                LOG.error("等待导入线程结束失败", e);
+            }
+        }
+
+        return success;
+    }
+
+    //执行并返回导入分数任务
+    private ImportSubjectScoreTask runImportSubjectScore(String project, String subjectId) {
+        ImportSubjectScoreTask task = new ImportSubjectScoreTask(project, subjectId);
+        task.start();
+        return task;
+    }
+
+    public boolean doImportSubjectScore(String project, String subjectId) {
+        boolean success = true;
+        try {
+            importSubjectScore0(project, subjectId);
+        } catch (Exception e) {
+            LOG.error("导入科目" + subjectId + "分数失败", e);
+            success = false;
+        }
+        return success;
     }
 
     /**
@@ -99,7 +146,7 @@ public class ScannerDBService {
      * @param project   项目ID
      * @param subjectId 科目ID
      */
-    public void importSubjectScore(String project, String subjectId) {
+    public void importSubjectScore0(String project, String subjectId) {
         String dbName = project + "_" + subjectId;
         LOG.info("导入 " + dbName + " 的成绩...");
         MongoCollection<Document> collection = getMongoClient(project).getDatabase(dbName).getCollection("students");
@@ -107,7 +154,7 @@ public class ScannerDBService {
         collection.find(doc()).forEach(
                 (Consumer<Document>) doc -> importStudentScore(project, subjectId, doc, counter));
 
-        LOG.info("已导入 " + counter.get() + " 名学生...");
+        LOG.info("已完成导入科目{}的{}名学生...", subjectId, counter.get());
     }
 
     /**
@@ -129,21 +176,32 @@ public class ScannerDBService {
                 doc("project", projectId).append("student", studentId).append("subject", $in(subjectList))
         );
 
-        saveObjectiveScores(projectId, subjectId, document, student);
-        saveSubjectiveScores(projectId, subjectId, document, student);
+        //查询学生该科目是否作弊
+        boolean isCheating = isCheating(document);
+        if (isCheating) {
+            LOG.info("该学生{}在科目{}的考试中存在作弊标记，将主观题和客观题分数改为0分", studentId, subjectId);
+        }
+
+        saveObjectiveScores(projectId, subjectId, document, student, isCheating);
+        saveSubjectiveScores(projectId, subjectId, document, student, isCheating);
 
         if (counter.incrementAndGet() % 100 == 0) {
             LOG.info("已导入科目 " + subjectId + " 的 " + counter.get() + " 名学生...");
         }
     }
 
+    private boolean isCheating(Document document) {
+        return BooleanUtils.toBoolean(document.getBoolean("isCheating"));
+    }
+
 
     private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
-        //网阅题目ID列表
+
         List<String> subjectiveIds = subjectiveList.stream().map(subQuestItem -> subQuestItem.getString("questionNo")).collect(Collectors.toList());
 
         //统计库题目ID列表
         List<String> subQuestIds = subQuestList.stream().map(subQuestItem -> subQuestItem.getString("questNo")).collect(Collectors.toList());
+
 
         for (int i = 0; i < subQuestIds.size(); i++) {
             //判断是否网阅题目ID中存在遗漏
@@ -160,9 +218,14 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student) {
+    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
-
+        String studentId = student.getString("student");
+        //网阅题目ID列表
+        if (null == subjectiveList || subjectiveList.isEmpty()) {
+            LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
+            return;
+        }
         //获取统计集合中主观题信息
         List<Document> subQuestList = new ArrayList<>();
 
@@ -184,11 +247,12 @@ public class ScannerDBService {
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
+            //如果该生作弊，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", score)
-                    .append("right", NumberUtil.equals(score, fullScore))
+                    .append("score", isCheating ? 0d : score)
+                    .append("right", isCheating ? false : NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
@@ -207,9 +271,14 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student) {
+    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
         List<Document> objectiveList = (List<Document>) document.get("objectiveList");
-
+        String studentId = student.getString("student");
+        //网阅题目ID列表
+        if (null == objectiveList || objectiveList.isEmpty()) {
+            LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
+            return;
+        }
         for (Document objectiveItem : objectiveList) {
 
             String questionNo = objectiveItem.getString("questionNo");
@@ -239,12 +308,13 @@ public class ScannerDBService {
 
             ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
 
+            //如果学生作弊，则客观题的得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", scoreAndRight.score)
+                    .append("score", isCheating ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    .append("right", scoreAndRight.right)
+                    .append("right", isCheating ? false : scoreAndRight.right)
                     .append("isObjective", true)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
@@ -353,6 +423,32 @@ public class ScannerDBService {
         public ScoreAndRight(double score, boolean right) {
             this.score = score;
             this.right = right;
+        }
+    }
+
+    /////////////////////////////////////////////////////////////
+
+    private class ImportSubjectScoreTask extends Thread {
+
+        private String project;
+
+        private String subjectId;
+
+        private boolean success;
+
+        public ImportSubjectScoreTask(String project, String subjectId) {
+            this.project = project;
+            this.subjectId = subjectId;
+        }
+
+        @Override
+        public void run() {
+            LOG.info("线程{}开始执行，项目{}，科目{}的分数数据开始导入...", this.getName(), project, subjectId);
+            success = doImportSubjectScore(project, subjectId);
+        }
+
+        public boolean isSuccess() {
+            return success;
         }
     }
 }
