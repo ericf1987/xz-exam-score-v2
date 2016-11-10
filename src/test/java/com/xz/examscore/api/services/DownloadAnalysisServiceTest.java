@@ -18,7 +18,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testMain() throws Exception {
         String[] arr = new String[]{
-                "100-200-300",
+/*                "100-200-300",
                 "100-200-301",
                 "100-200-302",
                 "100-200-303",
@@ -49,13 +49,13 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
                 "102-200-319",
                 "102-202-325",
                 "102-201-314",
-                "102-201-315",
+                "102-201-315",*/
                 "102-201-316"
         };
 /*        Result result = downloadAnalysisService.generateZipFiles("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68", arr);*/
-        Result result = downloadAnalysisService.generateZipFiles("430300-672a0ed23d9148e5a2a31c8bf1e08e62",
-                "9ea1472e-9f8e-4b48-b00c-8bde3288cc80", arr);
+        Result result = downloadAnalysisService.generateZipFiles("430100-e7bd093d92d844819c7eda8b641ab6ee",
+                "d00faaa0-8a9b-45c4-ae16-ea2688353cd0", arr);
         System.out.println(result.getData());
 /*        String s = downloadAnalysisService.getZipFilePrefix("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68");
@@ -64,7 +64,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testMain1() throws Exception{
-        String projectId = "431000-a5087c7540004f3a8df0042718c65424";
+        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
         String[] param = new String[]{"总体成绩分析","基础分析","分数分析.xlsx"};
         String result = getSaveFilePath(projectId, "F://", StringUtil.joinPaths(param));
         System.out.println(result);
