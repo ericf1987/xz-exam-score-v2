@@ -135,4 +135,13 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         List<Double> list = projectConfigService.getEntryLevelScoreLine(projectId, range, projectTarget, count);
         System.out.println(list);
     }
+
+    @Test
+    public void getScoreByIndex() throws Exception {
+        String projectId = "433100-fef19389d6ce4b1f99847ab96d2cfeba";
+        Range range = Range.school("64a1c8cd-a9b9-4755-a973-e1ce07f3f70a");
+        Target target = Target.project(projectId);
+        double scoreByIndex = projectConfigService.getScoreByIndex(projectId, range, target, 5, "0.4");
+        System.out.println(scoreByIndex);
+    }
 }

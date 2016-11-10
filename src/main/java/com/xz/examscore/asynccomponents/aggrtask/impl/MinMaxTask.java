@@ -69,11 +69,19 @@ public class MinMaxTask extends AggrTask {
     private void queryMinMax(
             String projectId, Target target, List<String> studentIds, Value<Double> min, Value<Double> max) {
 
+        //判断是不是所有学生得分都为0分
+        boolean allZero = true;
+
         for (int i = 0; i < studentIds.size(); i++) {
             double totalScore = scoreService.getScore(projectId, new Range(Range.STUDENT, studentIds.get(i)), target);
+            if (totalScore != 0) {
+                allZero = false;
+            }
 
             if (i == 0) {
-                min.set(totalScore);
+                if(totalScore != 0){
+                    min.set(totalScore);
+                }
                 max.set(totalScore);
             }
 
@@ -83,6 +91,12 @@ public class MinMaxTask extends AggrTask {
             } else if (totalScore > max.get()) {
                 max.set(totalScore);
             }
+        }
+
+        //如果所有得分都为0，则最大值和最小值各为0
+        if(allZero){
+            min.set(0d);
+            max.set(0d);
         }
     }
 

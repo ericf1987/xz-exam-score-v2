@@ -277,7 +277,7 @@ public class ProjectConfigService {
     }
 
     //根据排名率计算排名位置的得分
-    private double getScoreByIndex(String projectId, Range range, Target projectTarget, int studentCount, String rate) {
+    public double getScoreByIndex(String projectId, Range range, Target projectTarget, int studentCount, String rate) {
         double d = Double.parseDouble(rate) / 100;
         int index = (int) (studentCount * d);
         return rankService.getRankScore(projectId, range, projectTarget, index);
