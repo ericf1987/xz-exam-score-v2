@@ -60,6 +60,10 @@ public class ReportManager implements ApplicationContextAware {
     public void init() {
         this.executionPool = newBlockingThreadPoolExecutor(poolSize, poolSize, 100);
         this.reportConfig = XmlNodeReader.read(getClass().getResourceAsStream("/report/config/report-config.xml"));
+
+        if (StringUtil.isEmpty(savePath)) {
+            throw new IllegalStateException("报表输出路径为空");
+        }
     }
 
     /**
@@ -79,7 +83,7 @@ public class ReportManager implements ApplicationContextAware {
                     String filePath = reportTask.getCategory() + "/" + reportTask.getFilePathWithRange() + ".xlsx";
                     String saveFilePath = getSaveFilePath(projectId, savePath, filePath);
 
-                    LOG.info("开始生成报表 " + reportTask);
+                    LOG.info("开始生成报表 " + reportTask + ", 路径：" + saveFilePath);
                     reportTask.getReportGenerator().generate(projectId, reportTask.getRange(), saveFilePath);
 
                 } catch (Exception e) {

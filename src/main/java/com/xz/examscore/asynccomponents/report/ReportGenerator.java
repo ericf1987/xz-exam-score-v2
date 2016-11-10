@@ -1,6 +1,7 @@
 package com.xz.examscore.asynccomponents.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
+import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.examscore.asynccomponents.report.classes.ReportGeneratorInfo;
 import com.xz.examscore.bean.Range;
 import org.slf4j.Logger;
@@ -33,7 +34,6 @@ public abstract class ReportGenerator {
     public void generate(String projectId, Range range, String savePath) {
         try {
             List<SheetTask> sheetTasks = getSheetTasks(projectId, range);
-
             InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
             ExcelWriter excelWriter = new ExcelWriter(stream);
             excelWriter.clearSheets();
@@ -48,7 +48,7 @@ public abstract class ReportGenerator {
             }
 
             excelWriter.save(savePath);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error("生成报表失败", e);
         }
 
