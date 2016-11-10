@@ -14,4 +14,6 @@
     <logger name="org" level="ERROR"/>
     <logger name="net" level="ERROR"/>
     <logger name="com.xz.examscore.asynccomponents" level="DEBUG"/>
+    <logger name="com.xz.examscore.asynccomponents.MessageReceiver" level="INFO"/>
+    <logger name="com.xz.examscore.asynccomponents.QueueService" level="INFO"/>
 </configuration>

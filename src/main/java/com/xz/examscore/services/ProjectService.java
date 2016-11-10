@@ -14,6 +14,8 @@ import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.bean.Range;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -33,6 +35,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
  */
 @Service
 public class ProjectService {
+
+    static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -66,6 +70,7 @@ public class ProjectService {
      * 通过考试项目id查询项目所属学段
      *
      * @param projectId 考试项目id
+     *
      * @return 考试项目信息
      */
     public String findProjectStudyStage(String projectId) {
@@ -86,6 +91,7 @@ public class ProjectService {
      * 通过考试项目id查询考试项目
      *
      * @param projectId 考试项目id
+     *
      * @return 考试项目信息
      */
     public Document findProject(String projectId) {
@@ -100,13 +106,14 @@ public class ProjectService {
 
     /**
      * 通过考试项目id和分科标志查询考试项目
+     *
      * @param projectId 考试ID
-     * @param category 分科标志 文科：“W”，理科“L”
+     * @param category  分科标志 文科：“W”，理科“L”
      */
-    public Document findProject(String projectId, String category){
-        if(StringUtils.isEmpty(category)){
+    public Document findProject(String projectId, String category) {
+        if (StringUtils.isEmpty(category)) {
             return findProject(projectId);
-        }else{
+        } else {
             String cacheKey = "project_info:" + projectId + "category:" + category;
             return cache.get(cacheKey, () -> {
                 Document query = doc("project", projectId).append("category", category);
@@ -124,6 +131,7 @@ public class ProjectService {
      * @param area      区县id
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
+     *
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String city, String area, String schoolId, String examMonth) {
@@ -227,6 +235,7 @@ public class ProjectService {
      * 查询项目状态
      *
      * @param projectId 项目ID
+     *
      * @return 状态
      */
     public ProjectStatus getProjectStatus(String projectId) {
@@ -276,6 +285,7 @@ public class ProjectService {
 
     /**
      * 设置考试统计状态
+     *
      * @param projectId 项目ID
      * @param activated 统计状态参数
      */
@@ -292,7 +302,22 @@ public class ProjectService {
     public AggregationStatus getAggregationStatus(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
         Document query = doc("project", projectId);
+
         Document project = c.find(query).projection(doc("aggregationStatus", 1)).first();
-        return project == null ? AggregationStatus.Empty : AggregationStatus.valueOf(project.getString("aggregationStatus"));
+        if (project == null) {
+            return AggregationStatus.Empty;
+        }
+
+        String aggrStatus = project.getString("aggregationStatus");
+        if (StringUtil.isEmpty(aggrStatus)) {
+            return AggregationStatus.Empty;
+        }
+
+        try {
+            return AggregationStatus.valueOf(aggrStatus);
+        } catch (IllegalArgumentException e) {
+            LOG.error("项目" + projectId + "的统计状态为" + aggrStatus);
+            return AggregationStatus.Empty;
+        }
     }
 }

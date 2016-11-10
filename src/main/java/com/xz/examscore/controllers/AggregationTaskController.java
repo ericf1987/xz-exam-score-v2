@@ -90,6 +90,7 @@ public class AggregationTaskController {
      *
      * @param projectId       项目ID
      * @param type            统计类型（参考 {@link AggregationType}）:basic
+     * @param forceStart      是否强制开始统计:false
      * @param reimportProject 是否要重新导入项目信息:false
      * @param reimportScore   是否要重新导入和计算成绩（仅限网阅项目）:false
      * @param generateReport  是否要生成 Excel 报表文件:false
@@ -100,6 +101,7 @@ public class AggregationTaskController {
     public Result startAggregation(
             @RequestParam("project") String projectId,
             @RequestParam(value = "type", required = false, defaultValue = "Basic") String type,
+            @RequestParam(value = "forceStart", required = false, defaultValue = "false") String forceStart,
             @RequestParam(value = "reimportProject", required = false, defaultValue = "false") String reimportProject,
             @RequestParam(value = "reimportScore", required = false, defaultValue = "false") String reimportScore,
             @RequestParam(value = "generateReport", required = false, defaultValue = "false") String generateReport,
@@ -108,7 +110,7 @@ public class AggregationTaskController {
 
         //任务进入队列之前，先判断该考试项目是否正在统计
         AggregationStatus aggregationStatus = projectStatusService.getAggregationStatus(projectId);
-        if (aggregationStatus.equals(AggregationStatus.Activated)) {
+        if (aggregationStatus.equals(AggregationStatus.Activated) && !Boolean.valueOf(forceStart)) {
             return Result.fail("该项目的统计正在执行中，不能重复执行，请稍后执行!");
         }
 

@@ -92,10 +92,6 @@ public class Target {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Object getId() {
         return id;
     }
@@ -114,9 +110,15 @@ public class Target {
                 this.id : Document.parse(JSON.toJSONString(this.id));
     }
 
+    // 反序列化需要
     public Target setId(Object id) {
         this.id = id;
         return this;
+    }
+
+    // 反序列化需要
+    public void setName(String name) {
+        this.name = name;
     }
 
     @SuppressWarnings("SimplifiableIfStatement")

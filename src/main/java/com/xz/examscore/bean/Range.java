@@ -64,6 +64,7 @@ public class Range {
         return name;
     }
 
+    // 反序列化需要
     public void setName(String name) {
         this.name = name;
     }
@@ -72,6 +73,7 @@ public class Range {
         return id;
     }
 
+    // 反序列化需要
     public void setId(String id) {
         this.id = id;
     }
