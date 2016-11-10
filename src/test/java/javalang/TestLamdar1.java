@@ -13,11 +13,10 @@ import java.util.Map;
  */
 public class TestLamdar1 {
     public static void main(String[] args) {
-        List<Double> l = new ArrayList<>();
-        l.add(0.2d);
-        l.add(0.3d);
-        l.add(0.1d);
-        System.out.println(l.get(l.size() - 1));
+        Map<String, Object> m = new HashMap<>();
+        m.put("one", true);
+        m.put("two", false);
+        System.out.println(BooleanUtils.toBoolean((Boolean)m.get("false")));
     }
 
     public void test1(int a, int b){

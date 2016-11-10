@@ -5,6 +5,8 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.util.ReportNameMappings;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,8 @@ public class DownloadAnalysisService {
 
     @Autowired
     ClassService classService;
+
+    public static final Logger LOG = LoggerFactory.getLogger(DownloadAnalysisService.class);
 
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
         //根据文件参数获取文件路径

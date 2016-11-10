@@ -220,7 +220,11 @@ public class ScannerDBService {
     @SuppressWarnings("unchecked")
     private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
+        Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
+        if(null != isAbsent){
+            LOG.info("该学生{}的考试科目{}为缺考状态！所以主观题得分为0", studentId, subjectId);
+        }
         //网阅题目ID列表
         if (null == subjectiveList || subjectiveList.isEmpty()) {
             LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
@@ -265,6 +269,10 @@ public class ScannerDBService {
             if (null != missing && missing) {
                 scoreDoc.append("missing", true);
             }
+            //如果有缺考标记，则标记缺考
+            if(null != isAbsent){
+                scoreDoc.append("isAbsent", isAbsent);
+            }
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
@@ -273,7 +281,11 @@ public class ScannerDBService {
     @SuppressWarnings("unchecked")
     private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
         List<Document> objectiveList = (List<Document>) document.get("objectiveList");
+        Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
+        if(null != isAbsent){
+            LOG.info("该学生{}的考试科目{}为缺考状态！所以客观题得分为0", studentId, subjectId);
+        }
         //网阅题目ID列表
         if (null == objectiveList || objectiveList.isEmpty()) {
             LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
@@ -323,6 +335,10 @@ public class ScannerDBService {
                     .append("city", student.getString("city"))
                     .append("province", student.getString("province"))
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
+
+            if(null != isAbsent){
+                scoreDoc.append("isAbsent", isAbsent);
+            }
 
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }

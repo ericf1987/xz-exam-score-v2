@@ -114,8 +114,9 @@ public class PrepareDataService {
                 .append("city", "$city").append("area", "$area").append("school", "$school")
                 .append("class", "$class").append("student", "$student");
 
+        //过滤掉缺考的学生
         AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
-                $match("project", projectId),
+                $match(doc("project", projectId).append("isAbsent", doc("$exists", false))),
                 $group(doc("_id", _id).append("subjects", $addToSet("$subject")))
         ));
 

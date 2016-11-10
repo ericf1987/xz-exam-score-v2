@@ -139,11 +139,11 @@ public class ProjectCollegeEntryLevelAnalysis implements Server {
         String level = entry_level.get("level").toString();
         switch (level) {
             case "ONE":
-                return "超一本线" + dValue + "分";
+                return "超A等" + dValue + "分";
             case "TWO":
-                return "超二本线" + dValue + "分";
+                return "超B等" + dValue + "分";
             case "THREE":
-                return "超三本线" + dValue + "分";
+                return "超C等" + dValue + "分";
         }
         return "";
     }

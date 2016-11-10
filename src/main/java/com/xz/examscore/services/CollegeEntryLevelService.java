@@ -178,11 +178,11 @@ public class CollegeEntryLevelService {
     public String getEntryKeyDesc(String key) {
         switch (key) {
             case "ONE":
-                return "一本上线率";
+                return "A等";
             case "TWO":
-                return "二本上线率";
+                return "B等";
             case "THREE":
-                return "三本上线率";
+                return "C等";
         }
         return "";
     }
