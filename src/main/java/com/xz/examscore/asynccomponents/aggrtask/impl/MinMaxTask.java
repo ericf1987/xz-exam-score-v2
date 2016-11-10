@@ -77,7 +77,8 @@ public class MinMaxTask extends AggrTask {
                 max.set(totalScore);
             }
 
-            if (totalScore < min.get()) {
+            //统计最小值的时候把0过滤掉
+            if (totalScore < min.get() && totalScore != 0) {
                 min.set(totalScore);
             } else if (totalScore > max.get()) {
                 max.set(totalScore);

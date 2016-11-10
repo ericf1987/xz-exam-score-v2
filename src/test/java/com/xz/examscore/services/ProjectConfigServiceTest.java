@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * (description)
@@ -132,7 +132,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         Range range = Range.province("430000");
         Target projectTarget = Target.project(projectId);
         int count = studentService.getStudentCount(projectId, range, projectTarget);
-        Map<String, Double> map = projectConfigService.getEntryLevelMap(projectId, range, projectTarget, count);
-        System.out.println(map.toString());
+        List<Double> list = projectConfigService.getEntryLevelScoreLine(projectId, range, projectTarget, count);
+        System.out.println(list);
     }
 }

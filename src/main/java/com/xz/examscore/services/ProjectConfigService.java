@@ -263,25 +263,17 @@ public class ProjectConfigService {
     }
 
     //将上线率转化为录取分数线的分数
-    public Map<String, Double> getEntryLevelMap(String projectId, Range range, Target projectTarget, int studentCount) {
+    public List<Double> getEntryLevelScoreLine(String projectId, Range range, Target projectTarget, int studentCount) {
         ProjectConfig projectConfig = getProjectConfig(projectId);
-        Map<String, Double> map = new HashMap<>();
         if (projectConfig.getEntryLevelStatType().equals("rate")) {
             //如果录取参数为排名率，则需要计算出对应排名位置的分数，根据此分数来录取
-            List<Double> rates = projectConfig.getCollegeEntryLevel().stream()
+            return projectConfig.getCollegeEntryLevel().stream()
                     .map(rate -> getScoreByIndex(projectId, range, projectTarget, studentCount, rate)).collect(Collectors.toList());
-            for (int i = 0; i < ENTRY_LEVEL.length; i++) {
-                map.put(ENTRY_LEVEL[i], rates.get(i));
-            }
         } else {
             //转化为得分
-            List<Double> rates = projectConfig.getCollegeEntryLevel().stream()
+            return projectConfig.getCollegeEntryLevel().stream()
                     .map(rate -> DoubleUtils.round(Double.parseDouble(rate))).collect(Collectors.toList());
-            for (int i = 0; i < ENTRY_LEVEL.length; i++) {
-                map.put(ENTRY_LEVEL[i], rates.get(i));
-            }
         }
-        return map;
     }
 
     //根据排名率计算排名位置的得分

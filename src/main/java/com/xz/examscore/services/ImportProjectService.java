@@ -124,7 +124,7 @@ public class ImportProjectService {
         return context;
     }
 
-    protected void importProjectReportConfig(String projectId, Context context) {
+    public void importProjectReportConfig(String projectId, Context context) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
         JSONObject rankLevel = result.get("rankLevel");
         JSONObject scoreLevels = result.get("scoreLevels");

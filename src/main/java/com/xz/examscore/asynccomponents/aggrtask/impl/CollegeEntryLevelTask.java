@@ -18,7 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,9 @@ public class CollegeEntryLevelTask extends AggrTask{
     @Autowired
     RangeService rangeService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
@@ -65,7 +71,11 @@ public class CollegeEntryLevelTask extends AggrTask{
         int studentCount = studentService.getStudentCount(projectId, provinceRange, projectTarget);
 
         //获取本科上线率（按所有人数排名百分比录取或）
-        Map<String, Double> entry_level = collegeEntryLevelService.getEntryLevel(projectId, provinceRange, projectTarget, studentCount);
+        List<Double> scoreLines = collegeEntryLevelService.getEntryLevelScoreLine(projectId, provinceRange, projectTarget, studentCount);
+        Map<String, Double> entry_level = new HashMap<>();
+        for(int i = 0; i < scoreLines.size();i++){
+            entry_level.put(ProjectConfigService.ENTRY_LEVEL[i], scoreLines.get(i));
+        }
         //获取当前维度下考试总成绩的排名
         List<Document> scoreMap = rankService.getScoreMap(projectId, range, projectTarget);
         if (scoreMap.isEmpty()) {
@@ -82,7 +92,7 @@ public class CollegeEntryLevelTask extends AggrTask{
 
         Map<Double, Integer> rankMap = new HashMap<>();  // 排名 Map，
         //获取高于本科录取率的分数
-        Double baseLineScore = entry_level.get("THREE");
+        Double baseLineScore = scoreLines.get(scoreLines.size() - 1);
         //过滤未录取的数据
         List<Document> newScoreMap = scoreMap.stream().filter(m -> MapUtils.getDouble(m, "score") >= baseLineScore).collect(Collectors.toList());
         Value<Integer> totalCount = Value.of(0);
