@@ -17,6 +17,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +133,8 @@ public class ImportProjectService {
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
+        //是否开启学校信息共享
+        boolean shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
         //获取本科上线率统计相关参数
         String entryLevelStatType = "rate", entryLevelEnable = "false";
         List<String> collegeEntryLevel = new ArrayList<>();
@@ -144,7 +147,7 @@ public class ImportProjectService {
                 entryLevelStatType = onlineRateStat.get("onlineStatType").toString();
             }
             if(onlineRateStat.get("values") != null){
-                collegeEntryLevel = (List<String>) onlineRateStat.get("values");
+                collegeEntryLevel.addAll((List<String>) onlineRateStat.get("values"));
             }
         }
 
@@ -189,6 +192,7 @@ public class ImportProjectService {
             projectConfig.setEntryLevelStatType(entryLevelStatType);
             projectConfig.setEntryLevelEnable(Boolean.parseBoolean(entryLevelEnable));
             projectConfig.setCollegeEntryLevel(collegeEntryLevel);
+            projectConfig.setShareSchoolReport(shareSchoolReport);
             projectConfigService.fixProjectConfig(projectConfig);
 
             //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
@@ -205,7 +209,8 @@ public class ImportProjectService {
                     projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
                     projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate(),
                     projectConfig.isSeparateCombine(), projectConfig.getEntryLevelStatType(),
-                    projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel());
+                    projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel(),
+                    projectConfig.isShareSchoolReport());
             //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }

@@ -14,7 +14,7 @@ public class ReImportProjectConfigTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-bdfa63b0070b431fbc5308c0d362e74f");
+        Param param = new Param().setParameter("projectId", "433100-fef19389d6ce4b1f99847ab96d2cfeba");
         reImportProjectConfig.execute(param);
     }
 }

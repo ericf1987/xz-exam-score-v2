@@ -90,6 +90,7 @@ public class ProjectConfigService {
                         .append("entryLevelStatType", projectConfig.getEntryLevelStatType())
                         .append("entryLevelEnable", projectConfig.isEntryLevelEnable())
                         .append("collegeEntryLevel", projectConfig.getCollegeEntryLevel())
+                        .append("shareSchoolReport", projectConfig.isShareSchoolReport())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -105,6 +106,7 @@ public class ProjectConfigService {
                     .append("entryLevelStatType", projectConfig.getEntryLevelStatType())
                     .append("entryLevelEnable", projectConfig.isEntryLevelEnable())
                     .append("collegeEntryLevel", projectConfig.getCollegeEntryLevel())
+                    .append("shareSchoolReport", projectConfig.isShareSchoolReport())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -124,12 +126,13 @@ public class ProjectConfigService {
      * @param entryLevelStatType 本科上线率参数类型
      * @param entryLevelEnable   报表侧是否开启上线率报表
      * @param collegeEntryLevel  本科上线率参数
+     * @param shareSchoolReport  是否开启学校信息共享
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
             String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
-            String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel) {
+            String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel, boolean shareSchoolReport) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -144,6 +147,7 @@ public class ProjectConfigService {
                         .append("entryLevelStatType", entryLevelStatType)
                         .append("entryLevelEnable", entryLevelEnable)
                         .append("collegeEntryLevel", collegeEntryLevel)
+                        .append("shareSchoolReport", shareSchoolReport)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -159,6 +163,7 @@ public class ProjectConfigService {
                     .append("entryLevelStatType", entryLevelStatType)
                     .append("entryLevelEnable", entryLevelEnable)
                     .append("collegeEntryLevel", collegeEntryLevel)
+                    .append("shareSchoolReport", shareSchoolReport)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }

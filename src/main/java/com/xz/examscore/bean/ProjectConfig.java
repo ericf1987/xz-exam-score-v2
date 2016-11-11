@@ -70,6 +70,19 @@ public class ProjectConfig implements Serializable {
      */
     private String entryLevelStatType;
 
+    /**
+     * 是否开启学校信息共享
+     */
+    private boolean shareSchoolReport = false;
+
+    public boolean isShareSchoolReport() {
+        return shareSchoolReport;
+    }
+
+    public void setShareSchoolReport(boolean shareSchoolReport) {
+        this.shareSchoolReport = shareSchoolReport;
+    }
+
     public List<String> getCollegeEntryLevel() {
         return collegeEntryLevel;
     }
