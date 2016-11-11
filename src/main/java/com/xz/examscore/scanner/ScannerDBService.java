@@ -112,7 +112,7 @@ public class ScannerDBService {
                 task.join();
                 if (!task.isSuccess()) {
                     success = false;
-                    LOG.error("导入考试项目{}的科目{}的分数包出现异常！");
+                    LOG.error("导入考试项目{}的科目{}的分数包出现异常！", task.getProject(), task.getSubjectId());
                 }
             } catch (InterruptedException e) {
                 LOG.error("等待导入线程结束失败", e);
@@ -306,7 +306,8 @@ public class ScannerDBService {
             //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
             String standardAnswer = getStdAnswerFromQuest(objectiveItem, quest);
 
-            if (StringUtil.isBlank(studentAnswer)) {
+            //对于没有缺考的学生，客观题如果作答为空字符串，才报错判定为没有作答
+            if (null == isAbsent && StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" +
                         projectId + ", subject=" + sid + ", quest=" + objectiveItem);
             }
@@ -465,6 +466,22 @@ public class ScannerDBService {
 
         public boolean isSuccess() {
             return success;
+        }
+
+        public String getProject() {
+            return project;
+        }
+
+        public void setProject(String project) {
+            this.project = project;
+        }
+
+        public String getSubjectId() {
+            return subjectId;
+        }
+
+        public void setSubjectId(String subjectId) {
+            this.subjectId = subjectId;
         }
     }
 }
