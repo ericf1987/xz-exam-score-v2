@@ -134,7 +134,10 @@ public class ImportProjectService {
         Map<String, Double> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
         //是否开启学校信息共享
-        boolean shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
+        boolean shareSchoolReport = false;
+        if(result.get("shareSchoolReport") != null){
+            shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
+        }
         //获取本科上线率统计相关参数
         String entryLevelStatType = "rate", entryLevelEnable = "false";
         List<String> collegeEntryLevel = new ArrayList<>();

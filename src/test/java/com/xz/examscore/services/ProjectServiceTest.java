@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.bean.Range;
 import org.bson.Document;
@@ -57,5 +58,10 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
         Document doc = projectService.findProject("");
         Range schoolRange = Range.school("11b66fc2-8a76-41c2-a1b3-5011523c7e47");
         System.out.println(projectService.listProjectsByRange(schoolRange, doc.getString("category")).toString());
+    }
+
+    @Test
+    public void testsetAggregationStatus(){
+        projectService.setAggregationStatus("433100-148ec5544f7b4764851c3a8976945a2f", AggregationStatus.Terminated);
     }
 }
