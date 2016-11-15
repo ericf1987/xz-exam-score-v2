@@ -17,9 +17,9 @@ public class ProjectBasicDataAnalysisTest extends XzExamScoreV2ApplicationTests{
     @Test
     public void testExecute() throws Exception {
         String[] schoolIds = new String[]{
-                "d00faaa0-8a9b-45c4-ae16-ea2688353cd0"
+                "528654bb-3529-4ef2-9d71-5870d3f55d49"
         };
-        Param param = new Param().setParameter("projectId", "430100-553137a1e78741149104526aaa84393e")
+        Param param = new Param().setParameter("projectId", "430200-215a0a158e0244d79cf3c9924dc6691c")
                 .setParameter("schoolIds", schoolIds);
         Result result = projectBasicDataAnalysis.execute(param);
         System.out.println(result.getData());

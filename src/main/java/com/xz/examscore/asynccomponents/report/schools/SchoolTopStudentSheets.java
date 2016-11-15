@@ -6,6 +6,7 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.school.SchoolTopStudentStat;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.asynccomponents.report.total.TotalTopStudentSheets;
 import com.xz.examscore.services.SchoolService;
 import com.xz.examscore.services.TopStudentListService;
 import org.bson.Document;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +35,9 @@ public class SchoolTopStudentSheets extends SheetGenerator {
 
     @Autowired
     TopStudentListService topStudentListService;
+
+    @Autowired
+    TotalTopStudentSheets totalTopStudentSheets;
 
     public static final String[] SECONDARY_COLUMN = new String[]{
             "成绩", "总体排名"
@@ -67,12 +70,7 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "考号");
         excelWriter.set(0, column.incrementAndGet(), "学生姓名");
         excelWriter.set(0, column.incrementAndGet(), "班级");
-        Map<String, Object> topStudent = topStudents.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
-        for (Map<String, Object> subject : subjects) {
-            excelWriter.set(0, column.incrementAndGet(), subject.get("subjectName"));
-            excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
-        }
+        totalTopStudentSheets.appendHeader(excelWriter, topStudents, column);
     }
 
     private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> topStudents) {
@@ -83,12 +81,7 @@ public class SchoolTopStudentSheets extends SheetGenerator {
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "班级");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
-        Map<String, Object> topStudent = topStudents.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
-        for (int i = 0; i < subjects.size(); i++) {
-            excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[0]);
-            excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[1]);
-        }
+        totalTopStudentSheets.appendSecondaryHeader(excelWriter, topStudents, column);
     }
 
     private void fillData(ExcelWriter excelWriter, List<Map<String, Object>> topStudents) {

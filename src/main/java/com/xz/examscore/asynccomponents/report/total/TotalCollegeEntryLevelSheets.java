@@ -87,6 +87,10 @@ public class TotalCollegeEntryLevelSheets extends SheetGenerator {
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "上线情况");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
+        appendSubjectsColumns(excelWriter, students, column);
+    }
+
+    public void appendSubjectsColumns(ExcelWriter excelWriter, List<Map<String, Object>> students, AtomicInteger column) {
         if(!students.isEmpty()){
             Map<String, Object> one = students.get(0);
             List<Map<String, Object>> subjects = (List<Map<String, Object>>)one.get("subjects");

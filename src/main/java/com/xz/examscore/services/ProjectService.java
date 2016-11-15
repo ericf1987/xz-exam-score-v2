@@ -169,7 +169,9 @@ public class ProjectService {
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
                 .append("startDate", project.getExamStartDate())
-                .append("category", project.getCategory());
+                .append("category", project.getCategory())
+                .append("status", ProjectStatus.ProjectImporting)
+                .append("aggregationStatus", AggregationStatus.Activated);
 
         UpdateResult result = c.updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
@@ -179,6 +181,8 @@ public class ProjectService {
                     .append("startDate", project.getExamStartDate())
                     .append("category", project.getCategory())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    .append("status", ProjectStatus.ProjectImporting)
+                    .append("aggregationStatus", AggregationStatus.Activated)
             );
         }
     }

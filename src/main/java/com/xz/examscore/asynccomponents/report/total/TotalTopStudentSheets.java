@@ -63,11 +63,17 @@ public class TotalTopStudentSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "学生姓名");
         excelWriter.set(0, column.incrementAndGet(), "学校");
         excelWriter.set(0, column.incrementAndGet(), "总体排名");
-        Map<String, Object> topStudent = topStudents.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
-        for (Map<String, Object> subject : subjects) {
-            excelWriter.set(0, column.incrementAndGet(), subject.get("subjectName"));
-            excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
+        appendHeader(excelWriter, topStudents, column);
+    }
+
+    public void appendHeader(ExcelWriter excelWriter, List<Map<String, Object>> topStudents, AtomicInteger column) {
+        if(null != topStudents && !topStudents.isEmpty()){
+            Map<String, Object> topStudent = topStudents.get(0);
+            List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
+            for (Map<String, Object> subject : subjects) {
+                excelWriter.set(0, column.incrementAndGet(), subject.get("subjectName"));
+                excelWriter.mergeCells(0, column.get(), 0, column.incrementAndGet());
+            }
         }
     }
 
@@ -81,11 +87,17 @@ public class TotalTopStudentSheets extends SheetGenerator {
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "总体排名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
-        Map<String, Object> topStudent = topStudents.get(0);
-        List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
-        for (int i = 0; i < subjects.size(); i++) {
-            excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[0]);
-            excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[1]);
+        appendSecondaryHeader(excelWriter, topStudents, column);
+    }
+
+    public void appendSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> topStudents, AtomicInteger column) {
+        if(null != topStudents && !topStudents.isEmpty()){
+            Map<String, Object> topStudent = topStudents.get(0);
+            List<Map<String, Object>> subjects = (List<Map<String, Object>>) topStudent.get("subjects");
+            for (int i = 0; i < subjects.size(); i++) {
+                excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[0]);
+                excelWriter.set(1, column.incrementAndGet(), SECONDARY_COLUMN[1]);
+            }
         }
     }
 
