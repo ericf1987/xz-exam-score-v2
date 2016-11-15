@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtaskdispatcher;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.AggregationType;
 import org.junit.Test;
@@ -23,6 +24,12 @@ public class TaskDispatcherFactoryTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testListAvailableDispatchers() throws Exception {
         List<TaskDispatcher> dispatchers = taskDispatcherFactory.listAvailableDispatchers("AGGR1", AggregationType.All);
-        assertFalse(dispatchers.isEmpty());
+        dispatchers.forEach(dispatcher -> System.out.println(dispatcher.getClass().getSimpleName()));
+    }
+
+    @Test
+    public void testgetTaskDispatcher() throws Exception {
+        TaskDispatcher total_score = taskDispatcherFactory.getTaskDispatcher("total_score");
+        System.out.println(total_score.getClass().getSimpleName());
     }
 }

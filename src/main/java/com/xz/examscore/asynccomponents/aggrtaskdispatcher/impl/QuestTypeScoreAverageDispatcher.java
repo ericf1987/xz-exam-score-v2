@@ -5,6 +5,8 @@ import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.RangeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ import java.util.List;
 @Component
 public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
 
+    static final Logger LOG = LoggerFactory.getLogger(QuestTypeScoreAverageDispatcher.class);
+
     @Autowired
     RangeService rangeService;
 
@@ -26,8 +30,14 @@ public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
         List<Range> rangeList = rangeService.queryRanges(
                 projectId, Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
 
+        int counter = 0;
         for (Range range : rangeList) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
+            counter++;
+            if (counter % 1000 == 0) {
+                LOG.info("为项目 " + projectId + " 的 quest_type_score_average 统计发布了 " + counter + " 个任务");
+            }
         }
+        LOG.info("最终为项目 " + projectId + " 的 quest_type_score_average 统计发布了 " + counter + " 个任务");
     }
 }
