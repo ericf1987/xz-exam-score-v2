@@ -91,6 +91,7 @@ public class PrepareDataService {
                     break;
                 case "T":
                 case "F":
+                case "":
                     items = Arrays.asList("T", "F");
                     break;
                 default:

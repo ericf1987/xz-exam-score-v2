@@ -288,17 +288,19 @@ public class ScannerDBService {
         }
         //网阅题目ID列表
         if (null == objectiveList || objectiveList.isEmpty()) {
-            LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
+            LOG.info("该学生{}网阅客观题列表为空，对该学生进行数据修补，确保客观题结构存在", studentId);
+            fixMissingObjectiveQuest(projectId, subjectId, isAbsent, student);
             return;
         }
+
         for (Document objectiveItem : objectiveList) {
 
             String questionNo = objectiveItem.getString("questionNo");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
             Document quest = questService.findQuest(projectId, sid, questionNo);
             if (null == quest) {
-                LOG.error("题目为空：projectId={}, subjectId={}, sid={}, questionNo={}", projectId, subjectId, sid, questionNo);
-                throw new IllegalArgumentException("获取题目信息失败！统计失败");
+                LOG.error("网阅客观题题号在quest_list中查找不到对应题目，projectId={}, subjectId={}, sid={}, questionNo={}", projectId, subjectId, sid, questionNo);
+                throw new IllegalArgumentException("获取quest_list题号失败！统计失败");
             }
             double fullScore = getFullScore(quest, objectiveItem);
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
@@ -341,6 +343,34 @@ public class ScannerDBService {
                 scoreDoc.append("isAbsent", isAbsent);
             }
 
+            scoreDatabase.getCollection("score").insertOne(scoreDoc);
+        }
+    }
+
+    //修正客观题列表
+    private void fixMissingObjectiveQuest(String projectId, String subjectId, Boolean isAbsent, Document student) {
+        List<Document> questDocs = questService.getQuests(projectId, subjectId);
+        for(Document questDoc : questDocs){
+            Document scoreDoc = doc("project", projectId)
+                    .append("subject", subjectId)
+                    .append("questNo", questDoc.getString("questNo"))
+                    .append("score", 0d)
+                    .append("answer", "*")
+                    .append("right", false)
+                    .append("isObjective", true)
+                    .append("student", student.getString("student"))
+                    .append("class", student.getString("class"))
+                    .append("school", student.getString("school"))
+                    .append("area", student.getString("area"))
+                    .append("city", student.getString("city"))
+                    .append("province", student.getString("province"))
+                    .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                    .append("quest", questDoc.getString("questId"))
+                    .append("missing", true);
+
+            if(null != isAbsent){
+                scoreDoc.append("isAbsent", isAbsent);
+            }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
