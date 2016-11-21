@@ -17,8 +17,10 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.print.Doc;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -357,7 +359,7 @@ public class ScoreService {
             query.append("subject", target.getId().toString());
             Document doc = collection.find(query).first();
             if(null == doc){
-                return false;
+                return true;
             }
             return BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
         }else{
