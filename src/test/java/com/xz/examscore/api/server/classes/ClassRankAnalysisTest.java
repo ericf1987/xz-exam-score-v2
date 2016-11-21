@@ -15,9 +15,9 @@ public class ClassRankAnalysisTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430600-95e565c247574dd3b935ae9912c8eca5")
-                .setParameter("schoolId", "d1bf6d54-1e2e-40b3-b3df-fda8069e4389")
-                .setParameter("classId", "649e603f-1e27-43bb-89ca-5970efb76710");
+        Param param = new Param().setParameter("projectId", "430100-bdfa63b0070b431fbc5308c0d362e74f")
+                .setParameter("schoolId", "d9bdecc9-0185-4688-90d1-1aaf27e2dcfd")
+                .setParameter("classId", "ab2fba9c-2bfe-4ef6-a3f0-ce62247b24ec");
         Result result = classRankAnalysis.execute(param);
         System.out.println(result.getData());
     }

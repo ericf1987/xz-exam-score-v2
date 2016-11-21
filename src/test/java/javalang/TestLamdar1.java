@@ -1,5 +1,7 @@
 package javalang;
 
+import org.apache.commons.lang.BooleanUtils;
+
 /**
  * @author by fengye on 2016/6/3.
  */
@@ -51,14 +53,7 @@ public class TestLamdar1 {
     }
 
     public static void main(String[] args) {
-        TestLamdar1 test = new TestLamdar1();
-        Counter counter = test.new Counter();
-        for (int i = 0; i < 3; i++) {
-//            Thread thread = test.new MyThread(test.new Counter());
-            Thread thread = test.new MyThread(counter);
-            thread.start();
-            throw new NullPointerException();
-        }
+        System.out.println(BooleanUtils.toBoolean((Boolean) null));
     }
 
 }

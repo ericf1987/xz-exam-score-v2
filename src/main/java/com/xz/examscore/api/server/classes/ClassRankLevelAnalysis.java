@@ -108,6 +108,11 @@ public class ClassRankLevelAnalysis implements Server {
                 subjectMap.put("subjectScore", subjectScore);
                 subjectMap.put("subjectId", subjectId);
                 subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
+                //判断学生是否缺考
+                boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+                if(isAbsent){
+                    subjectMap.put("isAbsent", isAbsent);
+                }
                 subjectList.add(subjectMap);
             }
             studentInfo.put("subject", subjectList);

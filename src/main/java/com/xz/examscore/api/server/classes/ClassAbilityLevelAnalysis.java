@@ -59,6 +59,9 @@ public class ClassAbilityLevelAnalysis implements Server {
     @Autowired
     AbilityLevelService abilityLevelService;
 
+    @Autowired
+    TargetService targetService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -107,6 +110,13 @@ public class ClassAbilityLevelAnalysis implements Server {
             Range range = Range.student(studentId);
             map.put("subjectScore", scoreService.getScore(projectId, range, Target.subject(subjectId)));
             map.put("levelStats", getLevelStats(projectId, subjectId, range, levelMap));
+            //判断学生是否缺考
+            Target target = targetService.getTarget(projectId, subjectId);
+            boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+            if(isAbsent){
+                map.put("isAbsent", isAbsent);
+            }
+
             list.add(map);
         }
 

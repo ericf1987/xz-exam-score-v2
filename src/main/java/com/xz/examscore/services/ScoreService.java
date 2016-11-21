@@ -12,14 +12,13 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.Mongo;
 import com.xz.examscore.util.SubjectUtil;
+import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.print.Doc;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -341,4 +340,29 @@ public class ScoreService {
             return (int)scoreDatabase.getCollection("score").count(query);
         });
     }
+
+    //判断学生是否缺考
+    public boolean isStudentAbsent(String projectId, String studentId, Target target) {
+        String targetName = target.getName();
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+        Document query = doc("project", projectId).append("student", studentId);
+        if(targetName.equals(Target.PROJECT)){
+            //只有当没有任何分数明细的时候，才判断考生整个考试项目为缺考状态
+            long count = collection.count(query);
+            if(count == 0){
+                return true;
+            }
+            return false;
+        }else if(targetName.equals(Target.SUBJECT)){
+            query.append("subject", target.getId().toString());
+            Document doc = collection.find(query).first();
+            if(null == doc){
+                return false;
+            }
+            return BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
+        }else{
+            return false;
+        }
+    }
+
 }

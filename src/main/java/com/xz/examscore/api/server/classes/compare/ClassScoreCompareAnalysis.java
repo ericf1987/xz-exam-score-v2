@@ -73,7 +73,7 @@ public class ClassScoreCompareAnalysis implements Server{
                 String currentProject = project.getString("project");
                 Target target = targetService.getTarget(currentProject, subjectId);
                 double score = scoreService.getScore(currentProject, Range.student(student.getString("student")), target);
-                scores.add(getScoreMap(currentProject, score));
+                scores.add(getScoreMap(currentProject, student.getString("student"), score, target));
             }
             studentMap.put("scores", scores);
             studentList.add(studentMap);
@@ -81,10 +81,15 @@ public class ClassScoreCompareAnalysis implements Server{
         return studentList;
     }
 
-    private Map<String, Object> getScoreMap(String project, double score) {
+    private Map<String, Object> getScoreMap(String currentProject, String studentId, double score, Target target) {
         Map<String, Object> map = new HashMap<>();
-        map.put("projectId", project);
+        map.put("projectId", currentProject);
         map.put("score", DoubleUtils.round(score, false));
+        //判断学生是否缺考
+        boolean isAbsent = scoreService.isStudentAbsent(currentProject, studentId, target);
+        if(isAbsent){
+            map.put("isAbsent", isAbsent);
+        }
         return map;
     }
 }

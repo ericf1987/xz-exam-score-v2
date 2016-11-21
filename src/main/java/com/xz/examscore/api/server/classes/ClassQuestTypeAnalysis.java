@@ -54,6 +54,9 @@ public class ClassQuestTypeAnalysis implements Server {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    TargetService targetService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -96,7 +99,12 @@ public class ClassQuestTypeAnalysis implements Server {
             Range range = Range.student(studentId);
             double score = scoreService.getScore(projectId, range, Target.subject(subjectId));
             map.put("score", score);
-
+            //判断学生是否缺考
+            Target target = targetService.getTarget(projectId, subjectId);
+            boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+            if(isAbsent){
+                map.put("isAbsent", isAbsent);
+            }
             List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range,
                     questTypeService, fullScoreService, questTypeScoreService);
             map.put("questTypes", questTypes);

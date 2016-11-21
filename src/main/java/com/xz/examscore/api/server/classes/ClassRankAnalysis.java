@@ -140,6 +140,12 @@ public class ClassRankAnalysis implements Server {
         rankMaps.put("score", DoubleUtils.round(score));
         rankMaps.put("scoreRate", DoubleUtils.round(fullScore == 0 ? 0 : score / fullScore, true));
 
+        //判断学生是否缺考
+        boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+        if(isAbsent){
+            rankMaps.put("isAbsent", isAbsent);
+        }
+
         // 学生在班级排名
         int rankClassIndex = rankService.getRank(projectId, Range.clazz(classId), target, score);
         rankMaps.put("rankClassIndex", rankClassIndex);
