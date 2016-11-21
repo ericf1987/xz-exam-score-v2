@@ -10,6 +10,8 @@ import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.util.DocUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -99,6 +101,8 @@ public class ReportItemService {
         List<Map<String, Object>> list = new ArrayList<>();
 
         List<Document> reportItemList = reportItemMap.get(type);
+
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         for (Document document : reportItemList) {
             Map<String, Object> reportItem = new HashMap<>();
             String name = document.getString("name");
@@ -106,16 +110,29 @@ public class ReportItemService {
             reportItem.put("name", name);
             reportItem.put("id", document.getObjectId("_id").toHexString());
             reportItem.put("tag", document.getString("tag"));
+            Map<String, Object> rangeMap = (Map<String, Object>)document.get("range");
+            String rangeName = MapUtils.getString(rangeMap, "name");
 
             if (isPointOrLevelItem(name)) {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
-                //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
-                if (name.equals(ENTRY_LEVEL_REPORT)) {
-                    ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-                    reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
-                } else {
+                //根据联考开关进行判断
+                if(projectConfig.isShareSchoolReport()){
                     reportItem.put("dataStatus", checkItemDate(projectId, document));
+                }else{
+                    //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
+                    if (name.equals(ENTRY_LEVEL_REPORT)) {
+                        reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
+                    }
+                    //总体报表
+                    if(rangeName.equals("province")){
+                        reportItem.put("dataStatus", false);
+                    }
+                    //其他报表
+                    else {
+                        //如果是联考项目，判断是否学校之间共享数据，如果不共享数据，则将总体报表隐藏
+                        reportItem.put("dataStatus", checkItemDate(projectId, document));
+                    }
                 }
             }
 
@@ -255,12 +272,12 @@ public class ReportItemService {
         Document query = doc("_id", new ObjectId(id));
 
         Document document = new Document();
-        DocumentUtils.addTo(document, "type", type);
-        DocumentUtils.addTo(document, "name", name);
+        DocUtils.addTo(document, "type", type);
+        DocUtils.addTo(document, "name", name);
         DocumentUtils.addList(document, "collection_names", collectionNames);
-        DocumentUtils.addTo(document, "server_name", serverName);
-        DocumentUtils.addTo(document, "tag", tag);
-        DocumentUtils.addTo(document, "md5", MD5.digest(UUID.randomUUID().toString()));
+        DocUtils.addTo(document, "server_name", serverName);
+        DocUtils.addTo(document, "tag", tag);
+        DocUtils.addTo(document, "md5", MD5.digest(UUID.randomUUID().toString()));
 
         if (StringUtil.isNotBlank(position)) {
             document.put("position", NumberUtils.toInt(position));

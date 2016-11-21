@@ -73,7 +73,7 @@ public class ProjectConfig implements Serializable {
     /**
      * 是否开启学校信息共享
      */
-    private boolean shareSchoolReport = false;
+    private boolean shareSchoolReport = true;
 
     public boolean isShareSchoolReport() {
         return shareSchoolReport;

@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.xz.ajiaedu.common.mongo.DocumentUtils.addTo;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.examscore.util.DocUtils.addTo;
 
 /**
  * (description)

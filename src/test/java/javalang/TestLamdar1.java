@@ -1,25 +1,64 @@
 package javalang;
 
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.BooleanUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author by fengye on 2016/6/3.
  */
 public class TestLamdar1 {
-    public static void main(String[] args) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("one", true);
-        m.put("two", false);
-        System.out.println(BooleanUtils.toBoolean((Boolean)m.get("false")));
+    class Counter {
+        int count = 0;
+
+        public void add(String name) {
+            synchronized (this) {
+                System.out.println("开始执行add，线程名称为" + name + ", count=" + count);
+                count++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println("执行完成add，线程名称为" + name + ", count=" + count);
+                }
+            }
+        }
+
+        public void sub(String name) {
+            synchronized (this) {
+                System.out.println("开始执行sub，线程名称为" + name + ", count=" + count);
+                count--;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println("执行完成sub，线程名称为" + name + ", count=" + count);
+                }
+            }
+        }
     }
 
-    public void test1(int a, int b){
-        System.out.println(a + b);
+    class MyThread extends Thread {
+
+        Counter counter;
+
+        public MyThread(Counter counter) {
+            this.counter = counter;
+        }
+
+        public void run() {
+            counter.add(this.getName());
+            counter.sub(this.getName());
+        }
     }
+
+    public static void main(String[] args) {
+        TestLamdar1 test = new TestLamdar1();
+        Counter counter = test.new Counter();
+        for (int i = 0; i < 3; i++) {
+//            Thread thread = test.new MyThread(test.new Counter());
+            Thread thread = test.new MyThread(counter);
+            thread.start();
+            throw new NullPointerException();
+        }
+    }
+
 }

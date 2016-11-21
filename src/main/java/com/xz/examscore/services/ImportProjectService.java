@@ -133,8 +133,8 @@ public class ImportProjectService {
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
-        //是否开启学校信息共享
-        boolean shareSchoolReport = false;
+        //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
+        boolean shareSchoolReport = true;
         if(result.get("shareSchoolReport") != null){
             shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
         }
