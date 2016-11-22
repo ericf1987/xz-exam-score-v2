@@ -96,6 +96,7 @@ public class ReportItemService {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private List<Map<String, Object>> checkAndGetItemsData(String projectId, String type,
                                                            Map<String, List<Document>> reportItemMap) {
         List<Map<String, Object>> list = new ArrayList<>();
@@ -119,7 +120,7 @@ public class ReportItemService {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
-                //根据联考开关进行判断
+                //根据联考开关判断该报表是否允许下载
                 if(projectConfig.isShareSchoolReport() && rangeName.equals("province")){
                     downloadAllowed = false;
                 }
