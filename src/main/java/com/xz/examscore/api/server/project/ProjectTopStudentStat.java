@@ -123,6 +123,13 @@ public class ProjectTopStudentStat implements Server {
             projectInfo.put("rankIndex", rank);
             projectInfo.put("subjectId", "000");
             projectInfo.put("subjectName", "总体");
+
+            //判断学生是否缺考
+            boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+            if(isAbsent){
+                projectInfo.put("isAbsent", isAbsent);
+            }
+
             list.add(projectInfo);
 
             // 科目统计
@@ -156,6 +163,13 @@ public class ProjectTopStudentStat implements Server {
 
             subjectInfo.put("subjectId", subjectId);
             subjectInfo.put("subjectName", getSubjectName(subjectId));
+
+            //判断学生是否缺考
+            boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, Target.subject(subjectId));
+            if(isAbsent){
+                subjectInfo.put("isAbsent", isAbsent);
+            }
+
             list.add(subjectInfo);
         }
     }
