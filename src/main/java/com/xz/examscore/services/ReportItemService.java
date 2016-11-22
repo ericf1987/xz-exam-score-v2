@@ -111,31 +111,25 @@ public class ReportItemService {
             reportItem.put("id", document.getObjectId("_id").toHexString());
             reportItem.put("tag", document.getString("tag"));
             Map<String, Object> rangeMap = (Map<String, Object>)document.get("range");
+            //默认允许下载
+            boolean downloadAllowed = true;
             String rangeName = MapUtils.getString(rangeMap, "name");
 
             if (isPointOrLevelItem(name)) {
                 reportItem.put("dataStatus", averageService.isExistAverage(projectId, Target.POINT));
             } else {
+                reportItem.put("dataStatus", checkItemDate(projectId, document));
                 //根据联考开关进行判断
-                if(projectConfig.isShareSchoolReport()){
-                    reportItem.put("dataStatus", checkItemDate(projectId, document));
-                }else{
-                    //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
-                    if (name.equals(ENTRY_LEVEL_REPORT)) {
-                        reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
-                    }
-                    //总体报表
-                    if(rangeName.equals("province")){
-                        reportItem.put("dataStatus", false);
-                    }
-                    //其他报表
-                    else {
-                        //如果是联考项目，判断是否学校之间共享数据，如果不共享数据，则将总体报表隐藏
-                        reportItem.put("dataStatus", checkItemDate(projectId, document));
-                    }
+                if(projectConfig.isShareSchoolReport() && rangeName.equals("province")){
+                    downloadAllowed = false;
                 }
             }
 
+            //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
+            if (name.equals(ENTRY_LEVEL_REPORT)) {
+                reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
+            }
+            reportItem.put("downloadAllowed", downloadAllowed);
             list.add(reportItem);
         }
 
