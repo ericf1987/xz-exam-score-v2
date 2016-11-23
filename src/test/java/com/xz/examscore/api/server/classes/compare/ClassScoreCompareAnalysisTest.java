@@ -25,9 +25,9 @@ public class ClassScoreCompareAnalysisTest extends XzExamScoreV2ApplicationTests
     @Test
     public void testExecute() throws Exception {
         Param param = new Param()
-                .setParameter("projectId", "433100-fef19389d6ce4b1f99847ab96d2cfeba")
-                .setParameter("subjectId", "001")
-                .setParameter("classId", "f8259b31-7c8b-47ba-90d5-c5c15763660f");
+                .setParameter("projectId", "430100-194d9c9dd59d4145ae94bb66a06434d0")
+                .setParameter("subjectId", "")
+                .setParameter("classId", "ab183e62-5bf5-4c5f-b9a3-17c003defaca");
         Result result = classScoreCompareAnalysis.execute(param);
         System.out.println(result.getData());
     }

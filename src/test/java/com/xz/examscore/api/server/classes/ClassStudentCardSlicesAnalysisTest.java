@@ -7,18 +7,19 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author by fengye on 2016/8/1.
+ * @author by fengye on 2016/11/23.
  */
-public class ClassRankAnalysisTest extends XzExamScoreV2ApplicationTests {
+public class ClassStudentCardSlicesAnalysisTest extends XzExamScoreV2ApplicationTests {
+
     @Autowired
-    ClassRankAnalysis classRankAnalysis;
+    ClassStudentCardSlicesAnalysis classStudentCardSlicesAnalysis;
 
     @Test
     public void testExecute() throws Exception {
         Param param = new Param().setParameter("projectId", "430100-194d9c9dd59d4145ae94bb66a06434d0")
-                .setParameter("schoolId", "742bc2bc-5375-4281-9e66-0632a1a4c9dd")
-                .setParameter("classId", "ab183e62-5bf5-4c5f-b9a3-17c003defaca");
-        Result result = classRankAnalysis.execute(param);
+                .setParameter("studentId", "06160cba-6fac-43c6-9de4-9eec0379f4f3")
+                .setParameter("subjectId", "001");
+        Result result = classStudentCardSlicesAnalysis.execute(param);
         System.out.println(result.getData());
     }
 }

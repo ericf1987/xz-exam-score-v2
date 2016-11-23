@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
 import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.QuestService;
@@ -513,5 +514,37 @@ public class ScannerDBService {
         public void setSubjectId(String subjectId) {
             this.subjectId = subjectId;
         }
+    }
+
+    //查询学生某以科目的答题切图和留痕
+    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId){
+        String dbName = projectId + "_" + subjectId;
+        //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
+        Map<String, Object> resultMap = new HashMap<>();
+        MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
+        MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");
+        //查找学生的答题卡留痕
+        Document studentDoc = studentsCollection.find(doc("studentId", studentId)).first();
+        if(null != studentDoc && !studentDoc.isEmpty()){
+            //答题卡ID
+            String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
+            //答题卡正面
+            String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
+            //答题卡反面
+            String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
+            resultMap.put("cardId", cardId);
+            resultMap.put("paper_positive", paper_positive);
+            resultMap.put("paper_reverse", paper_reverse);
+            Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
+            if(null != cardDoc && !cardDoc.isEmpty()){
+                List<Map<String, Object>> positions = cardDoc.get("positions", List.class);
+                resultMap.put("positions", positions);
+            }else{
+                resultMap.put("positions", Collections.emptyList());
+            }
+        }else{
+            resultMap.put("positions", Collections.emptyList());
+        }
+        return resultMap;
     }
 }

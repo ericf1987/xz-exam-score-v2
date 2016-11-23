@@ -20,7 +20,7 @@ public class QueryReportItemsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430600-a093dba430094c76a813f72269626025";
+        String projectId = "430100-6e619bc460ae467fa6587b30a9a631af";
         Param param = new Param().setParameter("projectId", projectId);
         Map<String, Object> paramMap = queryReportItems.execute(param).getData();
         String json = JSON.toJSONString(paramMap);

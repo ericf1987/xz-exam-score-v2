@@ -8,6 +8,7 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.scanner.ScannerDBService;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
@@ -57,6 +58,9 @@ public class ClassRankAnalysis implements Server {
 
     @Autowired
     FullScoreService fullScoreService;
+
+    @Autowired
+    ScannerDBService scannerDBService;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -119,6 +123,8 @@ public class ClassRankAnalysis implements Server {
                     projectId, Target.subject(subjectId), schoolId, classId, studentId, rankSchoolIndex);
             rankAnalysisMap.put("subjectId", subjectId);
             rankAnalysisMap.put("subjectName", SubjectService.getSubjectName(subjectId));
+/*            Map<String, Object> cardMap = scannerDBService.getStudentCardSlices(projectId, subjectId, studentId);
+            rankAnalysisMap.put("cardSlices", cardMap);*/
             subjectRankList.add(rankAnalysisMap);
         }
 
