@@ -525,8 +525,6 @@ public class ScannerDBService {
         MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");
         //是否有整张答题卡切图
         boolean hasPaperPosition = false;
-        //是否有答题卡题目坐标
-        boolean hasQuestPosition = false;
         //查找学生的答题卡留痕
         Document studentDoc = studentsCollection.find(doc("studentId", studentId)).first();
         if(null != studentDoc && !studentDoc.isEmpty()){
@@ -536,9 +534,19 @@ public class ScannerDBService {
             String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
             //答题卡反面
             String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
+
+            String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
+            String offset1Y = DocumentUtils.getString(studentDoc, "offset1Y", "");
+            String offset2X = DocumentUtils.getString(studentDoc, "offset2X", "");
+            String offset2Y = DocumentUtils.getString(studentDoc, "offset2Y", "");
+
             resultMap.put("cardId", cardId);
             resultMap.put("paper_positive", paper_positive);
             resultMap.put("paper_reverse", paper_reverse);
+            resultMap.put("offset1X", offset1X);
+            resultMap.put("offset1Y", offset1Y);
+            resultMap.put("offset2X", offset2X);
+            resultMap.put("offset2Y", offset2Y);
             if(!StringUtils.isEmpty(cardId) && !StringUtils.isEmpty(paper_positive)){
                 hasPaperPosition = true;
             }
@@ -546,9 +554,6 @@ public class ScannerDBService {
             if(null != cardDoc && !cardDoc.isEmpty()){
                 List<Map<String, Object>> positions = cardDoc.get("positions", List.class);
                 resultMap.put("positions", positions);
-                if(null != positions && !positions.isEmpty()){
-                    hasQuestPosition = true;
-                }
             }else{
                 resultMap.put("positions", Collections.emptyList());
             }
@@ -556,7 +561,6 @@ public class ScannerDBService {
             resultMap.put("positions", Collections.emptyList());
         }
         resultMap.put("hasPaperPosition", hasPaperPosition);
-        resultMap.put("hasQuestPosition", hasQuestPosition);
         return resultMap;
     }
 }
