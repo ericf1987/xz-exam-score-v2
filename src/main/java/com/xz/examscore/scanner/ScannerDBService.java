@@ -536,9 +536,19 @@ public class ScannerDBService {
             String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
             //答题卡反面
             String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
+
+            String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
+            String offset1Y = DocumentUtils.getString(studentDoc, "offset1Y", "");
+            String offset2X = DocumentUtils.getString(studentDoc, "offset2X", "");
+            String offset2Y = DocumentUtils.getString(studentDoc, "offset2Y", "");
+
             resultMap.put("cardId", cardId);
             resultMap.put("paper_positive", paper_positive);
             resultMap.put("paper_reverse", paper_reverse);
+            resultMap.put("offset1X", offset1X);
+            resultMap.put("offset1Y", offset1Y);
+            resultMap.put("offset2X", offset2X);
+            resultMap.put("offset2Y", offset2Y);
             if(!StringUtils.isEmpty(cardId) && !StringUtils.isEmpty(paper_positive)){
                 hasPaperPosition = true;
             }
