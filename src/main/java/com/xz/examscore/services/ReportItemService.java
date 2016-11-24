@@ -129,6 +129,7 @@ public class ReportItemService {
             //上线预测报表需要根据project_config的配置参数来确定是否在页面显示
             if (name.equals(ENTRY_LEVEL_REPORT)) {
                 reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
+                downloadAllowed = downloadAllowed && projectConfig.isEntryLevelEnable();
             }
             reportItem.put("downloadAllowed", downloadAllowed);
             list.add(reportItem);
