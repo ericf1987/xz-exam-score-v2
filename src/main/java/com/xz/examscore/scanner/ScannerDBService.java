@@ -8,10 +8,10 @@ import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
-import com.xz.examscore.services.ImportProjectService;
-import com.xz.examscore.services.QuestService;
-import com.xz.examscore.services.StudentService;
-import com.xz.examscore.services.SubjectService;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -59,6 +59,9 @@ public class ScannerDBService {
 
     @Autowired
     SubjectService subjectService;
+
+    @Autowired
+    ScoreService scoreService;
 
     public MongoClient getMongoClient(String project) {
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
@@ -553,6 +556,16 @@ public class ScannerDBService {
             Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
             if(null != cardDoc && !cardDoc.isEmpty()){
                 List<Map<String, Object>> positions = cardDoc.get("positions", List.class);
+                //获取该题目的得分和满分
+                positions.forEach(position -> {
+                    String questionNo = MapUtils.getString(position, "questionNo");
+                    Document questDoc = questService.findQuest(projectId, subjectId, questionNo);
+                    double fullScore = DocumentUtils.getDouble(questDoc, "score", 0d);
+                    String questId = DocumentUtils.getString(questDoc, "questId", "");
+                    double score = scoreService.getScore(projectId, Range.student(studentId), Target.quest(questId));
+                    position.put("fullScore", fullScore);
+                    position.put("score", score);
+                });
                 resultMap.put("positions", positions);
             }else{
                 resultMap.put("positions", Collections.emptyList());
