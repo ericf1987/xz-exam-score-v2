@@ -23,9 +23,14 @@ public class FullScoreDispatcher extends TaskDispatcher {
 
         List<Target> targets = targetService.queryTargets(projectId,
                 Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE, Target.POINT);
-
+        int counter = 0;
         for (Target target : targets) {
             dispatchTask(createTask(projectId, aggregationId).setTarget(target));
+            counter++;
+            if (counter % 1000 == 0) {
+                LOG.info("为项目 " + projectId + " 的 full_score 统计发布了 " + counter + " 个任务");
+            }
         }
+        LOG.info("最终为项目 " + projectId + " 的 full_score 统计发布了 " + counter + " 个任务");
     }
 }

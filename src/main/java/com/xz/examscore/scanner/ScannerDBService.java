@@ -523,6 +523,10 @@ public class ScannerDBService {
         Map<String, Object> resultMap = new HashMap<>();
         MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
         MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");
+        //是否有整张答题卡切图
+        boolean hasPaperPosition = false;
+        //是否有答题卡题目坐标
+        boolean hasQuestPosition = false;
         //查找学生的答题卡留痕
         Document studentDoc = studentsCollection.find(doc("studentId", studentId)).first();
         if(null != studentDoc && !studentDoc.isEmpty()){
@@ -535,16 +539,24 @@ public class ScannerDBService {
             resultMap.put("cardId", cardId);
             resultMap.put("paper_positive", paper_positive);
             resultMap.put("paper_reverse", paper_reverse);
+            if(!StringUtils.isEmpty(cardId) && !StringUtils.isEmpty(paper_positive)){
+                hasPaperPosition = true;
+            }
             Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
             if(null != cardDoc && !cardDoc.isEmpty()){
                 List<Map<String, Object>> positions = cardDoc.get("positions", List.class);
                 resultMap.put("positions", positions);
+                if(null != positions && !positions.isEmpty()){
+                    hasQuestPosition = true;
+                }
             }else{
                 resultMap.put("positions", Collections.emptyList());
             }
         }else{
             resultMap.put("positions", Collections.emptyList());
         }
+        resultMap.put("hasPaperPosition", hasPaperPosition);
+        resultMap.put("hasQuestPosition", hasQuestPosition);
         return resultMap;
     }
 }

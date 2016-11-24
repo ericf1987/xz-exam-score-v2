@@ -1,6 +1,9 @@
 package javalang;
 
+import com.xz.examscore.util.ChineseName;
 import org.apache.commons.lang.BooleanUtils;
+
+import java.util.Random;
 
 /**
  * @author by fengye on 2016/6/3.
@@ -53,7 +56,10 @@ public class TestLamdar1 {
     }
 
     public static void main(String[] args) {
-        System.out.println(BooleanUtils.toBoolean((Boolean) null));
+        ChineseName cn = new ChineseName();
+        for (int i = 0; i <= 20; i++){
+            System.out.println(cn.nextRandomName());
+        }
     }
 
 }
