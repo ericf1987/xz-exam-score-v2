@@ -3,10 +3,7 @@ package com.xz.examscore.controllers;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
-import com.xz.examscore.bean.AggregationConfig;
-import com.xz.examscore.bean.AggregationStatus;
-import com.xz.examscore.bean.AggregationType;
-import com.xz.examscore.bean.ProjectStatus;
+import com.xz.examscore.bean.*;
 import com.xz.examscore.services.*;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.xz.examscore.bean.ProjectStatus.Initializing;
@@ -55,6 +54,9 @@ public class AggregationTaskController {
     @Autowired
     ProjectStatusService projectStatusService;
 
+    @Autowired
+    RangeService rangeService;
+
     /**
      * 开始统计任务
      *
@@ -80,8 +82,9 @@ public class AggregationTaskController {
         if (taskDispatcher == null) {
             return Result.fail("找不到任务 " + taskType + " 的分发类");
         }
+        Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);
 
-        aggregationService.runDispatchers(projectId, aggregationId, Collections.singletonList(taskDispatcher));
+        aggregationService.runDispatchers(projectId, aggregationId, Collections.singletonList(taskDispatcher), rangesMap);
         return Result.success("项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。");
     }
 

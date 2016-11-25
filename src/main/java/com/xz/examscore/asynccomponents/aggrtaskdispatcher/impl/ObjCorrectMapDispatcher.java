@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客观题正确率统计
@@ -31,8 +32,13 @@ public class ObjCorrectMapDispatcher extends TaskDispatcher {
     QuestService questService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
+
         List<Document> quests = questService.getQuests(projectId, true);
 
         int counter = 0;

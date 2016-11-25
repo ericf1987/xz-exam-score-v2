@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 非学生的题型得分（平均分）统计
@@ -25,13 +26,16 @@ public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
 
-        List<Range> rangeList = rangeService.queryRanges(
-                projectId, Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS);
+        String[] rangeKeys = new String[]{
+                Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
 
         int counter = 0;
-        for (Range range : rangeList) {
+        for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
             counter++;
             if (counter % 1000 == 0) {

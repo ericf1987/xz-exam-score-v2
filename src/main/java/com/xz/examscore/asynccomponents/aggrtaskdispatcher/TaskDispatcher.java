@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -50,7 +53,8 @@ public abstract class TaskDispatcher {
         dispatch(
                 projectId,
                 aggregationId,
-                context.get("projectConfig")
+                context.get("projectConfig"),
+                context.get("rangesMap")
         );
 
         Integer taskCount = taskCounter.get().get();
@@ -61,7 +65,9 @@ public abstract class TaskDispatcher {
         }
     }
 
-    public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);
+    public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap);
+
+//    public abstract void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig);
 
     public TaskDispatcherInfo getInfo() {
         if (!this.getClass().isAnnotationPresent(TaskDispatcherInfo.class)) {
@@ -127,5 +133,13 @@ public abstract class TaskDispatcher {
     // 每个考生发布一个任务，这个任务只有 Range
     protected void dispatchTaskForEveryStudent(String projectId, String aggregationId) {
         dispatchTaskForEveryStudent(projectId, aggregationId, null);
+    }
+
+    public List<Range> fetchRanges(String[] rangeKeys, Map<String, List<Range>> rangesMap) {
+        List<Range> ranges = new ArrayList<>();
+        for (String rangeKey : rangeKeys){
+            ranges.addAll(rangesMap.get(rangeKey));
+        }
+        return ranges;
     }
 }

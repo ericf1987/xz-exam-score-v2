@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分数分段人数统计
@@ -31,8 +32,12 @@ public class ScoreSegmentDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.PROVINCE, Range.SCHOOL, Range.CLASS
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
 
         int counter = 0;

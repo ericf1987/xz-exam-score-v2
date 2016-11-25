@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 科目贡献率
@@ -25,16 +26,16 @@ public class SubjectRateDispatcher extends TaskDispatcher {
     StudentService studentService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
 
-        List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
+        String[] rangeKeys = new String[]{
+                Range.PROVINCE, Range.SCHOOL, Range.CLASS
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
 
         for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
         }
-
-        // 为每个学生发布任务需要调用单独的方法，否则可能导致效率低下
-        dispatchTaskForEveryStudent(projectId, aggregationId);
     }
 }

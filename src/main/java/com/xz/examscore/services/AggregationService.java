@@ -10,6 +10,7 @@ import com.xz.examscore.asynccomponents.importproject.ImportTaskMessage;
 import com.xz.examscore.bean.AggregationConfig;
 import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.AggregationType;
+import com.xz.examscore.bean.Range;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,9 @@ public class AggregationService {
 
     @Autowired
     QueueService queueService;
+
+    @Autowired
+    RangeService rangeService;
 
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
@@ -151,6 +155,10 @@ public class AggregationService {
         String aggregationId = UUID.randomUUID().toString();
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
+        LOG.info("----开始查询项目{}的维度信息----");
+        Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);
+        LOG.info("----项目{}的维度信息查询结束----");
+
         List<TaskDispatcher> dispatcherList;
         int round = 1;
 
@@ -162,7 +170,7 @@ public class AggregationService {
 
             LOG.info("----对项目{}的第{}轮统计(ID={})任务：{}", projectId, round, aggregationId, dispatcherListNames);
 
-            runDispatchers(projectId, aggregationId, dispatcherList);
+            runDispatchers(projectId, aggregationId, dispatcherList, rangesMap);
             LOG.info("----对项目{}的第{}轮统计(ID={})任务分发完毕", projectId, round, aggregationId);
 
             waitForTaskCompletion(aggregationId);
@@ -186,17 +194,18 @@ public class AggregationService {
 
     /**
      * 执行 Dispatcher 列表
-     *
-     * @param projectId      项目ID
+     *  @param projectId      项目ID
      * @param aggregationId  本次统计ID
      * @param dispatcherList Dispatcher 列表
+     * @param rangeMap
      */
-    public void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList) {
+    public void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList, Map<String, List<Range>> rangesMap) {
         for (TaskDispatcher dispatcher : dispatcherList) {
             Context context = new Context();
             context.put("projectId", projectId);
             context.put("aggregationId", aggregationId);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
+            context.put("rangesMap", rangesMap);
             dispatcher.dispatch(context);
         }
     }

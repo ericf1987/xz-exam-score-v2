@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 全科及格率/全科不及格率
@@ -28,9 +29,14 @@ public class AllSubjectPassRateDispatcher extends TaskDispatcher {
 
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(
-                projectId, Range.CLASS, Range.SCHOOL, Range.PROVINCE);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+
+        String[] rangeKeys = new String[]{
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
+
         int counter = 0;
         for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
@@ -41,4 +47,5 @@ public class AllSubjectPassRateDispatcher extends TaskDispatcher {
         }
         LOG.info("最终为项目 " + projectId + " 的 all_subject_pass_rate 统计发布了 " + counter + " 个任务");
     }
+
 }

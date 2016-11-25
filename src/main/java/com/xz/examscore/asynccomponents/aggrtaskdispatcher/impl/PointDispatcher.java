@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -48,21 +49,20 @@ public class PointDispatcher extends TaskDispatcher {
     private static final String[] RANGES = {Range.CLASS, Range.SCHOOL, Range.PROVINCE};
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         // 删除旧数据
         LOG.info("删除项目 {} 的 point 相关旧数据...", projectId);
         deleteOldData(projectId);
 
         LOG.info("为项目 {} 预先创建总分记录...", projectId);
-        createBlankTotalScoreDocuments(projectId);
+        createBlankTotalScoreDocuments(projectId, rangesMap);
 
         LOG.info("项目 {} 的 point 相关旧数据删除完毕，开始统计...", projectId);
         dispatchTaskForEveryStudent(projectId, aggregationId);
     }
 
-    private void createBlankTotalScoreDocuments(String projectId) {
-        List<Range> ranges = rangeService.queryRanges(projectId, RANGES);
+    private void createBlankTotalScoreDocuments(String projectId, Map<String, List<Range>> rangesMap) {
+        List<Range> ranges = fetchRanges(RANGES, rangesMap);
         List<Target> targets = targetService.queryTargets(projectId, TARGETS);
         for (Target target : targets) {
             for (Range range : ranges) {

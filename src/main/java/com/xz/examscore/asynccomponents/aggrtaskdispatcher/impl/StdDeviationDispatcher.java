@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 标准差
@@ -31,8 +32,12 @@ public class StdDeviationDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.PROVINCE, Range.SCHOOL, Range.CLASS
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
 
         int counter = 0;

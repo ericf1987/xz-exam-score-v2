@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 排名前百分之N的学生ID列表
@@ -26,8 +27,12 @@ public class TopStudentListDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.PROVINCE, Range.SCHOOL
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT);
 
         for (Target target : targets) {

@@ -3,9 +3,15 @@ package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.StudentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 注意：报表中的得分率都是算出来的，这里的得分率统计只为四率人数统计服务
@@ -17,12 +23,27 @@ import org.springframework.stereotype.Component;
 @TaskDispatcherInfo(taskType = "score_rate", dependentTaskType = "total_score")
 @Component
 public class ScoreRateDispatcher extends TaskDispatcher {
+    static final Logger LOG = LoggerFactory.getLogger(ScoreRateDispatcher.class);
 
     @Autowired
     StudentService studentService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-        dispatchTaskForEveryStudent(projectId, aggregationId);
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.STUDENT
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
+
+        int counter = 0;
+        for (Range range : ranges) {
+            dispatchTask(createTask(projectId, aggregationId).setRange(range));
+            counter++;
+            if (counter % 1000 == 0) {
+                LOG.info("为项目 " + projectId + " 的 score_rate 统计发布了 " + counter + " 个任务");
+            }
+        }
+        LOG.info("最终为项目 " + projectId + " 的 score_rate 统计发布了 " + counter + " 个任务");
     }
 }

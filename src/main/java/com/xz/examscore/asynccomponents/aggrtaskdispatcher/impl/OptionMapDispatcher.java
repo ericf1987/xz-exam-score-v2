@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客观题各选项人数、比率
@@ -33,9 +34,13 @@ public class OptionMapDispatcher extends TaskDispatcher {
     RangeService rangeService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         List<Document> objecitveQuests = questService.getQuests(projectId, true);
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
+        String[] rangeKeys = new String[]{
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
 
         // 对每个学校、班级和每个客观题发布一个任务
         int counter = 0;

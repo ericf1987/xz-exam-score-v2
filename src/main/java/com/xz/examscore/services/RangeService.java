@@ -10,9 +10,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -145,5 +143,16 @@ public class RangeService {
         } else {
             return null;
         }
+    }
+
+    public Map<String, List<Range>> getRangesMap(String projectId) {
+        Map<String, List<Range>> rangesMap = new HashMap<>();
+        rangesMap.put(Range.STUDENT, queryRanges(projectId, Range.STUDENT));
+        rangesMap.put(Range.CLASS, queryRanges(projectId, Range.CLASS));
+        rangesMap.put(Range.SCHOOL, queryRanges(projectId, Range.SCHOOL));
+        rangesMap.put(Range.AREA, queryRanges(projectId, Range.AREA));
+        rangesMap.put(Range.CITY, queryRanges(projectId, Range.CITY));
+        rangesMap.put(Range.PROVINCE, queryRanges(projectId, Range.PROVINCE));
+        return rangesMap;
     }
 }

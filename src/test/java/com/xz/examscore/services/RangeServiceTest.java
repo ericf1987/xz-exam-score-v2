@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * (description)
@@ -29,5 +31,18 @@ public class RangeServiceTest extends XzExamScoreV2ApplicationTests {
     public void testQueryProvinceRange() throws Exception {
         List<Range> ranges = rangeService.queryRanges("430200-89c9dc7481cd47a69d85af3f0808e0c4", Range.PROVINCE);
         System.out.println(ranges);
+    }
+
+    @Test
+    public void testGetRangesMap() throws Exception {
+        long begin = System.currentTimeMillis();
+        Map<String, List<Range>> map = rangeService.getRangesMap("430500-60e161a4963b4fbe899d23d4be28b253");
+        long end = System.currentTimeMillis();
+        System.out.println("统计维度耗时：" + (end - begin));
+        Set<String> keySet = map.keySet();
+        for (String key : keySet){
+            List<Range> list = map.get(key);
+            System.out.println("key:" + key + ", size:" + list.size());
+        }
     }
 }

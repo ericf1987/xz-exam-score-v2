@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 等第排名统计
@@ -33,9 +34,12 @@ public class RankLevelMapDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
+        String[] rangeKeys = new String[]{
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        };
 
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.CLASS, Range.SCHOOL);
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT_COMBINATION, Target.SUBJECT);
 
         int counter = 0;

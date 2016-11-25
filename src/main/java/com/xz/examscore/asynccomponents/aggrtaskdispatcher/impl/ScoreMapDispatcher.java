@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @TaskDispatcherInfo(taskType = "score_map", dependentTaskType = "combined_total_score")
 @Component
@@ -26,11 +27,14 @@ public class ScoreMapDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
 
         // 对哪些范围进行排名
-        List<Range> ranges = rangeService.queryRanges(projectId, Range.PROVINCE, Range.SCHOOL, Range.CLASS);
+        String[] rangeKeys = new String[]{
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        };
 
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         // 对哪些分数进行排名
         // 对分数进行排名是因为要计算题目的区分度
         List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.SUBJECT_COMBINATION, Target.PROJECT, Target.QUEST);

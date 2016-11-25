@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.TargetService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @TaskDispatcherInfo(taskType = "total_score")
 @Component
@@ -26,8 +28,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     ScoreService scoreService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         // 知识点和能力层级不在这里统计
         List<Target> targets = targetService.queryTargets(projectId,
                 Target.QUEST, Target.SUBJECT, Target.SUBJECT_COMBINATION, Target.PROJECT, Target.SUBJECT_OBJECTIVE);

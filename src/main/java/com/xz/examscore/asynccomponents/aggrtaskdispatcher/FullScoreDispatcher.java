@@ -1,12 +1,14 @@
 package com.xz.examscore.asynccomponents.aggrtaskdispatcher;
 
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.TargetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 补完一些满分，例如主观题客观题满分，题型知识点满分等等
@@ -19,8 +21,7 @@ public class FullScoreDispatcher extends TaskDispatcher {
     TargetService targetService;
 
     @Override
-    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig) {
-
+    public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         List<Target> targets = targetService.queryTargets(projectId,
                 Target.QUEST_TYPE, Target.SUBJECT_OBJECTIVE, Target.POINT);
         int counter = 0;
