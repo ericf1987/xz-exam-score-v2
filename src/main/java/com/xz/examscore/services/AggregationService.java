@@ -156,7 +156,10 @@ public class AggregationService {
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
         LOG.info("----开始查询项目{}的维度信息----");
+        long begin = System.currentTimeMillis();
         Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);
+        long end = System.currentTimeMillis();
+        LOG.info("----统计维度列表耗时：{}", end - begin);
         LOG.info("----项目{}的维度信息查询结束----");
 
         List<TaskDispatcher> dispatcherList;
@@ -194,10 +197,11 @@ public class AggregationService {
 
     /**
      * 执行 Dispatcher 列表
-     *  @param projectId      项目ID
+     *
+     * @param projectId      项目ID
      * @param aggregationId  本次统计ID
      * @param dispatcherList Dispatcher 列表
-     * @param rangeMap
+     * @param rangesMap       维度列表
      */
     public void runDispatchers(String projectId, String aggregationId, List<TaskDispatcher> dispatcherList, Map<String, List<Range>> rangesMap) {
         for (TaskDispatcher dispatcher : dispatcherList) {
