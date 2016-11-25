@@ -131,6 +131,10 @@ public class ReportItemService {
                 reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
                 downloadAllowed = downloadAllowed && projectConfig.isEntryLevelEnable();
             }
+            //暂时屏蔽S-P报表的下载
+            if (name.contains("S-P")){
+                downloadAllowed = false;
+            }
             reportItem.put("downloadAllowed", downloadAllowed);
             list.add(reportItem);
         }
