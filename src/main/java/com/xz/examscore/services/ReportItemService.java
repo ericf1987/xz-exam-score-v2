@@ -121,7 +121,7 @@ public class ReportItemService {
             } else {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
                 //根据联考开关判断该报表是否允许下载
-                if(projectConfig.isShareSchoolReport() && rangeName.equals("province")){
+                if(!projectConfig.isShareSchoolReport() && rangeName.equals("province")){
                     downloadAllowed = false;
                 }
             }
