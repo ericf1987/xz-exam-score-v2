@@ -58,7 +58,21 @@ public class PointDispatcher extends TaskDispatcher {
         createBlankTotalScoreDocuments(projectId, rangesMap);
 
         LOG.info("项目 {} 的 point 相关旧数据删除完毕，开始统计...", projectId);
-        dispatchTaskForEveryStudent(projectId, aggregationId);
+        String[] rangeKeys = new String[]{
+                Range.STUDENT
+        };
+
+        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
+
+        int counter = 0;
+        for (Range range : ranges) {
+            dispatchTask(createTask(projectId, aggregationId).setRange(range));
+            counter++;
+            if (counter % 1000 == 0) {
+                LOG.info("为项目 " + projectId + " 的 point 统计发布了 " + counter + " 个任务");
+            }
+        }
+        LOG.info("最终为项目 " + projectId + " 的 point 统计发布了 " + counter + " 个任务");
     }
 
     private void createBlankTotalScoreDocuments(String projectId, Map<String, List<Range>> rangesMap) {

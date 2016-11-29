@@ -7,6 +7,8 @@ import com.xz.ajiaedu.common.concurrent.LockFactory;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @Service
 @SuppressWarnings("unchecked")
 public class RangeService {
+
+    static final Logger LOG = LoggerFactory.getLogger(RangeService.class);
 
     public static String DEFAULT_PROVINCE = "430000";
 
@@ -153,6 +157,11 @@ public class RangeService {
         rangesMap.put(Range.AREA, queryRanges(projectId, Range.AREA));
         rangesMap.put(Range.CITY, queryRanges(projectId, Range.CITY));
         rangesMap.put(Range.PROVINCE, queryRanges(projectId, Range.PROVINCE));
+        Set<String> keySet = rangesMap.keySet();
+        for (String key : keySet){
+            List<Range> list = rangesMap.get(key);
+            LOG.info("维度名称：{}, 数量：{}", key, list.size());
+        }
         return rangesMap;
     }
 }

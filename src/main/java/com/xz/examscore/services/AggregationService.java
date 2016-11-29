@@ -160,7 +160,7 @@ public class AggregationService {
         Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);
         long end = System.currentTimeMillis();
         LOG.info("----统计维度列表耗时：{}", end - begin);
-        LOG.info("----项目{}的维度信息查询结束----");
+        LOG.info("----项目{}的维度信息查询结束----", projectId);
 
         List<TaskDispatcher> dispatcherList;
         int round = 1;
