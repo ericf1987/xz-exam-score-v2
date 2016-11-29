@@ -9,20 +9,14 @@ import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.SubjectLevel;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.QuestService;
-import com.xz.examscore.services.RangeService;
-import com.xz.examscore.services.ScoreService;
-import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.*;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 统计 [考生] 的 [知识点] 得分/得分率
@@ -46,6 +40,9 @@ public class PointTask extends AggrTask {
 
     @Autowired
     QuestService questService;
+
+    @Autowired
+    SubjectService subjectService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -107,14 +104,90 @@ public class PointTask extends AggrTask {
     }
 
     @SuppressWarnings("unchecked")
-    private void countScores(
-            String projectId, String studentId,
-            DoubleCounterMap<String> pointScores,
-            DoubleCounterMap<SubjectLevel> subjectLevelScores,
-            DoubleCounterMap<PointLevel> pointLevelScores) {
+    private void countScores(String projectId, String studentId, DoubleCounterMap<String> pointScores,
+                             DoubleCounterMap<SubjectLevel> subjectLevelScores,
+                             DoubleCounterMap<PointLevel> pointLevelScores) {
+        //按照科目数量分多线程处理
+        List<String> subjectIds = subjectService.querySubjects(projectId);
+        for (String subjectId : subjectIds) {
+            PointTaskDistributor distributor = runPointTaskDistributor(projectId, studentId, subjectId);
+            pointScores.putAll(distributor.getPointScores());
+            subjectLevelScores.putAll(distributor.getSubjectLevelScores());
+            pointLevelScores.putAll(distributor.getPointLevelScores());
+        }
+    }
 
-        FindIterable<Document> scores = scoreService.getStudentQuestScores(projectId, studentId);
+    private PointTaskDistributor runPointTaskDistributor(String projectId, String studentId, String subjectId) {
+        PointTaskDistributor distributor = new PointTaskDistributor(projectId, subjectId, studentId);
+        distributor.start();
+        return distributor;
+    }
 
+    private class PointTaskDistributor extends Thread {
+        private String projectId;
+
+        private String subjectId;
+
+        private String studentId;
+
+        private DoubleCounterMap<String> pointScores = new DoubleCounterMap<>();
+
+        private DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
+
+        private DoubleCounterMap<PointLevel> pointLevelScores = new DoubleCounterMap<>();
+
+        public PointTaskDistributor(String projectId, String subjectId, String studentId){
+            this.projectId = projectId;
+            this.subjectId = subjectId;
+            this.studentId = studentId;
+        }
+
+        public DoubleCounterMap<String> getPointScores() {
+            return pointScores;
+        }
+
+        public DoubleCounterMap<SubjectLevel> getSubjectLevelScores() {
+            return subjectLevelScores;
+        }
+
+        public DoubleCounterMap<PointLevel> getPointLevelScores() {
+            return pointLevelScores;
+        }
+
+        public String getProjectId() {
+            return projectId;
+        }
+
+        public void setProjectId(String projectId) {
+            this.projectId = projectId;
+        }
+
+        public String getSubjectId() {
+            return subjectId;
+        }
+
+        public void setSubjectId(String subjectId) {
+            this.subjectId = subjectId;
+        }
+
+        public String getStudentId() {
+            return studentId;
+        }
+
+        public void setStudentId(String studentId) {
+            this.studentId = studentId;
+        }
+
+        @Override
+        public void run() {
+            LOG.info("线程{}开始执行，项目{}，科目{}, 学生{}的知识点，能力层级统计...", this.getName(), projectId, subjectId, studentId);
+            doPointTaskDistribute(projectId, subjectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
+        }
+
+    }
+
+    private void doPointTaskDistribute(String projectId, String subjectId, String studentId, DoubleCounterMap<String> pointScores, DoubleCounterMap<SubjectLevel> subjectLevelScores, DoubleCounterMap<PointLevel> pointLevelScores) {
+        FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
         for (Document scoreDoc : scores) {
             double score = scoreDoc.getDouble("score");
             String subject = scoreDoc.getString("subject");

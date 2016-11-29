@@ -142,6 +142,19 @@ public class ScoreService {
     }
 
     /**
+     * 查询指定学生的具体科目的所有分数记录
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 学生ID
+     * @return 分数记录
+     */
+    public FindIterable<Document> getStudentSubjectScores(String projectId, String studentId, String subjectId) {
+        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
+        return scoreDatabase.getCollection("score").find(query);
+    }
+
+    /**
      * 查询科目成绩
      *
      * @param projectId 项目ID

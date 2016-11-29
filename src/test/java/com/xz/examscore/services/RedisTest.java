@@ -43,9 +43,11 @@ public class RedisTest extends XzExamScoreV2ApplicationTests {
         task.setRange(range);
         task.setTarget(target);
         System.out.println(task.toString());
-        //queueService.addToQueue(QueueType.AggregationTaskList, task);
-        System.out.println(QueueType.AggregationTaskList.name());
+        queueService.addToQueue(QueueType.AggregationTaskList, task);
     }
 
-
+    @Test
+    public void testClearQueue() throws Exception {
+        queueService.clearQueue(QueueType.AggregationTaskList);
+    }
 }
