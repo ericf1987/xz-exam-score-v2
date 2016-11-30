@@ -33,7 +33,7 @@ public class TopAverageDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         String[] rangeKeys = new String[]{
-                Range.PROVINCE, Range.SCHOOL, Range.CLASS
+                Range.CLASS, Range.SCHOOL, Range.PROVINCE
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);

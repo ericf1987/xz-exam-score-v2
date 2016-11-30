@@ -29,7 +29,11 @@ public class QuestTypeScoreAverageDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
 
         String[] rangeKeys = new String[]{
-                Range.PROVINCE, Range.CITY, Range.AREA, Range.SCHOOL, Range.CLASS
+                Range.CLASS,
+                Range.SCHOOL,
+                Range.AREA,
+                Range.CITY,
+                Range.PROVINCE
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
