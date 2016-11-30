@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 @Component
 @AggrTaskMeta(taskType = "quest_type_score")
@@ -51,17 +52,53 @@ public class QuestTypeScoreTask extends AggrTask {
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
         String studentId = taskInfo.getRange().getId();
+        Document studentDoc = studentService.findStudent(projectId, studentId);
 
         List<String> subjectIds = subjectService.querySubjects(projectId);
+        Map<String, Double> questTypeScoresMap = new HashMap<>();
         //根据科目分多线程处理题型得分
         for(String subjectId : subjectIds){
-            runQuestTypeScoreDistributor(projectId, studentId, subjectId);
+            QuestTypeScoreTaskDistributor distributor = runQuestTypeScoreDistributor(projectId, studentId, subjectId);
+            questTypeScoresMap.putAll(distributor.getQuestTypeScoresMap());
+        }
+
+        // 保存考生题型得分
+        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_score");
+
+        for (String questTypeId : questTypeScoresMap.keySet()) {
+            Document query = doc("project", projectId).append("student", studentId).append("questType", questTypeId);
+            double score = questTypeScoresMap.get(questTypeId);
+            double fullScore = fullScoreService.getFullScore(projectId, Target.questType(questTypeId));
+            double rate = score / fullScore;
+
+            Document update = doc("score", score)
+                    .append("rate", rate)
+                    .append("class", studentDoc.getString("class"))
+                    .append("school", studentDoc.getString("school"))
+                    .append("area", studentDoc.getString("area"))
+                    .append("city", studentDoc.getString("city"))
+                    .append("province", studentDoc.getString("province"));
+
+            UpdateResult result = collection.updateMany(query, $set(update));
+            if (result.getMatchedCount() == 0) {
+                collection.insertOne(
+                        query.append("score", score)
+                                .append("rate", rate)
+                                .append("class", studentDoc.getString("class"))
+                                .append("school", studentDoc.getString("school"))
+                                .append("area", studentDoc.getString("area"))
+                                .append("city", studentDoc.getString("city"))
+                                .append("province", studentDoc.getString("province"))
+                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
+                );
+            }
         }
     }
 
-    private void runQuestTypeScoreDistributor(String projectId, String studentId, String subjectId) {
-        QuestTypeScoreTaskDistributor distributor = new QuestTypeScoreTaskDistributor(projectId, studentId, subjectId);
+    private QuestTypeScoreTaskDistributor runQuestTypeScoreDistributor(String projectId, String studentId, String subjectId) {
+        QuestTypeScoreTaskDistributor distributor = new QuestTypeScoreTaskDistributor(projectId, subjectId, studentId);
         distributor.start();
+        return distributor;
     }
 
     private class QuestTypeScoreTaskDistributor extends Thread{
@@ -109,13 +146,12 @@ public class QuestTypeScoreTask extends AggrTask {
 
         @Override
         public void run() {
-            LOG.info("线程{}开始执行，项目{}，科目{}, 学生{}的试卷题型得分统计...", this.getName(), projectId, subjectId, studentId);
+            //LOG.info("线程{}开始执行，项目{}，科目{}, 学生{}的试卷题型得分统计...", this.getName(), projectId, subjectId, studentId);
             doQuestTypeScoreTaskDistribute(projectId, subjectId, studentId, questTypeScoresMap);
         }
     }
 
     private void doQuestTypeScoreTaskDistribute(String projectId, String subjectId, String studentId, Map<String, Double> questTypeScoresMap) {
-        Document studentDoc = studentService.findStudent(projectId, studentId);
         FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
 
         // 对题型进行归类，分数累加
@@ -135,38 +171,6 @@ public class QuestTypeScoreTask extends AggrTask {
                 questTypeScoresMap.put(questTypeId, scoreValue);
             } else {
                 questTypeScoresMap.put(questTypeId, questTypeScoresMap.get(questTypeId) + scoreValue);
-            }
-        }
-
-        // 保存考生题型得分
-        MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_score");
-
-        for (String questTypeId : questTypeScoresMap.keySet()) {
-            Document query = doc("project", projectId).append("student", studentId).append("questType", questTypeId);
-            double score = questTypeScoresMap.get(questTypeId);
-            double fullScore = fullScoreService.getFullScore(projectId, Target.questType(questTypeId));
-            double rate = score / fullScore;
-
-            Document update = doc("score", score)
-                    .append("rate", rate)
-                    .append("class", studentDoc.getString("class"))
-                    .append("school", studentDoc.getString("school"))
-                    .append("area", studentDoc.getString("area"))
-                    .append("city", studentDoc.getString("city"))
-                    .append("province", studentDoc.getString("province"));
-
-            UpdateResult result = collection.updateMany(query, $set(update));
-            if (result.getMatchedCount() == 0) {
-                collection.insertOne(
-                        query.append("score", score)
-                                .append("rate", rate)
-                                .append("class", studentDoc.getString("class"))
-                                .append("school", studentDoc.getString("school"))
-                                .append("area", studentDoc.getString("area"))
-                                .append("city", studentDoc.getString("city"))
-                                .append("province", studentDoc.getString("province"))
-                                .append("md5", MD5.digest(UUID.randomUUID().toString()))
-                );
             }
         }
     }

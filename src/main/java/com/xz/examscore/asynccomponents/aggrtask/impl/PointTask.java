@@ -180,7 +180,7 @@ public class PointTask extends AggrTask {
 
         @Override
         public void run() {
-            LOG.info("线程{}开始执行，项目{}，科目{}, 学生{}的知识点，能力层级统计...", this.getName(), projectId, subjectId, studentId);
+            //LOG.info("线程{}开始执行，项目{}，科目{}, 学生{}的知识点，能力层级统计...", this.getName(), projectId, subjectId, studentId);
             doPointTaskDistribute(projectId, subjectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
         }
 

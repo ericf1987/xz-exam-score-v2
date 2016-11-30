@@ -38,9 +38,6 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
         for (Target target : targets) {
             dispatchTask(createTask(projectId, aggregationId).setTarget(target));
             counter++;
-            if (counter % 1000 == 0) {
-                LOG.info("为项目 " + projectId + " 的 total_score 统计发布了 " + counter + " 个任务");
-            }
         }
         LOG.info("最终为项目 " + projectId + " 的 total_score 统计发布了 " + counter + " 个任务");
     }

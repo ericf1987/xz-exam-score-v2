@@ -50,9 +50,6 @@ public class OptionMapDispatcher extends TaskDispatcher {
                         .setRange(range)
                         .setTarget(Target.quest(quest.getString("questId"))));
                 counter++;
-                if (counter % 1000 == 0) {
-                    LOG.info("为项目 " + projectId + " 的 option_map 统计发布了 " + counter + " 个任务");
-                }
             }
         }
         LOG.info("最终为项目 " + projectId + " 的 option_map 统计发布了 " + counter + " 个任务");

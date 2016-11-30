@@ -37,9 +37,6 @@ public class RankLevelDispatcher extends TaskDispatcher {
         for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
             counter++;
-            if (counter % 1000 == 0) {
-                LOG.info("为项目 " + projectId + " 的 rank_level 统计发布了 " + counter + " 个任务");
-            }
         }
         LOG.info("最终为项目 " + projectId + " 的 rank_level 统计发布了 " + counter + " 个任务");
     }

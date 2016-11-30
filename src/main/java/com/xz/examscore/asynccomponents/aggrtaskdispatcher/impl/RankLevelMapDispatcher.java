@@ -48,9 +48,6 @@ public class RankLevelMapDispatcher extends TaskDispatcher {
                 AggrTaskMessage task = createTask(projectId, aggregationId).setRange(range).setTarget(target);
                 dispatchTask(task);
                 counter++;
-                if (counter % 1000 == 0) {
-                    LOG.info("为项目 " + projectId + " 的 rank_level_map 统计发布了 " + counter + " 个任务");
-                }
             }
         }
         LOG.info("最终为项目 " + projectId + " 的 rank_level_map 统计发布了 " + counter + " 个任务");

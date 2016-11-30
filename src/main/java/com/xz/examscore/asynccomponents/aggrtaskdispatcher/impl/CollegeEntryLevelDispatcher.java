@@ -50,9 +50,6 @@ public class CollegeEntryLevelDispatcher extends TaskDispatcher{
             for (Target target : targets) {
                 dispatchTask(createTask(projectId, aggregationId).setRange(range).setTarget(target));
                 counter++;
-                if (counter % 1000 == 0) {
-                    LOG.info("为项目 " + projectId + " 的 college_entry_level 统计发布了 " + counter + " 个任务");
-                }
             }
         }
         LOG.info("最终为项目 " + projectId + " 的 college_entry_level 统计发布了 " + counter + " 个任务");
