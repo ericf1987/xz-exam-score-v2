@@ -60,7 +60,20 @@ public class PointTask extends AggrTask {
         DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
         DoubleCounterMap<PointLevel> pointLevelScores = new DoubleCounterMap<>();
 
-        countScores(projectId, studentId, pointScores, subjectLevelScores, pointLevelScores);
+        //生成分数任务列表
+        List<PointTaskDistributor> pointTaskDistributorTasks = countScores(projectId, studentId);
+
+        for (PointTaskDistributor distributor : pointTaskDistributorTasks){
+            try {
+                distributor.join();
+                pointScores.putAll(distributor.getPointScores());
+                subjectLevelScores.putAll(distributor.getSubjectLevelScores());
+                pointLevelScores.putAll(distributor.getPointLevelScores());
+            } catch (InterruptedException e) {
+                LOG.error("等待知识点，能力层级处理线程结束失败,考试ID：{}，项目ID：{}, 学生ID：{}", distributor.getProjectId(), distributor.getSubjectId(), distributor.getStudentId());
+            }
+        }
+
 
         // 统计知识点得分（学生，班级, 学校, 省份累加）
         for (Map.Entry<String, Double> pointScoreEntry : pointScores.entrySet()) {
@@ -104,17 +117,16 @@ public class PointTask extends AggrTask {
     }
 
     @SuppressWarnings("unchecked")
-    private void countScores(String projectId, String studentId, DoubleCounterMap<String> pointScores,
-                             DoubleCounterMap<SubjectLevel> subjectLevelScores,
-                             DoubleCounterMap<PointLevel> pointLevelScores) {
+    private List<PointTaskDistributor> countScores(String projectId, String studentId) {
+        //线程队列
+        List<PointTaskDistributor> PointTaskDistributorTasks = new ArrayList<>();
         //按照科目数量分多线程处理
         List<String> subjectIds = subjectService.querySubjects(projectId);
         for (String subjectId : subjectIds) {
             PointTaskDistributor distributor = runPointTaskDistributor(projectId, studentId, subjectId);
-            pointScores.putAll(distributor.getPointScores());
-            subjectLevelScores.putAll(distributor.getSubjectLevelScores());
-            pointLevelScores.putAll(distributor.getPointLevelScores());
+            PointTaskDistributorTasks.add(distributor);
         }
+        return PointTaskDistributorTasks;
     }
 
     private PointTaskDistributor runPointTaskDistributor(String projectId, String studentId, String subjectId) {

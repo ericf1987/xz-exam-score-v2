@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -56,10 +53,16 @@ public class QuestTypeScoreTask extends AggrTask {
 
         List<String> subjectIds = subjectService.querySubjects(projectId);
         Map<String, Double> questTypeScoresMap = new HashMap<>();
-        //根据科目分多线程处理题型得分
-        for(String subjectId : subjectIds){
-            QuestTypeScoreTaskDistributor distributor = runQuestTypeScoreDistributor(projectId, studentId, subjectId);
-            questTypeScoresMap.putAll(distributor.getQuestTypeScoresMap());
+
+        List<QuestTypeScoreTaskDistributor> distributors = countQuestTypeScores(projectId, studentId, subjectIds);
+
+        for (QuestTypeScoreTaskDistributor distributor : distributors) {
+            try {
+                distributor.join();
+                questTypeScoresMap.putAll(distributor.getQuestTypeScoresMap());
+            } catch (InterruptedException e) {
+                LOG.error("等待题型得分处理线程结束失败,考试ID：{}，项目ID：{}, 学生ID：{}", distributor.getProjectId(), distributor.getSubjectId(), distributor.getStudentId());
+            }
         }
 
         // 保存考生题型得分
@@ -95,13 +98,23 @@ public class QuestTypeScoreTask extends AggrTask {
         }
     }
 
+    private List<QuestTypeScoreTaskDistributor> countQuestTypeScores(String projectId, String studentId, List<String> subjectIds) {
+        //根据科目分多线程处理题型得分
+        List<QuestTypeScoreTaskDistributor> distributors = new ArrayList<>();
+        for (String subjectId : subjectIds) {
+            QuestTypeScoreTaskDistributor distributor = runQuestTypeScoreDistributor(projectId, studentId, subjectId);
+            distributors.add(distributor);
+        }
+        return distributors;
+    }
+
     private QuestTypeScoreTaskDistributor runQuestTypeScoreDistributor(String projectId, String studentId, String subjectId) {
         QuestTypeScoreTaskDistributor distributor = new QuestTypeScoreTaskDistributor(projectId, subjectId, studentId);
         distributor.start();
         return distributor;
     }
 
-    private class QuestTypeScoreTaskDistributor extends Thread{
+    private class QuestTypeScoreTaskDistributor extends Thread {
         private String projectId;
 
         private String subjectId;
@@ -110,7 +123,7 @@ public class QuestTypeScoreTask extends AggrTask {
 
         private Map<String, Double> questTypeScoresMap = new HashMap<>();
 
-        public QuestTypeScoreTaskDistributor(String projectId, String subjectId, String studentId){
+        public QuestTypeScoreTaskDistributor(String projectId, String subjectId, String studentId) {
             this.projectId = projectId;
             this.subjectId = subjectId;
             this.studentId = studentId;
