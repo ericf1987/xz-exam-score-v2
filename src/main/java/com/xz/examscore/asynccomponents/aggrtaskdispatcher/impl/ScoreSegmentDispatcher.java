@@ -23,7 +23,7 @@ import java.util.Map;
 @Component
 @TaskDispatcherInfo(taskType = "score_segment", dependentTaskType = "total_score")
 public class ScoreSegmentDispatcher extends TaskDispatcher {
-    static final Logger LOG = LoggerFactory.getLogger(ScoreLevelMapDispatcher.class);
+    static final Logger LOG = LoggerFactory.getLogger(ScoreSegmentDispatcher.class);
 
     @Autowired
     RangeService rangeService;
