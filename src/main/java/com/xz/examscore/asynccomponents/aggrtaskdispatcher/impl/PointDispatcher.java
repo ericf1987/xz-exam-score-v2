@@ -84,8 +84,9 @@ public class PointDispatcher extends TaskDispatcher {
 
     void deleteOldData(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("total_score");
-        c.deleteMany(doc("project", projectId).append("target.name",
-                $in(Target.POINT, Target.POINT_LEVEL, Target.SUBJECT_LEVEL)));
+        for(String target : TARGETS){
+            c.deleteMany(doc("project", projectId).append("target.name", target));
+        }
     }
 
 }

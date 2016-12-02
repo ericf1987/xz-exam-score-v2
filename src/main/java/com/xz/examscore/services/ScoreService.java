@@ -352,7 +352,7 @@ public class ScoreService {
         return cache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append(range.getName(), range.getId())
                     .append("subject", subjectId).append("quest", questId);
-            return (int)scoreDatabase.getCollection("score").count(query);
+            return (int) scoreDatabase.getCollection("score").count(query);
         });
     }
 
@@ -361,21 +361,21 @@ public class ScoreService {
         String targetName = target.getName();
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");
         Document query = doc("project", projectId).append("student", studentId);
-        if(targetName.equals(Target.PROJECT)){
+        if (targetName.equals(Target.PROJECT)) {
             //只有当没有任何分数明细的时候，才判断考生整个考试项目为缺考状态
             long count = collection.count(query);
-            if(count == 0){
+            if (count == 0) {
                 return true;
             }
             return false;
-        }else if(targetName.equals(Target.SUBJECT)){
+        } else if (targetName.equals(Target.SUBJECT)) {
             query.append("subject", target.getId().toString());
             Document doc = collection.find(query).first();
-            if(null == doc){
+            if (null == doc) {
                 return true;
             }
             return BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
-        }else{
+        } else {
             return false;
         }
     }

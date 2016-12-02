@@ -31,7 +31,7 @@ public class TotalScoreTaskDispatcher extends TaskDispatcher {
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         // 知识点和能力层级不在这里统计
         List<Target> targets = targetService.queryTargets(projectId,
-                Target.QUEST, Target.SUBJECT, Target.SUBJECT_COMBINATION, Target.PROJECT, Target.SUBJECT_OBJECTIVE);
+                Target.QUEST, Target.SUBJECT, Target.SUBJECT_COMBINATION, Target.SUBJECT_OBJECTIVE, Target.PROJECT);
         //执行统计前将total_score表中target为quest的记录清理一次
         scoreService.clearByTargetName(projectId, Target.QUEST);
         int counter = 0;

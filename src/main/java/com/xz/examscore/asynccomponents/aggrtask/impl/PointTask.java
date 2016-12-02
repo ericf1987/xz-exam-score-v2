@@ -5,10 +5,7 @@ import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
-import com.xz.examscore.bean.PointLevel;
-import com.xz.examscore.bean.Range;
-import com.xz.examscore.bean.SubjectLevel;
-import com.xz.examscore.bean.Target;
+import com.xz.examscore.bean.*;
 import com.xz.examscore.services.*;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -56,6 +53,21 @@ public class PointTask extends AggrTask {
         Range schoolRange = Range.school(student.getString("school"));
         Range provinceRange = Range.province(student.getString("province"));
 
+        Map<String, DoubleCounterMap<String>> pointMap = new HashMap<>();
+        Map<String, DoubleCounterMap<PointLevel>> pointLevelMap = new HashMap<>();
+        Map<String, DoubleCounterMap<SubjectLevel>> subjectLevelMap = new HashMap<>();
+
+        //记录各个维度知识点，双向细目和科目能力层级的总分
+        pointMap.put(student.getString("class"), new DoubleCounterMap<>());
+        pointMap.put(student.getString("school"), new DoubleCounterMap<>());
+        pointMap.put(student.getString("province"), new DoubleCounterMap<>());
+        pointLevelMap.put(student.getString("class"), new DoubleCounterMap<>());
+        pointLevelMap.put(student.getString("school"), new DoubleCounterMap<>());
+        pointLevelMap.put(student.getString("province"), new DoubleCounterMap<>());
+        subjectLevelMap.put(student.getString("class"), new DoubleCounterMap<>());
+        subjectLevelMap.put(student.getString("school"), new DoubleCounterMap<>());
+        subjectLevelMap.put(student.getString("province"), new DoubleCounterMap<>());
+
         DoubleCounterMap<String> pointScores = new DoubleCounterMap<>();
         DoubleCounterMap<SubjectLevel> subjectLevelScores = new DoubleCounterMap<>();
         DoubleCounterMap<PointLevel> pointLevelScores = new DoubleCounterMap<>();
@@ -63,7 +75,7 @@ public class PointTask extends AggrTask {
         //生成分数任务列表
         List<PointTaskDistributor> pointTaskDistributorTasks = countScores(projectId, studentId);
 
-        for (PointTaskDistributor distributor : pointTaskDistributorTasks){
+        for (PointTaskDistributor distributor : pointTaskDistributorTasks) {
             try {
                 distributor.join();
                 pointScores.putAll(distributor.getPointScores());
@@ -80,9 +92,9 @@ public class PointTask extends AggrTask {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, point, score, null);
-            addTotalScore(projectId, classRange, point, score);
-            addTotalScore(projectId, schoolRange, point, score);
-            addTotalScore(projectId, provinceRange, point, score);
+            accumulatePointScore(classRange, pointScoreEntry.getKey(), score, pointMap);
+            accumulatePointScore(schoolRange, pointScoreEntry.getKey(), score, pointMap);
+            accumulatePointScore(provinceRange, pointScoreEntry.getKey(), score, pointMap);
         }
 
         // 统计[知识点-能力层级]得分（班级累加，学校累加，省份累加）
@@ -90,9 +102,9 @@ public class PointTask extends AggrTask {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, pointLevel, score, null);
-            addTotalScore(projectId, classRange, pointLevel, score);
-            addTotalScore(projectId, schoolRange, pointLevel, score);
-            addTotalScore(projectId, provinceRange, pointLevel, score);
+            accumulatePointLevelScore(classRange, pointLevelEntry.getKey(), score, pointLevelMap);
+            accumulatePointLevelScore(schoolRange, pointLevelEntry.getKey(), score, pointLevelMap);
+            accumulatePointLevelScore(provinceRange, pointLevelEntry.getKey(), score, pointLevelMap);
         }
 
         // 统计能力层级得分（学生，班级累加，学校累加，省份累加）
@@ -100,10 +112,58 @@ public class PointTask extends AggrTask {
             Target subjectLevel = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
             scoreService.saveTotalScore(projectId, studentRange, null, subjectLevel, score, null);
-            addTotalScore(projectId, classRange, subjectLevel, score);
-            addTotalScore(projectId, schoolRange, subjectLevel, score);
-            addTotalScore(projectId, provinceRange, subjectLevel, score);
+            accumulateSubjectLevelScore(classRange, levelScoreEntry.getKey(), score, subjectLevelMap);
+            accumulateSubjectLevelScore(schoolRange, levelScoreEntry.getKey(), score, subjectLevelMap);
+            accumulateSubjectLevelScore(provinceRange, levelScoreEntry.getKey(), score, subjectLevelMap);
         }
+
+        finishAddTotalScore(projectId, classRange, schoolRange, provinceRange, pointMap, pointLevelMap, subjectLevelMap);
+    }
+
+    private void finishAddTotalScore(String projectId, Range classRange, Range schoolRange, Range provinceRange, Map<String, DoubleCounterMap<String>> pointMap, Map<String, DoubleCounterMap<PointLevel>> pointLevelMap, Map<String, DoubleCounterMap<SubjectLevel>> subjectLevelMap) {
+        rangeTotalScore(projectId, classRange, pointMap, pointLevelMap, subjectLevelMap);
+        rangeTotalScore(projectId, schoolRange, pointMap, pointLevelMap, subjectLevelMap);
+        rangeTotalScore(projectId, provinceRange, pointMap, pointLevelMap, subjectLevelMap);
+    }
+
+    //将各个维度累加好的结果一次性写入Mongo
+    private void rangeTotalScore(String projectId, Range range, Map<String, DoubleCounterMap<String>> pointMap, Map<String, DoubleCounterMap<PointLevel>> pointLevelMap, Map<String, DoubleCounterMap<SubjectLevel>> subjectLevelMap) {
+        DoubleCounterMap<String> pointCounter = pointMap.get(range.getId());
+        for (Map.Entry<String, Double> pointScoreEntry : pointCounter.entrySet()){
+            Target point = Target.point(pointScoreEntry.getKey());
+            double score = pointScoreEntry.getValue();
+            addTotalScore(projectId, range, point, score);
+        }
+
+        DoubleCounterMap<PointLevel> pointLevelCounter = pointLevelMap.get(range.getId());
+        for(Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelCounter.entrySet()){
+            Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
+            double score = pointLevelEntry.getValue();
+            addTotalScore(projectId, range, pointLevel, score);
+        }
+
+        DoubleCounterMap<SubjectLevel> subjectLevelCounter = subjectLevelMap.get(range.getId());
+        for(Map.Entry<SubjectLevel, Double> subjectLevelEntry : subjectLevelCounter.entrySet()){
+            Target subjectLevel = Target.subjectLevel(subjectLevelEntry.getKey());
+            double score = subjectLevelEntry.getValue();
+            addTotalScore(projectId, range, subjectLevel, score);
+        }
+    }
+
+    //先做累加运算
+    public void accumulatePointScore(Range range, String point, double score, Map<String, DoubleCounterMap<String>> pointMap) {
+        DoubleCounterMap<String> pointCounter = pointMap.get(range.getId());
+        pointCounter.incre(point, score);
+    }
+
+    public void accumulatePointLevelScore(Range range, PointLevel pointLevel, double score, Map<String, DoubleCounterMap<PointLevel>> pointLevelMap) {
+        DoubleCounterMap<PointLevel> pointLevelCounter = pointLevelMap.get(range.getId());
+        pointLevelCounter.incre(pointLevel, score);
+    }
+
+    public void accumulateSubjectLevelScore(Range range, SubjectLevel subjectLevel, double score, Map<String, DoubleCounterMap<SubjectLevel>> subjectLevelMap) {
+        DoubleCounterMap<SubjectLevel> subjectLevelCounter = subjectLevelMap.get(range.getId());
+        subjectLevelCounter.incre(subjectLevel, score);
     }
 
     private void addTotalScore(String projectId, Range range, Target target, double score) {
@@ -135,6 +195,7 @@ public class PointTask extends AggrTask {
         return distributor;
     }
 
+    //处理学生知识点，能力层级的分数统计分发器
     private class PointTaskDistributor extends Thread {
         private String projectId;
 
@@ -148,7 +209,7 @@ public class PointTask extends AggrTask {
 
         private DoubleCounterMap<PointLevel> pointLevelScores = new DoubleCounterMap<>();
 
-        public PointTaskDistributor(String projectId, String subjectId, String studentId){
+        public PointTaskDistributor(String projectId, String subjectId, String studentId) {
             this.projectId = projectId;
             this.subjectId = subjectId;
             this.studentId = studentId;
