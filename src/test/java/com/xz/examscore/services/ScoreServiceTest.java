@@ -68,4 +68,13 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         double d = scoreService.getScore(projectId, range, target);
         System.out.println(d);
     }
+
+    @Test
+    public void testGetCountByScore() throws Exception {
+        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        Range range = Range.school("c99a630b-d8e6-4758-b27d-4b062f9fec0a");
+        Target target = Target.project(projectId);
+        int count = scoreService.getCountByScore(projectId, range, target, 800);
+        System.out.println(count);
+    }
 }

@@ -268,6 +268,28 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
+    /**查询高于指定分数的记录总数
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param score     分数
+     * @return
+     */
+    public int getCountByScore(String projectId, Range range, Target target, double score){
+        return getListByScore(projectId, range, target, score).size();
+    }
+
+    public List<Document> getListByScore(String projectId, Range range, Target target, double score){
+        String collectionName = getTotalScoreCollection(projectId, target);
+        Document query = doc("project", projectId).append("range.name", Range.STUDENT)
+                .append(range.getName(), range.getId())
+                .append("target", target2Doc(target))
+                .append("totalScore", $gte(score));
+        FindIterable<Document> documents = scoreDatabase.getCollection(collectionName).find(query);
+        return toList(documents);
+    }
+
     /**
      * 创建一条空的总分记录
      *
