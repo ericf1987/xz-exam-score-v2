@@ -282,12 +282,37 @@ public class ScoreService {
 
     public List<Document> getListByScore(String projectId, Range range, Target target, double score){
         String collectionName = getTotalScoreCollection(projectId, target);
-        Document query = doc("project", projectId).append("range.name", Range.STUDENT)
-                .append(range.getName(), range.getId())
-                .append("target", target2Doc(target))
-                .append("totalScore", $gte(score));
-        FindIterable<Document> documents = scoreDatabase.getCollection(collectionName).find(query);
-        return toList(documents);
+        String cacheKey = "listByScore:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + score;
+
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append("range.name", Range.STUDENT)
+                    .append(range.getName(), range.getId())
+                    .append("target", target2Doc(target))
+                    .append("totalScore", $gte(score));
+            FindIterable<Document> documents = scoreDatabase.getCollection(collectionName).find(query);
+            return new ArrayList<>(toList(documents));
+        });
+    }
+
+    public int getCountByScoreSpan(String projectId, Range range, Target target, double max, double min){
+        String collectionName = getTotalScoreCollection(projectId, target);
+        String cacheKey = "countByScoreSpan:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + max + ":" + min;
+
+        Document doc = new Document();
+        if(min != 0){
+            doc.append("$gte", min);
+        }
+        if(max != 0){
+            doc.append("$lt", max);
+        }
+
+        return cache.get(cacheKey, () -> {
+            Document query = doc("project", projectId).append("range.name", Range.STUDENT)
+                    .append(range.getName(), range.getId())
+                    .append("target", target2Doc(target))
+                    .append("totalScore", doc);
+            return (int)scoreDatabase.getCollection(collectionName).count(query);
+        });
     }
 
     /**
