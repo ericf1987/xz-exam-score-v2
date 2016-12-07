@@ -4,10 +4,7 @@ import com.xz.examscore.asynccomponents.report.ReportGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.asynccomponents.report.classes.ReportGeneratorInfo;
 import com.xz.examscore.bean.Range;
-import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.TargetService;
 import com.xz.examscore.util.DoubleUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

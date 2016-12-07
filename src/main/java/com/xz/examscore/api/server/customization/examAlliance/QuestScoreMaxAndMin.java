@@ -22,7 +22,7 @@ import java.util.*;
  * @author by fengye on 2016/12/4.
  */
 @SuppressWarnings("unchecked")
-@Function(description = "联考项目-客观试题最高最低得分查询", parameters = {
+@Function(description = "联考项目-试题突出情况查询", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "isObjective", type = Type.Boolean, description = "试题类型", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true)
@@ -72,7 +72,7 @@ public class QuestScoreMaxAndMin implements Server {
                 questMap.put("average", DoubleUtils.round(average));
                 questMap.put("fullScore", fullScore);
                 questMap.put("rate", DoubleUtils.toPercent(rate));
-                questMap.put("pointList", pointList);
+                questMap.put("pointList", listPointName(pointList));
                 questList.add(questMap);
             }
             //对questList按照得分率高低进行排序
@@ -82,7 +82,7 @@ public class QuestScoreMaxAndMin implements Server {
                 return r2.compareTo(r1);
             });
             List<Map<String, Object>> result = new ArrayList<>();
-            if(!questList.isEmpty()){
+            if (!questList.isEmpty()) {
                 result.add(questList.get(0));
                 result.add(questList.get(questList.size() - 1));
             }
@@ -93,13 +93,26 @@ public class QuestScoreMaxAndMin implements Server {
         return Result.success().set("schools", schoolList);
     }
 
+    public String listPointName(List<String> pointList) {
+        if (null != pointList && !pointList.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            pointList.forEach(pointName -> {
+                builder.append(pointName).append("，");
+            });
+            String pointNames = builder.toString();
+            return pointNames.substring(0, pointNames.length() - 1);
+        } else {
+            return "无知识点";
+        }
+    }
+
     private List<String> getPointList(Document questDoc) {
-        Map<String, Object> pointMap = (Map<String, Object>)questDoc.get("points");
+        Map<String, Object> pointMap = (Map<String, Object>) questDoc.get("points");
         List<String> pointNames = new ArrayList<>();
-        if(null != pointMap && !pointMap.isEmpty()){
+        if (null != pointMap && !pointMap.isEmpty()) {
             Set<String> keySet = pointMap.keySet();
             List<String> pointIds = new ArrayList<>(keySet);
-            for(String pointId : pointIds){
+            for (String pointId : pointIds) {
                 Point point = pointService.getPoint(pointId);
                 pointNames.add(point.getName());
             }

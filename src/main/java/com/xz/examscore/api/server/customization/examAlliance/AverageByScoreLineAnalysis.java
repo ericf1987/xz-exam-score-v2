@@ -44,6 +44,7 @@ public class AverageByScoreLineAnalysis implements Server {
     @Autowired
     SubjectService subjectService;
 
+    //分数线
     public static final double SCORE_LINE = 800;
 
     @Override

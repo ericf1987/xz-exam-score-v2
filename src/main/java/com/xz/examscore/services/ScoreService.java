@@ -99,37 +99,6 @@ public class ScoreService {
     }
 
     /**
-     * 查询一个学生在指定项目中的指定目标名称的分数
-     *
-     * @param projectId  项目ID
-     * @param studentId  学生ID
-     * @param targetName 目标名称
-     * @return 分数列表
-     */
-    public List<Document> getStudentScores(String projectId, String studentId, String targetName) {
-
-        if (targetName.equals(Target.QUEST)) {
-            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
-            Document query = doc("project", projectId).append("student", studentId);
-            return MongoUtils.toList(collection.find(query));
-
-        } else {
-
-            MongoCollection<Document> collection;
-            List<Document> result = new ArrayList<>();
-            Document query = doc("project", projectId).append("range", range2Doc(Range.student(studentId)));
-
-            collection = scoreDatabase.getCollection("total_score");
-            result.addAll(MongoUtils.toList(collection.find(query)));
-
-            collection = scoreDatabase.getCollection("total_score_combined");
-            result.addAll(MongoUtils.toList(collection.find(query)));
-
-            return result;
-        }
-    }
-
-    /**
      * 查询指定学生的所有分数记录
      *
      * @param projectId 项目ID
@@ -228,11 +197,6 @@ public class ScoreService {
         return result;
     }
 
-    public Double getTotalScore0(String projectId, Range range, Target target) {
-        String collection = getTotalScoreCollection(projectId, target);
-        return getTotalScore0(collection, projectId, range, target);
-    }
-
     public Map<String, Double> getAllSubjectScore(String projectId, Range range) {
         List<String> subjectIds = subjectService.querySubjects(projectId);
         Map<String, Double> result = new HashMap<>();
@@ -268,19 +232,20 @@ public class ScoreService {
         cache.delete(cacheKey);
     }
 
-    /**查询高于指定分数的记录总数
+    /**
+     * 查询高于指定分数的记录总数
      *
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
      * @param score     分数
-     * @return
+     * @return 高于指定分数的记录总数
      */
-    public int getCountByScore(String projectId, Range range, Target target, double score){
+    public int getCountByScore(String projectId, Range range, Target target, double score) {
         return getListByScore(projectId, range, target, score).size();
     }
 
-    public List<Document> getListByScore(String projectId, Range range, Target target, double score){
+    public List<Document> getListByScore(String projectId, Range range, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
         String cacheKey = "listByScore:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + score;
 
@@ -294,15 +259,25 @@ public class ScoreService {
         });
     }
 
-    public int getCountByScoreSpan(String projectId, Range range, Target target, double max, double min){
+    /**
+     * 获取分数段内的学生人数
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param max       最大值
+     * @param min       最小值
+     * @return 分数段内的学生人数
+     */
+    public int getCountByScoreSpan(String projectId, Range range, Target target, double max, double min) {
         String collectionName = getTotalScoreCollection(projectId, target);
         String cacheKey = "countByScoreSpan:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + max + ":" + min;
 
         Document doc = new Document();
-        if(min != 0){
+        if (min != 0) {
             doc.append("$gte", min);
         }
-        if(max != 0){
+        if (max != 0) {
             doc.append("$lt", max);
         }
 
@@ -311,7 +286,7 @@ public class ScoreService {
                     .append(range.getName(), range.getId())
                     .append("target", target2Doc(target))
                     .append("totalScore", doc);
-            return (int)scoreDatabase.getCollection(collectionName).count(query);
+            return (int) scoreDatabase.getCollection(collectionName).count(query);
         });
     }
 
@@ -408,22 +383,17 @@ public class ScoreService {
         String targetName = target.getName();
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");
         Document query = doc("project", projectId).append("student", studentId);
-        if (targetName.equals(Target.PROJECT)) {
-            //只有当没有任何分数明细的时候，才判断考生整个考试项目为缺考状态
-            long count = collection.count(query);
-            if (count == 0) {
-                return true;
-            }
-            return false;
-        } else if (targetName.equals(Target.SUBJECT)) {
-            query.append("subject", target.getId().toString());
-            Document doc = collection.find(query).first();
-            if (null == doc) {
-                return true;
-            }
-            return BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
-        } else {
-            return false;
+        switch (targetName) {
+            case Target.PROJECT:
+                //只有当没有任何分数明细的时候，才判断考生整个考试项目为缺考状态
+                long count = collection.count(query);
+                return count == 0;
+            case Target.SUBJECT:
+                query.append("subject", target.getId().toString());
+                Document doc = collection.find(query).first();
+                return null == doc || BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
+            default:
+                return false;
         }
     }
 

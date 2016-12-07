@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2016/12/5.
  */
-@Function(description = "联考项目-统计全科分数高于指定分数线的学生的各科平均分", parameters = {
+@Function(description = "联考项目-前百分段名平均分", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "rankSegment", type = Type.String, description = "考试项目ID", required = true)
 })
@@ -74,7 +74,7 @@ public class AverageByRankLineAnalysis implements Server {
 
         List<Document> studentListByScore = scoreService.getListByScore(projectId, provinceRange, Target.project(projectId), rankScore);
 
-        List<Map<String, Object>> averageData = getAverageData(projectId, provinceRange, subjectIds, studentListByScore, requiredCount);
+        List<Map<String, Object>> averageData = getAverageData(projectId, subjectIds, studentListByScore, requiredCount);
 
         provinceMap.put("count", requiredCount);
         provinceMap.put("rate", rate);
@@ -97,7 +97,7 @@ public class AverageByRankLineAnalysis implements Server {
             double rankScore = rankService.getRankScore(projectId, schoolRange, Target.project(projectId), requiredCount);
             List<Document> studentListByScore = scoreService.getListByScore(projectId, schoolRange, Target.project(projectId), rankScore);
 
-            List<Map<String, Object>> averageData = getAverageData(projectId, schoolRange, subjectIds, studentListByScore, requiredCount);
+            List<Map<String, Object>> averageData = getAverageData(projectId, subjectIds, studentListByScore, requiredCount);
             schoolMap.put("schoolName", schoolService.getSchoolName(projectId, schoolRange.getId()));
             schoolMap.put("count", requiredCount);
             schoolMap.put("rate", rate);
@@ -107,7 +107,7 @@ public class AverageByRankLineAnalysis implements Server {
         return schoolsData;
     }
 
-    private List<Map<String, Object>> getAverageData(String projectId, Range range, List<String> subjectIds, List<Document> studentListByScore, int requiredCount) {
+    private List<Map<String, Object>> getAverageData(String projectId, List<String> subjectIds, List<Document> studentListByScore, int requiredCount) {
         List<Map<String, Object>> averageData = new ArrayList<>();
         Map<String, Object> projectAverage = new HashMap<>();
         //统计全科数据

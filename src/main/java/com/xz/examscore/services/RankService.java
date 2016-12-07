@@ -52,7 +52,6 @@ public class RankService {
      * @param range     范围
      * @param target    目标
      * @param studentId 学生ID
-     *
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, String studentId) {
@@ -71,7 +70,6 @@ public class RankService {
      * @param range     范围
      * @param target    目标
      * @param score     分数
-     *
      * @return 分数在指定目标和范围内的排名
      */
     public int getRank(String projectId, Range range, Target target, double score) {
@@ -97,33 +95,38 @@ public class RankService {
 
     /**
      * 查询排名位置的得分
+     *
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     * @param rankIndex     分数
-     *
+     * @param rankIndex 分数
      * @return 查询排名位置的得分
      */
-    public double getRankScore(String projectId, Range range, Target target, int rankIndex){
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
-        Document id = Mongo.query(projectId, range, target);
-        Document doc = collection.find(id).first();
-        if(null != doc && !doc.isEmpty()){
-            List<Document> scoreMap = (List<Document>)doc.get("scoreMap");
-            Collections.sort(scoreMap, (Map<String, Object> m1, Map<String, Object> m2) -> {
-                Double s1 = (Double)m1.get("score");
-                Double s2 = (Double)m2.get("score");
-                return s2.compareTo(s1);
-            });
-            int rankCount = 0;
-            for(Document one : scoreMap){
-                rankCount += one.getInteger("count");
-                if(rankCount >= rankIndex){
-                    return one.getDouble("score");
+    public double getRankScore(String projectId, Range range, Target target, int rankIndex) {
+        String cacheKey = "rank_score:" + projectId + ":" + range + ":" + target + ":" + rankIndex;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
+            Document id = Mongo.query(projectId, range, target);
+            Document doc = collection.find(id).first();
+            if (null != doc && !doc.isEmpty()) {
+                List<Document> scoreMap = (List<Document>) doc.get("scoreMap");
+                Collections.sort(scoreMap, (Map<String, Object> m1, Map<String, Object> m2) -> {
+                    Double s1 = (Double) m1.get("score");
+                    Double s2 = (Double) m2.get("score");
+                    return s2.compareTo(s1);
+                });
+                int rankCount = 0;
+                for (Document one : scoreMap) {
+                    rankCount += one.getInteger("count");
+                    if (rankCount >= rankIndex) {
+                        return one.getDouble("score");
+                    }
                 }
             }
-        }
-        return 0d;
+            return 0d;
+        });
+
     }
 
     /**
@@ -142,19 +145,18 @@ public class RankService {
      * @param range     排名范围
      * @param target    排名目标
      * @param studentId 学生ID
-     *
      * @return 排名等级，如果考生没有参加考试则返回 null
      */
     public String getRankLevel(String projectId, Range range, Target target, String studentId) {
-        if(target.getName().equals(Target.SUBJECT_COMBINATION)){
+        if (target.getName().equals(Target.SUBJECT_COMBINATION)) {
             return getRankLevelWithSubjectCombination(projectId, range, target, studentId);
-        }else{
+        } else {
             return getRankLevelNonSubjectCombination(projectId, range, target, studentId);
         }
     }
 
     //获取费
-    private String getRankLevelNonSubjectCombination(String projectId, Range range, Target target, String studentId){
+    private String getRankLevelNonSubjectCombination(String projectId, Range range, Target target, String studentId) {
         int rank = getRank(projectId, range, target, studentId);
         int studentCount = studentService.getStudentCount(projectId, range, target);
 
@@ -189,9 +191,9 @@ public class RankService {
                 Target::subject
         ).collect(Collectors.toList());
         StringBuilder builder = new StringBuilder();
-        for (Target subjectTarget : subjectCombinationsTarget){
+        for (Target subjectTarget : subjectCombinationsTarget) {
             String levelKey = getRankLevelNonSubjectCombination(projectId, range, subjectTarget, studentId);
-            if(null == levelKey){
+            if (null == levelKey) {
                 return null;
             }
             builder.append(levelKey);
