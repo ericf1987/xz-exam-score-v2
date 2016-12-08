@@ -1,7 +1,6 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -18,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.WITHOUT_INNER_ID;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.SubjectUtil.isCombinedSubject;
 
 /**
@@ -105,22 +104,6 @@ public class StudentService {
         });
     }
 
-    public List<Document> getSubjectAggrByRange(String projectId, Range range){
-        MongoCollection<Document> collection = scoreDatabase.getCollection("student_list");
-        Document query = doc("_id", doc("subjectId", "$subjects")).append("count", doc("$sum", 1));
-        AggregateIterable<Document> document = collection.aggregate(Arrays.asList(
-                $match(doc("project", projectId).append(range.getName(), range.getId())),
-                $unwind("$subjects"),
-                $group(query)
-                ));
-
-        List<Document> list = new ArrayList<>();
-
-        document.forEach((Consumer<Document>) list::add);
-
-        return list;
-    }
-
     private String getCacheKey(String prefix, String projectId, String subjectId, Range range) {
         String cacheKey = prefix + projectId;
         if (subjectId != null) {
@@ -136,12 +119,13 @@ public class StudentService {
      * @param projectId       项目ID
      * @param range           范围（可选，null 表示整个项目）
      * @param maxStudentCount 最多查询多少个学生（调试用，<=0 表示不限）
+     * @param skipCount       跳过多少条记录（分页用）
      * @param projection      要取哪些字段（可选，null 表示取所有字段）
      *
      * @return 学生列表
      */
     public FindIterable<Document> getProjectStudentList(
-            String projectId, Range range, int maxStudentCount, Document projection) {
+            String projectId, Range range, int maxStudentCount, int skipCount, Document projection) {
 
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
@@ -154,6 +138,10 @@ public class StudentService {
 
         if (maxStudentCount > 0) {
             findIterable.limit(maxStudentCount);
+        }
+
+        if(skipCount > 0){
+            findIterable.skip(skipCount);
         }
 
         if (projection != null) {

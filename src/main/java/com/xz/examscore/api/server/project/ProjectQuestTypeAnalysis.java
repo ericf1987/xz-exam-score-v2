@@ -86,8 +86,8 @@ public class ProjectQuestTypeAnalysis implements Server {
             map.put("schoolName", schoolName);
 
             Range range = Range.school(schoolId);
-            List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range,
-                    questTypeService, fullScoreService, questTypeScoreService);
+            List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range
+            );
             map.put("questTypes", questTypes);
 
             list.add(map);
@@ -99,16 +99,12 @@ public class ProjectQuestTypeAnalysis implements Server {
     // 整体试题分析
     private List<Map<String, Object>> getTotalQuestTypeAnalysis(String projectId, String subjectId) {
         Range range = rangeService.queryProvinceRange(projectId);
-        return getQuestTypeAnalysis(projectId, subjectId, range,
-                questTypeService, fullScoreService, questTypeScoreService);
+        return getQuestTypeAnalysis(projectId, subjectId, range);
     }
 
     // 题型分析数据
-    public static List<Map<String, Object>> getQuestTypeAnalysis(
-            String projectId, String subjectId, Range range,
-            QuestTypeService questTypeService,
-            FullScoreService fullScoreService,
-            QuestTypeScoreService questTypeScoreService) {
+    public List<Map<String, Object>> getQuestTypeAnalysis(
+            String projectId, String subjectId, Range range) {
 
         List<QuestType> questTypes = questTypeService.getQuestTypeList(projectId, subjectId);
 

@@ -120,7 +120,7 @@ public abstract class TaskDispatcher {
     protected void dispatchTaskForEveryStudent(
             String projectId, String aggregationId, Consumer<String> beforeDispatch) {
 
-        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, 0, doc("student", 1));
+        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, 0, 0, doc("student", 1));
         for (Document document : list) {
             String studentId = document.getString("student");
             if (beforeDispatch != null) {
@@ -137,7 +137,7 @@ public abstract class TaskDispatcher {
 
     public List<Range> fetchRanges(String[] rangeKeys, Map<String, List<Range>> rangesMap) {
         List<Range> ranges = new ArrayList<>();
-        for (String rangeKey : rangeKeys){
+        for (String rangeKey : rangeKeys) {
             ranges.addAll(rangesMap.get(rangeKey));
         }
         return ranges;

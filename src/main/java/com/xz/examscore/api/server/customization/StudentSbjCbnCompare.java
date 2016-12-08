@@ -1,22 +1,22 @@
 package com.xz.examscore.api.server.customization;
 
-        import com.mongodb.client.FindIterable;
-        import com.xz.ajiaedu.common.lang.Result;
-        import com.xz.examscore.api.Param;
-        import com.xz.examscore.api.annotation.Function;
-        import com.xz.examscore.api.annotation.Parameter;
-        import com.xz.examscore.api.annotation.Type;
-        import com.xz.examscore.api.server.Server;
-        import com.xz.examscore.bean.Range;
-        import com.xz.examscore.bean.Target;
-        import com.xz.examscore.services.*;
-        import com.xz.examscore.util.DoubleUtils;
-        import org.apache.commons.collections.MapUtils;
-        import org.bson.Document;
-        import org.springframework.beans.factory.annotation.Autowired;
-        import org.springframework.stereotype.Service;
+import com.mongodb.client.FindIterable;
+import com.xz.ajiaedu.common.lang.Result;
+import com.xz.examscore.api.Param;
+import com.xz.examscore.api.annotation.Function;
+import com.xz.examscore.api.annotation.Parameter;
+import com.xz.examscore.api.annotation.Type;
+import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
+import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
+import org.apache.commons.collections.MapUtils;
+import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-        import java.util.*;
+import java.util.*;
 
 /**
  * @author by fengye on 2016/10/19.
@@ -51,7 +51,7 @@ public class StudentSbjCbnCompare implements Server {
         String subjectCombinationId = param.getString("subjectCombinationId");
         List<Map<String, Object>> result = new ArrayList<>();
         Target subjectCombinationTarget = Target.subjectCombination(subjectCombinationId);
-        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, -1, null);
+        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, -1, 0, null);
         for (Document doc : list) {
             String studentId = doc.getString("student");
             String studentName = doc.getString("name");

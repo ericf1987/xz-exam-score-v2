@@ -36,7 +36,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         assertEquals(1, calculateScore(4, "A", "A", null).score, 0.1);
         assertEquals(0, calculateScore(4, "A,D", "", null).score, 0.1);
         assertEquals(1, calculateScore(4, "A,D", "", true).score, 0.1);*/
-        System.out.println(calculateScore(4, "B2D2BD4", "", false).score);
+        System.out.println(calculateScore(3, "C", "", null).score);
     }
 
     @Test

@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
-
 /**
  * 总体成绩-尖子试卷题型分析
  *
@@ -68,6 +66,9 @@ public class ProjectTopStudentQuestTypeStat implements Server {
     @Autowired
     ScoreService scoreService;
 
+    @Autowired
+    ProjectQuestTypeAnalysis projectQuestTypeAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -81,12 +82,9 @@ public class ProjectTopStudentQuestTypeStat implements Server {
             rankSegment = initRankSegment(projectId, range, topStudentListService);
         }
 
-        List<Map<String, Object>> totalQuestTypeAnalysis = getQuestTypeAnalysis(projectId, subjectId, range,
-                questTypeService, fullScoreService, questTypeScoreService);
+        List<Map<String, Object>> totalQuestTypeAnalysis = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
 
-        List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target,
-                subjectId, topStudentListService, studentService, schoolService, classService,
-                questTypeService, fullScoreService, questTypeScoreService, scoreService);
+        List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target, subjectId);
 
         return Result.success()
                 .set("totals", totalQuestTypeAnalysis)
@@ -107,12 +105,8 @@ public class ProjectTopStudentQuestTypeStat implements Server {
     }
 
     // 尖子生题型统计
-    public static List<Map<String, Object>> getTopStudentQuestTypeStat(
-            String projectId, String[] rankSegment, Range range, Target target, String subjectId,
-            TopStudentListService topStudentListService, StudentService studentService,
-            SchoolService schoolService, ClassService classService,
-            QuestTypeService questTypeService, FullScoreService fullScoreService,
-            QuestTypeScoreService questTypeScoreService, ScoreService scoreService) {
+    public List<Map<String, Object>> getTopStudentQuestTypeStat(
+            String projectId, String[] rankSegment, Range range, Target target, String subjectId) {
 
         List<Map<String, Object>> topStudents = new ArrayList<>();
         int minIndex = NumberUtils.toInt(rankSegment[0]);
@@ -151,8 +145,7 @@ public class ProjectTopStudentQuestTypeStat implements Server {
             }
 
             Range _range = Range.student(studentId);
-            List<Map<String, Object>> questTypeAnalysis = getQuestTypeAnalysis(projectId, subjectId, _range,
-                    questTypeService, fullScoreService, questTypeScoreService);
+            List<Map<String, Object>> questTypeAnalysis = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, _range);
             map.put("questTypes", questTypeAnalysis);
 
             topStudents.add(map);

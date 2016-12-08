@@ -6,6 +6,8 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis;
+import com.xz.examscore.api.server.project.ProjectTopStudentQuestTypeStat;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
@@ -16,8 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
-import static com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
-import static com.xz.examscore.api.server.project.ProjectTopStudentQuestTypeStat.getTopStudentQuestTypeStat;
 import static com.xz.examscore.api.server.project.ProjectTopStudentQuestTypeStat.initRankSegment;
 
 /**
@@ -59,6 +59,12 @@ public class SchoolTopStudentQuestTypeStat implements Server {
     @Autowired
     ScoreService scoreService;
 
+    @Autowired
+    ProjectQuestTypeAnalysis projectQuestTypeAnalysis;
+
+    @Autowired
+    ProjectTopStudentQuestTypeStat projectTopStudentQuestTypeStat;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -73,12 +79,9 @@ public class SchoolTopStudentQuestTypeStat implements Server {
             rankSegment = initRankSegment(projectId, range, topStudentListService);
         }
 
-        List<Map<String, Object>> schoolQuestTypeAnalysis = getQuestTypeAnalysis(projectId, subjectId, range,
-                questTypeService, fullScoreService, questTypeScoreService);
+        List<Map<String, Object>> schoolQuestTypeAnalysis = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
 
-        List<Map<String, Object>> topStudents = getTopStudentQuestTypeStat(projectId, rankSegment, range, target,
-                subjectId, topStudentListService, studentService, schoolService, classService,
-                questTypeService, fullScoreService, questTypeScoreService, scoreService);
+        List<Map<String, Object>> topStudents = projectTopStudentQuestTypeStat.getTopStudentQuestTypeStat(projectId, rankSegment, range, target, subjectId);
         return Result.success()
                 .set("schools", schoolQuestTypeAnalysis)
                 .set("topStudents", topStudents)

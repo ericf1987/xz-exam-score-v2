@@ -64,11 +64,11 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
         levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap,
-                pointService, questService, fullScoreService, averageService);
+        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap
+        );
 
         Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                levelMap, fullScoreService, averageService);
+                levelMap);
 
         return Result.success()
                 .set("points", pointStats)
@@ -77,13 +77,9 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     }
 
     // 获取知识点统计分析
-    public static List<Map<String, Object>> getPointAnalysis(
+    public List<Map<String, Object>> getPointAnalysis(
             String projectId, String subjectId, Range range,
-            Map<String, Document> levelMap,
-            PointService pointService,
-            QuestService questService,
-            FullScoreService fullScoreService,
-            AverageService averageService) {
+            Map<String, Document> levelMap) {
 
         List<Map<String, Object>> pointStats = new ArrayList<>();
         List<Point> points = pointService.getPoints(projectId, subjectId);
@@ -136,7 +132,7 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     }
 
     // 获取题目集合总分
-    private static double getFullScore(String projectId, List<Document> quests, FullScoreService fullScoreService) {
+    public double getFullScore(String projectId, List<Document> quests, FullScoreService fullScoreService) {
         double fullScore = 0;
         for (Document quest : quests) {
             String questId = quest.getString("questId");
@@ -147,10 +143,8 @@ public class ProjectPointAbilityLevelAnalysis implements Server {
     }
 
     // 获取能力层级统计分析
-    public static Map<String, Object> getAbilityLevelStats(String projectId, String subjectId, Range range,
-                                                           Map<String, Document> levelMap,
-                                                           FullScoreService fullScoreService,
-                                                           AverageService averageService) {
+    public Map<String, Object> getAbilityLevelStats(String projectId, String subjectId, Range range,
+                                                           Map<String, Document> levelMap) {
 
         double totalScore = 0, userScore = 0;
         Map<String, Object> levelStat = new HashMap<>();

@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalysis;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.*;
 import org.bson.Document;
@@ -54,6 +55,9 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
     @Autowired
     AbilityLevelService abilityLevelService;
 
+    @Autowired
+    ProjectPointAbilityLevelAnalysis projectPointAbilityLevelAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -78,10 +82,9 @@ public class SchoolPointAbilityLevelAnalysis implements Server {
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
         levelMap = filterLevels(projectId, subjectId, levelMap, fullScoreService);
 
-        List<Map<String, Object>> pointStats = getPointAnalysis(projectId, subjectId, range, levelMap,
-                pointService, questService, fullScoreService, averageService);
-        Map<String, Object> abilityLevelStat = getAbilityLevelStats(projectId, subjectId, range,
-                levelMap, fullScoreService, averageService);
+        List<Map<String, Object>> pointStats = projectPointAbilityLevelAnalysis.getPointAnalysis(projectId, subjectId, range, levelMap);
+        Map<String, Object> abilityLevelStat = projectPointAbilityLevelAnalysis.getAbilityLevelStats(projectId, subjectId, range,
+                levelMap);
 
         return Result.success()
                 .set("points", pointStats)

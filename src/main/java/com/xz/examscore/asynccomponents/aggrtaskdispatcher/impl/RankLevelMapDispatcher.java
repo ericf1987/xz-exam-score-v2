@@ -36,7 +36,7 @@ public class RankLevelMapDispatcher extends TaskDispatcher {
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         String[] rangeKeys = new String[]{
-                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+                Range.CLASS, Range.SCHOOL
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);

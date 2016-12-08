@@ -54,7 +54,6 @@ public class ExportScoreService {
      *
      * @param projectId       项目ID
      * @param notifyInterface 是否要通知接口导入成绩
-     *
      * @return 上传后的 oss 文件路径
      */
     public String exportScore(String projectId, boolean notifyInterface) {
@@ -100,7 +99,7 @@ public class ExportScoreService {
 
         String province = provinceService.getProjectProvince(projectId);
         Value<Integer> counter = Value.of(0);
-        studentService.getProjectStudentList(projectId, Range.province(province), -1, null)
+        studentService.getProjectStudentList(projectId, Range.province(province), -1, 0, null)
                 .forEach((Consumer<Document>) studentDoc -> addStudentScores(projectId, packCreator, studentDoc, counter));
 
         FileUtils.writeFile(packCreator.createZipArchive(), new File(filePath));

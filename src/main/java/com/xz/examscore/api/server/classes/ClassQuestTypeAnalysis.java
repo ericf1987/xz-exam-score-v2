@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.xz.examscore.api.server.classes.ClassPointAnalysis.initSubject;
-import static com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
 
 /**
  * 班级成绩-试卷题型分析
@@ -56,6 +56,9 @@ public class ClassQuestTypeAnalysis implements Server {
 
     @Autowired
     TargetService targetService;
+
+    @Autowired
+    ProjectQuestTypeAnalysis projectQuestTypeAnalysis;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -102,11 +105,8 @@ public class ClassQuestTypeAnalysis implements Server {
             //判断学生是否缺考
             Target target = targetService.getTarget(projectId, subjectId);
             boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
-            if(isAbsent){
-                map.put("isAbsent", isAbsent);
-            }
-            List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range,
-                    questTypeService, fullScoreService, questTypeScoreService);
+            if (isAbsent) map.put("isAbsent", isAbsent);
+            List<Map<String, Object>> questTypes = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
             map.put("questTypes", questTypes);
 
             list.add(map);
@@ -119,7 +119,6 @@ public class ClassQuestTypeAnalysis implements Server {
     // 班级试题分析
     private List<Map<String, Object>> getClassQuestTypeAnalysis(String projectId, String subjectId, String classId) {
         Range range = Range.clazz(classId);
-        return getQuestTypeAnalysis(projectId, subjectId, range,
-                questTypeService, fullScoreService, questTypeScoreService);
+        return projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
     }
 }

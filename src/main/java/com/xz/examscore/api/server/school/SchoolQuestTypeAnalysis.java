@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.FullScoreService;
@@ -21,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis.getQuestTypeAnalysis;
 import static com.xz.examscore.api.server.sys.QueryExamClasses.getFullClassName;
 
 /**
@@ -49,6 +49,9 @@ public class SchoolQuestTypeAnalysis implements Server {
 
     @Autowired
     QuestTypeScoreService questTypeScoreService;
+
+    @Autowired
+    ProjectQuestTypeAnalysis projectQuestTypeAnalysis;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -89,8 +92,7 @@ public class SchoolQuestTypeAnalysis implements Server {
             map.put("className", getFullClassName(listClass));
 
             Range range = Range.clazz(_classId);
-            List<Map<String, Object>> questTypes = getQuestTypeAnalysis(projectId, subjectId, range,
-                    questTypeService, fullScoreService, questTypeScoreService);
+            List<Map<String, Object>> questTypes = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
             map.put("questTypes", questTypes);
 
             list.add(map);
@@ -103,7 +105,6 @@ public class SchoolQuestTypeAnalysis implements Server {
     // 学校试题分析
     private List<Map<String, Object>> getSchoolQuestTypeAnalysis(String projectId, String subjectId, String schoolId) {
         Range range = Range.school(schoolId);
-        return getQuestTypeAnalysis(projectId, subjectId, range,
-                questTypeService, fullScoreService, questTypeScoreService);
+        return projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, range);
     }
 }

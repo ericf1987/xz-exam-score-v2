@@ -252,12 +252,12 @@ public class ScannerDBService {
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
-            //如果该生作弊，则主观题得分为0
+            //如果该生作弊或缺考，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", isCheating ? 0d : score)
-                    .append("right", isCheating ? false : NumberUtil.equals(score, fullScore))
+                    .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : score)
+                    .append("right", isCheating || (null != isAbsent && isAbsent) ? false : NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
@@ -328,9 +328,9 @@ public class ScannerDBService {
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", isCheating ? 0d : scoreAndRight.score)
+                    .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    .append("right", isCheating ? false : scoreAndRight.right)
+                    .append("right", isCheating || (null != isAbsent && isAbsent) ? false : scoreAndRight.right)
                     .append("isObjective", true)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
