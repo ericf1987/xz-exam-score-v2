@@ -18,7 +18,7 @@ public class QuestScoreDetailAnalysisTest extends XzExamScoreV2ApplicationTests 
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430300-672a0ed23d9148e5a2a31c8bf1e08e62")
+        Param param = new Param().setParameter("projectId", "430100-f00975f88b4e4881925613b2a238673f")
                 .setParameter("subjectId", "001");
         Result result = questScoreDetailAnalysis.execute(param);
         System.out.println(result.getData());

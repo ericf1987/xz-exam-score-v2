@@ -160,9 +160,9 @@ public class ImportProjectService {
             Map<String, Double> rankLevels = formatRankLevel(standard);
             boolean isCombine = JudgeCombine((List<String>) rankLevel.get("modelSubjects"));
             //尖子生比例
-            Double topStudentRate = 0d;
+            Double topStudentRate = 0.05d;
             //高分段比例
-            Double highScoreRate = 0d;
+            Double highScoreRate = 0.3d;
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
@@ -173,12 +173,12 @@ public class ImportProjectService {
             }
 
             //获取尖子生比例
-            if (StringUtils.isEmpty(topStudentRatio)) {
+            if (!StringUtils.isEmpty(topStudentRatio)) {
                 topStudentRate = Double.parseDouble(topStudentRatio);
             }
 
             //获取高分段比例
-            if (StringUtils.isEmpty(highScoreRatio)) {
+            if (!StringUtils.isEmpty(highScoreRatio)) {
                 highScoreRate = Double.parseDouble(highScoreRatio);
             }
 

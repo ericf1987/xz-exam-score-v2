@@ -16,7 +16,7 @@ public class AverageByRankLineReportTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        averageByRankLineReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", null, "target/前百分段名平均分.xlsx");
+        averageByRankLineReport.generate("430100-f00975f88b4e4881925613b2a238673f", null, "target/前百分段名平均分.xlsx");
 
     }
 }

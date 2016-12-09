@@ -12,6 +12,7 @@ import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.RangeService;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -93,7 +94,8 @@ public class TotalScoreTask extends AggrTask {
 
         Document aggregateResult = aggregate.first();
         if (aggregateResult != null) {
-            Double score = aggregateResult.getDouble("totalScore");
+            //控制精度
+            Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
             Range parent = rangeService.getParentRange(projectId, aggrRange);
             scoreService.saveTotalScore(projectId, aggrRange, parent, target, score, null);
         }
@@ -116,7 +118,7 @@ public class TotalScoreTask extends AggrTask {
         Document aggregateResult = aggregate.first();
         if (aggregateResult != null) {
             Range parent = rangeService.getParentRange(projectId, aggrRange);
-            Double score = aggregateResult.getDouble("totalScore");
+            Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
             scoreService.saveTotalScore(projectId, aggrRange, parent, target, score, null);
         }
     }
@@ -157,7 +159,7 @@ public class TotalScoreTask extends AggrTask {
             Document aggregateResult = aggregate.first();
 
             if (aggregateResult != null) {
-                Double score = aggregateResult.getDouble("totalScore");
+                Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
                 Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                         .append("area", student.get("area")).append("city", student.get("city"))
                         .append("province", student.get("province"));
@@ -190,7 +192,7 @@ public class TotalScoreTask extends AggrTask {
 
             // 如果缺考则会导致 aggregate() 没有返回值
             if (aggregateResult != null) {
-                Double score = aggregateResult.getDouble("totalScore");
+                Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
                 Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                         .append("area", student.get("area")).append("city", student.get("city"))
                         .append("province", student.get("province"));

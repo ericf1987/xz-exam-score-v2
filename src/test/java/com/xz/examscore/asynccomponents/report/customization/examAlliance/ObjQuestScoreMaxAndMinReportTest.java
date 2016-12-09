@@ -14,6 +14,6 @@ public class ObjQuestScoreMaxAndMinReportTest extends XzExamScoreV2ApplicationTe
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        objQuestScoreMaxAndMinReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", null, "target/客观题突出情况.xlsx");
+        objQuestScoreMaxAndMinReport.generate("430100-f00975f88b4e4881925613b2a238673f", null, "target/客观题突出情况.xlsx");
     }
 }

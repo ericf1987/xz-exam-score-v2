@@ -74,14 +74,10 @@ public class ObjQuestScoreMaxAndMinSheets extends SheetGenerator {
             String schoolName = MapUtils.getString(schoolMap, "name");
             excelWriter.set(row, column.incrementAndGet(), schoolName);
             for(Map<String, Object> questMap : questList){
-                String questNo = MapUtils.getString(questMap, "questNo");
-                String average = MapUtils.getString(questMap, "average");
-                String rate = MapUtils.getString(questMap, "rate");
-                List<String> pointLIst = (List<String>)MapUtils.getObject(questMap, "pointList");
-                excelWriter.set(row, column.incrementAndGet(), questNo);
-                excelWriter.set(row, column.incrementAndGet(), average);
-                excelWriter.set(row, column.incrementAndGet(), rate);
-                excelWriter.set(row, column.incrementAndGet(), pointLIst);
+                excelWriter.set(row, column.incrementAndGet(), MapUtils.getString(questMap, "questNo"));
+                excelWriter.set(row, column.incrementAndGet(), MapUtils.getString(questMap, "average"));
+                excelWriter.set(row, column.incrementAndGet(), MapUtils.getString(questMap, "rate"));
+                excelWriter.set(row, column.incrementAndGet(), MapUtils.getObject(questMap, "pointList"));
             }
             row++;
             column.set(-1);

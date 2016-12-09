@@ -67,7 +67,7 @@ public class QuestScoreDetailAnalysis implements Server {
                 questMap.put("isObjective", questDoc.get("isObjective"));
                 questMap.put("average", average);
                 questMap.put("fullScore", fullScore);
-                questMap.put("rate", DoubleUtils.toPercent(DoubleUtils.round(rate, true)));
+                questMap.put("rate", DoubleUtils.round(rate, true));
                 questList.add(questMap);
             }
             schoolMap.put("schoolName", schoolName);

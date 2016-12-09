@@ -106,7 +106,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430600-c55a7eb5810046e997a3fc69130a7b4c");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430300-f529e0f0236d49559b0c27acbbb255ed");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());
