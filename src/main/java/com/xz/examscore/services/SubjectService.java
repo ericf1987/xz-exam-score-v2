@@ -42,6 +42,7 @@ public class SubjectService {
         SUBJECT_NAMES.put("013", "思想品德");
         SUBJECT_NAMES.put("014", "信息技术");
         SUBJECT_NAMES.put("015", "体育");
+        SUBJECT_NAMES.put("019", "道德与法治");//陕西榆林特有科目
         SUBJECT_NAMES.put("004005006", "理科综合");
         SUBJECT_NAMES.put("007008009", "文科综合");
     }
