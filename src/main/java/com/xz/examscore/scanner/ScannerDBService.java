@@ -172,9 +172,12 @@ public class ScannerDBService {
             throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
         }
 
-        List<String> subjectList = importProjectService.separateSubject(subjectId);
+/*        List<String> subjectList = importProjectService.separateSubject(subjectId);
         scoreDatabase.getCollection("score").deleteMany(
                 doc("project", projectId).append("student", studentId).append("subject", $in(subjectList))
+        );*/
+        scoreDatabase.getCollection("score").deleteMany(
+                doc("project", projectId).append("student", studentId).append("subject", subjectId)
         );
 
         //查询学生该科目是否作弊

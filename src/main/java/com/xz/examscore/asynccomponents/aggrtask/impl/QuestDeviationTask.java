@@ -141,7 +141,10 @@ public class QuestDeviationTask extends AggrTask {
         for (String studentId : studentIds) {
             Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
             Document doc = scoreCol.find(query).first();
-            sum += doc.getDouble("score");
+            //如果出现有选做题的情况，则会出现空指针异常，在此做好判断
+            if(null != doc){
+                sum += doc.getDouble("score");
+            }
         }
         System.out.println("学生总分：" + sum + ", 学生人数：" + count + ", 平均得分：" + DoubleUtils.round(sum / count, false));
         return count == 0 ? 0 : DoubleUtils.round(sum / count, false);

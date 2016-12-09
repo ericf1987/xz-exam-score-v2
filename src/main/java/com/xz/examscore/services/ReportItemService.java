@@ -111,7 +111,7 @@ public class ReportItemService {
             reportItem.put("name", name);
             reportItem.put("id", document.getObjectId("_id").toHexString());
             reportItem.put("tag", document.getString("tag"));
-            Map<String, Object> rangeMap = (Map<String, Object>)document.get("range");
+            Map<String, Object> rangeMap = (Map<String, Object>) document.get("range");
             //默认允许下载
             boolean downloadAllowed = true;
             String rangeName = MapUtils.getString(rangeMap, "name");
@@ -121,7 +121,7 @@ public class ReportItemService {
             } else {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
                 //根据联考开关判断该报表是否允许下载
-                if(!projectConfig.isShareSchoolReport() && rangeName.equals("province")){
+                if (projectConfig.isShareSchoolReport() && rangeName.equals("province")) {
                     downloadAllowed = false;
                 }
             }
@@ -130,6 +130,10 @@ public class ReportItemService {
             if (name.equals(ENTRY_LEVEL_REPORT)) {
                 reportItem.put("dataStatus", checkItemDate(projectId, document) && projectConfig.isEntryLevelEnable());
                 downloadAllowed = downloadAllowed && projectConfig.isEntryLevelEnable();
+            }
+            //暂时屏蔽S-P报表的下载
+            if (name.contains("S-P")) {
+                downloadAllowed = false;
             }
             reportItem.put("downloadAllowed", downloadAllowed);
             list.add(reportItem);

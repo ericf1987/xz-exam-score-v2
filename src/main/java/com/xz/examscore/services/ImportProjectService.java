@@ -667,7 +667,7 @@ public class ImportProjectService {
 
     public boolean sliceSubject(String project) {
         // TODO: 2016/11/2 目前对于综合类科目，对其进行拆分统计，如果需要改变是否拆分的条件，在这里完成编写
-        return true;
+        return false;
     }
 
     protected void importProjectInfo(String projectId, Context context) {
