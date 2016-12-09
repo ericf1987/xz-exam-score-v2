@@ -14,14 +14,12 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -118,7 +116,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         FindIterable<Document> projectStudentList = studentService.getProjectStudentList(projectId, Range.clazz(classId),
                 pageSize, pageSize * pageCount, doc("student", 1).append("name", 1));
 
-        for(Document studentDoc : projectStudentList){
+        for (Document studentDoc : projectStudentList) {
             Map<String, Object> studentMap = new HashMap<>();
             //统计基础信息
             String studentId = studentDoc.getString("student");
@@ -160,8 +158,18 @@ public class StudentEvaluationFormAnalysis implements Server {
         return projectPointAbilityLevelAnalysis.getPointAnalysis(projectId, subjectId, Range.student(studentId), levelMap);
     }
 
-    private List<Map<String, Object>> getPointScoreMap(String projectId, String studentId, String subjectId) {
-        return classPointAnalysis.getPointStats(projectId, subjectId, Range.student(studentId));
+    private Map<String, Object> getPointScoreMap(String projectId, String studentId, String subjectId) {
+        Map<String, Object> pointScore = new HashMap<>();
+        List<Map<String, Object>> pointStats = classPointAnalysis.getPointStats(projectId, subjectId, Range.student(studentId));
+        Collections.sort(pointStats, (Map<String, Object> p1, Map<String, Object> p2) -> {
+            Double r1 = MapUtils.getDouble(p1, "scoreRate");
+            Double r2 = MapUtils.getDouble(p2, "scoreRate");
+            return r2.compareTo(r1);
+        });
+        int size = pointStats.size();
+        pointScore.put("top", pointStats.subList(0, size >= 5 ? 5 : size));
+        pointScore.put("bottom", pointStats.subList(size >= 5 ? (size - 5) : 0, pointStats.size()));
+        return pointScore;
     }
 
     private List<Map<String, Object>> getQuestTypeScoreMap(String projectId, String studentId, String subjectId) {
