@@ -16,6 +16,6 @@ public class QuestScoreDetailReportTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        questScoreDetailReport.generate("430100-f00975f88b4e4881925613b2a238673f", null, "target/试题得分明细.xlsx");
+        questScoreDetailReport.generate("430100-6da6fefff9b74e67917950567b368910", null, "target/试题得分明细.xlsx");
     }
 }

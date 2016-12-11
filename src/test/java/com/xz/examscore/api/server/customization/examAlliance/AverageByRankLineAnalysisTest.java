@@ -26,10 +26,10 @@ public class AverageByRankLineAnalysisTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        String projectId = "430100-6da6fefff9b74e67917950567b368910";
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
-        Param param = new Param().setParameter("projectId", "430300-672a0ed23d9148e5a2a31c8bf1e08e62")
-                .setParameter("rankSegment", "0.1");
+        Param param = new Param().setParameter("projectId", "430100-6da6fefff9b74e67917950567b368910")
+                .setParameter("rankSegment", "0.9");
         Result result = averageByRankLineAnalysis.execute(param);
         int studentCount = studentService.getStudentCount(projectId, provinceRange, Target.project(projectId));
         System.out.println(studentCount);

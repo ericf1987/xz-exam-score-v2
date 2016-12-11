@@ -238,15 +238,16 @@ public class ScannerDBService {
             return;
         }
         //获取统计集合中主观题信息
-        List<Document> subQuestList = new ArrayList<>();
+/*        List<Document> subQuestList = new ArrayList<>();
 
         //获取拆分后所有综合科目的题目列表（quest_list）
         List<String> subjectIds = importProjectService.separateSubject(subjectId);
         subjectIds.forEach(s -> {
             List<Document> subList = questService.getQuests(projectId, s, false);
             subQuestList.addAll(subList);
-        });
+        });*/
 
+        List<Document> subQuestList = questService.getQuests(projectId, subjectId, false);
         //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
         fixMissingSubjectQuest(subQuestList, subjectiveList);
 
