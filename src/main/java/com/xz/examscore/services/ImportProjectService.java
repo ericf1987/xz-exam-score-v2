@@ -671,6 +671,54 @@ public class ImportProjectService {
         context.put("subjectList", subjects);
     }
 
+    private void importSlicedSubjects(String projectId, Context context) {
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+        //查询题目信息
+        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        //统计出每个考试的总分
+        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+        LOG.info("CMS试题明细接口计算出的科目总分为：{}", subjectScore.toString());
+        if (jsonArray == null) {
+            LOG.info("没有项目 " + projectId + " 的科目信息。");
+            return;
+        }
+
+        List<String> subjects = new ArrayList<>();
+        Value<Double> projectFullScore = Value.of(0d);
+        List<String> subjectIds = new ArrayList<>();
+        //组合科目ID列表
+        List<String> combinedSubjectIds = new ArrayList<>();
+        jsonArray.forEach(o -> {
+            JSONObject subjectObj = (JSONObject) o;
+            String subjectId = subjectObj.getString("subjectId");
+            //找到综合科目ID，进行拆分
+            if (subjectId.length() > SUBJECT_LENGTH) {
+                subjectIds.addAll(separateSubject(subjectId));
+                combinedSubjectIds.add(subjectId);
+            } else {
+                subjectIds.add(subjectObj.getString("subjectId"));
+            }
+        });
+
+        for (String subjectId : subjectIds) {
+            Double fullScore = MapUtils.getDouble(subjectScore, subjectId);
+            // 科目没有录入或没有答题卡
+            if (fullScore == null) {
+                LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
+                return;
+            }
+            projectFullScore.set(projectFullScore.get() + fullScore);
+            subjects.add(subjectId);
+            fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
+        }
+
+        subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
+        if(!combinedSubjectIds.isEmpty()){
+            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
+        }
+        fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
+        context.put("subjectList", subjects);
+    }
 
     //拆分科目并保存科目信息
     public List<String> separateSubject(String subjectId) {
