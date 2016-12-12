@@ -535,17 +535,22 @@ public class ScannerDBService {
         String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
         Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
         //适配老版本数据结构，如果没有偏移量，则使用新版本数据结构，反之，则使用老版本数据结构
-        String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
-        if (!StringUtil.isBlank(offset1X)) {
-            LOG.info("无法获取偏移量，使用老版本网阅数据结构");
-            List<Document> positions = cardDoc.get("positions", List.class);
-            if (positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))) {
-                hasPaperPosition = false;
+        if (null != studentDoc && null != cardDoc) {
+            if (null != cardDoc.get("positions")) {
+                LOG.info("无法获取偏移量，使用老版本网阅数据结构");
+                List<Document> positions = cardDoc.get("positions", List.class);
+                if (positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))) {
+                    hasPaperPosition = false;
+                }
+                return getPreviousCardSlice(studentDoc, cardDoc, hasPaperPosition);
+            } else {
+                LOG.info("使用新版本网阅数据结构");
+                return getCurrentCardSlice(studentDoc, true);
             }
-            return getPreviousCardSlice(studentDoc, cardDoc, hasPaperPosition);
         } else {
-            LOG.info("使用新版本网阅数据结构");
-            return getCurrentCardSlice(studentDoc, true);
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("hasPaperPosition", false);
+            return resultMap;
         }
     }
 

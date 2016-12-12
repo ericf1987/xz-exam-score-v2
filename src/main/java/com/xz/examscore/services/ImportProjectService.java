@@ -125,6 +125,52 @@ public class ImportProjectService {
         return context;
     }
 
+    /**
+     * 导入考试项目信息
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
+    protected void importProjectInfo(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 基本信息...");
+        JSONObject projectObj = interfaceClient.queryProjectById(projectId);
+
+        if (projectObj == null) {
+            LOG.info("没有找到项目 " + projectId);
+            return;
+        }
+
+        ExamProject project = new ExamProject();
+        project.setId(projectId);
+        project.setName(projectObj.getString("name"));
+        project.setGrade(projectObj.getInteger("grade"));
+        project.setCreateTime(new Date());
+        //项目类型 文科：W，理科：L
+        project.setCategory(projectObj.getString("category"));
+        //考试开始日期
+        project.setExamStartDate(projectObj.getString("examStartDate"));
+
+        context.put("project", project);
+        projectService.saveProject(project);
+    }
+
+    /**
+     * 导入科目信息
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文信息
+     */
+    private void importSubjects(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 科目信息...");
+        importNormalSubjects(projectId, context);
+    }
+
+    /**
+     * 导入考试配置参数信息
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文信息
+     */
     public void importProjectReportConfig(String projectId, Context context) {
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
         JSONObject rankLevel = result.get("rankLevel");
@@ -135,7 +181,7 @@ public class ImportProjectService {
         boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
         //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
         boolean shareSchoolReport = true;
-        if(result.get("shareSchoolReport") != null){
+        if (result.get("shareSchoolReport") != null) {
             shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
         }
         //获取本科上线率统计相关参数
@@ -143,13 +189,13 @@ public class ImportProjectService {
         List<String> collegeEntryLevel = new ArrayList<>();
         JSONObject onlineRateStat = result.get("onlineRateStat");
         if (onlineRateStat != null && !onlineRateStat.isEmpty()) {
-            if(onlineRateStat.get("isOn") != null){
+            if (onlineRateStat.get("isOn") != null) {
                 entryLevelEnable = onlineRateStat.get("isOn").toString();
             }
-            if(onlineRateStat.get("onlineStatType") != null){
+            if (onlineRateStat.get("onlineStatType") != null) {
                 entryLevelStatType = onlineRateStat.get("onlineStatType").toString();
             }
-            if(onlineRateStat.get("values") != null){
+            if (onlineRateStat.get("values") != null) {
                 collegeEntryLevel.addAll((List<String>) onlineRateStat.get("values"));
             }
         }
@@ -219,34 +265,60 @@ public class ImportProjectService {
         }
     }
 
-    private Map<String, Double> formatRankLevel(Map<String, Object> m) {
-        Map<String, Double> rankLevels = new HashMap<>();
-        Set<String> keys = m.keySet();
-        for (String key : keys) {
-            double d = Double.parseDouble(m.get(key).toString());
-            rankLevels.put(key, d / 100);
-        }
-        return rankLevels;
+    /**
+     * 导入考题信息
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
+    private void importQuests(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 考题信息...");
+        JSONArray jsonArray = interfaceClient.queryQuestionByProject(projectId);
+        List<Document> projectQuests = new ArrayList<>();
+
+        //如果科目中包含综合科目，则将题目的科目ID由单科改为综合科目ID
+        List<String> subjectIds = context.get("subjectList");
+        boolean isCombine = subjectIds.contains("004005006") || subjectIds.contains("007008009");
+
+        context.put("questCount", jsonArray.size());
+        //判断是否为综合科目，是否需要合并科目ID
+        //List<String> subjectList = context.get("subjectList");
+        //List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
+        jsonArray.forEach(o -> {
+            JSONObject questObj = (JSONObject) o;
+            Document questDoc = new Document();
+            questDoc.put("project", projectId);
+            questDoc.put("questId", questObj.getString("questId"));
+            questDoc.put("subject", isCombine ? paddingSubjectId(questObj.getString("subjectId")) : questObj.getString("subjectId"));
+            questDoc.put("questType", questObj.getString("questType"));
+            questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
+            questDoc.put("questNo", questObj.getString("paperQuestNum"));
+            questDoc.put("score", questObj.getDoubleValue("score"));
+            questDoc.put("answer", questObj.getString("answer"));
+            questDoc.put("scoreRule", questObj.getString("scoreRule"));
+            questDoc.put("points", questObj.get("points"));
+            questDoc.put("items", questObj.get("items"));
+            questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
+            questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
+            //是否直接给分
+            questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
+            questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
+
+            fixQuest(questDoc);
+
+            projectQuests.add(questDoc);
+        });
+
+        context.put("quests", projectQuests);
+        questService.saveProjectQuests(projectId, projectQuests);
     }
 
-    //判断是否文理分科
-    private boolean JudgeCombine(List<String> modelSubjects) {
-        if (null != modelSubjects && !modelSubjects.isEmpty()) {
-            for (String subject : modelSubjects)
-                if (subject.equals("004005006") || subject.equals("007008009")) return true;
-            return false;
-        }
-        return false;
-    }
-
-    // 仅导入题目数据，用于修改标答后的重新算分
-    // 注意如果 importQuests() 方法对 context 参数进行了读取操作，则本方法可能会失效，因为
-    // 传过去的是一个空的 Context。
-    public void importProjectQuest(String projectId) {
-        importQuests(projectId, new Context());
-    }
-
-    // 导入考试知识点/能力层级
+    /**
+     * 导入考试知识点/能力层级
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
     @SuppressWarnings({"unchecked", "MismatchedQueryAndUpdateOfCollection"})
     private void importPointsAndLevels(String projectId, Context context) {
         List<Document> projectQuests = context.get("quests");
@@ -324,6 +396,12 @@ public class ImportProjectService {
         }
     }
 
+    /**
+     * 导入试卷题型信息
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private void importQuestTypes(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 题型信息");
@@ -364,119 +442,12 @@ public class ImportProjectService {
         }
     }
 
-    // 导入考题信息
-    private void importQuests(String projectId, Context context) {
-        LOG.info("导入项目 " + projectId + " 考题信息...");
-        JSONArray jsonArray = interfaceClient.queryQuestionByProject(projectId);
-        List<Document> projectQuests = new ArrayList<>();
-
-        context.put("questCount", jsonArray.size());
-        //判断是否为综合科目，是否需要合并科目ID
-        //List<String> subjectList = context.get("subjectList");
-        //List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
-        jsonArray.forEach(o -> {
-            JSONObject questObj = (JSONObject) o;
-            Document questDoc = new Document();
-            questDoc.put("project", projectId);
-            questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", questObj.getString("subjectId"));
-            questDoc.put("questType", questObj.getString("questType"));
-            questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
-            questDoc.put("questNo", questObj.getString("paperQuestNum"));
-            questDoc.put("score", questObj.getDoubleValue("score"));
-            questDoc.put("answer", questObj.getString("answer"));
-            questDoc.put("scoreRule", questObj.getString("scoreRule"));
-            questDoc.put("points", questObj.get("points"));
-            questDoc.put("items", questObj.get("items"));
-            questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
-            questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
-            //是否直接给分
-            questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
-            questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
-
-            fixQuest(questDoc);
-
-            projectQuests.add(questDoc);
-        });
-
-        context.put("quests", projectQuests);
-        questService.saveProjectQuests(projectId, projectQuests);
-    }
-
-    // 导入考试班级
-    private void importClasses(String projectId, Context context) {
-        List<Document> classes = new ArrayList<>();
-        List<Document> schools = context.get("schools");
-        ExamProject project = context.get("project");
-
-        for (Document school : schools) {
-            String schoolId = school.getString("school");
-            List<Document> schoolClasses = new ArrayList<>();
-
-            LOG.info("导入学校 " + schoolId + "(" + school.getString("name") + ") 班级信息...");
-
-            JSONArray jsonArray = interfaceClient.queryExamClassByProject(projectId, schoolId, false);
-
-            jsonArray.forEach(o -> {
-                JSONObject classObj = (JSONObject) o;
-
-                Document schoolClass = new Document()
-                        .append("project", projectId)
-                        .append("class", classObj.getString("id"))
-                        .append("name", classObj.getString("name"))
-                        .append("grade", project.getGrade())
-                        .append("school", schoolId)
-                        .append("area", school.getString("area"))
-                        .append("city", school.getString("city"))
-                        .append("province", school.getString("province"))
-                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
-
-                schoolClasses.add(schoolClass);
-                classes.add(schoolClass);               // 之后查询学生用
-            });
-
-            classService.saveProjectSchoolClasses(projectId, schoolId, schoolClasses);
-        }
-
-        context.put("classes", classes);
-    }
-
-    // 导入考生列表
-    private void importStudents(String projectId, Context context) {
-        List<Document> classes = context.get("classes");
-        int classCount = classes.size();
-        int index = 0;
-
-        for (Document classDoc : classes) {
-            String classId = classDoc.getString("class");
-            index++;
-            LOG.info("导入班级 " + classId + " 的考生信息(" + index + "/" + classCount + ")...");
-
-            List<Document> classStudents = new ArrayList<>();
-            JSONArray students = interfaceClient.queryClassExamStudent(projectId, classId);
-            students.forEach(o -> {
-                JSONObject studentObj = (JSONObject) o;
-                Document studentDoc = new Document()
-                        .append("project", projectId)
-                        //导入学生考号
-                        .append("examNo", studentObj.get("examNo"))
-                        .append("student", studentObj.get("id"))
-                        .append("name", studentObj.get("name"))
-                        .append("class", classDoc.get("class"))
-                        .append("school", classDoc.get("school"))
-                        .append("area", classDoc.get("area"))
-                        .append("city", classDoc.get("city"))
-                        .append("province", classDoc.get("province"))
-                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
-
-                classStudents.add(studentDoc);
-            });
-
-            studentService.saveProjectClassStudents(projectId, classId, classStudents);
-        }
-    }
-
-    // 导入学校和区市省
+    /**
+     * 导入学校和区市省
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
     private void importSchools(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 学校信息...");
         JSONArray jsonArray = interfaceClient.queryExamSchoolByProject(projectId, false);
@@ -514,6 +485,116 @@ public class ImportProjectService {
         areaService.saveProjectAreas(projectId, areas);
     }
 
+    /**
+     * 导入考试班级
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
+    private void importClasses(String projectId, Context context) {
+        List<Document> classes = new ArrayList<>();
+        List<Document> schools = context.get("schools");
+        ExamProject project = context.get("project");
+
+        for (Document school : schools) {
+            String schoolId = school.getString("school");
+            List<Document> schoolClasses = new ArrayList<>();
+
+            LOG.info("导入学校 " + schoolId + "(" + school.getString("name") + ") 班级信息...");
+
+            JSONArray jsonArray = interfaceClient.queryExamClassByProject(projectId, schoolId, false);
+
+            jsonArray.forEach(o -> {
+                JSONObject classObj = (JSONObject) o;
+
+                Document schoolClass = new Document()
+                        .append("project", projectId)
+                        .append("class", classObj.getString("id"))
+                        .append("name", classObj.getString("name"))
+                        .append("grade", project.getGrade())
+                        .append("school", schoolId)
+                        .append("area", school.getString("area"))
+                        .append("city", school.getString("city"))
+                        .append("province", school.getString("province"))
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
+
+                schoolClasses.add(schoolClass);
+                classes.add(schoolClass);               // 之后查询学生用
+            });
+
+            classService.saveProjectSchoolClasses(projectId, schoolId, schoolClasses);
+        }
+
+        context.put("classes", classes);
+    }
+
+    /**
+     * 导入考生列表
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
+    private void importStudents(String projectId, Context context) {
+        List<Document> classes = context.get("classes");
+        int classCount = classes.size();
+        int index = 0;
+
+        for (Document classDoc : classes) {
+            String classId = classDoc.getString("class");
+            index++;
+            LOG.info("导入班级 " + classId + " 的考生信息(" + index + "/" + classCount + ")...");
+
+            List<Document> classStudents = new ArrayList<>();
+            JSONArray students = interfaceClient.queryClassExamStudent(projectId, classId);
+            students.forEach(o -> {
+                JSONObject studentObj = (JSONObject) o;
+                Document studentDoc = new Document()
+                        .append("project", projectId)
+                        //导入学生考号
+                        .append("examNo", studentObj.get("examNo"))
+                        .append("student", studentObj.get("id"))
+                        .append("name", studentObj.get("name"))
+                        .append("class", classDoc.get("class"))
+                        .append("school", classDoc.get("school"))
+                        .append("area", classDoc.get("area"))
+                        .append("city", classDoc.get("city"))
+                        .append("province", classDoc.get("province"))
+                        .append("md5", MD5.digest(UUID.randomUUID().toString()));
+
+                classStudents.add(studentDoc);
+            });
+
+            studentService.saveProjectClassStudents(projectId, classId, classStudents);
+        }
+    }
+
+    private Map<String, Double> formatRankLevel(Map<String, Object> m) {
+        Map<String, Double> rankLevels = new HashMap<>();
+        Set<String> keys = m.keySet();
+        for (String key : keys) {
+            double d = Double.parseDouble(m.get(key).toString());
+            rankLevels.put(key, d / 100);
+        }
+        return rankLevels;
+    }
+
+    //判断是否文理分科
+    private boolean JudgeCombine(List<String> modelSubjects) {
+        if (null != modelSubjects && !modelSubjects.isEmpty()) {
+            for (String subject : modelSubjects)
+                if (subject.equals("004005006") || subject.equals("007008009")) return true;
+            return false;
+        }
+        return false;
+    }
+
+    // 仅导入题目数据，用于修改标答后的重新算分
+    // 注意如果 importQuests() 方法对 context 参数进行了读取操作，则本方法可能会失效，因为
+    // 传过去的是一个空的 Context。
+    public void importProjectQuest(String projectId) {
+        importQuests(projectId, new Context());
+    }
+
     // 修复官网的题目记录属性不全导致的问题
     private void fixQuest(Document questDoc) {
 
@@ -535,71 +616,6 @@ public class ImportProjectService {
         } else {
             return "0".equals(questType) || "1".equals(questType) || "2".equals(questType);
         }
-    }
-
-    private void importSubjects(String projectId, Context context) {
-        LOG.info("导入项目 " + projectId + " 科目信息...");
-        //是否需要将文综或理综拆分成单个科目
-        boolean flag = sliceSubject(projectId);
-        if (flag) {
-            //将综合科目拆分成多个科目
-            importSlicedSubjects(projectId, context);
-        } else {
-            importNormalSubjects(projectId, context);
-        }
-        context.put("subjectSliced", flag);
-    }
-
-    private void importSlicedSubjects(String projectId, Context context) {
-        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
-        //查询题目信息
-        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
-        //统计出每个考试的总分
-        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
-
-        //// TODO: 2016/12/12 确保试题接口的科目ID和科目接口的科目ID一致
-
-        LOG.info("CMS试题明细接口计算出的科目总分为：{}", subjectScore.toString());
-        if (jsonArray == null) {
-            LOG.info("没有项目 " + projectId + " 的科目信息。");
-            return;
-        }
-
-        List<String> subjects = new ArrayList<>();
-        Value<Double> projectFullScore = Value.of(0d);
-        List<String> subjectIds = new ArrayList<>();
-        //组合科目ID列表
-        List<String> combinedSubjectIds = new ArrayList<>();
-        jsonArray.forEach(o -> {
-            JSONObject subjectObj = (JSONObject) o;
-            String subjectId = subjectObj.getString("subjectId");
-            //找到综合科目ID，进行拆分
-            if (subjectId.length() > SUBJECT_LENGTH) {
-                subjectIds.addAll(separateSubject(subjectId));
-                combinedSubjectIds.add(subjectId);
-            } else {
-                subjectIds.add(subjectObj.getString("subjectId"));
-            }
-        });
-
-        for (String subjectId : subjectIds) {
-            Double fullScore = MapUtils.getDouble(subjectScore, subjectId);
-            // 科目没有录入或没有答题卡
-            if (fullScore == null) {
-                LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
-                return;
-            }
-            projectFullScore.set(projectFullScore.get() + fullScore);
-            subjects.add(subjectId);
-            fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
-        }
-
-        subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
-        if(!combinedSubjectIds.isEmpty()){
-            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
-        }
-        fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
-        context.put("subjectList", subjects);
     }
 
     public Map<String, Double> gatherQuestScoreBySubject(JSONArray jsonQuest) {
@@ -641,14 +657,14 @@ public class ImportProjectService {
             }
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);
-            if(subjectId.length() > SUBJECT_LENGTH){
+            if (subjectId.length() > SUBJECT_LENGTH) {
                 combinedSubjectIds.add(subjectId);
             }
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
         subjectService.saveProjectSubjects(projectId, subjects);  // 保存科目列表
-        if(!combinedSubjectIds.isEmpty()){
+        if (!combinedSubjectIds.isEmpty()) {
             subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
         }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
@@ -668,32 +684,16 @@ public class ImportProjectService {
         return subjectIds;
     }
 
-    public boolean sliceSubject(String project) {
-        // TODO: 2016/11/2 目前对于综合类科目，对其进行拆分统计，如果需要改变是否拆分的条件，在这里完成编写
-        return false;
-    }
-
-    protected void importProjectInfo(String projectId, Context context) {
-        LOG.info("导入项目 " + projectId + " 基本信息...");
-        JSONObject projectObj = interfaceClient.queryProjectById(projectId);
-
-        if (projectObj == null) {
-            LOG.info("没有找到项目 " + projectId);
-            return;
+    public String paddingSubjectId(String subjectId) {
+        String[] w = new String[]{"004", "005", "006"};
+        String[] l = new String[]{"007", "008", "009"};
+        if (StringUtil.isOneOf(subjectId, w)) {
+            return "004005006";
+        } else if (StringUtil.isOneOf(subjectId, l)) {
+            return "007008009";
+        } else {
+            return subjectId;
         }
-
-        ExamProject project = new ExamProject();
-        project.setId(projectId);
-        project.setName(projectObj.getString("name"));
-        project.setGrade(projectObj.getInteger("grade"));
-        project.setCreateTime(new Date());
-        //项目类型 文科：W，理科：L
-        project.setCategory(projectObj.getString("category"));
-        //考试开始日期
-        project.setExamStartDate(projectObj.getString("examStartDate"));
-
-        context.put("project", project);
-        projectService.saveProject(project);
     }
 
     //从zip包读取学生信息
