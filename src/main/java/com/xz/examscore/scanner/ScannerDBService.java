@@ -8,10 +8,7 @@ import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
-import com.xz.examscore.bean.Range;
-import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -264,7 +261,7 @@ public class ScannerDBService {
                     .append("subject", sid)
                     .append("questNo", questionNo)
                     .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : score)
-                    .append("right", isCheating || (null != isAbsent && isAbsent) ? false : NumberUtil.equals(score, fullScore))
+                    .append("right", !(isCheating || (null != isAbsent && isAbsent)) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
@@ -337,7 +334,7 @@ public class ScannerDBService {
                     .append("questNo", questionNo)
                     .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    .append("right", isCheating || (null != isAbsent && isAbsent) ? false : scoreAndRight.right)
+                    .append("right", !(isCheating || (null != isAbsent && isAbsent)) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
@@ -384,12 +381,14 @@ public class ScannerDBService {
     }
 
     public String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
-        //如果科目需要拆分
+        //如果网阅接口的科目ID为综合科目ID
         if (subjectId.length() != ImportProjectService.SUBJECT_LENGTH) {
             Document q1 = questService.findQuest(projectId, subjectId, questionNo);
+            //查询到综合科目ID对应的试题，则返回综合科目ID
             if (null != q1) {
                 return q1.getString("subject");
             } else {
+                //如果未查到，则该题目肯定对应综合中某一特定科目ID,返回科目ID，确保分数数据对应的科目ID和题目数据科目ID一致
                 List<String> subjectIds = importProjectService.separateSubject(subjectId);
                 Document q2 = questService.findQuest(projectId, subjectIds, questionNo);
                 return q2.getString("subject");
@@ -527,57 +526,101 @@ public class ScannerDBService {
     public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId){
         String dbName = projectId + "_" + subjectId;
         //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
-        Map<String, Object> resultMap = new HashMap<>();
         MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
         MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");
         //是否有整张答题卡切图
-        boolean hasPaperPosition = false;
+        boolean hasPaperPosition = true;
         //查找学生的答题卡留痕
         Document studentDoc = studentsCollection.find(doc("studentId", studentId)).first();
-        if(null != studentDoc && !studentDoc.isEmpty()){
-            //答题卡ID
-            String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
-            //答题卡正面
-            String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
-            //答题卡反面
-            String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
-
-            String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
-            String offset1Y = DocumentUtils.getString(studentDoc, "offset1Y", "");
-            String offset2X = DocumentUtils.getString(studentDoc, "offset2X", "");
-            String offset2Y = DocumentUtils.getString(studentDoc, "offset2Y", "");
-
-            resultMap.put("cardId", cardId);
-            resultMap.put("paper_positive", paper_positive);
-            resultMap.put("paper_reverse", paper_reverse);
-            resultMap.put("offset1X", offset1X);
-            resultMap.put("offset1Y", offset1Y);
-            resultMap.put("offset2X", offset2X);
-            resultMap.put("offset2Y", offset2Y);
-            if(!StringUtils.isEmpty(cardId) && !StringUtils.isEmpty(paper_positive)){
-                hasPaperPosition = true;
+        String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
+        Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
+        //适配老版本数据结构，如果没有偏移量，则使用新版本数据结构，反之，则使用老版本数据结构
+        String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
+        if(!StringUtil.isBlank(offset1X)){
+            LOG.info("无法获取偏移量，使用老版本网阅数据结构");
+            List<Document> positions = cardDoc.get("positions", List.class);
+            if(positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))){
+                hasPaperPosition = false;
             }
-            Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
-            if(null != cardDoc && !cardDoc.isEmpty()){
-                List<Map<String, Object>> positions = cardDoc.get("positions", List.class);
-                //获取该题目的得分和满分
-                positions.forEach(position -> {
-                    String questionNo = MapUtils.getString(position, "questionNo");
-                    Document questDoc = questService.findQuest(projectId, subjectId, questionNo);
-                    double fullScore = DocumentUtils.getDouble(questDoc, "score", 0d);
-                    String questId = DocumentUtils.getString(questDoc, "questId", "");
-                    double score = scoreService.getScore(projectId, Range.student(studentId), Target.quest(questId));
-                    position.put("fullScore", fullScore);
-                    position.put("score", score);
-                });
-                resultMap.put("positions", positions);
-            }else{
-                resultMap.put("positions", Collections.emptyList());
-            }
+            return getPreviousCardSlice(studentDoc, cardDoc, hasPaperPosition);
         }else{
-            resultMap.put("positions", Collections.emptyList());
+            LOG.info("使用新版本网阅数据结构");
+            return getCurrentCardSlice(studentDoc, true);
         }
+    }
+
+    private Map<String, Object> getPreviousCardSlice(Document studentDoc, Document cardDoc, boolean hasPaperPosition) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+        resultMap.put("cardId", DocumentUtils.getString(studentDoc, "cardId", ""));
+        resultMap.put("paper_positive", DocumentUtils.getString(studentDoc, "paper_positive", ""));
+        resultMap.put("paper_reverse", DocumentUtils.getString(studentDoc, "paper_reverse", ""));
+        resultMap.put("offset1X", DocumentUtils.getString(studentDoc, "offset1X", ""));
+        resultMap.put("offset1Y", DocumentUtils.getString(studentDoc, "offset1X", ""));
+        resultMap.put("offset2X", DocumentUtils.getString(studentDoc, "offset1X", ""));
+        resultMap.put("offset2Y", DocumentUtils.getString(studentDoc, "offset1X", ""));
+
+        List<Document> objectiveList = studentDoc.get("objectiveList", List.class);
+        List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
+
+        for(Document doc : objectiveList){
+            String questionNo = doc.getString("questionNo");
+            List<Document> rects = getRect(questionNo, cardDoc);
+            doc.append("rects", rects);
+        }
+
+        for(Document doc : subjectiveList){
+            String questionNo = doc.getString("questionNo");
+            List<Document> rects = getRect(questionNo, cardDoc);
+            doc.append("rects", rects);
+        }
+
+        resultMap.put("objectiveList", objectiveList);
+        resultMap.put("subjectiveList", subjectiveList);
+        return resultMap;
+    }
+
+    //获取题目的坐标信息
+    private List<Document> getRect(String questionNo, Document cardDoc) {
+        List<Document> rects = new ArrayList<>();
+        List<Document> positions = cardDoc.get("positions", List.class);
+        positions.forEach(position -> {
+            String qNo = position.getString("questionNo");
+            if(questionNo.equals(qNo)){
+                rects.addAll(position.get("positionsBeanList", List.class));
+            }
+        });
+        return rects;
+    }
+
+    private Map<String, Object> getCurrentCardSlice(Document studentDoc, boolean hasPaperPosition) {
+        Map<String, Object> resultMap = new HashMap<>();
+        //答题卡ID
+        String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
+        //答题卡正面
+        String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
+        //答题卡反面
+        String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
+
+        //客观题信息
+        List<Document> objectiveList = studentDoc.get("objectiveList", List.class);
+        //主观题作答
+        List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
+        //获取学生作答了的题目（过滤选做题）
+        objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+        subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+
+        resultMap.put("cardId", cardId);
+        resultMap.put("offset1X", "");
+        resultMap.put("offset1Y", "");
+        resultMap.put("offset2X", "");
+        resultMap.put("offset2Y", "");
+        resultMap.put("paper_positive", paper_positive);
+        resultMap.put("paper_reverse", paper_reverse);
+        resultMap.put("objectiveList", objectiveList);
+        resultMap.put("subjectiveList", subjectiveList);
         resultMap.put("hasPaperPosition", hasPaperPosition);
+
         return resultMap;
     }
 }

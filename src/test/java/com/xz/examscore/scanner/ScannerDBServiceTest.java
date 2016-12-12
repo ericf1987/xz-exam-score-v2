@@ -6,6 +6,8 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Map;
+
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
 import static org.junit.Assert.assertEquals;
 
@@ -50,6 +52,15 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String project = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
         String subjectId = scannerDBService.getSubjectIdInQuestList(project, "22", "007008009");
         System.out.println(subjectId);
+    }
+
+    @Test
+    public void testgetStudentCardSlices() throws Exception {
+        String project = "430100-f00975f88b4e4881925613b2a238673f";
+        String subjectId = "002";
+        String studentId = "9796e596-ac91-4114-bc37-f494cedc9271";
+        Map<String, Object> map = scannerDBService.getStudentCardSlices(project, subjectId, studentId);
+        System.out.println(map.toString());
     }
 
 }
