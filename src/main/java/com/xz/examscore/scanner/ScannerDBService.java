@@ -226,7 +226,7 @@ public class ScannerDBService {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
         Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
-        if(null != isAbsent){
+        if (null != isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以主观题得分为0", studentId, subjectId);
         }
         //网阅题目ID列表
@@ -275,7 +275,7 @@ public class ScannerDBService {
                 scoreDoc.append("missing", true);
             }
             //如果有缺考标记，则标记缺考
-            if(null != isAbsent){
+            if (null != isAbsent) {
                 scoreDoc.append("isAbsent", isAbsent);
             }
 
@@ -288,7 +288,7 @@ public class ScannerDBService {
         List<Document> objectiveList = (List<Document>) document.get("objectiveList");
         Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
-        if(null != isAbsent){
+        if (null != isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以客观题得分为0", studentId, subjectId);
         }
         //网阅题目ID列表
@@ -344,7 +344,7 @@ public class ScannerDBService {
                     .append("province", student.getString("province"))
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
-            if(null != isAbsent){
+            if (null != isAbsent) {
                 scoreDoc.append("isAbsent", isAbsent);
             }
 
@@ -355,7 +355,7 @@ public class ScannerDBService {
     //修正客观题列表
     private void fixMissingObjectiveQuest(String projectId, String subjectId, Boolean isAbsent, Document student) {
         List<Document> questDocs = questService.getQuests(projectId, subjectId);
-        for(Document questDoc : questDocs){
+        for (Document questDoc : questDocs) {
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
                     .append("questNo", questDoc.getString("questNo"))
@@ -373,7 +373,7 @@ public class ScannerDBService {
                     .append("quest", questDoc.getString("questId"))
                     .append("missing", true);
 
-            if(null != isAbsent){
+            if (null != isAbsent) {
                 scoreDoc.append("isAbsent", isAbsent);
             }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
@@ -523,7 +523,7 @@ public class ScannerDBService {
     }
 
     //查询学生某以科目的答题切图和留痕
-    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId){
+    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId) {
         String dbName = projectId + "_" + subjectId;
         //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
         MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
@@ -536,14 +536,14 @@ public class ScannerDBService {
         Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
         //适配老版本数据结构，如果没有偏移量，则使用新版本数据结构，反之，则使用老版本数据结构
         String offset1X = DocumentUtils.getString(studentDoc, "offset1X", "");
-        if(!StringUtil.isBlank(offset1X)){
+        if (!StringUtil.isBlank(offset1X)) {
             LOG.info("无法获取偏移量，使用老版本网阅数据结构");
             List<Document> positions = cardDoc.get("positions", List.class);
-            if(positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))){
+            if (positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))) {
                 hasPaperPosition = false;
             }
             return getPreviousCardSlice(studentDoc, cardDoc, hasPaperPosition);
-        }else{
+        } else {
             LOG.info("使用新版本网阅数据结构");
             return getCurrentCardSlice(studentDoc, true);
         }
@@ -563,13 +563,13 @@ public class ScannerDBService {
         List<Document> objectiveList = studentDoc.get("objectiveList", List.class);
         List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
 
-        for(Document doc : objectiveList){
+        for (Document doc : objectiveList) {
             String questionNo = doc.getString("questionNo");
             List<Document> rects = getRect(questionNo, cardDoc);
             doc.append("rects", rects);
         }
 
-        for(Document doc : subjectiveList){
+        for (Document doc : subjectiveList) {
             String questionNo = doc.getString("questionNo");
             List<Document> rects = getRect(questionNo, cardDoc);
             doc.append("rects", rects);
@@ -577,6 +577,7 @@ public class ScannerDBService {
 
         resultMap.put("objectiveList", objectiveList);
         resultMap.put("subjectiveList", subjectiveList);
+        resultMap.put("hasPaperPosition", hasPaperPosition);
         return resultMap;
     }
 
@@ -586,7 +587,7 @@ public class ScannerDBService {
         List<Document> positions = cardDoc.get("positions", List.class);
         positions.forEach(position -> {
             String qNo = position.getString("questionNo");
-            if(questionNo.equals(qNo)){
+            if (questionNo.equals(qNo)) {
                 rects.addAll(position.get("positionsBeanList", List.class));
             }
         });
