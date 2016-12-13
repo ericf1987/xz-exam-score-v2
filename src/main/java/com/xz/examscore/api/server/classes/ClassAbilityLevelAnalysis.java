@@ -131,7 +131,7 @@ public class ClassAbilityLevelAnalysis implements Server {
         return getLevelStats(projectId, subjectId, range, levelMap);
     }
 
-    private List<Map<String, Object>> getLevelStats(String projectId, String subjectId,
+    public List<Map<String, Object>> getLevelStats(String projectId, String subjectId,
                                                     Range range, Map<String, Document> levelMap) {
         List<Map<String, Object>> levelStats = new ArrayList<>();
         for (String levelId : levelMap.keySet()) {

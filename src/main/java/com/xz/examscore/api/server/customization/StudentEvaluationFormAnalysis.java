@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.classes.ClassAbilityLevelAnalysis;
 import com.xz.examscore.api.server.classes.ClassPointAnalysis;
 import com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalysis;
 import com.xz.examscore.api.server.project.ProjectQuestTypeAnalysis;
@@ -99,6 +100,9 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     ProjectQuestTypeAnalysis projectQuestTypeAnalysis;
 
+    @Autowired
+    ClassAbilityLevelAnalysis classAbilityLevelAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -135,7 +139,8 @@ public class StudentEvaluationFormAnalysis implements Server {
                 //统计各个科目的题型，知识点，双向细目情况
                 map.put("questTypeScore", getQuestTypeScoreMap(projectId, studentId, subjectId));
                 map.put("pointScore", getPointScoreMap(projectId, studentId, subjectId));
-                map.put("pointAbilityLevel", getPointAbilityLevel(projectId, studentId, subjectId));
+                //map.put("pointAbilityLevel", getPointAbilityLevel(projectId, studentId, subjectId));
+                map.put("subjectAbilityLevel", getSubjectAbilityLevel(projectId, studentId, subjectId));
                 subjectScoreAndRank.add(map);
             });
             scoreAndRankMap.put("subjects", subjectScoreAndRank);
@@ -149,6 +154,12 @@ public class StudentEvaluationFormAnalysis implements Server {
             resultList.add(studentMap);
         }
         return Result.success().set("studentList", resultList);
+    }
+
+    private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {
+        String studyStage = projectService.findProjectStudyStage(projectId);
+        Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+        return classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
     }
 
     private List<Map<String, Object>> getPointAbilityLevel(String projectId, String studentId, String subjectId) {
