@@ -29,10 +29,9 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 @Function(description = "学生测评报告分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true),
-        @Parameter(name = "projectId", type = Type.String, description = "班级ID", required = true),
+        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true),
         @Parameter(name = "pageSize", type = Type.String, description = "每页查询学生数量", required = true),
-        @Parameter(name = "pageCount", type = Type.String, description = "页码数", required = true),
-        @Parameter(name = "subjectCombinationId", type = Type.String, description = "组合科目ID", required = true)
+        @Parameter(name = "pageCount", type = Type.String, description = "页码数", required = true)
 })
 @Service
 public class StudentEvaluationFormAnalysis implements Server {

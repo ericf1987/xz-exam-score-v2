@@ -9,8 +9,12 @@ import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -117,6 +121,23 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         Param param = new Param().setParameter("pageSize", 10).setParameter("pageIndex", 0);
         ApiResponse result = interfaceClient.listRpApplyOpen(param);
         System.out.println(result.getData());
+    }
+
+    @Test
+    public void testCompareSubjectId() throws Exception {
+        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
+        JSONArray questJson = interfaceClient.queryQuestionByProject(projectId);
+        JSONArray subjectJson = interfaceClient.querySubjectListByProjectId(projectId);
+        ApiResponse projectConfigJson = interfaceClient.queryProjectReportConfig(projectId);
+        System.out.println(projectConfigJson.getData());
+        Map<String, Double> questMap = importProjectService.gatherQuestScoreBySubject(questJson);
+        List<String> subjectInQuest = new ArrayList<>(questMap.keySet());
+        System.out.println("题目的科目类型-->" + subjectInQuest.toString());
+        List<String> subjectIds = subjectJson.stream().map(subject -> {
+            JSONObject s = (JSONObject) subject;
+            return s.getString("subjectId");
+        }).collect(Collectors.toList());
+        System.out.println("科目ID-->" + subjectIds.toString());
     }
 
 }
