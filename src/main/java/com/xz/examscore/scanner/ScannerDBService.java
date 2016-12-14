@@ -43,6 +43,9 @@ public class ScannerDBService {
     MongoClient scannerMongoClient2;
 
     @Autowired
+    MongoClient scannerMongoClient3;
+
+    @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
@@ -63,10 +66,20 @@ public class ScannerDBService {
     public MongoClient getMongoClient(String project) {
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
-        if (null == projectDoc) {
+        Document projectDoc2 = scannerMongoClient2.getDatabase("project_database")
+                .getCollection("project").find(doc("projectId", project)).first();
+        Document projectDoc3 = scannerMongoClient3.getDatabase("project_database")
+                .getCollection("project").find(doc("projectId", project)).first();
+        if(null != projectDoc){
+            return scannerMongoClient;
+        }
+        if(null != projectDoc2){
             return scannerMongoClient2;
         }
-        return scannerMongoClient;
+        if(null != projectDoc3){
+            return scannerMongoClient3;
+        }
+        throw new IllegalArgumentException("查找不到项目的网阅数据源：{}" + project);
     }
 
     public Document findProject(String project) {

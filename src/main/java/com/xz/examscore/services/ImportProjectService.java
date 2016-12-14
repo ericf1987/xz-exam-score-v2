@@ -162,13 +162,13 @@ public class ImportProjectService {
      */
     private void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
-        boolean split = splitSubject(projectId);
-        if(split){
+        boolean isSubjectSplited = splitSubject(projectId);
+        if(isSubjectSplited){
             importSlicedSubjects(projectId, context);
         }else {
             importNormalSubjects(projectId, context);
         }
-        context.put("split", split);
+        context.put("isSubjectSplited", isSubjectSplited);
     }
 
     private boolean splitSubject(String projectId) {
@@ -289,7 +289,7 @@ public class ImportProjectService {
 
         //如果科目中包含综合科目，则将题目的科目ID由单科改为综合科目ID
         List<String> subjectIds = context.get("subjectList");
-        boolean split = context.get("split");
+        boolean isSubjectSplited = context.get("isSubjectSplited");
         boolean isCombine = subjectIds.contains("004005006") || subjectIds.contains("007008009");
 
 
@@ -302,7 +302,7 @@ public class ImportProjectService {
             Document questDoc = new Document();
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", isCombine && !split ? paddingSubjectId(questObj.getString("subjectId")) : questObj.getString("subjectId"));
+            questDoc.put("subject", isCombine && !isSubjectSplited ? paddingSubjectId(questObj.getString("subjectId")) : questObj.getString("subjectId"));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));
