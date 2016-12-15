@@ -64,6 +64,7 @@ public class ScannerDBService {
     ScoreService scoreService;
 
     public MongoClient getMongoClient(String project) {
+
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
         Document projectDoc2 = scannerMongoClient2.getDatabase("project_database")
@@ -550,7 +551,7 @@ public class ScannerDBService {
         //适配老版本数据结构，如果没有偏移量，则使用新版本数据结构，反之，则使用老版本数据结构
         if (null != studentDoc && null != cardDoc) {
             if (null != cardDoc.get("positions")) {
-                LOG.info("无法获取偏移量，使用老版本网阅数据结构");
+                LOG.info("使用老版本网阅数据结构");
                 List<Document> positions = cardDoc.get("positions", List.class);
                 if (positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))) {
                     hasPaperPosition = false;
@@ -578,14 +579,8 @@ public class ScannerDBService {
         resultMap.put("offset2X", DocumentUtils.getString(studentDoc, "offset1X", ""));
         resultMap.put("offset2Y", DocumentUtils.getString(studentDoc, "offset1X", ""));
 
-        List<Document> objectiveList = studentDoc.get("objectiveList", List.class);
         List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
 
-        for (Document doc : objectiveList) {
-            String questionNo = doc.getString("questionNo");
-            List<Document> rects = getRect(questionNo, cardDoc);
-            doc.append("rects", rects);
-        }
 
         for (Document doc : subjectiveList) {
             String questionNo = doc.getString("questionNo");
@@ -593,7 +588,6 @@ public class ScannerDBService {
             doc.append("rects", rects);
         }
 
-        resultMap.put("objectiveList", objectiveList);
         resultMap.put("subjectiveList", subjectiveList);
         resultMap.put("hasPaperPosition", hasPaperPosition);
         return resultMap;
