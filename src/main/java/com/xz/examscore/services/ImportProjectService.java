@@ -288,21 +288,18 @@ public class ImportProjectService {
         List<Document> projectQuests = new ArrayList<>();
 
         //如果科目中包含综合科目，则将题目的科目ID由单科改为综合科目ID
-        List<String> subjectIds = context.get("subjectList");
         boolean isSubjectSplited = context.get("isSubjectSplited");
-        boolean isCombine = subjectIds.contains("004005006") || subjectIds.contains("007008009");
-
 
         context.put("questCount", jsonArray.size());
         //判断是否为综合科目，是否需要合并科目ID
-        //List<String> subjectList = context.get("subjectList");
-        //List<String> combinedSubject = subjectList.stream().filter(subject -> subject.length() != SUBJECT_LENGTH).collect(Collectors.toList());
         jsonArray.forEach(o -> {
             JSONObject questObj = (JSONObject) o;
             Document questDoc = new Document();
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
-            questDoc.put("subject", isCombine && !isSubjectSplited ? paddingSubjectId(questObj.getString("subjectId")) : questObj.getString("subjectId"));
+            //如果拆分，则subject取答题卡的科目ID
+            questDoc.put("subject", !isSubjectSplited ? questObj.getString("cardSubjectId") : questObj.getString("subjectId"));
+            questDoc.put("cardSubjectId", questObj.getString("cardSubjectId"));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
             questDoc.put("questNo", questObj.getString("paperQuestNum"));

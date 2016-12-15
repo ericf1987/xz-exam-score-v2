@@ -575,12 +575,11 @@ public class ScannerDBService {
         resultMap.put("paper_positive", DocumentUtils.getString(studentDoc, "paper_positive", ""));
         resultMap.put("paper_reverse", DocumentUtils.getString(studentDoc, "paper_reverse", ""));
         resultMap.put("offset1X", DocumentUtils.getString(studentDoc, "offset1X", ""));
-        resultMap.put("offset1Y", DocumentUtils.getString(studentDoc, "offset1X", ""));
-        resultMap.put("offset2X", DocumentUtils.getString(studentDoc, "offset1X", ""));
-        resultMap.put("offset2Y", DocumentUtils.getString(studentDoc, "offset1X", ""));
+        resultMap.put("offset1Y", DocumentUtils.getString(studentDoc, "offset1Y", ""));
+        resultMap.put("offset2X", DocumentUtils.getString(studentDoc, "offset2X", ""));
+        resultMap.put("offset2Y", DocumentUtils.getString(studentDoc, "offset2Y", ""));
 
         List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
-
 
         for (Document doc : subjectiveList) {
             String questionNo = doc.getString("questionNo");
@@ -588,6 +587,8 @@ public class ScannerDBService {
             doc.append("rects", rects);
         }
 
+        //老版本网阅数据客观题没有坐标信息，所以不传客观题列表
+        resultMap.put("objectiveList", Collections.emptyList());
         resultMap.put("subjectiveList", subjectiveList);
         resultMap.put("hasPaperPosition", hasPaperPosition);
         return resultMap;
