@@ -70,6 +70,9 @@ public class AggregationService {
     @Autowired
     RangeService rangeService;
 
+    @Autowired
+    RecordExceptionService recordExceptionService;
+
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
     /**
@@ -85,6 +88,8 @@ public class AggregationService {
         boolean generateReport = config.isGenerateReport();
         boolean exportScore = config.isExportScore();
         AggregationType aggregationType = config.getAggregationType();
+
+        recordExceptionService.deleteExceptionRecord(projectId, null);
 
         if (reimportProject || reimportScore) {
             ImportTaskMessage message = new ImportTaskMessage(projectId, reimportProject, reimportScore, exportScore);
@@ -111,11 +116,13 @@ public class AggregationService {
             projectService.updateAggregationTime(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationFailed);
             projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
+            recordExceptionService.recordException(projectId, AggregationFailed, e);
             throw e;
         } catch (Exception e) {
             projectService.updateAggregationTime(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationFailed);
             projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
+            recordExceptionService.recordException(projectId, AggregationFailed, e);
             throw new AppException(e);
         }
     }
@@ -133,19 +140,20 @@ public class AggregationService {
         new Thread(runnable).start();
     }
 
-    private void generateReports(String projectId) {
+    public void generateReports(String projectId) {
         projectStatusService.setProjectStatus(projectId, ReportGenerating);
         reportService.generateReports(projectId, false);
         projectStatusService.setProjectStatus(projectId, ReportGenerated);
     }
 
-    private void importScannerScore(String projectId) {
+    public void importScannerScore(String projectId) {
         projectStatusService.setProjectStatus(projectId, ScoreImporting);
         scannerDBService.importProjectScore(projectId);
         projectStatusService.setProjectStatus(projectId, ScoreImported);
+
     }
 
-    private void importProjectInfo(String projectId) {
+    public void importProjectInfo(String projectId) {
         projectStatusService.setProjectStatus(projectId, ProjectImporting);
         importProjectService.importProject(projectId, true);
         projectStatusService.setProjectStatus(projectId, ProjectImported);

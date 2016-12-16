@@ -1,6 +1,7 @@
 package com.xz.examscore.api.server.sys;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -8,6 +9,7 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.services.ProjectService;
+import com.xz.examscore.services.RecordExceptionService;
 import com.xz.examscore.util.AggregationProgressParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,15 +28,19 @@ public class QueryProjectProgess implements Server{
     
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    RecordExceptionService recordExceptionService;
     
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        Map<String, Object> resultMap = getProjectProgress(projectService.getProjectStatus(projectId));
+        Map<String, Object> resultMap = getProjectProgress(projectId);
         return Result.success().set("progress", resultMap);
     }
 
-    private Map<String, Object> getProjectProgress(ProjectStatus projectStatus) {
+    private Map<String, Object> getProjectProgress(String projectId) {
+        ProjectStatus projectStatus = projectService.getProjectStatus(projectId);
         String status = projectStatus.name();
         String progressRate = AggregationProgressParam.PROGRESS_MAP.get(status);
         Map<String, Object> result = new HashMap<>();
@@ -44,6 +50,9 @@ public class QueryProjectProgess implements Server{
         step.put("stepNo", getStep(status));
         step.put("isCompleted", AggregationProgressParam.PROGRESS_MAP_STATUS.get(status));
         result.put("step", step);
+        //获取异常信息
+        String exceptionDesc = DocumentUtils.getString(recordExceptionService.findExceptionRecord(projectId, projectStatus), "desc", "");
+        result.put("exceptionDesc", exceptionDesc);
         return result;
     }
 
