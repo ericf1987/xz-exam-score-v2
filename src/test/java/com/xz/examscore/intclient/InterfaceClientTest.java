@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -62,7 +61,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("433100-0372aa59ae4841618138c65e9ee18314");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430100-7ed67368c4444041b46d7aeff8d180d1");
         System.out.println(quests.toString());
         Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests);
         System.out.println(importProjectService.separateSubject("004005006").toString());
@@ -85,7 +84,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryClassExamStudent() throws Exception {
-        JSONArray students = interfaceClient.queryClassExamStudent("430100-6e619bc460ae467fa6587b30a9a631af", "ab183e62-5bf5-4c5f-b9a3-17c003defaca");
+        JSONArray students = interfaceClient.queryClassExamStudent("430100-909f145f001742c5904068e03006bfd2", "cb62862d-1dde-4ec0-b849-b8fd08ba0a61");
         System.out.println(students.toJSONString());
         assertNotNull(students);
         assertFalse(students.isEmpty());

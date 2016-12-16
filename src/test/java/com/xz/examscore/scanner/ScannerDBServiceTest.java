@@ -57,7 +57,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testgetStudentCardSlices() throws Exception {
         String project = "430100-194d9c9dd59d4145ae94bb66a06434d0";
-        String subjectId = "002";
+        String subjectId = "001";
         String studentId = "9ac03375-4bf4-41d4-abbd-73ecc4617a3e";
         Map<String, Object> map = scannerDBService.getStudentCardSlices(project, subjectId, studentId);
         System.out.println(map.toString());

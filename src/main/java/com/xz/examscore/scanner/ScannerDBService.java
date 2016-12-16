@@ -80,7 +80,7 @@ public class ScannerDBService {
         if(null != projectDoc3){
             return scannerMongoClient3;
         }
-        throw new IllegalArgumentException("查找不到项目的网阅数据源：{}" + project);
+        throw new IllegalArgumentException("查找不到项目的网阅数据源：" + project);
     }
 
     public Document findProject(String project) {
@@ -186,6 +186,7 @@ public class ScannerDBService {
             throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
         }
 
+        //清除综合科目及其子科目的分数信息
         List<String> subjectList = importProjectService.separateSubject(subjectId);
         scoreDatabase.getCollection("score").deleteMany(
                 doc("project", projectId).append("student", studentId).append("subject", $in(subjectList))
@@ -325,7 +326,7 @@ public class ScannerDBService {
             String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
             //标准答案数据从统计数据库的quest_list中获取
             //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
-            String standardAnswer = getStdAnswerFromQuest(objectiveItem, quest);
+            String standardAnswer = getStdAnswerFromQuest(quest);
 
             //对于没有缺考的学生，客观题如果作答为空字符串，才报错判定为没有作答
             if (null == isAbsent && StringUtil.isBlank(studentAnswer)) {
@@ -413,18 +414,17 @@ public class ScannerDBService {
     }
 
     //获取标准答案
-    private String getStdAnswerFromQuest(Document objectiveItem, Document quest) {
-        String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
+    private String getStdAnswerFromQuest(Document quest) {
 
         Boolean isObjective = quest.getBoolean("isObjective");
         if (isObjective != null && isObjective) {
             if (!StringUtils.isEmpty(quest.getString("scoreRule"))) {
-                standardAnswer = quest.getString("scoreRule");
+                return quest.getString("scoreRule");
             } else {
-                standardAnswer = quest.getString("answer");
+                return quest.getString("answer");
             }
         }
-        return standardAnswer;
+        throw new IllegalArgumentException("获取试题" + quest.getString("questId") + "的标答出现异常，请核实试题类型和标答");
     }
 
     //////////////////////////////////////////////////////////////
