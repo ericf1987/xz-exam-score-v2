@@ -101,14 +101,16 @@ public class SchoolCompareSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 3;
         List<Map<String, Object>> classes = result.get("classes");
-        classes.forEach(clazz -> {
+        for(Map<String, Object> clazz : classes){
             List<Map<String, Object>> projectList = (List<Map<String, Object>>) clazz.get("projects");
             excelWriter.set(row, column.incrementAndGet(), clazz.get("className"));
-            projectList.forEach(projectMap -> {
+            for(Map<String, Object> projectMap : projectList){
                 excelWriter.set(row, column.incrementAndGet(), projectMap.get("scoreRate") + "(" + projectMap.get("average") + ")");
                 excelWriter.set(row, column.incrementAndGet(), projectMap.get("excellentRate") + "(" + projectMap.get("excellentCount") + ")");
                 excelWriter.set(row, column.incrementAndGet(), projectMap.get("passRate") + "(" + projectMap.get("passCount") + ")");
-            });
-        });
+            }
+            row++;
+            column.set(-1);
+        }
     }
 }

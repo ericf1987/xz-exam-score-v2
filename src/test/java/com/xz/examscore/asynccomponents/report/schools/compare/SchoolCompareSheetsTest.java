@@ -15,6 +15,6 @@ public class SchoolCompareSheetsTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateSheet() throws Exception {
-        schoolCompareReport.generate("433100-148ec5544f7b4764851c3a8976945a2f", Range.school("64a1c8cd-a9b9-4755-a973-e1ce07f3f70a"), "target/school-compare.xlsx");
+        schoolCompareReport.generate("430200-3730c73573a842b1aace1fcbdb6c087d", Range.school("64b32035-baa7-461b-bc7f-edab34d9f5b3"), "target/school-compare.xlsx");
     }
 }
