@@ -7,9 +7,14 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.services.ProjectConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author by fengye on 2016/9/1.
@@ -23,10 +28,22 @@ public class QueryProjectConfig implements Server{
     @Autowired
     InterfaceClient interfaceClient;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
+        ProjectConfig projectConfig = projectConfigService.fixProjectConfig(new ProjectConfig(projectId));
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
+        Map<String, Object> projectConfigMap = result.getData();
+        if(!projectConfigMap.containsKey("onlineRateStat")){
+            Map<String, Object> onlineRateStat = new HashMap<>();
+            onlineRateStat.put("values", projectConfig.getCollegeEntryLevel());
+            onlineRateStat.put("isOn", String.valueOf(projectConfig.isEntryLevelEnable()));
+            onlineRateStat.put("onlineStatType", projectConfig.getEntryLevelStatType());
+            result.put("onlineRateStat", onlineRateStat);
+        }
         return Result.success().set("projectConfig", result.getData());
     }
 }

@@ -45,7 +45,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430100-2c641a3e36ff492aa535da7fb4cf28cf");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430100-a78a195640534cf79265364c11864ff2");
         System.out.println(quests.toString());
         Map<String, Double> map = new HashMap<>();
         map.put("score", 0d);
@@ -109,7 +109,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430300-f529e0f0236d49559b0c27acbbb255ed");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430500-79fbd04d11fe4e12ac43fe484e6fa735");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

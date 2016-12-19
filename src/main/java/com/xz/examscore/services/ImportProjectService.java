@@ -163,9 +163,9 @@ public class ImportProjectService {
     private void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
         boolean isSubjectSplited = splitSubject(projectId);
-        if(isSubjectSplited){
+        if (isSubjectSplited) {
             importSlicedSubjects(projectId, context);
-        }else {
+        } else {
             importNormalSubjects(projectId, context);
         }
         context.put("isSubjectSplited", isSubjectSplited);
@@ -189,11 +189,15 @@ public class ImportProjectService {
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
         Map<String, Double> scoreLevelsMap = new HashMap<>();
-        boolean splitUnionSubject = result.get("splitUnionSubject") != null && Boolean.parseBoolean(result.get("splitUnionSubject").toString());
+        boolean splitUnionSubject = false;
         //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
         boolean shareSchoolReport = true;
         if (result.get("shareSchoolReport") != null) {
             shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
+        }
+        //是否拆分科目
+        if (result.get("splitUnionSubject") != null) {
+            splitUnionSubject = Boolean.parseBoolean(result.get("splitUnionSubject").toString());
         }
         //获取本科上线率统计相关参数
         String entryLevelStatType = "rate", entryLevelEnable = "false";
@@ -723,7 +727,7 @@ public class ImportProjectService {
         }
 
         subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
-        if(!combinedSubjectIds.isEmpty()){
+        if (!combinedSubjectIds.isEmpty()) {
             subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
         }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分

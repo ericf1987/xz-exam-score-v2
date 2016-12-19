@@ -13,7 +13,7 @@ public class QueryProjectConfigTest extends XzExamScoreV2ApplicationTests {
     QueryProjectConfig queryProjectConfig;
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430100-cb04005aa5ae460fae6b9d87df797066";
+        String projectId = "430500-79fbd04d11fe4e12ac43fe484e6fa735";
         Param param = new Param().setParameter("projectId", projectId);
         System.out.println(queryProjectConfig.execute(param).getData().get("projectConfig"));
     }

@@ -1,12 +1,19 @@
 package com.xz.examscore.services;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.Mongo;
+import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
+import static com.xz.examscore.util.Mongo.target2Doc;
 
 /**
  * (description)
@@ -20,6 +27,18 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     ScoreService scoreService;
+
+    @Autowired
+    MongoDatabase scoreDatabase;
+
+    @Autowired
+    StudentService studentService;
+
+    @Autowired
+    RankService rankService;
+
+    @Autowired
+    ClassService classService;
 
     @Test
     public void testGetTotalScore() throws Exception {
@@ -76,5 +95,25 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         Target target = Target.project(projectId);
         int count = scoreService.getCountByScore(projectId, range, target, 800);
         System.out.println(count);
+    }
+
+    @Test
+    public void testGetRankByScore() throws Exception {
+        String projectId = "430200-5446510d585c40c0a226a717a9d4cb2b";
+        double score = 89.5d;
+        String subjectId = "003";
+        Target target = Target.subject(subjectId);
+        String collectionName = scoreService.getTotalScoreCollection(projectId, target);
+        Document query = doc("project", projectId).append("range.name", Range.STUDENT)
+                .append("target", target2Doc(target))
+                .append("totalScore", score);
+        FindIterable<Document> documents = scoreDatabase.getCollection(collectionName).find(query);
+        toList(documents).forEach(document -> {
+            Document studentDoc = (Document)document.get("range");
+            String studentId = studentDoc.getString("id");
+            Document doc = studentService.findStudent(projectId, studentId);
+            int rank = rankService.getRank(projectId, Range.clazz(doc.getString("class")), target, studentId);
+            System.out.println("班级：" + classService.getClassName(projectId, doc.getString("class")) + "，学生姓名：" + doc.getString("name") + ", 排名：" + rank);
+        });
     }
 }

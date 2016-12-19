@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
@@ -71,13 +72,13 @@ public class ScannerDBService {
                 .getCollection("project").find(doc("projectId", project)).first();
         Document projectDoc3 = scannerMongoClient3.getDatabase("project_database")
                 .getCollection("project").find(doc("projectId", project)).first();
-        if(null != projectDoc){
+        if (null != projectDoc) {
             return scannerMongoClient;
         }
-        if(null != projectDoc2){
+        if (null != projectDoc2) {
             return scannerMongoClient2;
         }
-        if(null != projectDoc3){
+        if (null != projectDoc3) {
             return scannerMongoClient3;
         }
         throw new IllegalArgumentException("查找不到项目的网阅数据源：" + project);
@@ -323,7 +324,10 @@ public class ScannerDBService {
                 throw new IllegalArgumentException("获取quest_list题号失败！统计失败");
             }
             double fullScore = getFullScore(quest, objectiveItem);
-            String studentAnswer = objectiveItem.getString("answerContent").toUpperCase();
+
+            //将学生作答排序
+            String studentAnswer = sortStudentAnswer(objectiveItem.getString("answerContent").toUpperCase());
+
             //标准答案数据从统计数据库的quest_list中获取
             //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
             String standardAnswer = getStdAnswerFromQuest(quest);
@@ -366,6 +370,50 @@ public class ScannerDBService {
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
+
+    public String sortStudentAnswer(String studentAnswer) {
+        char[] c = studentAnswer.toCharArray();
+        Arrays.sort(c);
+        return new String(c);
+    }
+
+    //将标答进行排序A1B1DA2排序成A1B1AD2
+    public String sortStdAnswer(String stdAnswer) {
+
+        if (StringUtil.isEmpty(stdAnswer)) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        //匹配数字
+        Pattern p_number = Pattern.compile("\\d+");
+
+        //匹配字母
+        Pattern p_char = Pattern.compile("[a-zA-Z]+");
+
+        //["", "1", "1", "1"]
+        String[] numbers = p_char.split(stdAnswer);
+        //["B", "D", "DA"]
+        String[] chars = p_number.split(stdAnswer);
+
+        numbers = Arrays.stream(numbers)
+                .filter(s -> (s != null && s.length() > 0))
+                .toArray(String[]::new);
+
+        chars = Arrays.stream(chars)
+                .filter(s -> (s != null && s.length() > 0))
+                .toArray(String[]::new);
+
+        if (numbers.length == 0) {
+            return stdAnswer;
+        } else {
+            for (int i = 1; i < numbers.length; i++) {
+                builder.append(sortStudentAnswer(chars[i])).append(numbers[i]);
+            }
+            return builder.toString();
+        }
+    }
+
 
     //修正客观题列表
     private void fixMissingObjectiveQuest(String projectId, String subjectId, Boolean isAbsent, Document student) {
@@ -419,7 +467,7 @@ public class ScannerDBService {
         Boolean isObjective = quest.getBoolean("isObjective");
         if (isObjective != null && isObjective) {
             if (!StringUtils.isEmpty(quest.getString("scoreRule"))) {
-                return quest.getString("scoreRule");
+                return sortStdAnswer(quest.getString("scoreRule"));
             } else {
                 return quest.getString("answer");
             }

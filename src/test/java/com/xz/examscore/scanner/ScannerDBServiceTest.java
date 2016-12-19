@@ -5,7 +5,9 @@ import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
@@ -34,11 +36,13 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testCalculateScore() throws Exception {
 /*        assertEquals(1, calculateScore(4, "B,D", "", null).score, 0.1);
-        assertEquals(0, calculateScore(4, "A,D", "AD", false).score, 0.1);
+        assertEquals(0, calculateScore(4, "A,D", "DA", false).score, 0.1);
         assertEquals(1, calculateScore(4, "A", "A", null).score, 0.1);
         assertEquals(0, calculateScore(4, "A,D", "", null).score, 0.1);
         assertEquals(1, calculateScore(4, "A,D", "", true).score, 0.1);*/
-        System.out.println(calculateScore(3, "C", "", null).score);
+        /*System.out.println(calculateScore(3, "c", "c", null).score);
+        System.out.println(calculateScore(4, "A1B1DA2BC2", "DA", null).score);*/
+        System.out.println(scannerDBService.sortStdAnswer("A2C2D2AC2AD2CD2DCA4"));
     }
 
     @Test
