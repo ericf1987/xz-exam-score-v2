@@ -42,7 +42,6 @@ public class RankLevelFormater {
 
     //格式化等第参数 例如将AAAABC转化成4A1B1C
     public static String format2(String str){
-
         if (StringUtil.isEmpty(str)) {
             return "";
         }

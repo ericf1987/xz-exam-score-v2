@@ -34,6 +34,7 @@
                 <report name="分数段统计" class=".schools.SchoolBasicScoreSegmentReport"/>
                 <report name="学科分析" class=".schools.SchoolBasicSubjectReport"/>
                 <report name="等第报表" class=".schools.SchoolRankLevelReport"/>
+                <report name="组合科目等第报表" class=".schools.SchoolCombinedRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="试卷题型分析" class=".schools.SchoolPaperQuestTypeReport"/>
@@ -60,6 +61,7 @@
             <report-category name="基础分析">
                 <report name="分数排名统计" class=".classes.ClassBasicRankReport"/>
                 <report name="等第报表" class=".classes.ClassRankLevelReport"/>
+                <report name="组合科目等第报表" class=".classes.ClassCombinedRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="题型分析" class=".classes.ClassQuestTypeReport"/>

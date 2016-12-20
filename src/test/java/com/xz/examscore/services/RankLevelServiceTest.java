@@ -34,4 +34,12 @@ public class RankLevelServiceTest extends XzExamScoreV2ApplicationTests{
         System.out.println(list2.toString());
         System.out.println(list3.toString());
     }
+
+    @Test
+    public void testGetRankLevel() throws Exception {
+        String projectId = "430600-2404b0cc131c472dbbd13085385f5ee0";
+        String studentId = "02189e7f-d294-4d87-9c22-0df480f6bf5c";
+        Target target = Target.subjectCombination("004005006");
+        rankLevelService.getRankLevel(projectId, studentId, target, Range.SCHOOL, "F");
+    }
 }

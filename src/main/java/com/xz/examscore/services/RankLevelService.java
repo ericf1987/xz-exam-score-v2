@@ -62,7 +62,12 @@ public class RankLevelService {
                 .find(query).projection(doc("rankLevel", 1)).first();
 
         if (document != null) {
-            return ((Document) document.get("rankLevel")).getString(rankRange);
+            Document rankLevelDoc = (Document)document.get("rankLevel");
+            if(rankLevelDoc != null && !rankLevelDoc.isEmpty()){
+                return rankLevelDoc.getString(rankRange);
+            }else{
+                return defaultValue;
+            }
         } else {
             LOG.warn("找不到排名等级（可能缺考）: query=" + query.toJson());
             return defaultValue;
