@@ -148,14 +148,15 @@ public class RankService {
      * @return 排名等级，如果考生没有参加考试则返回 null
      */
     public String getRankLevel(String projectId, Range range, Target target, String studentId) {
-        if (target.getName().equals(Target.SUBJECT_COMBINATION)) {
+/*        if (target.getName().equals(Target.SUBJECT_COMBINATION)) {
             return getRankLevelWithSubjectCombination(projectId, range, target, studentId);
         } else {
             return getRankLevelNonSubjectCombination(projectId, range, target, studentId);
-        }
+        }*/
+        return getRankLevelNonSubjectCombination(projectId, range, target, studentId);
     }
 
-    //获取费
+    //获取非组合科目的排名等级
     private String getRankLevelNonSubjectCombination(String projectId, Range range, Target target, String studentId) {
         int rank = getRank(projectId, range, target, studentId);
         int studentCount = studentService.getStudentCount(projectId, range, target);

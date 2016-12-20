@@ -655,10 +655,17 @@ public class ImportProjectService {
             return;
         }
 
+        //查询题目信息
+        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        //统计出每个考试的总分
+        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
-        //组合科目ID列表
-        List<String> combinedSubjectIds = new ArrayList<>();
+        //文综满分
+        Value<Double> artsFullScore = Value.of(0d);
+        //理综满分
+        Value<Double> scienceFullScore = Value.of(0d);
 
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
@@ -669,20 +676,36 @@ public class ImportProjectService {
                 LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
                 return;
             }
+            //累加考试项目满分
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);
-            if (subjectId.length() > SUBJECT_LENGTH) {
-                combinedSubjectIds.add(subjectId);
-            }
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
+        processCombine(projectId, subjectScore, artsFullScore, scienceFullScore);
+
         subjectService.saveProjectSubjects(projectId, subjects);  // 保存科目列表
-        if (!combinedSubjectIds.isEmpty()) {
-            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
-        }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
         context.put("subjectList", subjects);
+    }
+
+    private void processCombine(String projectId, Map<String, Double> subjects, Value<Double> artsFullScore, Value<Double> scienceFullScore) {
+        List<String> subjectIds = new ArrayList<>(subjects.keySet());
+        //组合科目ID列表
+        List<String> combinedSubjectIds = new ArrayList<>();
+        if (subjectIds.containsAll(Arrays.asList("007", "008", "009"))) {
+            combinedSubjectIds.add("007008009");
+            artsFullScore.set(artsFullScore.get() + subjects.get("007") + subjects.get("008") + subjects.get("009"));
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
+        }
+
+        if (subjectIds.containsAll(Arrays.asList("004", "005", "006"))) {
+            combinedSubjectIds.add("004005006");
+            scienceFullScore.set(scienceFullScore.get() + subjects.get("004") + subjects.get("005") + subjects.get("006"));
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
+        }
+
+        subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds);
     }
 
     private void importSlicedSubjects(String projectId, Context context) {
@@ -699,16 +722,17 @@ public class ImportProjectService {
 
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
+        //文综满分
+        Value<Double> artsFullScore = Value.of(0d);
+        //理综满分
+        Value<Double> scienceFullScore = Value.of(0d);
         List<String> subjectIds = new ArrayList<>();
-        //组合科目ID列表
-        List<String> combinedSubjectIds = new ArrayList<>();
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
             //找到综合科目ID，进行拆分
             if (subjectId.length() > SUBJECT_LENGTH) {
                 subjectIds.addAll(separateSubject(subjectId));
-                combinedSubjectIds.add(subjectId);
             } else {
                 subjectIds.add(subjectObj.getString("subjectId"));
             }
@@ -726,10 +750,9 @@ public class ImportProjectService {
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         }
 
+        processCombine(projectId, subjectScore, artsFullScore, scienceFullScore);
+
         subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
-        if (!combinedSubjectIds.isEmpty()) {
-            subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds); // 保存组合科目
-        }
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
         context.put("subjectList", subjects);
     }
@@ -744,18 +767,6 @@ public class ImportProjectService {
             subjectIds.add(subjectId.substring(i, i + SUBJECT_LENGTH));
         }
         return subjectIds;
-    }
-
-    public String paddingSubjectId(String subjectId) {
-        String[] w = new String[]{"004", "005", "006"};
-        String[] l = new String[]{"007", "008", "009"};
-        if (StringUtil.isOneOf(subjectId, w)) {
-            return "004005006";
-        } else if (StringUtil.isOneOf(subjectId, l)) {
-            return "007008009";
-        } else {
-            return subjectId;
-        }
     }
 
     //从zip包读取学生信息

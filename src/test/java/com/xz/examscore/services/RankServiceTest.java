@@ -46,8 +46,8 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testGetRankLevel() throws Exception {
         String levelMap = rankService.getRankLevel(
-                "430100-2c641a3e36ff492aa535da7fb4cf28cf", Range.clazz("27bb692f-a179-41b1-a57f-ab51ee42b71d"),
-                Target.subjectCombination("007008009"), "0c3d10ad-74c0-4db3-9d15-937c2e874614"
+                "430600-2404b0cc131c472dbbd13085385f5ee0", Range.clazz("e86f50b4-cbe6-403c-84d1-8cc668ee0221"),
+                Target.subjectCombination("004005006"), "04d2293d-06ed-456d-a3eb-e9060b9a132f"
         );
         System.out.println(levelMap);
     }

@@ -170,7 +170,7 @@ public class ScoreService {
     }
 
     private double getTotalScore(String collection, String projectId, Range range, Target target) {
-        String cacheKey = "score:" + collection + ":" + projectId + ":" + range + ":" + target;
+        String cacheKey = "getTotalScore:" + collection + ":" + projectId + ":" + range + ":" + target;
 
         return cache.get(cacheKey, () -> {
             return getTotalScore0(collection, projectId, range, target);
@@ -313,7 +313,7 @@ public class ScoreService {
      */
     public int addTotalScore(String projectId, Range range, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
-        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+        String cacheKey = "addTotalScore:" + collectionName + ":" + projectId + ":" + range + ":" + target;
 
         Document query = Mongo.query(projectId, range, target);
         MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);

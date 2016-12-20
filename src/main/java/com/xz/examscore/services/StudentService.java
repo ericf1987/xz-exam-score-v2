@@ -26,7 +26,7 @@ import static com.xz.examscore.util.SubjectUtil.isCombinedSubject;
 
 /**
  * 查询学生列表
- *
+ * <p>
  * 注意，在 student_list 记录中，subjects 属性如果不存在，表示该考生没有参加任何考试，不应计入统计当中。
  *
  * @author yiding_he
@@ -57,13 +57,15 @@ public class StudentService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     *
      * @return 考生数量
      */
     public int getStudentCount(String projectId, Range range, Target target) {
         if (target.match(Target.PROJECT)) {
             return getStudentCount(projectId, range);
-        } else {
+        } else if (target.match(Target.SUBJECT_COMBINATION)){
+            //如果是组合科目，取参考了其中任何一科的参考人数
+            return getStudentIds(projectId, range, target).size();
+        }else{
             String subjectId = targetService.getTargetSubjectId(projectId, target);
             return getStudentCount(projectId, subjectId, range);
         }
@@ -74,7 +76,6 @@ public class StudentService {
      *
      * @param projectId 项目ID
      * @param range     范围
-     *
      * @return 考生数量
      */
     public int getStudentCount(String projectId, Range range) {
@@ -87,7 +88,6 @@ public class StudentService {
      * @param projectId 项目ID
      * @param subjectId 科目ID
      * @param range     范围
-     *
      * @return 考生数量
      */
     public int getStudentCount(String projectId, String subjectId, Range range) {
@@ -121,7 +121,6 @@ public class StudentService {
      * @param maxStudentCount 最多查询多少个学生（调试用，<=0 表示不限）
      * @param skipCount       跳过多少条记录（分页用）
      * @param projection      要取哪些字段（可选，null 表示取所有字段）
-     *
      * @return 学生列表
      */
     public FindIterable<Document> getProjectStudentList(
@@ -140,7 +139,7 @@ public class StudentService {
             findIterable.limit(maxStudentCount);
         }
 
-        if(skipCount > 0){
+        if (skipCount > 0) {
             findIterable.skip(skipCount);
         }
 
@@ -157,25 +156,24 @@ public class StudentService {
      * @param projectId 项目ID
      * @param target    目标
      * @param range     范围
-     *
      * @return 学生ID列表
      */
     public List<String> getStudentIds(String projectId, Range range, Target target) {
         String cacheKey = "student_id_list:" + projectId + ":" + range + ":" + target;
         //如果是科目组合，则统计至少包含参与了三科中其中至少一科的学生的人数
-        if(target.getName().equals(Target.SUBJECT_COMBINATION)){
+        if (target.getName().equals(Target.SUBJECT_COMBINATION)) {
             return cache.get(cacheKey, () -> {
                 List<String> subjectIds = importProjectService.separateSubject(target.getId().toString());
                 List<String> studentIds = new ArrayList<>();
-                for (String subjectId : subjectIds){
+                for (String subjectId : subjectIds) {
                     getStudentIds(projectId, range, Target.subject(subjectId)).forEach(id -> {
-                        if(!studentIds.contains(id))
+                        if (!studentIds.contains(id))
                             studentIds.add(id);
                     });
                 }
                 return (ArrayList<String>) studentIds;
             });
-        }else {
+        } else {
             return cache.get(cacheKey, () -> {
                 String subjectId = targetService.getTargetSubjectId(projectId, target);
                 return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
@@ -189,7 +187,6 @@ public class StudentService {
      * @param projectId 项目ID
      * @param subjectId 科目ID（可选，null表示不论科目）
      * @param range     范围（可选，null表示所有参考学生）
-     *
      * @return 学生ID列表
      */
     public List<String> getStudentIds(String projectId, String subjectId, Range range) {
@@ -232,7 +229,6 @@ public class StudentService {
      *
      * @param projectId 项目ID
      * @param range     范围
-     *
      * @return 学生ID列表
      */
     public List<Document> getStudentList(String projectId, Range range) {

@@ -71,7 +71,7 @@ public class RankLevelTask extends AggrTask {
         updateSubjectRankLevels(projectId, studentId, sbjTargets, rankRanges, rankLevelsMap);  // 存入 rankLevelsMap
 
         // 统计组合科目等第
-        if(!sbjCombinationTargets.isEmpty()){
+        if (!sbjCombinationTargets.isEmpty()) {
             insertSubjectRankLevels(projectId, studentId, sbjCombinationTargets);
             updateSubjectRankLevels(projectId, studentId, sbjCombinationTargets, rankRanges, rankLevelsMap);
         }
@@ -128,7 +128,7 @@ public class RankLevelTask extends AggrTask {
             Map<String, String> rankLevels = rankLevelsMap.get(rangeName);
 
             if (combinedSubjects || !subjectCombinations.isEmpty()) {
-                removeCombiningSubjects(rankLevels);
+                removeCombinedSubjects(rankLevels);
             }
 
             List<String> rankLevelList = new ArrayList<>(rankLevels.values());
@@ -146,11 +146,23 @@ public class RankLevelTask extends AggrTask {
         }
     }
 
-    private void removeCombiningSubjects(Map<String, String> rankLevels) {
+    //移除综合项目，只取单科统计等第
+    private void removeCombinedSubjects(Map<String, String> rankLevels) {
         Iterator<Map.Entry<String, String>> iterator = rankLevels.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = iterator.next();
-            if (!StringUtil.isOneOf(entry.getKey(), "001", "002", "003", "004005006", "007008009")) {
+            if (StringUtil.isOneOf(entry.getKey() , "004005006", "007008009")) {
+                iterator.remove();
+            }
+        }
+    }
+
+    //移除文理单科，统计综合等第
+    private void removeNonCombinedSubjects(Map<String, String> rankLevels) {
+        Iterator<Map.Entry<String, String>> iterator = rankLevels.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            if (StringUtil.isOneOf(entry.getKey(), "004", "005", "006", "007", "008", "009")) {
                 iterator.remove();
             }
         }
