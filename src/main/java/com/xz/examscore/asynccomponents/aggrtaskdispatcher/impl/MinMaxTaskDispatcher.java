@@ -29,7 +29,7 @@ public class MinMaxTaskDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
-        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT_COMBINATION, Target.SUBJECT);
 
         String[] rangeKeys = new String[]{
                 Range.CLASS, Range.SCHOOL, Range.PROVINCE

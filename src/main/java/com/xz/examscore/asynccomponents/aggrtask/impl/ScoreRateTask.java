@@ -53,7 +53,7 @@ public class ScoreRateTask extends AggrTask {
         String projectId = taskInfo.getProjectId();
         Range range = taskInfo.getRange();
 
-        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT, Target.SUBJECT_COMBINATION);
 
         for (Target target : targets) {
             processStudentScoreRate(projectId, range, target);

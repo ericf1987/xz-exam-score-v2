@@ -77,7 +77,7 @@ public class StudentEvaluationFormAnalysis implements Server {
     QuestTypeService questTypeService;
 
     @Autowired
-    FullScoreService fullScoreService;
+    ScoreRateService scoreRateService;
 
     @Autowired
     QuestTypeScoreService questTypeScoreService;
@@ -103,6 +103,9 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     ClassAbilityLevelAnalysis classAbilityLevelAnalysis;
 
+    @Autowired
+    SubjectCombinationService subjectCombinationService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -113,11 +116,25 @@ public class StudentEvaluationFormAnalysis implements Server {
         Document projectDoc = projectService.findProject(projectId);
         String category = projectDoc.getString("category");
         List<String> subjectIds = subjectService.querySubjects(projectId);
+        List<String> combinedSubjectIds = subjectCombinationService.getAllSubjectCombinations(projectId);
         int studentCount = studentService.getStudentCount(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
         List<Map<String, Object>> resultList = new ArrayList<>();
 
+        //本科上线预测
+        List<Double> entryLevelScoreLine = projectConfigService.getEntryLevelScoreLine(projectId,
+                Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId), studentCount);
+
         FindIterable<Document> projectStudentList = studentService.getProjectStudentList(projectId, Range.clazz(classId),
                 pageSize, pageSize * pageCount, doc("student", 1).append("name", 1));
+
+        //项目最高最低分
+        double[] minMaxScore = minMaxScoreService.getMinMaxScore(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
+        double min = minMaxScore[0];
+        double max = minMaxScore[1];
+
+        LinkedList<Double> scoreLine = new LinkedList<>(entryLevelScoreLine);
+        scoreLine.addFirst(max);
+        scoreLine.addLast(min);
 
         for (Document studentDoc : projectStudentList) {
             Map<String, Object> studentMap = new HashMap<>();
@@ -132,10 +149,11 @@ public class StudentEvaluationFormAnalysis implements Server {
 
             //查询得分及排名
             Map<String, Object> scoreAndRankMap = new HashMap<>();
-            scoreAndRankMap.put("project", getScoreAndRankMap(projectId, schoolId, classId, studentId, null));
+            scoreAndRankMap.put("project", getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.project(projectId)));
+            //单科得分及排名
             List<Map<String, Object>> subjectScoreAndRank = new ArrayList<>();
             subjectIds.forEach(subjectId -> {
-                Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, subjectId);
+                Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subject(subjectId));
                 //统计各个科目的题型，知识点，双向细目情况
                 map.put("questTypeScore", getQuestTypeScoreMap(projectId, studentId, subjectId));
                 map.put("pointScore", getPointScoreMap(projectId, studentId, subjectId));
@@ -144,16 +162,20 @@ public class StudentEvaluationFormAnalysis implements Server {
                 subjectScoreAndRank.add(map);
             });
             scoreAndRankMap.put("subjects", subjectScoreAndRank);
+
+            //查询组合科目得分及排名
+            List<Map<String, Object>> combinedSubjectScoreAndRank = new ArrayList<>();
+            combinedSubjectIds.forEach(combinedSubjectId -> {
+                Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subjectCombination(combinedSubjectId));
+                combinedSubjectScoreAndRank.add(map);
+            });
+            scoreAndRankMap.put("combinedSubjects", combinedSubjectScoreAndRank);
+
             studentMap.put("scoreAndRankMap", scoreAndRankMap);
 
-            //本科上线预测
-
-            List<Double> entryLevelScoreLine = projectConfigService.getEntryLevelScoreLine(projectId,
-                    Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId), studentCount);
-            studentMap.put("entryLevelScoreLine", entryLevelScoreLine);
             resultList.add(studentMap);
         }
-        return Result.success().set("studentList", resultList);
+        return Result.success().set("scoreLine", scoreLine).set("studentList", resultList);
     }
 
     private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {
@@ -162,11 +184,11 @@ public class StudentEvaluationFormAnalysis implements Server {
         return classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
     }
 
-    private List<Map<String, Object>> getPointAbilityLevel(String projectId, String studentId, String subjectId) {
+/*    private List<Map<String, Object>> getPointAbilityLevel(String projectId, String studentId, String subjectId) {
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
         return projectPointAbilityLevelAnalysis.getPointAnalysis(projectId, subjectId, Range.student(studentId), levelMap);
-    }
+    }*/
 
     private Map<String, Object> getPointScoreMap(String projectId, String studentId, String subjectId) {
         Map<String, Object> pointScore = new HashMap<>();
@@ -186,16 +208,18 @@ public class StudentEvaluationFormAnalysis implements Server {
         return projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, Range.student(studentId));
     }
 
-    public Map<String, Object> getScoreAndRankMap(String projectId, String schoolId, String classId, String studentId, String subjectId) {
+    public Map<String, Object> getScoreAndRankMap(String projectId, String schoolId, String classId, String studentId, Target target) {
         Map<String, Object> scoreAndRank = new HashMap<>();
-        Target target = targetService.getTarget(projectId, subjectId);
         double totalScore = scoreService.getScore(projectId, Range.student(studentId), target);
         int classRank = rankService.getRank(projectId, Range.clazz(classId), target, studentId);
         int schoolRank = rankService.getRank(projectId, Range.school(schoolId), target, studentId);
+        double scoreRate = scoreRateService.getScoreRate(projectId, Range.student(studentId), target);
         scoreAndRank.put("totalScore", totalScore);
+        scoreAndRank.put("scoreRate", DoubleUtils.round(scoreRate));
         scoreAndRank.put("classRank", classRank);
         scoreAndRank.put("schoolRank", schoolRank);
         scoreAndRank.put("subjectId", target.match(Target.PROJECT) ? "" : target.getId());
+        scoreAndRank.put("subjectName", target.match(Target.PROJECT) ? "全科" : SubjectService.getSubjectName(target.getId().toString()));
 
         //加入该科目的学校最高分，最低分，平均分
         double[] minMaxScore = minMaxScoreService.getMinMaxScore(projectId, Range.school(schoolId), target);
