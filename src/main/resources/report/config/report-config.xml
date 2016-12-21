@@ -34,7 +34,6 @@
                 <report name="分数段统计" class=".schools.SchoolBasicScoreSegmentReport"/>
                 <report name="学科分析" class=".schools.SchoolBasicSubjectReport"/>
                 <report name="等第报表" class=".schools.SchoolRankLevelReport"/>
-                <report name="组合科目等第报表" class=".schools.SchoolCombinedRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="试卷题型分析" class=".schools.SchoolPaperQuestTypeReport"/>
@@ -51,6 +50,7 @@
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class=".schools.SchoolBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class=".schools.SchoolQuestScoreDetailReport"/>
+                <report name="组合科目等第报表" class=".schools.SchoolCombinedRankLevelReport"/>
             </report-category>
             <report-category name="历次考试对比">
                 <report name="历史考试数据对比" class=".schools.compare.SchoolCompareReport"/>
@@ -61,7 +61,6 @@
             <report-category name="基础分析">
                 <report name="分数排名统计" class=".classes.ClassBasicRankReport"/>
                 <report name="等第报表" class=".classes.ClassRankLevelReport"/>
-                <report name="组合科目等第报表" class=".classes.ClassCombinedRankLevelReport"/>
             </report-category>
             <report-category name="试卷分析">
                 <report name="题型分析" class=".classes.ClassQuestTypeReport"/>
@@ -72,6 +71,7 @@
             <report-category name="基础数据">
                 <report name="学生各科成绩明细" class=".classes.ClassBasicDataReport"/>
                 <report name="各科试卷题目得分明细" class=".classes.ClassQuestScoreDetailReport"/>
+                <report name="组合科目等第报表" class=".classes.ClassCombinedRankLevelReport"/>
             </report-category>
             <report-category name="历次考试对比">
                 <report name="学生历史成绩" class=".classes.compare.ClassScoreCompareReport"/>
