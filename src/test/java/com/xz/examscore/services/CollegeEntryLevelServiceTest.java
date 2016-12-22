@@ -3,10 +3,11 @@ package com.xz.examscore.services;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import java.util.List;
 
 /**
  * @author by fengye on 2016/10/28.
@@ -23,40 +24,10 @@ public class CollegeEntryLevelServiceTest extends XzExamScoreV2ApplicationTests 
     ProvinceService provinceService;
 
     @Test
-    public void testGetEntryLevelStudent() throws Exception {
-
-    }
-
-    @Test
-    public void testGetEntryLevelStudentRankSegment() throws Exception {
-
-    }
-
-    @Test
-    public void testGetEntryLevel() throws Exception {
-
-    }
-
-    @Test
-    public void testGetEntryLevelKey() throws Exception {
-
-    }
-
-    @Test
     public void testGetEntryLevelStudentCount() throws Exception {
         String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
         Range schoolRange = Range.school("9ea1472e-9f8e-4b48-b00c-8bde3288cc80");
         System.out.println(collegeEntryLevelService.getEntryLevelStudentRankSegment(projectId, schoolRange).toString());
-    }
-
-    @Test
-    public void testGetEntryLevelStudentByKey() throws Exception {
-
-    }
-
-    @Test
-    public void testGetEntryKeyDesc() throws Exception {
-
     }
 
     @Test
@@ -67,5 +38,43 @@ public class CollegeEntryLevelServiceTest extends XzExamScoreV2ApplicationTests 
         int studentCount = studentService.getStudentCount(projectId,
                 range, target);
         System.out.println(collegeEntryLevelService.getEntryLevelScoreLine(projectId, range, target, studentCount));
+    }
+
+    @Test
+    public void testGetEntryLevelDoc() throws Exception {
+        String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
+        List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
+        entryLevelDoc.forEach(doc -> System.out.println(doc.toString()));
+    }
+
+    @Test
+    public void testGetEntryLevelStudent() throws Exception {
+
+    }
+
+    @Test
+    public void testGetEntryLevelStudentRankSegment() throws Exception {
+
+    }
+
+    @Test
+    public void testGetEntryLevelKey() throws Exception {
+
+    }
+
+    @Test
+    public void testGetEntryLevelStudentByKey() throws Exception {
+        String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
+        String province = provinceService.getProjectProvince(projectId);
+        Range provinceRange = Range.province(province);
+        Target target = Target.project(projectId);
+        int size = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, provinceRange, target, "ONE").size();
+        int count = collegeEntryLevelService.getEntryLevelStudentCount(projectId, provinceRange, target, "ONE");
+        System.out.println(size + ":" + count);
+    }
+
+    @Test
+    public void testGetEntryKeyDesc() throws Exception {
+
     }
 }

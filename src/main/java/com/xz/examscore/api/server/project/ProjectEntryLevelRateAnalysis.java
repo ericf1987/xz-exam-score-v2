@@ -43,14 +43,14 @@ public class ProjectEntryLevelRateAnalysis implements Server {
         String projectId = param.getString("projectId");
         String[] schoolIds = param.getStringValues("schoolIds");
         List<Map<String, Object>> result = new ArrayList<>();
-        String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
+        List<String> entryLevel = collegeEntryLevelService.getEntryLevelKey(projectId);
         //学校列表
         for (String schoolId : schoolIds) {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, Object>> onlineRate = new ArrayList<>();
             Target projectTarget = Target.project(projectId);
             int studentCount = studentService.getStudentCount(projectId, Range.school(schoolId), projectTarget);
-            for(String key : entryLevelKey){
+            for(String key : entryLevel){
                 Map<String,Object> m = new HashMap<>();
                 int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, Range.school(schoolId), projectTarget, key);
                 double rate = DoubleUtils.round((double) onlineCount / studentCount, true);

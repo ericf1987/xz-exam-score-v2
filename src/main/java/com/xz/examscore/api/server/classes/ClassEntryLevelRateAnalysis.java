@@ -54,10 +54,10 @@ public class ClassEntryLevelRateAnalysis implements Server {
         List<String> studentIds = studentService.getStudentIds(projectId, clazzRange, projectTarget);
         //本科录取的学生
         List<Document> entryLevelStudents = new ArrayList<>();
-        String[] entryLevelKey = collegeEntryLevelService.getEntryLevelKey(projectId);
+        List<String> entryLevel = collegeEntryLevelService.getEntryLevelKey(projectId);
         List<Map<String, Object>> onlineRate = new ArrayList<>();
         Map<String, Object> outlineMap = new HashMap<>();
-        for (String key : entryLevelKey) {
+        for (String key : entryLevel) {
             Map<String, Object> map = new HashMap<>();
             int onlineCount = collegeEntryLevelService.getEntryLevelStudentCount(projectId, clazzRange, projectTarget, key);
             double rate = (double) onlineCount / studentCount;

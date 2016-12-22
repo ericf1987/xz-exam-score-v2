@@ -109,9 +109,9 @@ public class ImportProjectService {
         Context context = new Context();
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
+        importProjectReportConfig(projectId, context);
         importProjectInfo(projectId, context);
         importSubjects(projectId, context);
-        importProjectReportConfig(projectId, context);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
         importQuestTypes(projectId, context);
@@ -162,7 +162,7 @@ public class ImportProjectService {
      */
     private void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
-        boolean isSubjectSplited = splitSubject(projectId);
+        boolean isSubjectSplited = splitSubject(projectId, context);
         if (isSubjectSplited) {
             importSlicedSubjects(projectId, context);
         } else {
@@ -171,9 +171,9 @@ public class ImportProjectService {
         context.put("isSubjectSplited", isSubjectSplited);
     }
 
-    private boolean splitSubject(String projectId) {
-        //根据CMS接口判断是否要拆分科目
-        return false;
+    private boolean splitSubject(String projectId, Context context) {
+        ProjectConfig projectConfig = context.get("projectConfig");
+        return projectConfig.isSeparateCombine();
     }
 
     /**

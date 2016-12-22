@@ -97,7 +97,7 @@ public class CollegeEntryLevelService {
             int totalTopStudentCount = getEntryLevelStudentMaxRank(projectId, range);
 
             //如果未统计出本科生学生录取数据，则分段参数从考试配置表中取得
-            if(totalTopStudentCount == 0){
+            if (totalTopStudentCount == 0) {
                 ProjectConfig projectConfig = new ProjectConfig(projectId);
                 totalTopStudentCount = projectConfig.getRankSegmentCount();
             }
@@ -128,10 +128,6 @@ public class CollegeEntryLevelService {
         return projectConfigService.getEntryLevelScoreLine(projectId, range, projectTarget, studentCount);
     }
 
-    public String[] getEntryLevelKey(String projectId) {
-        return projectConfigService.ENTRY_LEVEL;
-    }
-
     /**
      * 查询上线率学生人数
      *
@@ -147,11 +143,49 @@ public class CollegeEntryLevelService {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target);
 
-            if(!StringUtils.isBlank(key)){
+            if (!StringUtils.isBlank(key)) {
                 query.append("college_entry_level.level", key);
             }
 
             return (int) collection.count(query);
+        });
+    }
+
+    /**
+     * 查询项目的本科批次
+     *
+     * @param projectId 项目ID
+     * @return 本科批次
+     */
+    public List<String> getEntryLevelKey(String projectId) {
+        String cacheKey = "entry_level_key:" + projectId;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
+            List<String> list = new ArrayList<>();
+            Document query = query(projectId, null, null);
+            for (String next : collection.distinct("college_entry_level.level", query, String.class)) {
+                list.add(next);
+            }
+            return CollectionUtils.asArrayList(list);
+        });
+    }
+
+    /**
+     * 查询项目的本科批次
+     *
+     * @param projectId 项目ID
+     * @return 本科批次
+     */
+    public List<Document> getEntryLevelDoc(String projectId) {
+        String cacheKey = "entry_level_doc:" + projectId;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
+            List<Document> list = new ArrayList<>();
+            Document query = query(projectId, null, null);
+            for (Document next : collection.distinct("college_entry_level", query, Document.class)) {
+                list.add(next);
+            }
+            return CollectionUtils.asArrayList(list);
         });
     }
 
@@ -168,8 +202,12 @@ public class CollegeEntryLevelService {
         String cacheKey = "entry_level_student_by_key:" + projectId + ":" + range + ":" + target + ":" + key;
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
-            Document query = query(projectId, range, target)
-                    .append("college_entry_level.level", key);
+            Document query = query(projectId, range, target);
+
+            if (!StringUtils.isBlank(key)) {
+                query.append("college_entry_level.level", key);
+            }
+
             Document projection = doc("totalScore", 1).append("rank", 1).append("student", 1).append("dValue", 1).append("_id", 0);  // 查询结果包含属性
             return CollectionUtils.asArrayList(toList(collection.find(query).projection(projection)));
         });
