@@ -7,7 +7,9 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author by fengye on 2016/10/28.
@@ -44,6 +46,12 @@ public class CollegeEntryLevelServiceTest extends XzExamScoreV2ApplicationTests 
     public void testGetEntryLevelDoc() throws Exception {
         String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
         List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
+        entryLevelDoc.forEach(doc -> System.out.println(doc.toString()));
+        Collections.sort(entryLevelDoc, (Document doc1, Document doc2) -> {
+            Double s1 = doc1.getDouble("score");
+            Double s2 = doc2.getDouble("score");
+            return s2.compareTo(s1);
+        });
         entryLevelDoc.forEach(doc -> System.out.println(doc.toString()));
     }
 

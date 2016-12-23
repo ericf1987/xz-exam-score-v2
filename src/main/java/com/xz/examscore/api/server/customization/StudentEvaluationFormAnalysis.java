@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
@@ -106,6 +107,12 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     SubjectCombinationService subjectCombinationService;
 
+    @Autowired
+    CollegeEntryLevelService collegeEntryLevelService;
+
+    @Autowired
+    CollegeEntryLevelAverageService collegeEntryLevelAverageService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -115,6 +122,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         int pageCount = Integer.valueOf(param.getString("pageCount"));
         Document projectDoc = projectService.findProject(projectId);
         String category = projectDoc.getString("category");
+        Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         List<String> subjectIds = subjectService.querySubjects(projectId);
         List<String> combinedSubjectIds = subjectCombinationService.getAllSubjectCombinations(projectId);
         int studentCount = studentService.getStudentCount(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
@@ -135,6 +143,40 @@ public class StudentEvaluationFormAnalysis implements Server {
         LinkedList<Double> scoreLine = new LinkedList<>(entryLevelScoreLine);
         scoreLine.addFirst(max);
         scoreLine.addLast(min);
+
+        List<List<Map<String, Object>>> entryLevelList = new ArrayList<>();
+        //查询各个本科录取段内，各个目标维度的平均分
+        List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
+        Collections.sort(entryLevelDoc, (Document d1, Document d2) -> {
+            Double s1 = d1.getDouble("score");
+            Double s2 = d2.getDouble("score");
+            return s2.compareTo(s1);
+        });
+        List<String> entryLevelKey = entryLevelDoc.stream().map(doc -> doc.getString("level")).collect(Collectors.toList());
+        for (String key : entryLevelKey) {
+            //科目
+            List<Map<String, Object>> averagesInLevel = new ArrayList<>();
+            for (String subjectId : subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).collect(Collectors.toList())) {
+                Map<String, Object> averageInLevel = new HashMap<>();
+                double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subject(subjectId), key);
+                String subjectName = SubjectService.getSubjectName(subjectId);
+                averageInLevel.put("subjectId", subjectId);
+                averageInLevel.put("subjectName", subjectName);
+                averageInLevel.put("average", DoubleUtils.round(average));
+                averagesInLevel.add(averageInLevel);
+            }
+            //组合科目
+            for (String combinedSubjectId : combinedSubjectIds) {
+                Map<String, Object> averageInLevel = new HashMap<>();
+                double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subjectCombination(combinedSubjectId), key);
+                String combinedSubjectName = SubjectService.getSubjectName(combinedSubjectId);
+                averageInLevel.put("subjectId", combinedSubjectId);
+                averageInLevel.put("subjectName", combinedSubjectName);
+                averageInLevel.put("average", DoubleUtils.round(average));
+                averagesInLevel.add(averageInLevel);
+            }
+            entryLevelList.add(averagesInLevel);
+        }
 
         for (Document studentDoc : projectStudentList) {
             Map<String, Object> studentMap = new HashMap<>();
@@ -175,7 +217,7 @@ public class StudentEvaluationFormAnalysis implements Server {
 
             resultList.add(studentMap);
         }
-        return Result.success().set("scoreLine", scoreLine).set("studentList", resultList);
+        return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
     }
 
     private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {

@@ -3,13 +3,13 @@ package com.xz.examscore.asynccomponents.aggrtask.impl;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ScoreService;
+import com.xz.examscore.services.SubjectCombinationService;
 import com.xz.examscore.services.SubjectService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +49,8 @@ public class CombinedSubjectScoreTask extends AggrTask {
         List<String> subjectIds = subjectService.querySubjects(projectId);
         double w = 0, l = 0;
         for (String subjectId : subjectIds) {
-            w += isW(subjectId) ? scoreService.getSubjectScore(projectId, studentId, subjectId) : 0;
-            l += isL(subjectId) ? scoreService.getSubjectScore(projectId, studentId, subjectId) : 0;
+            w += SubjectCombinationService.isW(subjectId) ? scoreService.getSubjectScore(projectId, studentId, subjectId) : 0;
+            l += SubjectCombinationService.isL(subjectId) ? scoreService.getSubjectScore(projectId, studentId, subjectId) : 0;
         }
 
         saveScore(projectId, studentId, l, "004005006");    // 保存文科合计分数
@@ -67,13 +67,4 @@ public class CombinedSubjectScoreTask extends AggrTask {
         totalScore.insertOne(doc(lQuery).append("totalScore", score).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
-    private boolean isL(String subjectId) {
-        return StringUtil.isOneOf(subjectId, "004", "005", "006");
-    }
-
-    private boolean isW(String subjectId) {
-        // 有的学校把政治课(007)称作思想品德(013)
-        // 体育被划作文科
-        return StringUtil.isOneOf(subjectId, "007", "008", "009", "013", "015");
-    }
 }

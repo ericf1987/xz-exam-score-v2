@@ -5,6 +5,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,5 +67,15 @@ public class SubjectCombinationService {
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
+    }
+
+    public static boolean isL(String subjectId) {
+        return StringUtil.isOneOf(subjectId, "004", "005", "006");
+    }
+
+    public static boolean isW(String subjectId) {
+        // 有的学校把政治课(007)称作思想品德(013)
+        // 体育被划作文科
+        return StringUtil.isOneOf(subjectId, "007", "008", "009", "013", "015");
     }
 }

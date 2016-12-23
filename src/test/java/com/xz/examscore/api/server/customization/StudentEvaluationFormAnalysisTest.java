@@ -6,8 +6,6 @@ import com.xz.examscore.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * @author by fengye on 2016/12/8.
  */
@@ -18,9 +16,9 @@ public class StudentEvaluationFormAnalysisTest extends XzExamScoreV2ApplicationT
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
-        String schoolId = "df32d9c9-3cb0-4d1a-84ec-fd1197d3dc4c";
-        String classId = "5247109a-4686-4ac2-a8e4-f9b6d6c75762";
+        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
+        String schoolId = "528654bb-3529-4ef2-9d71-5870d3f55d49";
+        String classId = "a3fec3c6-0e46-40c3-8632-69bdf78d8484";
         String pageSize = "10";
         String pageCount = "1";
         Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId)

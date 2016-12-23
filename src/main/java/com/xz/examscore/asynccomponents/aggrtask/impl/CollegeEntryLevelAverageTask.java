@@ -64,7 +64,6 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
             ArrayList<Document> entryLevelStudent = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, provinceRange, projectTarget, key);
             //指定本科批次的人数
             int count = entryLevelStudent.size();
-            System.out.println("批次为：" + key + ", 学生人数：" + count);
             double totalScore = 0;
             for (Document doc : entryLevelStudent){
                 String studentId = doc.getString("student");
