@@ -6,7 +6,6 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.api.server.school.SchoolRankLevelAnalysis;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -51,9 +50,6 @@ public class ClassRankLevelAnalysis implements Server {
 
     @Autowired
     FullScoreService fullScoreService;
-
-    @Autowired
-    SchoolRankLevelAnalysis scholRankLevelAnalysis;
 
     @Override
     public Result execute(Param param) throws Exception {

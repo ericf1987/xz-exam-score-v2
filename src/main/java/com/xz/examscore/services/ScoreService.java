@@ -228,7 +228,7 @@ public class ScoreService {
             query.putAll(update);
             scoreDatabase.getCollection(collectionName).insertOne(query.append("md5", Mongo.md5()));
         }
-        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+        String cacheKey = "getTotalScore:" + collectionName + ":" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
     }
 

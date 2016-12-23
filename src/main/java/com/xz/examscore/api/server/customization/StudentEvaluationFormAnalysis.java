@@ -223,6 +223,13 @@ public class StudentEvaluationFormAnalysis implements Server {
     private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
+        List<Map<String, Object>> classAbilityLevelList = classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
+        //按得分率排序
+        Collections.sort(classAbilityLevelList, (Map<String, Object> m1, Map<String, Object> m2) -> {
+            Double r1 = MapUtils.getDouble(m1, "scoreRate");
+            Double r2 = MapUtils.getDouble(m2, "scoreRate");
+            return r2.compareTo(r1);
+        });
         return classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
     }
 
@@ -247,7 +254,14 @@ public class StudentEvaluationFormAnalysis implements Server {
     }
 
     private List<Map<String, Object>> getQuestTypeScoreMap(String projectId, String studentId, String subjectId) {
-        return projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, Range.student(studentId));
+        List<Map<String, Object>> questTypeList = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, Range.student(studentId));
+        //按得分率排序
+        Collections.sort(questTypeList, (Map<String, Object> m1, Map<String, Object> m2) -> {
+            Double s1 = MapUtils.getDouble(m1, "scoreRate");
+            Double s2 = MapUtils.getDouble(m2, "scoreRate");
+            return s2.compareTo(s1);
+        });
+        return questTypeList;
     }
 
     public Map<String, Object> getScoreAndRankMap(String projectId, String schoolId, String classId, String studentId, Target target) {
