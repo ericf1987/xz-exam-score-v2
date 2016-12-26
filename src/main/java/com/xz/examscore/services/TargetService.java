@@ -53,6 +53,9 @@ public class TargetService {
 
     public Target getTarget(String projectId, String subjectId) {
         if (StringUtil.isNotBlank(subjectId)) {
+            if(subjectId.length() > ImportProjectService.SUBJECT_LENGTH){
+                return Target.subjectCombination(subjectId);
+            }
             return Target.subject(subjectId);
         } else {
             return Target.project(projectId);

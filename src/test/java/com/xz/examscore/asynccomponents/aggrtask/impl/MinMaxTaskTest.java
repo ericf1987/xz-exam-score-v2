@@ -1,6 +1,5 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
-import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
@@ -44,13 +43,12 @@ public class MinMaxTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void test1() throws Exception {
-        String projectId = "430100-553137a1e78741149104526aaa84393e";
-        Target target = Target.subject("008");
-        Range range = Range.school("d00faaa0-8a9b-45c4-ae16-ea2688353cd0");
-        String subjectId = targetService.getTargetSubjectId(projectId, target);
+        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
+        Target target = Target.subjectCombination("004005006");
+        Range range = Range.clazz("a3fec3c6-0e46-40c3-8632-69bdf78d8484");
 
         // 查询考生列表
-        List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
 
         if (studentIds.isEmpty()) {
 

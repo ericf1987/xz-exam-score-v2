@@ -2,6 +2,7 @@ package com.xz.examscore.scanner;
 
 import com.mongodb.MongoClient;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,13 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     public void testFindProject() throws Exception {
         Document project = scannerDBService.findProject("430100-c9ccbcb7fcb542e3a2f278e8d2ca2c4f");
         System.out.println(project.toJson());
+    }
+
+    @Test
+    public void test1() throws Exception {
+        System.out.println(BooleanUtils.toBoolean(Boolean.parseBoolean("null")));
+        System.out.println(BooleanUtils.toBoolean(true));
+        System.out.println(BooleanUtils.toBoolean(false));
     }
 
     @Test

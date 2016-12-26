@@ -245,6 +245,10 @@ public class ScannerDBService {
         if (null != isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以主观题得分为0", studentId, subjectId);
         }
+
+        if (isCheating) {
+            LOG.info("该学生{}在考试科目{}中作弊！所以主观题得分为0", studentId, subjectId);
+        }
         //网阅题目ID列表
         if (null == subjectiveList || subjectiveList.isEmpty()) {
             LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
@@ -332,10 +336,14 @@ public class ScannerDBService {
             //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
             String standardAnswer = getStdAnswerFromQuest(quest);
 
-            //对于没有缺考的学生，客观题如果作答为空字符串，才报错判定为没有作答
-            if (null == isAbsent && StringUtil.isBlank(studentAnswer)) {
-                throw new IllegalStateException("客观题没有考生作答, project=" +
-                        projectId + ", subject=" + sid + ", quest=" + objectiveItem);
+            //对于没有缺考或没有作弊的学生，客观题如果作答为空字符串，才报错判定为没有作答
+            if (null == isAbsent && !isCheating && StringUtil.isBlank(studentAnswer)) {
+                throw new IllegalStateException("客观题没有考生作答, project=" + projectId +
+                        ", studentId=" + studentId +
+                        ", subject=" + sid +
+                        ", quest=" + objectiveItem +
+                        ", isAbsent=" + isAbsent +
+                        ", isCheating=" + isCheating);
             }
 
             if (StringUtil.isBlank(standardAnswer)) {

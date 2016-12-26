@@ -124,6 +124,8 @@ public class StudentEvaluationFormAnalysis implements Server {
         String category = projectDoc.getString("category");
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         List<String> subjectIds = subjectService.querySubjects(projectId);
+        //存放文理单科
+        List<String> wlSubjectIds = subjectIds.stream().filter(wl -> SubjectCombinationService.isW(wl) || SubjectCombinationService.isL(wl)).collect(Collectors.toList());
         List<String> combinedSubjectIds = subjectCombinationService.getAllSubjectCombinations(projectId);
         int studentCount = studentService.getStudentCount(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
         List<Map<String, Object>> resultList = new ArrayList<>();
@@ -157,12 +159,7 @@ public class StudentEvaluationFormAnalysis implements Server {
             //科目
             List<Map<String, Object>> averagesInLevel = new ArrayList<>();
             for (String subjectId : subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).collect(Collectors.toList())) {
-                Map<String, Object> averageInLevel = new HashMap<>();
-                double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subject(subjectId), key);
-                String subjectName = SubjectService.getSubjectName(subjectId);
-                averageInLevel.put("subjectId", subjectId);
-                averageInLevel.put("subjectName", subjectName);
-                averageInLevel.put("average", DoubleUtils.round(average));
+                Map<String, Object> averageInLevel = getAveragesInLevel(projectId, provinceRange, key, subjectId);
                 averagesInLevel.add(averageInLevel);
             }
             //组合科目
@@ -183,6 +180,7 @@ public class StudentEvaluationFormAnalysis implements Server {
             //统计基础信息
             String studentId = studentDoc.getString("student");
             Map<String, String> studentBaseInfo = new HashMap<>();
+            studentBaseInfo.put("studentId", studentId);
             studentBaseInfo.put("studentName", studentDoc.getString("name"));
             studentBaseInfo.put("className", classService.getClassName(projectId, classId));
             studentBaseInfo.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
@@ -192,18 +190,21 @@ public class StudentEvaluationFormAnalysis implements Server {
             //查询得分及排名
             Map<String, Object> scoreAndRankMap = new HashMap<>();
             scoreAndRankMap.put("project", getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.project(projectId)));
-            //单科得分及排名
+            //语数外得分及排名
             List<Map<String, Object>> subjectScoreAndRank = new ArrayList<>();
-            subjectIds.forEach(subjectId -> {
-                Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subject(subjectId));
-                //统计各个科目的题型，知识点，双向细目情况
-                map.put("questTypeScore", getQuestTypeScoreMap(projectId, studentId, subjectId));
-                map.put("pointScore", getPointScoreMap(projectId, studentId, subjectId));
-                //map.put("pointAbilityLevel", getPointAbilityLevel(projectId, studentId, subjectId));
-                map.put("subjectAbilityLevel", getSubjectAbilityLevel(projectId, studentId, subjectId));
+            subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).forEach(subjectId -> {
+                Map<String, Object> map = getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(subjectId), getQuestTypeScoreMap(projectId, studentId, subjectId), getPointScoreMap(projectId, studentId, subjectId), getSubjectAbilityLevel(projectId, studentId, subjectId));
                 subjectScoreAndRank.add(map);
             });
             scoreAndRankMap.put("subjects", subjectScoreAndRank);
+
+            //文理单科得分及排名
+            List<Map<String, Object>> wlSubjectScoreAndRank = new ArrayList<>();
+            wlSubjectIds.forEach(wlSubjectId -> {
+                Map<String, Object> map = getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(wlSubjectId), getQuestTypeScoreMap(projectId, studentId, wlSubjectId), getPointScoreMap(projectId, studentId, wlSubjectId), getSubjectAbilityLevel(projectId, studentId, wlSubjectId));
+                wlSubjectScoreAndRank.add(map);
+            });
+            scoreAndRankMap.put("wlSubjects", wlSubjectScoreAndRank);
 
             //查询组合科目得分及排名
             List<Map<String, Object>> combinedSubjectScoreAndRank = new ArrayList<>();
@@ -218,6 +219,25 @@ public class StudentEvaluationFormAnalysis implements Server {
             resultList.add(studentMap);
         }
         return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
+    }
+
+    public Map<String, Object> getSingleSubjectRankAndLevel(String projectId, String schoolId, String classId, String studentId, Target subject, List<Map<String, Object>> questTypeScoreMap, Map<String, Object> pointScoreMap, List<Map<String, Object>> subjectAbilityLevel2) {
+        Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, subject);
+        //统计各个科目的题型，知识点，双向细目情况
+        map.put("questTypeScore", questTypeScoreMap);
+        map.put("pointScore", pointScoreMap);
+        map.put("subjectAbilityLevel", subjectAbilityLevel2);
+        return map;
+    }
+
+    public Map<String, Object> getAveragesInLevel(String projectId, Range provinceRange, String key, String subjectId) {
+        Map<String, Object> averageInLevel = new HashMap<>();
+        double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subject(subjectId), key);
+        String subjectName = SubjectService.getSubjectName(subjectId);
+        averageInLevel.put("subjectId", subjectId);
+        averageInLevel.put("subjectName", subjectName);
+        averageInLevel.put("average", DoubleUtils.round(average));
+        return averageInLevel;
     }
 
     private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {

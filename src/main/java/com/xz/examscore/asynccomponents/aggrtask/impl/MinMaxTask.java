@@ -48,10 +48,10 @@ public class MinMaxTask extends AggrTask {
         String projectId = taskInfo.getProjectId();
         Target target = taskInfo.getTarget();
         Range range = taskInfo.getRange();
-        String subjectId = targetService.getTargetSubjectId(projectId, target);
 
         // 查询考生列表
-        List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);
+        /*List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);*/
+        List<String> studentIds = studentService.getStudentIds(projectId, range, target);
 
         if (studentIds.isEmpty()) {
             saveMinMax(projectId, target, range, Value.of(0d), Value.of(0d));
