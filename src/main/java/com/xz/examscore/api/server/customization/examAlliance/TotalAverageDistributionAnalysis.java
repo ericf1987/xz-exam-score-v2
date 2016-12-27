@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/12/26.
  */
-@Function(description = "联考项目-前百分段名平均分", parameters = {
+@Function(description = "联考项目-整体平均分统计", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
 })
 @Service
@@ -55,8 +55,11 @@ public class TotalAverageDistributionAnalysis implements Server {
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
         Map<String, Object> resultMap = new HashMap<>();
 
-        List<Map<String, Object>> totalData = getRangeAverageDistribution(projectId, provinceRange, subjectIds, combinedSubjectIds);
-        resultMap.put("totalData", totalData);
+        Map<String, Object> totalDataMap = new HashMap<>();
+        totalDataMap.put("schoolId", projectId);
+        totalDataMap.put("schoolName", "总体");
+        totalDataMap.put("subjects", getRangeAverageDistribution(projectId, provinceRange, subjectIds, combinedSubjectIds));
+        resultMap.put("totalData", totalDataMap);
 
         List<Map<String, Object>> schoolData = new ArrayList<>();
         projectSchools.forEach(projectSchool -> {

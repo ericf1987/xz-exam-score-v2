@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author by fengye on 2016/12/25.
  */
-@Function(description = "联考项目-前百分段名平均分", parameters = {
+@Function(description = "联考项目-单科各校基本情况", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "考试科目ID", required = true)
 })

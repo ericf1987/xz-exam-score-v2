@@ -31,6 +31,9 @@ public class CollegeEntryLevelService {
     SimpleCache cache;
 
     @Autowired
+    SimpleCache instantCache;
+
+    @Autowired
     ProjectConfigService projectConfigService;
 
     /**
