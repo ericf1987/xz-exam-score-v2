@@ -9,10 +9,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.CollegeEntryLevelService;
-import com.xz.examscore.services.ProjectService;
-import com.xz.examscore.services.ProvinceService;
-import com.xz.examscore.services.ScoreService;
+import com.xz.examscore.services.*;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,9 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
     @Autowired
     CollegeEntryLevelService collegeEntryLevelService;
 
+    @Autowired
+    StudentService studentService;
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
@@ -60,6 +60,10 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
         //查询本次考试的本科批次
         List<String> entryLevel = collegeEntryLevelService.getEntryLevelKey(projectId);
         List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
+
+        double onlineTotalScore = 0;
+        double onlineTotalCount = 0;
+
         for (String key : entryLevel){
             ArrayList<Document> entryLevelStudent = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, provinceRange, projectTarget, key);
             //指定本科批次的人数
@@ -79,6 +83,35 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
             if(result.getMatchedCount() == 0){
                 collection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
             }
+
+            //累加本科上线的总分
+            onlineTotalScore += totalScore;
+            //累加本科上线的人数
+            onlineTotalCount += count;
         }
+
+        saveOffLineAverage(projectId, range, target, collection, onlineTotalScore, onlineTotalCount);
+    }
+
+    private void saveOffLineAverage(String projectId, Range range, Target target, MongoCollection<Document> collection, double onlineTotalScore, double onlineTotalCount) {
+        //查询当前维度和目标的总分
+        double subCount = studentService.getStudentCount(projectId, range, target) - onlineTotalCount;
+        double subTotal = scoreService.getScore(projectId, range, target) - onlineTotalScore;
+        double offLineAverage = subCount == 0 ? 0 : subTotal / subCount;
+
+        if(subCount < 0 || subTotal < 0) {
+            throw new IllegalArgumentException("统计本科未上线学生平均分异常！");
+        }
+
+        // 保存平均分
+
+        Document query = Mongo.query(projectId, range, target);
+        query.append("college_entry_level", doc("score", 0).append("level", "OFFLINE"));
+
+        UpdateResult result = collection.updateMany(query, $set(doc("average", offLineAverage)));
+        if(result.getMatchedCount() == 0){
+            collection.insertOne(query.append("average", offLineAverage).append("md5", MD5.digest(UUID.randomUUID().toString())));
+        }
+
     }
 }

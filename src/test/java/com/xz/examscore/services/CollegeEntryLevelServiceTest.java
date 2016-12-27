@@ -57,11 +57,20 @@ public class CollegeEntryLevelServiceTest extends XzExamScoreV2ApplicationTests 
 
     @Test
     public void testGetEntryLevelStudent() throws Exception {
-
+        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
+        Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
+        Target target = Target.project(projectId);
+        double entryLevelTotalScore = collegeEntryLevelService.getEntryLevelTotalScore(projectId, provinceRange, target, "");
+        System.out.println(entryLevelTotalScore);
     }
 
     @Test
     public void testGetEntryLevelStudentRankSegment() throws Exception {
+
+    }
+
+    @Test
+    public void testGetEntryLevelTotalScore() throws Exception {
 
     }
 

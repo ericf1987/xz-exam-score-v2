@@ -8,6 +8,7 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,13 @@ public class TotalAverageDistributionAnalysis implements Server {
 
         List<Map<String, Object>> schoolData = new ArrayList<>();
         projectSchools.forEach(projectSchool -> {
+            Map<String, Object> schoolMap = new HashMap<>();
+            String schoolId = projectSchool.getString("school");
+            schoolMap.put("schoolId", schoolId);
+            schoolMap.put("schoolName", schoolService.getSchoolName(projectId, schoolId));
             Range range = Range.school(projectSchool.getString("school"));
-            schoolData.addAll(getRangeAverageDistribution(projectId, range, subjectIds, combinedSubjectIds));
+            schoolMap.put("subjects", getRangeAverageDistribution(projectId, range, subjectIds, combinedSubjectIds));
+            schoolData.add(schoolMap);
         });
         resultMap.put("schoolData", schoolData);
 
@@ -87,7 +93,7 @@ public class TotalAverageDistributionAnalysis implements Server {
         Map<String, Object> map = new HashMap<>();
         map.put("subjectId", subjectId);
         map.put("subjectName", subjectName);
-        map.put("average", average);
+        map.put("average", DoubleUtils.round(average));
         return map;
     }
 }

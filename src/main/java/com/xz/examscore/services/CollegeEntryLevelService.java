@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
@@ -13,13 +14,9 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.query;
 
 /**
@@ -148,6 +145,35 @@ public class CollegeEntryLevelService {
             }
 
             return (int) collection.count(query);
+        });
+    }
+
+    /**
+     * 查询上线学生总分
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param target    目标
+     * @param key       上线率参数
+     * @return 上线学生总分
+     */
+    public double getEntryLevelTotalScore(String projectId, Range range, Target target, String key) {
+        String cacheKey = "entry_level_student_totalScore:" + projectId + ":" + range + ":" + target + ":" + key;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
+            Document query = query(projectId, range, target);
+            if (!StringUtils.isBlank(key)) {
+                query.append("college_entry_level.level", key);
+            }
+            Document match = $match(query);
+            Document group = $group(doc("_id", null).append("totalScore", doc("$sum", "$totalScore")));
+
+            AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
+                    match, group
+            ));
+
+            Document first = aggregate.first();
+            return first.getDouble("totalScore");
         });
     }
 

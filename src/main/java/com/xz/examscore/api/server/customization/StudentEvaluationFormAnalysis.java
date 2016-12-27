@@ -155,6 +155,8 @@ public class StudentEvaluationFormAnalysis implements Server {
             return s2.compareTo(s1);
         });
         List<String> entryLevelKey = entryLevelDoc.stream().map(doc -> doc.getString("level")).collect(Collectors.toList());
+        //增加统计本科未上线学生的平均得分
+        entryLevelKey.add("OFFLINE");
         for (String key : entryLevelKey) {
             //科目
             List<Map<String, Object>> averagesInLevel = new ArrayList<>();
@@ -252,12 +254,6 @@ public class StudentEvaluationFormAnalysis implements Server {
         });
         return classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
     }
-
-/*    private List<Map<String, Object>> getPointAbilityLevel(String projectId, String studentId, String subjectId) {
-        String studyStage = projectService.findProjectStudyStage(projectId);
-        Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
-        return projectPointAbilityLevelAnalysis.getPointAnalysis(projectId, subjectId, Range.student(studentId), levelMap);
-    }*/
 
     private Map<String, Object> getPointScoreMap(String projectId, String studentId, String subjectId) {
         Map<String, Object> pointScore = new HashMap<>();

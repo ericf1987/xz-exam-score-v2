@@ -18,7 +18,7 @@ public class TotalAverageDistributionAnalysisTest extends XzExamScoreV2Applicati
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430200-3e67c524f149491597279ef6ae31baef");
+        Param param = new Param().setParameter("projectId", "430300-672a0ed23d9148e5a2a31c8bf1e08e62");
         Result result = totalAverageDistributionAnalysis.execute(param);
         System.out.println(result.getData());
     }
