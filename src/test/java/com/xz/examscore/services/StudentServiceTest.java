@@ -6,9 +6,12 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.sys.QueryExamSubjects;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -85,5 +88,20 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
         Result result = queryExamSubjects.execute(param);
         System.out.println(result.getData());
 
+    }
+
+    @Test
+    public void testPickStudentsByRange() throws Exception {
+        String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
+        List<String> studentIds = Arrays.asList("7beb04a1-a9a0-4255-85b8-f0c98da9f7db",
+                "6f5d2ede-1acb-463a-acb4-4230a5e139c9",
+                "37ec8040-994e-4223-bf14-fb5e2892c498",
+                "5ef5d89c-684c-49a8-94a4-228dcc2546d3",
+                "ff1b6153-99b5-475f-985c-265cc423067b",
+                "6cd5d31e-193a-4aae-9c03-bb92c493f816",
+                "8c7933e8-6777-436f-9e7c-b4a788c75301",
+                "7ab1a822-45a9-40e7-b753-95d16a95534e");
+        ArrayList<Document> school = studentService.pickStudentsByRange(projectId, studentIds, "school");
+        System.out.println(school);
     }
 }

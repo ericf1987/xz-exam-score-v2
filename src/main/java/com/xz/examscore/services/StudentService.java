@@ -1,6 +1,7 @@
 package com.xz.examscore.services;
 
 import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -17,11 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.WITHOUT_INNER_ID;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.SubjectUtil.isCombinedSubject;
 
 /**
@@ -62,10 +63,10 @@ public class StudentService {
     public int getStudentCount(String projectId, Range range, Target target) {
         if (target.match(Target.PROJECT)) {
             return getStudentCount(projectId, range);
-        } else if (target.match(Target.SUBJECT_COMBINATION)){
+        } else if (target.match(Target.SUBJECT_COMBINATION)) {
             //如果是组合科目，取参考了其中任何一科的参考人数
             return getStudentIds(projectId, range, target).size();
-        }else{
+        } else {
             String subjectId = targetService.getTargetSubjectId(projectId, target);
             return getStudentCount(projectId, subjectId, range);
         }
@@ -276,5 +277,21 @@ public class StudentService {
 
         String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
         cache.delete(cacheKey);
+    }
+
+    public ArrayList<Document> pickStudentsByRange(String projectId, List<String> studentIds, String rangeName) {
+        String cacheKey = "studentInRange:" + rangeName + ":" + studentIds;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+            Document match = doc("project", projectId);
+            if(null != studentIds && !studentIds.isEmpty()){
+                match.append("student", doc("$in", studentIds));
+            }
+            Document group = doc("_id", "$" + rangeName).append("students", $addToSet("$student"));
+            AggregateIterable<Document> aggregate = students.aggregate(Arrays.asList(
+                    $match(match), $group(group)
+            ));
+            return new ArrayList<>(toList(aggregate));
+        });
     }
 }

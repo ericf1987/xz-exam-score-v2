@@ -64,12 +64,12 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
         double onlineTotalScore = 0;
         double onlineTotalCount = 0;
 
-        for (String key : entryLevel){
+        for (String key : entryLevel) {
             ArrayList<Document> entryLevelStudent = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, provinceRange, projectTarget, key);
             //指定本科批次的人数
             int count = entryLevelStudent.size();
             double totalScore = 0;
-            for (Document doc : entryLevelStudent){
+            for (Document doc : entryLevelStudent) {
                 String studentId = doc.getString("student");
                 double score = scoreService.getScore(projectId, Range.student(studentId), target);
                 totalScore += score;
@@ -80,7 +80,7 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
 
             // 保存平均分
             UpdateResult result = collection.updateMany(query, $set(doc("average", average)));
-            if(result.getMatchedCount() == 0){
+            if (result.getMatchedCount() == 0) {
                 collection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
             }
 
@@ -99,8 +99,12 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
         double subTotal = scoreService.getScore(projectId, range, target) - onlineTotalScore;
         double offLineAverage = subCount == 0 ? 0 : subTotal / subCount;
 
-        if(subCount < 0 || subTotal < 0) {
-            throw new IllegalArgumentException("统计本科未上线学生平均分异常！");
+        if (subCount < 0 || subTotal < 0) {
+            throw new IllegalArgumentException("统计本科未上线学生平均分异常！project=" + projectId
+                    + ", range=" + range
+                    + ", target=" + target
+                    + ", onlineTotalCount=" + onlineTotalCount
+                    + ", onlineTotalScore" + onlineTotalScore);
         }
 
         // 保存平均分
@@ -109,7 +113,7 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
         query.append("college_entry_level", doc("score", 0).append("level", "OFFLINE"));
 
         UpdateResult result = collection.updateMany(query, $set(doc("average", offLineAverage)));
-        if(result.getMatchedCount() == 0){
+        if (result.getMatchedCount() == 0) {
             collection.insertOne(query.append("average", offLineAverage).append("md5", MD5.digest(UUID.randomUUID().toString())));
         }
 

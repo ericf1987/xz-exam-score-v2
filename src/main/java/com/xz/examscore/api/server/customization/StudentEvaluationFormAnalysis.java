@@ -113,6 +113,9 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     CollegeEntryLevelAverageService collegeEntryLevelAverageService;
 
+    @Autowired
+    FullScoreService fullScoreService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -223,12 +226,20 @@ public class StudentEvaluationFormAnalysis implements Server {
         return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
     }
 
-    public Map<String, Object> getSingleSubjectRankAndLevel(String projectId, String schoolId, String classId, String studentId, Target subject, List<Map<String, Object>> questTypeScoreMap, Map<String, Object> pointScoreMap, List<Map<String, Object>> subjectAbilityLevel2) {
+    public Map<String, Object> getSingleSubjectRankAndLevel(String projectId, String schoolId, String classId, String studentId, Target subject, List<Map<String, Object>> questTypeScoreMap, Map<String, Object> pointScoreMap, List<Map<String, Object>> subjectAbilityLevel) {
         Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, subject);
         //统计各个科目的题型，知识点，双向细目情况
         map.put("questTypeScore", questTypeScoreMap);
         map.put("pointScore", pointScoreMap);
-        map.put("subjectAbilityLevel", subjectAbilityLevel2);
+        //目前考虑将能力层级中得分为0的过滤
+        subjectAbilityLevel = subjectAbilityLevel.stream().filter(m -> MapUtils.getDouble(m, "score") != 0).collect(Collectors.toList());
+        //根据得分率排序
+        Collections.sort(subjectAbilityLevel, (Map<String, Object> m1, Map<String, Object> m2) -> {
+            Double d1 = MapUtils.getDouble(m1, "scoreRate");
+            Double d2 = MapUtils.getDouble(m2, "scoreRate");
+            return d2.compareTo(d1);
+        });
+        map.put("subjectAbilityLevel", subjectAbilityLevel);
         return map;
     }
 
@@ -286,7 +297,9 @@ public class StudentEvaluationFormAnalysis implements Server {
         int classRank = rankService.getRank(projectId, Range.clazz(classId), target, studentId);
         int schoolRank = rankService.getRank(projectId, Range.school(schoolId), target, studentId);
         double scoreRate = scoreRateService.getScoreRate(projectId, Range.student(studentId), target);
+        double fullScore = fullScoreService.getFullScore(projectId, target);
         scoreAndRank.put("totalScore", totalScore);
+        scoreAndRank.put("fullScore", fullScore);
         scoreAndRank.put("scoreRate", DoubleUtils.round(scoreRate));
         scoreAndRank.put("classRank", classRank);
         scoreAndRank.put("schoolRank", schoolRank);
