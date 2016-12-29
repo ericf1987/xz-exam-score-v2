@@ -46,6 +46,8 @@ public class TaskDispatcherFactory {
         ArrayList<TaskDispatcher> dispatchers = new ArrayList<>(dispatcherMap.values());
         dispatchers.removeIf(dispatcher -> isDispatcherCompleted(dispatcher, completedTaskTypes));
         dispatchers.removeIf(dispatcher -> !isDependencyCompleted(dispatcher, completedTaskTypes));
+        // 去掉个性化需求统计任务
+        dispatchers.removeIf(this::isCustomized);
 
         if (aggregationType == AggregationType.Basic) {
             dispatchers.removeIf(this::isAdvanced);
@@ -58,6 +60,10 @@ public class TaskDispatcherFactory {
 
     private boolean isAdvanced(TaskDispatcher dispatcher) {
         return dispatcher.getInfo().isAdvanced();
+    }
+
+    private boolean isCustomized(TaskDispatcher dispatcher) {
+        return dispatcher.getInfo().isCustomized();
     }
 
     // 没有依赖任务亦可视为依赖任务已完成

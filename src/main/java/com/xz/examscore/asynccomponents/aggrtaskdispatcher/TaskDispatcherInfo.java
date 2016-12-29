@@ -20,4 +20,6 @@ public @interface TaskDispatcherInfo {
     String dependentTaskType() default "";  // 依赖任务类型
 
     boolean isAdvanced() default false;
+
+    boolean isCustomized() default false; //是否是定制化统计任务
 }

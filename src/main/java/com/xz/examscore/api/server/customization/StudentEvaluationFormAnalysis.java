@@ -116,6 +116,9 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     FullScoreService fullScoreService;
 
+    @Autowired
+    StudentCompetitiveService studentCompetitiveService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -217,13 +220,32 @@ public class StudentEvaluationFormAnalysis implements Server {
                 Map<String, Object> map = getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subjectCombination(combinedSubjectId));
                 combinedSubjectScoreAndRank.add(map);
             });
+
+            //查询竞争对手数据，并对比
+            List<Map<String,Object>> studentCompetitiveList = new ArrayList<>();
+            subjectIds.forEach(subjectId -> studentCompetitiveList.add(getStudentCompetitiveMap(projectId, studentId, provinceRange, subjectId)));
+            combinedSubjectIds.forEach(combinedSubjectId -> studentCompetitiveList.add(getStudentCompetitiveMap(projectId, studentId, provinceRange, combinedSubjectId)));
+
             scoreAndRankMap.put("combinedSubjects", combinedSubjectScoreAndRank);
 
             studentMap.put("scoreAndRankMap", scoreAndRankMap);
 
+            studentMap.put("studentCompetitiveList", studentCompetitiveList);
+
             resultList.add(studentMap);
         }
         return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
+    }
+
+    private Map<String, Object> getStudentCompetitiveMap(String projectId, String studentId, Range provinceRange, String subjectId) {
+        Map<String, Object> map = new HashMap<>();
+        int rank = rankService.getRank(projectId, provinceRange, Target.subject(subjectId), studentId);
+        //竞争对手平均分
+        double average = studentCompetitiveService.getAverage(projectId, provinceRange, Target.subject(subjectId), rank);
+        map.put("subjectId", subjectId);
+        map.put("subjectName", SubjectService.getSubjectName(subjectId));
+        map.put("average", average);
+        return map;
     }
 
     public Map<String, Object> getSingleSubjectRankAndLevel(String projectId, String schoolId, String classId, String studentId, Target subject, List<Map<String, Object>> questTypeScoreMap, Map<String, Object> pointScoreMap, List<Map<String, Object>> subjectAbilityLevel) {
