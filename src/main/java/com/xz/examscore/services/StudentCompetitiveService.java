@@ -29,7 +29,7 @@ public class StudentCompetitiveService {
 
     public double getAverage(String projectId, Range range, Target target, int rank){
         MongoCollection<Document> collection = scoreDatabase.getCollection("student_competitive");
-        Document query = doc("projectId", projectId)
+        Document query = doc("project", projectId)
                 .append("range", range2Doc(range))
                 .append("target", target2Doc(target))
                 .append("startIndex", $lte(rank))
