@@ -23,6 +23,9 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     ScoreService scoreService;
 
+    @Autowired
+    StudentCompetitiveService studentCompetitiveService;
+
     @Test
     public void testGetRank() throws Exception {
         System.out.println("rank of 99: " +
@@ -31,16 +34,16 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetRank2() throws Exception {
-        String projectId = "430200-89c9dc7481cd47a69d85af3f0808e0c4";
-        Range range = Range.school("7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52");
-        Target target = Target.quest("573c49e62d560287556b8a76");
+        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
+        Range range = Range.province("430000");
+        Target target = Target.subjectCombination("004005006");
 
         int rank = rankService.getRank(projectId,
-                range, target, "c740e974-c281-4c19-9f1b-82103c691563");
+                range, target, "c8a246f3-cb0e-4eee-a295-b0730b5f2e1e");
 
         int studentCount = studentService.getStudentCount(projectId, range, target);
-
-        System.out.println(rank + ", " + studentCount);
+        double average = studentCompetitiveService.getAverage(projectId, range, target, rank);
+        System.out.println(rank + ", " + studentCount + ", " + average);
     }
 
     @Test

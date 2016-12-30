@@ -222,8 +222,8 @@ public class StudentEvaluationFormAnalysis implements Server {
             });
 
             //查询竞争对手数据，并对比
-            List<Map<String,Object>> studentCompetitiveList = new ArrayList<>();
-            subjectIds.forEach(subjectId -> studentCompetitiveList.add(getStudentCompetitiveMap(projectId, studentId, provinceRange, subjectId)));
+            List<Map<String, Object>> studentCompetitiveList = new ArrayList<>();
+            subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).forEach(subjectId -> studentCompetitiveList.add(getStudentCompetitiveMap(projectId, studentId, provinceRange, subjectId)));
             combinedSubjectIds.forEach(combinedSubjectId -> studentCompetitiveList.add(getStudentCompetitiveMap(projectId, studentId, provinceRange, combinedSubjectId)));
 
             scoreAndRankMap.put("combinedSubjects", combinedSubjectScoreAndRank);
@@ -239,9 +239,10 @@ public class StudentEvaluationFormAnalysis implements Server {
 
     private Map<String, Object> getStudentCompetitiveMap(String projectId, String studentId, Range provinceRange, String subjectId) {
         Map<String, Object> map = new HashMap<>();
-        int rank = rankService.getRank(projectId, provinceRange, Target.subject(subjectId), studentId);
+        Target target = targetService.getTarget(projectId, subjectId);
+        int rank = rankService.getRank(projectId, provinceRange, target, studentId);
         //竞争对手平均分
-        double average = studentCompetitiveService.getAverage(projectId, provinceRange, Target.subject(subjectId), rank);
+        double average = studentCompetitiveService.getAverage(projectId, provinceRange, target, rank);
         map.put("subjectId", subjectId);
         map.put("subjectName", SubjectService.getSubjectName(subjectId));
         map.put("average", average);
