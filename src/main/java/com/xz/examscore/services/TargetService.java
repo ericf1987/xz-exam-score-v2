@@ -230,7 +230,7 @@ public class TargetService {
                 if (questType != null) {
                     return questType.getSubjectId();
                 } else {
-                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                    throw new IllegalArgumentException("Target not found in questType " + projectId + ": " + target);
                 }
 
             case QUEST:
@@ -239,7 +239,7 @@ public class TargetService {
                 if (quest != null) {
                     return quest.getString("subject");
                 } else {
-                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                    throw new IllegalArgumentException("Target not found in quest " + projectId + ": " + target);
                 }
 
             case POINT:
@@ -249,7 +249,7 @@ public class TargetService {
                 if (point != null && !StringUtils.isEmpty(point.getSubject())) {
                     return point.getSubject();
                 } else {
-                    throw new IllegalArgumentException("Target not found in project " + projectId + ": " + target);
+                    throw new IllegalArgumentException("Target not found in point " + projectId + ": " + target);
                 }
 
             case SUBJECT_LEVEL:
