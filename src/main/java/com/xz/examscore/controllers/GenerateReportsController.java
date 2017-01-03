@@ -21,14 +21,28 @@ public class GenerateReportsController {
 
     @Autowired
     ReportService reportService;
+    
+    @Autowired
+    ExamAllianceReportService examAllianceReportService;
 
     @ResponseBody
     @RequestMapping(value = "all")
     public Result generateReports(@RequestParam("project") String projectId) {
-
         reportService.generateReports(projectId, true, false);
-
         return Result.success();
+    }
+
+    @ResponseBody
+    @RequestMapping(value="examAlliance")
+    public Result generateExamAllianceReports(@RequestParam("project") String projectId){
+        reportService.generateReports(projectId, true, true);
+        return Result.success();
+    }
+
+    @ResponseBody
+    @RequestMapping(value="downloadReports")
+    public Result downloadReports(@RequestParam("project") String projectId){
+        return examAllianceReportService.downloadReports(projectId);
     }
 
 }

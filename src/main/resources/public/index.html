@@ -141,5 +141,25 @@
     </form>
 </fieldset>
 
+<fieldset>
+    <legend>联考报表-生成Excel报表</legend>
+    <form action="report/examAlliance" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">生成报表</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>联考报表-导出报表</legend>
+    <form action="report/downloadReports" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">导出报表</button>
+        </p>
+    </form>
+</fieldset>
+
 </body>
 </html>

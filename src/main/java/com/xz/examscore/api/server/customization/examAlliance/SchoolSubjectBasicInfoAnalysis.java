@@ -1,6 +1,7 @@
 package com.xz.examscore.api.server.customization.examAlliance;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -49,6 +50,9 @@ public class SchoolSubjectBasicInfoAnalysis implements Server {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    ProvinceService provinceService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -67,13 +71,27 @@ public class SchoolSubjectBasicInfoAnalysis implements Server {
 
         AtomicInteger rank = new AtomicInteger();
         result.forEach(projectSchool -> projectSchool.put("rank", rank.incrementAndGet()));
-        return Result.success().set("schoolSubjectBasicInfo", result);
+        Map<String, Object> provinceMap = handleProcessData(projectId, subjectId);
+        provinceMap.put("rank", 1);
+
+        return Result.success().set("schoolSubjectBasicInfo", result).set("provinceSubjectBasicInfo", provinceMap);
+    }
+
+    private Map<String, Object> handleProcessData(String projectId, String subjectId) {
+        Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
+        Map<String, Object> map = getRangeMap(projectId, subjectId, "", provinceRange);
+        return map;
     }
 
     public void handleData(String projectId, String subjectId, List<Map<String, Object>> result, Document projectSchool) {
         String schoolId = projectSchool.getString("school");
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
         Range schoolRange = Range.school(schoolId);
+        Map<String, Object> schoolMap = getRangeMap(projectId, subjectId, schoolName, schoolRange);
+        result.add(schoolMap);
+    }
+
+    public Map<String, Object> getRangeMap(String projectId, String subjectId, String schoolName, Range schoolRange) {
         Target target = targetService.getTarget(projectId, subjectId);
         //参考人数
         int studentCount = studentService.getStudentCount(projectId, schoolRange, target);
@@ -86,11 +104,11 @@ public class SchoolSubjectBasicInfoAnalysis implements Server {
         double fullScore = fullScoreService.getFullScore(projectId, target);
         double scoreRate = DoubleUtils.round(average / fullScore, true);
         Map<String, Object> schoolMap = new HashMap<>();
-        schoolMap.put("schoolName", schoolName);
+        schoolMap.put("schoolName", StringUtil.isBlank(schoolName) ? "总体" : schoolName);
         schoolMap.put("max", max);
         schoolMap.put("average", average);
         schoolMap.put("scoreRate", scoreRate);
         schoolMap.put("studentCount", studentCount);
-        result.add(schoolMap);
+        return schoolMap;
     }
 }

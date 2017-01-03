@@ -32,7 +32,9 @@ public class SchoolSubjectBasicInfoSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId).setParameter("subjectId", subjectId);
         Result result = schoolSubjectBasicInfoAnalysis.execute(param);
         List<Map<String, Object>> schoolData = result.get("schoolSubjectBasicInfo");
+        Map<String, Object> provinceData = result.get("provinceSubjectBasicInfo");
         setHeader(excelWriter);
+        fillProvinceData(excelWriter, provinceData);
         fillSchoolData(excelWriter, schoolData);
     }
 
@@ -45,8 +47,18 @@ public class SchoolSubjectBasicInfoSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "得分率");
     }
 
-    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolData) {
+    private void fillProvinceData(ExcelWriter excelWriter, Map<String, Object> provinceData) {
         int row = 1;
+        AtomicInteger column = new AtomicInteger(-1);
+        excelWriter.set(row, column.incrementAndGet(), provinceData.get("schoolName"));
+        excelWriter.set(row, column.incrementAndGet(), provinceData.get("max"));
+        excelWriter.set(row, column.incrementAndGet(), DoubleUtils.round(MapUtils.getDouble(provinceData, "average")));
+        excelWriter.set(row, column.incrementAndGet(), provinceData.get("rank"));
+        excelWriter.set(row, column.incrementAndGet(), provinceData.get("scoreRate"));
+    }
+
+    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolData) {
+        int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         for(Map<String, Object> schoolMap : schoolData){
             excelWriter.set(row, column.incrementAndGet(), schoolMap.get("schoolName"));

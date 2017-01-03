@@ -33,6 +33,9 @@ public class DownloadAnalysisService {
     @Value("${report.generator.savepath}")
     private String savePath;
 
+    @Value("${examAlliance.report.generator.savepath}")
+    private String savePath2;
+
     @Value("${report.zip.location}")
     private String downloadPath;
 
@@ -133,7 +136,7 @@ public class DownloadAnalysisService {
     }
 
     //解析文件参数（学校成绩分析-基础分析-分数分析）
-    private List<Map<String, String>> getFileCategory(String projectId, String schoolId, String[] param) {
+    public List<Map<String, String>> getFileCategory(String projectId, String schoolId, String[] param) {
         //源文件路径和压缩文件路径
         String srcFile, zipFile;
         String part0 = param[0];
@@ -180,6 +183,15 @@ public class DownloadAnalysisService {
                     param[0], param[1], filename
             );
             srcFile = getSaveFilePath(projectId, savePath, filePath);
+            zipFile = StringUtil.joinPaths(
+                    param[0], param[1], filename
+            );
+            fileCategory.add(getOneFileCategory(srcFile, zipFile, filename));
+        } else if(part0.startsWith("联考")){
+            filePath = StringUtil.joinPaths(
+                    param[0], param[1], filename
+            );
+            srcFile = getSaveFilePath(projectId, savePath2, filePath);
             zipFile = StringUtil.joinPaths(
                     param[0], param[1], filename
             );

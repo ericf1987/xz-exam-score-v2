@@ -451,6 +451,7 @@ public class ScannerDBService {
         }
     }
 
+    //针对网阅库中题目的综合科目ID和CMS题目的科目ID不一致的情况，做出的修正
     public String getSubjectIdInQuestList(String projectId, String questionNo, String subjectId) {
         //如果网阅接口的科目ID为综合科目ID
         if (subjectId.length() != ImportProjectService.SUBJECT_LENGTH) {

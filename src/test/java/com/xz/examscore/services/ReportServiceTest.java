@@ -16,6 +16,6 @@ public class ReportServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGenerateReports() throws Exception {
-        reportService.generateReports("430100-e7bd093d92d844819c7eda8b641ab6ee", true, false);
+        reportService.generateReports("430200-3e67c524f149491597279ef6ae31baef", true, false);
     }
 }
