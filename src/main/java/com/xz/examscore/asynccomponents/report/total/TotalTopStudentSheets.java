@@ -60,6 +60,7 @@ public class TotalTopStudentSheets extends SheetGenerator {
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> topStudents) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "考号");
+        excelWriter.set(0, column.incrementAndGet(), "学校考号");
         excelWriter.set(0, column.incrementAndGet(), "学生姓名");
         excelWriter.set(0, column.incrementAndGet(), "学校");
         excelWriter.set(0, column.incrementAndGet(), "总体排名");
@@ -80,6 +81,8 @@ public class TotalTopStudentSheets extends SheetGenerator {
     private void setupSecondaryHeader(ExcelWriter excelWriter, List<Map<String, Object>> topStudents) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "考号");
+        excelWriter.mergeCells(0, column.get(), 1, column.get());
+        excelWriter.set(1, column.incrementAndGet(), "学校考号");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "学生姓名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
@@ -106,6 +109,7 @@ public class TotalTopStudentSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         for (Map<String, Object> topStudent : topStudents) {
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("examNo"));
+            excelWriter.set(row, column.incrementAndGet(), topStudent.get("customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("name"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("schoolName"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));

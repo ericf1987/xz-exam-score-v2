@@ -566,6 +566,8 @@ public class ImportProjectService {
                         .append("project", projectId)
                         //导入学生考号
                         .append("examNo", studentObj.get("examNo"))
+                        //导入学校自定义卡号
+                        .append("customExamNo", studentObj.get("customExamNo"))
                         .append("student", studentObj.get("id"))
                         .append("name", studentObj.get("name"))
                         .append("class", classDoc.get("class"))

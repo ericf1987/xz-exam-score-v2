@@ -84,7 +84,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryClassExamStudent() throws Exception {
-        JSONArray students = interfaceClient.queryClassExamStudent("430100-909f145f001742c5904068e03006bfd2", "cb62862d-1dde-4ec0-b849-b8fd08ba0a61");
+        JSONArray students = interfaceClient.queryClassExamStudent("433100-f2dc335004f24415bab7d69a01403115", "006832bd-1ce7-477d-9a49-7d401aa38505");
         System.out.println(students.toJSONString());
         assertNotNull(students);
         assertFalse(students.isEmpty());

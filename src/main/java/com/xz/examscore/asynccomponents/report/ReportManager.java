@@ -46,6 +46,9 @@ public class ReportManager implements ApplicationContextAware {
     @Value("${report.generator.savepath}")
     private String savePath;
 
+    @Value("${examAlliance.report.generator.savepath}")
+    private String savePath2;
+
     @Autowired
     ProvinceService provinceService;
 
@@ -54,13 +57,15 @@ public class ReportManager implements ApplicationContextAware {
 
     private XmlNode reportConfig;
 
+    private XmlNode reportConfig2;
+
     private ApplicationContext applicationContext;
 
     @PostConstruct
     public void init() {
         this.executionPool = newBlockingThreadPoolExecutor(poolSize, poolSize, 100);
         this.reportConfig = XmlNodeReader.read(getClass().getResourceAsStream("/report/config/report-config.xml"));
-
+        this.reportConfig2 = XmlNodeReader.read(getClass().getResourceAsStream("/report/config/examAlliance-report-config.xml"));
         if (StringUtil.isEmpty(savePath)) {
             throw new IllegalStateException("报表输出路径为空");
         }
@@ -71,9 +76,9 @@ public class ReportManager implements ApplicationContextAware {
      *
      * @param projectId 项目ID
      */
-    public void generateReports(final String projectId, boolean async) {
+    public void generateReports(final String projectId, boolean async, boolean isExamAlliance) {
 
-        List<ReportTask> reportTasks = createReportGenerators(projectId);
+        List<ReportTask> reportTasks = createReportGenerators(projectId, isExamAlliance);
         ThreadPoolExecutor pool = async ? executionPool : newBlockingThreadPoolExecutor(10, 10, 100);
         CountDownLatch countDownLatch = new CountDownLatch(reportTasks.size());
 
@@ -81,7 +86,7 @@ public class ReportManager implements ApplicationContextAware {
             Runnable runnable = () -> {
                 try {
                     String filePath = reportTask.getCategory() + "/" + reportTask.getFilePathWithRange() + ".xlsx";
-                    String saveFilePath = getSaveFilePath(projectId, savePath, filePath);
+                    String saveFilePath = getSaveFilePath(projectId, isExamAlliance ? savePath2 : savePath, filePath);
 
                     LOG.info("开始生成报表 " + reportTask + ", 路径：" + saveFilePath);
                     reportTask.getReportGenerator().generate(projectId, reportTask.getRange(), saveFilePath);
@@ -118,14 +123,16 @@ public class ReportManager implements ApplicationContextAware {
         return System.getProperty("unit_testing") != null;
     }
 
-    public List<ReportTask> createReportGenerators(String projectId) {
+    public List<ReportTask> createReportGenerators(String projectId, boolean isExamAlliance) {
 
-        List<XmlNode> reportSets = reportConfig.getChildren(xmlNode ->
-                xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals(projectId));
+        List<XmlNode> reportSets = isExamAlliance ?
+                reportConfig2.getChildren(xmlNode -> xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals(projectId)) :
+                reportConfig.getChildren(xmlNode -> xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals(projectId));
 
         if (reportSets.isEmpty()) {
-            reportSets = reportConfig.getChildren(xmlNode ->
-                    xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals("default"));
+            reportSets = isExamAlliance ?
+                    reportConfig2.getChildren(xmlNode -> xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals("default")) :
+                    reportConfig.getChildren(xmlNode -> xmlNode.getTagName().equals("report-set") && xmlNode.getString("id").equals("default"));
         }
 
         XmlNode reportSet = reportSets.get(0);
@@ -197,7 +204,6 @@ public class ReportManager implements ApplicationContextAware {
      * @param projectId 项目ID
      * @param savePath  报表根目录
      * @param filePath  报表根目录下的文件路径
-     *
      * @return 报表文件路径
      */
     private String getSaveFilePath(String projectId, String savePath, String filePath) {

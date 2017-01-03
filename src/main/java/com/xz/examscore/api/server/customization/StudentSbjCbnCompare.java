@@ -59,6 +59,7 @@ public class StudentSbjCbnCompare implements Server {
             String className = classService.getClassName(projectId, classId);
             String schoolId = doc.getString("school");
             String examNo = doc.getString("examNo");
+            String customExamNo = doc.getString("customExamNo");
             double score = scoreService.getScore(projectId, Range.student(studentId), subjectCombinationTarget);
             int classRank = rankService.getRank(projectId, Range.clazz(classId), subjectCombinationTarget, score);
             int schoolRank = rankService.getRank(projectId, Range.school(schoolId), subjectCombinationTarget, score);
@@ -66,6 +67,7 @@ public class StudentSbjCbnCompare implements Server {
             studentMap.put("studentName", studentName);
             studentMap.put("className", className);
             studentMap.put("examNo", examNo);
+            studentMap.put("customExamNo", customExamNo);
             studentMap.put("score", DoubleUtils.round(score, false));
             studentMap.put("classRank", classRank);
             studentMap.put("schoolRank", schoolRank);

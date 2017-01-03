@@ -38,6 +38,7 @@ public class ClassCombinedRankLevelSheets extends SheetGenerator {
     private void setHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "考号");
+        excelWriter.set(0, column.incrementAndGet(), "学校考号");
         excelWriter.set(0, column.incrementAndGet(), "姓名");
         List<String> subjectIds = result.get("subjectIds");
         for (String subjectId : subjectIds){
@@ -50,6 +51,8 @@ public class ClassCombinedRankLevelSheets extends SheetGenerator {
     private void setSecondaryHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(1, column.incrementAndGet(), "考号");
+        excelWriter.mergeCells(0, column.get(), 1, column.get());
+        excelWriter.set(1, column.incrementAndGet(), "学校考号");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "姓名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
@@ -69,6 +72,7 @@ public class ClassCombinedRankLevelSheets extends SheetGenerator {
         for(Map<String, Object> student : students){
             List<Map<String, Object>> subjectList = (List<Map<String, Object>>)student.get("subjects");
             excelWriter.set(row, column.incrementAndGet(), student.get("examNo"));
+            excelWriter.set(row, column.incrementAndGet(), student.get("customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             for(Map<String, Object> subject : subjectList){
                 excelWriter.set(row, column.incrementAndGet(), subject.get("score"));

@@ -39,6 +39,7 @@ public class StudentSbjCbnSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "班级");
         excelWriter.set(0, column.incrementAndGet(), "考号");
+        excelWriter.set(0, column.incrementAndGet(), "学校考号");
         excelWriter.set(0, column.incrementAndGet(), "姓名");
         excelWriter.set(0, column.incrementAndGet(), "综合得分");
         excelWriter.set(0, column.incrementAndGet(), "本班排名");
@@ -51,6 +52,7 @@ public class StudentSbjCbnSheets extends SheetGenerator {
         for(Map<String, Object> map : result){
             excelWriter.set(row, column.incrementAndGet(), map.get("className"));
             excelWriter.set(row, column.incrementAndGet(), map.get("examNo"));
+            excelWriter.set(row, column.incrementAndGet(), map.get("customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), map.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), map.get("score"));
             excelWriter.set(row, column.incrementAndGet(), map.get("classRank"));

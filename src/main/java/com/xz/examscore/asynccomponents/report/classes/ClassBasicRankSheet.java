@@ -63,6 +63,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
         if(null != rankstat && !rankstat.isEmpty()){
             Map<String, Object> projectRank = (Map<String, Object>) rankstat.get("projectRankStat");
             excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "examNo"));
+            excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), getString(rankstat, "studentName"));
             excelWriter.set(row, column.incrementAndGet(), projectRank.get("score"));
             Map<String, Object> projectRankStat = (Map<String, Object>)rankstat.get("projectRankStat");
@@ -94,6 +95,7 @@ public class ClassBasicRankSheet extends SheetGenerator {
             }
             AtomicInteger column = new AtomicInteger(-1);
             excelWriter.set(row, column.incrementAndGet(), "考号");
+            excelWriter.set(row, column.incrementAndGet(), "学校考号");
             excelWriter.set(row, column.incrementAndGet(), "学生姓名");
             excelWriter.set(row, column.incrementAndGet(), "全部科目");
             column.incrementAndGet();
@@ -121,8 +123,10 @@ public class ClassBasicRankSheet extends SheetGenerator {
             AtomicInteger column = new AtomicInteger(-1);
             excelWriter.set(row, column.incrementAndGet(), "考号");
             excelWriter.mergeCells(0, 0, 1, 0);
-            excelWriter.set(row, column.incrementAndGet(), "学生姓名");
+            excelWriter.set(row, column.incrementAndGet(), "学校考号");
             excelWriter.mergeCells(0, 1, 1, 1);
+            excelWriter.set(row, column.incrementAndGet(), "学生姓名");
+            excelWriter.mergeCells(0, 2, 1, 2);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[0]);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[1]);
             excelWriter.set(row, column.incrementAndGet(), SECONDARY_HEADER[2]);

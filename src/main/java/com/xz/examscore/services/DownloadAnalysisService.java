@@ -74,6 +74,21 @@ public class DownloadAnalysisService {
 //        File file1 = new File(dir, zipFileName);
         Map<String, Object> resultMap = new HashMap<>();
         List<String> failureList = new ArrayList<>();
+        doZipOperation(pathList, file, failureList);
+        //判断压缩文件中是否有文件条目
+        int size = getZipSize(directory);
+        if (size != 0) {
+            //zip文件下载url
+            resultMap.put("downloadURL", downloadURL + prefix + File.separator +zipFileName);
+        } else {
+            resultMap.put("downloadURL", "");
+        }
+        //不存在的文件列表
+        resultMap.put("failureList", failureList);
+        return resultMap;
+    }
+
+    public void doZipOperation(List<Map<String, String>> pathList, File file, List<String> failureList) {
         try {
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file));
             FileInputStream fis;
@@ -97,20 +112,9 @@ public class DownloadAnalysisService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //判断压缩文件中是否有文件条目
-        int size = getZipSize(directory);
-        if (size != 0) {
-            //zip文件下载url
-            resultMap.put("downloadURL", downloadURL + prefix + File.separator +zipFileName);
-        } else {
-            resultMap.put("downloadURL", "");
-        }
-        //不存在的文件列表
-        resultMap.put("failureList", failureList);
-        return resultMap;
     }
 
-    private int getZipSize(String fileName) {
+    public int getZipSize(String fileName) {
         try {
             ZipFile zipFile = new ZipFile(fileName);
             return zipFile.size();

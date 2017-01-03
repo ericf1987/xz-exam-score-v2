@@ -96,6 +96,7 @@ public class ClassPointAnalysis implements Server {
             map.put("studentId", studentId);
             map.put("studentName", studentName);
             map.put("examNo", student.getString("examNo"));
+            map.put("customExamNo", student.getString("customExamNo"));
 
             Range range = Range.student(studentId);
             map.put("subjectScore", scoreService.getScore(projectId, range, Target.subject(subjectId)));

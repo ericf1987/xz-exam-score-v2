@@ -76,6 +76,7 @@ public class ClassBasicDataAnalysis implements Server {
             String studentId = student.getString("student");
             String cityName = cityService.getCityName(student.getString("city"));
             map.put("examNo", student.getString("examNo"));
+            map.put("customExamNo", student.getString("customExamNo"));
             map.put("studentName", student.getString("name"));
             map.put("school", schoolName);
             map.put("class", className);

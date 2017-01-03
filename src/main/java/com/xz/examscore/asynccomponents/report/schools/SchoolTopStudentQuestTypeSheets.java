@@ -60,6 +60,7 @@ public class SchoolTopStudentQuestTypeSheets extends SheetGenerator {
     private void setupHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "考号");
+        excelWriter.set(0, column.incrementAndGet(), "学校考号");
         excelWriter.set(0, column.incrementAndGet(), "尖子生");
         excelWriter.set(0, column.incrementAndGet(), "所属班级");
         excelWriter.set(0, column.incrementAndGet(), "总体排名");
@@ -76,6 +77,7 @@ public class SchoolTopStudentQuestTypeSheets extends SheetGenerator {
         for(Map<String, Object> topStudent : topStudents){
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>)topStudent.get("questTypes");
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("examNo"));
+            excelWriter.set(row, column.incrementAndGet(), topStudent.get("customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("name"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("className"));
             excelWriter.set(row, column.incrementAndGet(), topStudent.get("rank"));

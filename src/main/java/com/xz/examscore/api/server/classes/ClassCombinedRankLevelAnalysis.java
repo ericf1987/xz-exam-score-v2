@@ -95,6 +95,7 @@ public class ClassCombinedRankLevelAnalysis implements Server {
             List<Map<String, Object>> subjects = new ArrayList<>();
             String studentName = studentDoc.getString("name");
             String examNo = studentDoc.getString("examNo");
+            String customExamNo = studentDoc.getString("customExamNo");
             Range studentRange = Range.student(studentDoc.getString("student"));
             for (String subject : nonCombinedSubjectIds) {
                 Target target = Target.subject(subject);
@@ -109,6 +110,7 @@ public class ClassCombinedRankLevelAnalysis implements Server {
             double totalScore = subjects.stream().mapToDouble(subjectMap -> MapUtils.getDouble(subjectMap, "score")).sum();
             studentMap.put("studentName", studentName);
             studentMap.put("examNo", examNo);
+            studentMap.put("customExamNo", customExamNo);
             if (rangeName.equals(Range.SCHOOL)) {
                 studentMap.put("className", classService.getClassName(projectId, studentDoc.getString("class")));
             }

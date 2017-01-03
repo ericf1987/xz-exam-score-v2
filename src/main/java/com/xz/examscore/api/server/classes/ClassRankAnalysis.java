@@ -82,6 +82,7 @@ public class ClassRankAnalysis implements Server {
             String studentName = student.getString("name");
 
             map.put("examNo", student.getString("examNo"));
+            map.put("customExamNo", student.getString("customExamNo"));
             map.put("studentId", studentId);
             map.put("studentName", studentName);
 

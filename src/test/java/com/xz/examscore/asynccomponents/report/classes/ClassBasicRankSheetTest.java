@@ -14,6 +14,6 @@ public class ClassBasicRankSheetTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        classBasicRankReport.generate("430100-2df3f3ad199042c39c5f4b69f5dc7840", Range.clazz("a1895cd9-d82c-4b12-a698-164fb5ceb1f3"), "target/class-score-rank.xlsx");
+        classBasicRankReport.generate("430200-3e67c524f149491597279ef6ae31baef", Range.clazz("a3fec3c6-0e46-40c3-8632-69bdf78d8484"), "target/class-score-rank.xlsx");
     }
 }

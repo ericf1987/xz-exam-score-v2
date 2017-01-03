@@ -106,6 +106,7 @@ public class ProjectCollegeEntryLevelAnalysis implements Server {
             String classId = student.getString("class");
             //学生本次考试考号
             map.put("examNo", student.getString("examNo"));
+            map.put("customExamNo", student.getString("customExamNo"));
             map.put("name", student.getString("name"));
             map.put("totalScore", totalScore);
             map.put("entryLevelInfo", info);

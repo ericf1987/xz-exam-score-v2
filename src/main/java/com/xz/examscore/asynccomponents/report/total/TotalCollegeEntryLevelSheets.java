@@ -65,6 +65,7 @@ public class TotalCollegeEntryLevelSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(0, column.incrementAndGet(), "学校名称");
         excelWriter.set(0, column.incrementAndGet(), "学生考号");
+        excelWriter.set(0, column.incrementAndGet(), "学校考号");
         excelWriter.set(0, column.incrementAndGet(), "学生姓名");
         excelWriter.set(0, column.incrementAndGet(), "上线情况");
         if(!students.isEmpty()){
@@ -82,6 +83,8 @@ public class TotalCollegeEntryLevelSheets extends SheetGenerator {
         excelWriter.set(1, column.incrementAndGet(), "学校名称");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "学生考号");
+        excelWriter.mergeCells(0, column.get(), 1, column.get());
+        excelWriter.set(1, column.incrementAndGet(), "学校考号");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
         excelWriter.set(1, column.incrementAndGet(), "学生姓名");
         excelWriter.mergeCells(0, column.get(), 1, column.get());
@@ -107,6 +110,7 @@ public class TotalCollegeEntryLevelSheets extends SheetGenerator {
         for(Map<String, Object> one : students){
             excelWriter.set(row, column.incrementAndGet(), one.get("schoolName"));
             excelWriter.set(row, column.incrementAndGet(), one.get("examNo"));
+            excelWriter.set(row, column.incrementAndGet(), one.get("customExamNo"));
             excelWriter.set(row, column.incrementAndGet(), one.get("name"));
             excelWriter.set(row, column.incrementAndGet(), one.get("entryLevelInfo"));
             List<Map<String, Object>> subjects = (List<Map<String, Object>>)one.get("subjects");

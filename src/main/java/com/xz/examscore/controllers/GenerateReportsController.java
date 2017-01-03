@@ -1,6 +1,7 @@
 package com.xz.examscore.controllers;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.examscore.services.ExamAllianceReportService;
 import com.xz.examscore.services.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,8 +26,9 @@ public class GenerateReportsController {
     @RequestMapping(value = "all")
     public Result generateReports(@RequestParam("project") String projectId) {
 
-        reportService.generateReports(projectId, true);
+        reportService.generateReports(projectId, true, false);
 
         return Result.success();
     }
+
 }

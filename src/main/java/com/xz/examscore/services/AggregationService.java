@@ -142,7 +142,7 @@ public class AggregationService {
 
     public void generateReports(String projectId) {
         projectStatusService.setProjectStatus(projectId, ReportGenerating);
-        reportService.generateReports(projectId, false);
+        reportService.generateReports(projectId, false, false);
         projectStatusService.setProjectStatus(projectId, ReportGenerated);
     }
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<report-config>
+
+    <report-set id="default" base="com.xz.examscore.asynccomponents.report.customization.examAlliance">
+
+        <report-category name="联考成绩分析" range="province">
+            <report-category name="基础分析">
+                <report name="前百分段名平均分" class=".AverageByRankLineReport"/>
+                <report name="800分以上人数统计" class=".AverageByScoreLineReport"/>
+                <report name="本科及上线率分析" class=".CollegeEntryLevelRateReport"/>
+                <report name="客观题突出情况" class=".ObjQuestScoreMaxAndMinReport"/>
+                <report name="试题得分明细" class=".QuestScoreDetailReport"/>
+                <report name="主观题突出情况" class=".SbjQuestScoreMaxAndMinReport"/>
+                <report name="单科各校基本情况" class=".SchoolSubjectBasicInfoReport"/>
+                <report name="各科基本情况" class=".SubjectTopAverageReport"/>
+                <report name="一本入围比例核算" class=".ToBeEntryLevelReport"/>
+                <report name="临界生人数及各科得分率" class=".ToBeEntryLevelStudentReport"/>
+                <report name="整体平均分统计" class=".TotalAverageDistributionReport"/>
+                <report name="试卷难度系数" class=".TotalDegreeOfDifficultyReport"/>
+                <report name="分数段表" class=".TotalScoreSegmentCountReport"/>
+            </report-category>
+        </report-category>
+
+    </report-set>
+</report-config>
