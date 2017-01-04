@@ -96,6 +96,9 @@ public class ImportProjectService {
     @Autowired
     SubjectCombinationService subjectCombinationService;
 
+    @Autowired
+    QuestAbilityLevelService questAbilityLevelService;
+
     public static final int SUBJECT_LENGTH = 3;
 
     /**
@@ -115,6 +118,7 @@ public class ImportProjectService {
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
         importQuestTypes(projectId, context);
+        importQuestAbilityLevel(projectId, context);
 
         if (reimportStudents) {
             importSchools(projectId, context);
@@ -314,6 +318,7 @@ public class ImportProjectService {
             questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
+            questDoc.put("levelOrAbility", questObj.getString("levelOrAbility"));
             //是否直接给分
             questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
             questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
@@ -455,6 +460,53 @@ public class ImportProjectService {
                     projectId, Target.questType(questTypeId), questTypeFullScore.get(questTypeId));
         }
     }
+
+    /**
+     * 导入试题能力层级
+     *
+     * @param projectId 考试项目ID
+     * @param context   上下文对象
+     */
+    private void importQuestAbilityLevel(String projectId, Context context) {
+        LOG.info("导入项目 " + projectId + " 试题能力层级");
+        questAbilityLevelService.clearQuestAbilityLevel(projectId);
+
+        List<Document> projectQuests = context.get("quests");
+        Map<String, Document> questAbilityLevelMap = new HashMap<>();
+        DoubleCounterMap<String> questAbilityLevelScore = new DoubleCounterMap<>();
+
+        for (Document quest : projectQuests) {
+            double score = quest.getDouble("score");
+            String subject = quest.getString("subject");
+            String abilityLevel = quest.getString("levelOrAbility");
+            if(StringUtil.isBlank(abilityLevel)){
+                continue;
+            }
+
+            abilityLevel = subject + "_" + abilityLevel;
+            String abilityLevelDesc = abilityLevel.contains("level") ? "水平检测" : "能力检测";
+
+            questAbilityLevelScore.incre(abilityLevel, score);
+
+            if(!questAbilityLevelMap.containsKey(abilityLevel)){
+                questAbilityLevelMap.put(abilityLevel, doc("project", projectId)
+                .append("subject", subject)
+                .append("questAbilityLevel", abilityLevel)
+                .append("questAbilityLevelName", abilityLevelDesc));
+            }
+        }
+
+        //保存题目能力层级
+        for(Document doc : questAbilityLevelMap.values()){
+            questAbilityLevelService.saveQuestAbilityLevel(doc);
+        }
+
+        //保存题目能力层级满分
+        for(String questAbilityLevel : questAbilityLevelMap.keySet()){
+            fullScoreService.saveFullScore(projectId, Target.questAbilityLevel(questAbilityLevel), questAbilityLevelScore.get(questAbilityLevel));
+        }
+    }
+
 
     /**
      * 导入学校和区市省

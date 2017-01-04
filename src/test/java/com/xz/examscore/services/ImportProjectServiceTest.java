@@ -1,6 +1,5 @@
 package com.xz.examscore.services;
 
-import com.alibaba.fastjson.JSONArray;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.junit.Test;
@@ -19,7 +18,7 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportProjectQuest() throws Exception {
-        importProjectService.importProject("430300-f529e0f0236d49559b0c27acbbb255ed", false);
+        importProjectService.importProject("430100-386a57cd56434c77bb4336076394c345", false);
     }
 
     @Test

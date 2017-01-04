@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xz.examscore.bean.Target.*;
@@ -47,6 +44,9 @@ public class TargetService {
 
     @Autowired
     SubjectCombinationService subjectCombinationService;
+
+    @Autowired
+    QuestAbilityLevelService questAbilityLevelService;
 
     @Autowired
     SimpleCache cache;
@@ -100,6 +100,10 @@ public class TargetService {
 
         if (targetNameList.contains(SUBJECT_COMBINATION)) {
             targetList.addAll(querySubjectCombinations(projectId));
+        }
+
+        if (targetNameList.contains(QUEST_ABILITY_LEVEL)) {
+            targetList.addAll(queryQuestAbilityLevels(projectId));
         }
 
         return targetList;
@@ -185,6 +189,12 @@ public class TargetService {
                 .collect(Collectors.toList());
     }
 
+    private List<Target> queryQuestAbilityLevels(String projectId) {
+        return questAbilityLevelService.queryQuestAbilityLevels(projectId).stream()
+                .map(questAbilityLevel -> new Target(QUEST_ABILITY_LEVEL, questAbilityLevel))
+                .collect(Collectors.toList());
+    }
+
     private List<Target> queryQuests(String projectId) {
 
         String cacheKey = "project_quest_target_list:" + projectId;
@@ -231,6 +241,15 @@ public class TargetService {
                     return questType.getSubjectId();
                 } else {
                     throw new IllegalArgumentException("Target not found in questType " + projectId + ": " + target);
+                }
+
+            case QUEST_ABILITY_LEVEL:
+                String questAbilityLevel = target.getId().toString();
+                Document doc = questAbilityLevelService.getQuestAbilityLevelDoc(projectId, questAbilityLevel);
+                if (doc != null) {
+                    return doc.getString("subject");
+                } else {
+                    throw new IllegalArgumentException("Target not found in questAbilityLevel " + projectId + ": " + target);
                 }
 
             case QUEST:

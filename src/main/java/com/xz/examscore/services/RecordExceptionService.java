@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.ProjectStatus;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,9 @@ public class RecordExceptionService {
      * @param projectStatus 统计执行阶段
      * @param e             异常
      */
-    public void recordException(String projectId, ProjectStatus projectStatus, Exception e) {
+    public void recordException(String projectId, ProjectStatus projectStatus, Exception e, String desc) {
         String exceptionName = e.getClass().getName();
-        String exceptionDesc = e.getMessage();
+        String exceptionDesc = StringUtil.isBlank(e.getMessage()) ? desc : e.getMessage();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = format.format(Calendar.getInstance().getTime());
         MongoCollection<Document> collection = scoreDatabase.getCollection("exception_list");

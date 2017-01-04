@@ -32,6 +32,8 @@ public class Target {
 
     public static final String SUBJECT_LEVEL = "subjectLevel";
 
+    public static final String QUEST_ABILITY_LEVEL = "questAbilityLevel";
+
     public static Target project(String project) {
         return new Target(Target.PROJECT, project);
     }
@@ -75,6 +77,8 @@ public class Target {
     public static Target pointLevel(PointLevel pointLevel) {
         return new Target(POINT_LEVEL, pointLevel);
     }
+
+    public static Target questAbilityLevel(String questAbilityLevel) {return new Target(QUEST_ABILITY_LEVEL, questAbilityLevel);}
 
     private String name;
 
@@ -175,4 +179,5 @@ public class Target {
 
         return new Target(target.getString("name"), id);
     }
+
 }

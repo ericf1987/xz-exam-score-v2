@@ -58,7 +58,7 @@ public class ImportMessageReceiver extends MessageReceiver<ImportTaskMessage> {
                 LOG.error("导入项目失败", e);
                 projectStatusService.setProjectStatus(projectId, ProjectImporting);
                 projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
-                recordExceptionService.recordException(projectId, ProjectImporting, e);
+                recordExceptionService.recordException(projectId, ProjectImporting, e, "导入项目基础信息出现异常，请检查！");
                 return;
             }
         }
@@ -73,7 +73,7 @@ public class ImportMessageReceiver extends MessageReceiver<ImportTaskMessage> {
                 LOG.error("导入网阅分数失败", e);
                 projectStatusService.setProjectStatus(projectId, ScoreImporting);
                 projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
-                recordExceptionService.recordException(projectId, ScoreImporting, e);
+                recordExceptionService.recordException(projectId, ScoreImporting, e, "导入分数出现异常，请检查！");
                 return;
             }
         }

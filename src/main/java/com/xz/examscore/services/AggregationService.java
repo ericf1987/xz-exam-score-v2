@@ -116,13 +116,13 @@ public class AggregationService {
             projectService.updateAggregationTime(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationFailed);
             projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
-            recordExceptionService.recordException(projectId, AggregationFailed, e);
+            recordExceptionService.recordException(projectId, AggregationFailed, e, "数据统计执行失败！");
             throw e;
         } catch (Exception e) {
             projectService.updateAggregationTime(projectId);
             projectStatusService.setProjectStatus(projectId, AggregationFailed);
             projectStatusService.setAggregationStatus(projectId, AggregationStatus.Terminated);
-            recordExceptionService.recordException(projectId, AggregationFailed, e);
+            recordExceptionService.recordException(projectId, AggregationFailed, e, "数据统计执行失败！");
             throw new AppException(e);
         }
     }
