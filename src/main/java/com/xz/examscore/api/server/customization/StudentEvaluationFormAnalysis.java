@@ -300,6 +300,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         double totalScore = scoreService.getScore(projectId, Range.student(studentId), target);
         int classRank = rankService.getRank(projectId, Range.clazz(classId), target, studentId);
         int schoolRank = rankService.getRank(projectId, Range.school(schoolId), target, studentId);
+        int provinceRank = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), target, studentId);
         double scoreRate = scoreRateService.getScoreRate(projectId, Range.student(studentId), target);
         double fullScore = fullScoreService.getFullScore(projectId, target);
         scoreAndRank.put("totalScore", totalScore);
@@ -307,6 +308,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         scoreAndRank.put("scoreRate", DoubleUtils.round(scoreRate));
         scoreAndRank.put("classRank", classRank);
         scoreAndRank.put("schoolRank", schoolRank);
+        scoreAndRank.put("provinceRank", provinceRank);
         scoreAndRank.put("subjectId", target.match(Target.PROJECT) ? "" : target.getId());
         scoreAndRank.put("subjectName", target.match(Target.PROJECT) ? "全科" : SubjectService.getSubjectName(target.getId().toString()));
 

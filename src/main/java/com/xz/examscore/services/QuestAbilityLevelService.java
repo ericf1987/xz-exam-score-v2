@@ -7,6 +7,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,12 +36,12 @@ public class QuestAbilityLevelService {
     }
 
     public void saveQuestAbilityLevel(Document doc) {
-        saveQuestAbilityLevel(doc.getString("project"), doc.getString("subject"), doc.getString("questAbilityLevel"), doc.getString("questAbilityLevelName"));
+        saveQuestAbilityLevel(doc.getString("project"), doc.getString("subject"), doc.getString("levelOrAbility"), doc.getString("questAbilityLevel"), doc.getString("questAbilityLevelName"));
     }
 
-    private void saveQuestAbilityLevel(String project, String subject, String questAbilityLevel, String name) {
+    private void saveQuestAbilityLevel(String project, String subject, String levelOrAbility, String questAbilityLevel, String name) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("quest_ability_level_list");
-        Document query = doc("project", project).append("subject", subject).append("questAbilityLevel", questAbilityLevel);
+        Document query = doc("project", project).append("subject", subject).append("levelOrAbility", levelOrAbility).append("questAbilityLevel", questAbilityLevel);
         Document update = $set(
                 doc("questAbilityLevelName", name));
         UpdateResult result = collection.updateMany(query, update);
@@ -62,7 +63,7 @@ public class QuestAbilityLevelService {
 
             Consumer<String> getQuestType = quest_ability_level -> {
                 Document q = doc("project", projectId).append("questAbilityLevel", quest_ability_level);
-                Document p = doc("questAbilityLevelName", 1).append("subject", 1);
+                Document p = doc("questAbilityLevelName", 1).append("subject", 1).append("levelOrAbility", 1);
                 Document d = collection.find(q).projection(p).first();
 
                 if (d != null) {
@@ -75,9 +76,36 @@ public class QuestAbilityLevelService {
         });
     }
 
-    public Document getQuestAbilityLevelDoc(String projectId, String questAbilityLevel) {
-        FindIterable<Document> documents = scoreDatabase.getCollection("quest_ability_level_list")
-                .find(doc("project", projectId).append("questAbilityLevel", questAbilityLevel));
+    public Document getQuestAbilityLevelDoc(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility){
+        Document query = getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
+        FindIterable<Document> documents = scoreDatabase.getCollection("quest_ability_level_list").find(query);
         return null != documents ? documents.first() : null;
     }
+
+    public String getId(String subjectId, String abilityLevel){
+        if(!StringUtil.isBlank(abilityLevel)){
+            return subjectId + "_" + abilityLevel;
+        }
+        return null;
+    }
+
+    public String getSubjectId(String questAbilityLevel){
+        String[] arr = questAbilityLevel.split("_");
+        return arr[0];
+    }
+
+    public String getLevel(String questAbilityLevel){
+        String[] arr = questAbilityLevel.split("_");
+        return arr[1];
+    }
+
+    public Document getQuery(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility) {
+        Document q = doc("project", projectId).append("questAbilityLevel", questAbilityLevel);
+        if (!StringUtil.isBlank(subjectId))
+            q.append("subject", subjectId);
+        if (!StringUtil.isBlank(levelOrAbility))
+            q.append("levelOrAbility", levelOrAbility);
+        return q;
+    }
+
 }

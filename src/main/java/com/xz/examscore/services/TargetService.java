@@ -245,7 +245,7 @@ public class TargetService {
 
             case QUEST_ABILITY_LEVEL:
                 String questAbilityLevel = target.getId().toString();
-                Document doc = questAbilityLevelService.getQuestAbilityLevelDoc(projectId, questAbilityLevel);
+                Document doc = questAbilityLevelService.getQuestAbilityLevelDoc(projectId, questAbilityLevel, null, null);
                 if (doc != null) {
                     return doc.getString("subject");
                 } else {

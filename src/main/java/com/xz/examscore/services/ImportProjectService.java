@@ -306,7 +306,8 @@ public class ImportProjectService {
             questDoc.put("project", projectId);
             questDoc.put("questId", questObj.getString("questId"));
             //如果拆分，则subject取答题卡的科目ID
-            questDoc.put("subject", !isSubjectSplited ? questObj.getString("cardSubjectId") : questObj.getString("subjectId"));
+            String sid = !isSubjectSplited ? questObj.getString("cardSubjectId") : questObj.getString("subjectId");
+            questDoc.put("subject", sid);
             questDoc.put("cardSubjectId", questObj.getString("cardSubjectId"));
             questDoc.put("questType", questObj.getString("questType"));
             questDoc.put("isObjective", isObjective(questObj.getString("questType"), questObj.getString("subObjTag")));
@@ -318,7 +319,10 @@ public class ImportProjectService {
             questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
-            questDoc.put("levelOrAbility", questObj.getString("levelOrAbility"));
+            String levelOrAbility = generateByRandom();
+            //questDoc.put("levelOrAbility", questObj.getString("levelOrAbility"));
+            questDoc.put("levelOrAbility", levelOrAbility);
+            questDoc.put("questAbilityLevel", questAbilityLevelService.getId(sid, levelOrAbility));
             //是否直接给分
             questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
             questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
@@ -330,6 +334,14 @@ public class ImportProjectService {
 
         context.put("quests", projectQuests);
         questService.saveProjectQuests(projectId, projectQuests);
+    }
+
+    private String generateByRandom() {
+        int r = (int)(Math.random() * 10);
+        if(r > 7){
+            return "ability";
+        }
+        return "level";
     }
 
     /**
@@ -478,21 +490,22 @@ public class ImportProjectService {
         for (Document quest : projectQuests) {
             double score = quest.getDouble("score");
             String subject = quest.getString("subject");
-            String abilityLevel = quest.getString("levelOrAbility");
-            if(StringUtil.isBlank(abilityLevel)){
+            String levelOrAbility = quest.getString("levelOrAbility");
+            if(StringUtil.isBlank(levelOrAbility)){
                 continue;
             }
 
-            abilityLevel = subject + "_" + abilityLevel;
-            String abilityLevelDesc = abilityLevel.contains("level") ? "水平检测" : "能力检测";
+            String questAbilityLevel = questAbilityLevelService.getId(subject, levelOrAbility);
+            String questAbilityLevelName = questAbilityLevel.contains("level") ? "水平检测" : "能力检测";
 
-            questAbilityLevelScore.incre(abilityLevel, score);
+            questAbilityLevelScore.incre(questAbilityLevel, score);
 
-            if(!questAbilityLevelMap.containsKey(abilityLevel)){
-                questAbilityLevelMap.put(abilityLevel, doc("project", projectId)
+            if(!questAbilityLevelMap.containsKey(questAbilityLevel)){
+                questAbilityLevelMap.put(questAbilityLevel, doc("project", projectId)
                 .append("subject", subject)
-                .append("questAbilityLevel", abilityLevel)
-                .append("questAbilityLevelName", abilityLevelDesc));
+                .append("levelOrAbility", levelOrAbility)
+                .append("questAbilityLevel", questAbilityLevel)
+                .append("questAbilityLevelName", questAbilityLevelName));
             }
         }
 
