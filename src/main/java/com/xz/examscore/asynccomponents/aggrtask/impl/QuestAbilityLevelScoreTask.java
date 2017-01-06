@@ -89,7 +89,7 @@ public class QuestAbilityLevelScoreTask extends AggrTask {
 
             Document update = doc("score", score)
                     .append("rate", rate)
-                    .append("subjectId", subjectId)
+                    .append("subject", subjectId)
                     .append("levelOrAbility", levelOrAbility)
                     .append("class", studentDoc.getString("class"))
                     .append("school", studentDoc.getString("school"))
@@ -102,7 +102,7 @@ public class QuestAbilityLevelScoreTask extends AggrTask {
                 collection.insertOne(
                         query.append("score", score)
                                 .append("rate", rate)
-                                .append("subjectId", subjectId)
+                                .append("subject", subjectId)
                                 .append("levelOrAbility", levelOrAbility)
                                 .append("class", studentDoc.getString("class"))
                                 .append("school", studentDoc.getString("school"))

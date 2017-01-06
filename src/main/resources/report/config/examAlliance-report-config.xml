@@ -18,6 +18,7 @@
                 <report name="整体平均分统计" class=".TotalAverageDistributionReport"/>
                 <report name="试卷难度系数" class=".TotalDegreeOfDifficultyReport"/>
                 <report name="分数段表" class=".TotalScoreSegmentCountReport"/>
+                <report name="题目能力层级分析" class=".TotalQuestAbilityLevelScoreReport"/>
             </report-category>
         </report-category>
 

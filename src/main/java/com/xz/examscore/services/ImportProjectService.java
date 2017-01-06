@@ -112,8 +112,8 @@ public class ImportProjectService {
         Context context = new Context();
 
         // 下面的导入顺序不能变更，否则可能造成数据错误
-        importProjectReportConfig(projectId, context);
         importProjectInfo(projectId, context);
+        importProjectReportConfig(projectId, context);
         importSubjects(projectId, context);
         importQuests(projectId, context);   // 该方法对 context 参数只写不读
         importPointsAndLevels(projectId, context);
