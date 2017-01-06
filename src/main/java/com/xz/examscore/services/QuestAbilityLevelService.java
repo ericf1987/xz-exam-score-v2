@@ -76,31 +76,33 @@ public class QuestAbilityLevelService {
         });
     }
 
-    public Document getQuestAbilityLevelDoc(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility){
+    public Document getQuestAbilityLevelDoc(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility) {
         Document query = getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
         FindIterable<Document> documents = scoreDatabase.getCollection("quest_ability_level_list").find(query);
         return null != documents ? documents.first() : null;
     }
 
-    public String getId(String subjectId, String abilityLevel){
-        if(!StringUtil.isBlank(abilityLevel)){
+    public String getId(String subjectId, String abilityLevel) {
+        if (!StringUtil.isBlank(abilityLevel)) {
             return subjectId + "_" + abilityLevel;
         }
         return null;
     }
 
-    public String getSubjectId(String questAbilityLevel){
+    public String getSubjectId(String questAbilityLevel) {
         String[] arr = questAbilityLevel.split("_");
         return arr[0];
     }
 
-    public String getLevel(String questAbilityLevel){
+    public String getLevel(String questAbilityLevel) {
         String[] arr = questAbilityLevel.split("_");
         return arr[1];
     }
 
     public Document getQuery(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility) {
-        Document q = doc("project", projectId).append("questAbilityLevel", questAbilityLevel);
+        Document q = doc("project", projectId);
+        if (!StringUtil.isBlank(questAbilityLevel))
+            q.append("questAbilityLevel", questAbilityLevel);
         if (!StringUtil.isBlank(subjectId))
             q.append("subject", subjectId);
         if (!StringUtil.isBlank(levelOrAbility))

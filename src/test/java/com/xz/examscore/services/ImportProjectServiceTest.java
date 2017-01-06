@@ -18,13 +18,13 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportProjectQuest() throws Exception {
-        importProjectService.importProject("610800-01e4a879c6434326bb084f4840d63630", false);
+        importProjectService.importProject("430100-d9463d7e76834ef69741bc77e631f282", false);
     }
 
     @Test
     public void testImportReportConfig() throws Exception {
         Context context = new Context();
-        importProjectService.importProjectReportConfig("430100-98abd83a67524a7daca4b531db0742ee", context);
+        importProjectService.importProjectReportConfig("430100-d9463d7e76834ef69741bc77e631f282", context);
         System.out.println(context.toString());
     }
 

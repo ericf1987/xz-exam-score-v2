@@ -5,8 +5,10 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
+import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,4 +94,28 @@ public class QuestAbilityLevelScoreService {
 
     }
 
+    public double getAllPassCount(String projectId, Range schoolRange, List<String> subjectIds, String level, double factor) {
+        List<Document> studentList = getStudentList(projectId, null, null, level, schoolRange);
+        CounterMap<String> passCounter = new CounterMap<>();
+
+        for (Document doc : studentList) {
+            boolean flag = true;
+            for (String subjectId : subjectIds) {
+                double fullScore = fullScoreService.getFullScore(projectId, Target.subject(subjectId));
+                double passScore = fullScore * factor;
+                double score = doc.getDouble("score");
+                if(passScore > score){
+                    flag = false;
+                    break;
+                }
+            }
+            //如果该学生全科通过，则累加
+            if(flag)
+                passCounter.incre("allPass");
+        }
+        int allPassCount = passCounter.getCount("allPass");
+        int totalCount = studentList.size();
+        double allPassRate = totalCount == 0 ? 0 :  DoubleUtils.round((double)allPassCount / studentList.size());
+        return allPassRate;
+    }
 }

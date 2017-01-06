@@ -678,8 +678,8 @@ public class ScannerDBService {
         //主观题作答
         List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
         //获取学生作答了的题目（过滤选做题）
-        objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
-        subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+        List<Document> newObjectiveList = objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+        List<Document> newSubjectiveList = subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
 
         resultMap.put("cardId", cardId);
         resultMap.put("offset1X", "");
@@ -688,8 +688,8 @@ public class ScannerDBService {
         resultMap.put("offset2Y", "");
         resultMap.put("paper_positive", paper_positive);
         resultMap.put("paper_reverse", paper_reverse);
-        resultMap.put("objectiveList", objectiveList);
-        resultMap.put("subjectiveList", subjectiveList);
+        resultMap.put("objectiveList", newObjectiveList);
+        resultMap.put("subjectiveList", newSubjectiveList);
         resultMap.put("hasPaperPosition", hasPaperPosition);
 
         return resultMap;

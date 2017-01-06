@@ -7,6 +7,7 @@ import com.xz.examscore.api.server.customization.examAlliance.TotalQuestAbilityL
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.services.SubjectService;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,10 @@ public class TotalQuestAbilityLevelScoreSheets extends SheetGenerator {
             "人平均分", "指标率"
     };
 
+    public static final String[] LAST_HEADER = new String[]{
+            "总分", "指标率"
+    };
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Param param = new Param().setParameter("projectId", projectId);
@@ -58,10 +63,10 @@ public class TotalQuestAbilityLevelScoreSheets extends SheetGenerator {
             }
             excelWriter.mergeCells(0, column.get() - length + 1, 0, column.get());
         }
-        for (int j = 0; j < SECONDARY_HEADER.length; j++) {
+        for (int j = 0; j < length; j++) {
             excelWriter.set(0, column.incrementAndGet(), "总分");
         }
-        excelWriter.mergeCells(0, column.get() - SECONDARY_HEADER.length + 1, 0, column.get());
+        excelWriter.mergeCells(0, column.get() - length + 1, 0, column.get());
     }
 
     private void setSecondaryHeader(ExcelWriter excelWriter, List<String> subjectIds) {
@@ -78,7 +83,10 @@ public class TotalQuestAbilityLevelScoreSheets extends SheetGenerator {
             }
         }
         for (String c : SECONDARY_HEADER) {
-            excelWriter.set(1, column.incrementAndGet(), c);
+            for (int j = 0; j < LAST_HEADER.length; j++) {
+                excelWriter.set(1, column.incrementAndGet(), c);
+            }
+            excelWriter.mergeCells(1, column.get() - 1, 1, column.get());
         }
     }
 
@@ -98,7 +106,9 @@ public class TotalQuestAbilityLevelScoreSheets extends SheetGenerator {
         }
 
         for (String c : SECONDARY_HEADER) {
-            excelWriter.set(2, column.incrementAndGet(), "总分");
+            for (String t : LAST_HEADER) {
+                excelWriter.set(2, column.incrementAndGet(), t);
+            }
         }
     }
 
@@ -127,9 +137,16 @@ public class TotalQuestAbilityLevelScoreSheets extends SheetGenerator {
             }
 
             Map<String, Object> total = (Map<String, Object>) map.get("total");
-            excelWriter.set(row, column.incrementAndGet(), total.get("levelTotal"));
-            excelWriter.set(row, column.incrementAndGet(), total.get("abilityTotal"));
-            excelWriter.set(row, column.incrementAndGet(), total.get("totalScore"));
+            Map<String, Object> l = (Map<String, Object>) total.get("level");
+            Map<String, Object> a = (Map<String, Object>) total.get("ability");
+            Map<String, Object> t = (Map<String, Object>) total.get("total");
+
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(l, "score"));
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(l, "rate"));
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(a, "score"));
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(a, "rate"));
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(t, "score"));
+            excelWriter.set(row, column.incrementAndGet(), MapUtils.getDouble(t, "rate"));
 
             row++;
             column.set(-1);
