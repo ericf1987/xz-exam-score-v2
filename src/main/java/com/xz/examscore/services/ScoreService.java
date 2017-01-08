@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -43,6 +44,12 @@ public class ScoreService {
 
     @Autowired
     SubjectService subjectService;
+
+    @Autowired
+    SubjectCombinationService subjectCombinationService;
+
+    @Autowired
+    ImportProjectService importProjectService;
 
     @Autowired
     SimpleCache cache;
@@ -105,9 +112,15 @@ public class ScoreService {
      * @param studentId 学生ID
      * @return 分数记录
      */
-    public FindIterable<Document> getStudentQuestScores(String projectId, String studentId) {
-        Document query = doc("project", projectId).append("student", studentId);
-        return scoreDatabase.getCollection("score").find(query);
+    public List<Document> getStudentQuestScores(String projectId, String studentId) {
+        List<String> allSubjects = new ArrayList<>();
+        allSubjects.addAll(subjectService.querySubjects(projectId).stream().filter(subject -> subject.length() == 3).collect(Collectors.toList()));
+        allSubjects.addAll(subjectCombinationService.getAllSubjectCombinations(projectId));
+        List<Document> studentScores = new ArrayList<>();
+        for (String subjectId : allSubjects){
+            studentScores.addAll(getStudentScoresBySubject(projectId, studentId, subjectId));
+        }
+        return studentScores;
     }
 
     /**
@@ -119,8 +132,45 @@ public class ScoreService {
      * @return 分数记录
      */
     public FindIterable<Document> getStudentSubjectScores(String projectId, String studentId, String subjectId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
         Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
-        return scoreDatabase.getCollection("score").find(query);
+        return collection.find(query);
+    }
+
+    /**
+     * 查询指定学生的具体科目的所有分数记录列表
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 学生ID
+     * @return 分数记录
+     */
+    public ArrayList<Document> getStudentScoresBySubject(String projectId, String studentId, String subjectId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+        if (subjectId.length() > ImportProjectService.SUBJECT_LENGTH) {
+            //组合科目
+            Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
+            Document first = collection.find(query).first();
+            //如果存在组合科目的分数
+            if (null != first && !first.isEmpty()) {
+                return CollectionUtils.asArrayList(toList(collection.find(query)));
+            } else {
+                //查询单科
+                List<String> subjects = importProjectService.separateSubject(subjectId);
+                List<Document> list = new ArrayList<>();
+                for (String subject : subjects) {
+                    Document q = doc("project", projectId).append("student", studentId).append("subject", subject);
+                    FindIterable<Document> documents = collection.find(q);
+                    list.addAll(toList(documents));
+                }
+                list.forEach(doc -> {
+                    doc.put("subject", subjectId);
+                });
+                return CollectionUtils.asArrayList(list);
+            }
+        }
+        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
+        return CollectionUtils.asArrayList(toList(collection.find(query)));
     }
 
     /**

@@ -64,6 +64,9 @@ public class ScannerDBService {
     @Autowired
     ScoreService scoreService;
 
+    @Autowired
+    ScannerDBExceptionService scannerDBExceptionService;
+
     public MongoClient getMongoClient(String project) {
 
         Document projectDoc = scannerMongoClient.getDatabase("project_database")
@@ -165,6 +168,7 @@ public class ScannerDBService {
     public void importSubjectScore0(String project, String subjectId) {
         String dbName = project + "_" + subjectId;
         LOG.info("导入 " + dbName + " 的成绩...");
+        scannerDBExceptionService.deleteRecord(project);
         MongoCollection<Document> collection = getMongoClient(project).getDatabase(dbName).getCollection("students");
         AtomicInteger counter = new AtomicInteger();
         collection.find(doc()).forEach(
@@ -184,7 +188,11 @@ public class ScannerDBService {
         Document student = studentService.findStudent(projectId, studentId);
 
         if (student == null) {
-            throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
+            //throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
+            String desc = "找不到项目 " + projectId + ", 科目 " + subjectId + " 的考生 " + studentId;
+            LOG.error(desc);
+            scannerDBExceptionService.recordScannerDBException(projectId, studentId, subjectId, desc);
+            return;
         }
 
         //清除综合科目及其子科目的分数信息

@@ -11,6 +11,8 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 import static com.xz.examscore.util.Mongo.target2Doc;
@@ -115,5 +117,13 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
             int rank = rankService.getRank(projectId, Range.clazz(doc.getString("class")), target, studentId);
             System.out.println("班级：" + classService.getClassName(projectId, doc.getString("class")) + "，学生姓名：" + doc.getString("name") + ", 排名：" + rank);
         });
+    }
+
+    @Test
+    public void testGetStudentScores() throws Exception {
+        String projectId = "430100-501b96776dc348748e2afdb95d491516";
+        String studentId = "000b9822-43e3-4bca-a3a1-f25a01b08247";
+        List<Document> studentScores = scoreService.getStudentQuestScores(projectId, studentId);
+        System.out.println(studentScores);
     }
 }

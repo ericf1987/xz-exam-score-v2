@@ -105,14 +105,4 @@ public class SubjectService {
         }
     }
 
-    /**
-     * 获取综合科目ID
-     * @param projectId 项目ID
-     */
-    public List<String> getCombineSubjects(String projectId){
-        MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
-        Document doc = c.find(doc("project", projectId)).first();
-        List<String> subjects = (List<String>)doc.get("subjects");
-        return subjects.stream().filter(subject -> subject.length() != ImportProjectService.SUBJECT_LENGTH).collect(Collectors.toList());
-    }
 }

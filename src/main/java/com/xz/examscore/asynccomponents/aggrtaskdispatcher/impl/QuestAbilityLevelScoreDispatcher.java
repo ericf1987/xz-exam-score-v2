@@ -17,7 +17,7 @@ import java.util.Map;
  * @author by fengye on 2017/1/4.
  */
 @Component
-@TaskDispatcherInfo(taskType = "quest_ability_level_score", isAdvanced = true)
+@TaskDispatcherInfo(taskType = "quest_ability_level_score", isAdvanced = true, isCustomized = true)
 public class QuestAbilityLevelScoreDispatcher extends TaskDispatcher{
 
     static final Logger LOG = LoggerFactory.getLogger(QuestAbilityLevelScoreDispatcher.class);

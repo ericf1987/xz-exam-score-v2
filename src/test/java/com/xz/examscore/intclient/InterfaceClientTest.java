@@ -61,7 +61,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("610800-01e4a879c6434326bb084f4840d63630");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430100-c2ed12467b2d481dbc833bda83dee21a");
         System.out.println(quests.toString());
         Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests);
         System.out.println(importProjectService.separateSubject("004005006").toString());
@@ -77,14 +77,15 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryExamClassByProject() throws Exception {
-        JSONArray classes = interfaceClient.queryExamClassByProject(PROJECT_ID, SCHOOL_ID, false);
+        JSONArray classes = interfaceClient.queryExamClassByProject("430100-501b96776dc348748e2afdb95d491516", "ad364e60-20ce-4063-a67e-beeb438d57e9", false);
+        System.out.println(classes.toString());
         assertNotNull(classes);
         assertFalse(classes.isEmpty());
     }
 
     @Test
     public void testQueryClassExamStudent() throws Exception {
-        JSONArray students = interfaceClient.queryClassExamStudent("433100-f2dc335004f24415bab7d69a01403115", "006832bd-1ce7-477d-9a49-7d401aa38505");
+        JSONArray students = interfaceClient.queryClassExamStudent("430100-501b96776dc348748e2afdb95d491516", "006832bd-1ce7-477d-9a49-7d401aa38505");
         System.out.println(students.toJSONString());
         assertNotNull(students);
         assertFalse(students.isEmpty());
@@ -109,7 +110,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("610800-01e4a879c6434326bb084f4840d63630");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-c2ed12467b2d481dbc833bda83dee21a");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

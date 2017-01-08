@@ -47,6 +47,12 @@ public class ExportScoreService {
     InterfaceClient interfaceClient;
 
     @Autowired
+    SubjectService subjectService;
+
+    @Autowired
+    SubjectCombinationService subjectCombinationService;
+
+    @Autowired
     OSSFileClient scorePackOssFileClient;
 
     /**
@@ -116,8 +122,9 @@ public class ExportScoreService {
         packCreator.addStudent(studentDoc.getString("school"), studentDoc.getString("student"), "");
 
         String studentId = studentDoc.getString("student");
+
         scoreService.getStudentQuestScores(projectId, studentId)
-                .forEach((Consumer<Document>) scoreDoc -> addStudentScore(packCreator, scoreDoc));
+                .forEach(scoreDoc -> addStudentScore(packCreator, scoreDoc));
     }
 
     private void addStudentScore(ScoreDataPackCreator packCreator, Document scoreDoc) {
