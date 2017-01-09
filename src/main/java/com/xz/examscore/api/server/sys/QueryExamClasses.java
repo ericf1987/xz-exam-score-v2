@@ -5,7 +5,10 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.*;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ClassService;
+import com.xz.examscore.services.StudentService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,9 @@ public class QueryExamClasses implements Server {
     @Autowired
     ClassService classService;
 
+    @Autowired
+    StudentService studentService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -43,6 +49,7 @@ public class QueryExamClasses implements Server {
         List<Document> listClasses = classService.listClasses(projectId, schoolId);
         for (Document listClass : listClasses) {
             listClass.put("name", getFullClassName(listClass));
+            listClass.put("studentCount", studentService.getStudentCount(projectId, Range.clazz(listClass.getString("class")), Target.project(projectId)));
         }
 
         listClasses.sort((o1, o2) -> o1.getString("name").compareTo(o2.getString("name")));

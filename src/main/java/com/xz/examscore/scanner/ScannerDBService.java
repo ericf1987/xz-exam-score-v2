@@ -8,6 +8,7 @@ import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.services.*;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
@@ -66,6 +67,9 @@ public class ScannerDBService {
 
     @Autowired
     ScannerDBExceptionService scannerDBExceptionService;
+
+    @Autowired
+    ProjectConfigService projectConfigService;
 
     public MongoClient getMongoClient(String project) {
 
@@ -603,7 +607,24 @@ public class ScannerDBService {
 
     //查询学生某以科目的答题切图和留痕
     public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId) {
-        String dbName = projectId + "_" + subjectId;
+
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
+        String dbName = projectId + "_";
+
+        boolean separateCombine = projectConfig.isSeparateCombine();
+        if(separateCombine){
+            if(StringUtil.isOneOf(subjectId, "004", "005", "006")){
+                dbName += "004005006";
+            }else if(StringUtil.isOneOf(subjectId, "007", "008", "009")){
+                dbName += "007008009";
+            }else{
+                dbName += subjectId;
+            }
+        }else{
+            dbName += subjectId;
+        }
+
         //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
         MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
         MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");

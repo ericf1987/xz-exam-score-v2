@@ -294,4 +294,14 @@ public class StudentService {
             return new ArrayList<>(toList(aggregate));
         });
     }
+
+    public boolean hasAllSubjects(String projectId, String studentId, List<String> subjectIds) {
+        String cacheKey = "hasAllSubjects:" + projectId + ":" + studentId + ":" + subjectIds;
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+            Document query = doc("project", projectId).append("student", studentId).append("subjects", doc("$all", subjectIds));
+            Document first = students.find(query).first();
+            return first != null && !first.isEmpty();
+        });
+    }
 }

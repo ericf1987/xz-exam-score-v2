@@ -132,7 +132,9 @@ public class StudentEvaluationFormAnalysis implements Server {
         List<String> subjectIds = subjectService.querySubjects(projectId);
         //存放文理单科
         List<String> wlSubjectIds = subjectIds.stream().filter(wl -> SubjectCombinationService.isW(wl) || SubjectCombinationService.isL(wl)).collect(Collectors.toList());
+        //综合科目
         List<String> combinedSubjectIds = subjectCombinationService.getAllSubjectCombinations(projectId);
+        //全科参考学生
         int studentCount = studentService.getStudentCount(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
         List<Map<String, Object>> resultList = new ArrayList<>();
 
@@ -187,6 +189,9 @@ public class StudentEvaluationFormAnalysis implements Server {
             Map<String, Object> studentMap = new HashMap<>();
             //统计基础信息
             String studentId = studentDoc.getString("student");
+            if(!isRequiredStudent(projectId, studentId, subjectIds)){
+                continue;
+            }
             Map<String, String> studentBaseInfo = new HashMap<>();
             studentBaseInfo.put("studentId", studentId);
             studentBaseInfo.put("studentName", studentDoc.getString("name"));
@@ -226,8 +231,17 @@ public class StudentEvaluationFormAnalysis implements Server {
             studentMap.put("scoreAndRankMap", scoreAndRankMap);
 
             resultList.add(studentMap);
+
+            //resultList = filterScoreZero(resultList);
         }
         return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
+    }
+
+    public boolean isRequiredStudent(String projectId, String studentId, List<String> subjectIds) {
+        //只有全科参考且总分不为0才满足条件
+        boolean b = studentService.hasAllSubjects(projectId, studentId, subjectIds);
+        double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
+        return b && totalScore != 0;
     }
 
     public Map<String, Object> getSingleSubjectRankAndLevel(String projectId, String schoolId, String classId, String studentId, Target subject, List<Map<String, Object>> questTypeScoreMap, Map<String, Object> pointScoreMap, List<Map<String, Object>> subjectAbilityLevel) {
@@ -236,7 +250,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         map.put("questTypeScore", questTypeScoreMap);
         map.put("pointScore", pointScoreMap);
         //目前考虑将能力层级中得分为0的过滤
-        subjectAbilityLevel = subjectAbilityLevel.stream().filter(m -> MapUtils.getDouble(m, "score") != 0).collect(Collectors.toList());
+        //subjectAbilityLevel = subjectAbilityLevel.stream().filter(m -> MapUtils.getDouble(m, "score") != 0).collect(Collectors.toList());
         //根据得分率排序
         Collections.sort(subjectAbilityLevel, (Map<String, Object> m1, Map<String, Object> m2) -> {
             Double d1 = MapUtils.getDouble(m1, "scoreRate");

@@ -121,8 +121,8 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentScores() throws Exception {
-        String projectId = "430100-501b96776dc348748e2afdb95d491516";
-        String studentId = "000b9822-43e3-4bca-a3a1-f25a01b08247";
+        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
+        String studentId = "00708600-9b39-49ad-a8e5-80f7aaa4cb1f";
         List<Document> studentScores = scoreService.getStudentQuestScores(projectId, studentId);
         System.out.println(studentScores);
     }
