@@ -23,9 +23,9 @@ public class StudentEvaluationFormAnalysisTest extends XzExamScoreV2ApplicationT
     @Test
     public void testExecute() throws Exception {
         String projectId = "430100-501b96776dc348748e2afdb95d491516";
-        String schoolId = "e12f9a05-4686-435a-869c-26e82f7722e6";
-        String classId = "c006d874-9d7c-483a-a37f-4d7c78c8dea4";
-        String pageSize = "10";
+        String schoolId = "4b2efe63-0d1d-4a58-b355-23a29d1d433a";
+        String classId = "b329dda6-f7a9-4ea2-a8df-1e863b244e22";
+        String pageSize = "70";
         String pageCount = "1";
         Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId)
                 .setParameter("classId", classId)

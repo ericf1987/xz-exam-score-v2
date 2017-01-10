@@ -32,7 +32,10 @@ public class TotalScoreSegmentCountSheets extends SheetGenerator {
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
-        Param param = new Param().setParameter("projectId", projectId);
+        Param param = new Param().setParameter("projectId", projectId)
+                .setParameter("max", "900")
+                .setParameter("min", "300")
+                .setParameter("span", "100");
         Result result = totalScoreSegmentCountAnalysis.execute(param);
         setHeader(excelWriter);
         fillProvinceData(excelWriter, result);

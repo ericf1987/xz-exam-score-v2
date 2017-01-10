@@ -19,8 +19,11 @@ import java.util.*;
 /**
  * @author by fengye on 2016/12/3.
  */
-@Function(description = "联考项目-分数段成绩人数", parameters = {
-        @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true)
+@Function(description = "联考项目-学校分数分段统计（10分段）", parameters = {
+        @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "max", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "min", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "span", type = Type.String, description = "考试项目ID", required = true)
 })
 @Service
 public class TotalScoreSegmentCountAnalysis implements Server {
@@ -43,41 +46,64 @@ public class TotalScoreSegmentCountAnalysis implements Server {
     @Autowired
     ScoreService scoreService;
 
+    @Autowired
+    MinMaxScoreService minMaxScoreService;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
+        String max = param.getString("max");
+        String min = param.getString("min");
+        String span = param.getString("span");
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
-        Map<String, Object> projectScoreSegmentMap = getProjectScoreSegment(projectId);
-        List<Map<String, Object>> schoolScoreSegmentList = getSchoolScoreSegment(projectId, projectSchools);
-        Result result = Result.success().set("project", projectScoreSegmentMap).set("schools", schoolScoreSegmentList);
-        return result;
+        Map<String, Object> projectScoreSegmentMap = getProjectScoreSegment(projectId, Integer.parseInt(max), Integer.parseInt(min), Integer.parseInt(span));
+        List<Map<String, Object>> schoolScoreSegmentList = getSchoolScoreSegment(projectId, projectSchools, Integer.parseInt(max), Integer.parseInt(min), Integer.parseInt(span));
+        List<String> column = generateColumn(Integer.parseInt(max), Integer.parseInt(min), Integer.parseInt(span));
+        return Result.success().set("project", projectScoreSegmentMap).set("schools", schoolScoreSegmentList).set("column", column);
     }
 
-    private Map<String, Object> getProjectScoreSegment(String projectId) {
+    private List<String> generateColumn(int max, int min, int span) {
+        List<String> column = new ArrayList<>();
+        column.add(min + "以下");
+        for (int i = min; i < max; i += span){
+            int j = i + span;
+            column.add(i + "-" + j);
+        }
+        column.add(max + "以上");
+        return column;
+    }
+
+    private Map<String, Object> getProjectScoreSegment(String projectId, int max, int min, int span) {
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
-        CounterMap<Integer> counterMap = getScoreSegmentMap(projectId, provinceRange);
+        CounterMap<Integer> counterMap = getScoreSegmentMap(projectId, provinceRange, max, min, span);
         Map<String, Object> provinceData = new HashMap<>();
+        double[] minMaxScore = minMaxScoreService.getMinMaxScore(projectId, provinceRange, Target.project(projectId));
         provinceData.put("name", "总体");
+        provinceData.put("count", studentService.getStudentCount(projectId, provinceRange, Target.project(projectId)));
+        provinceData.put("max", minMaxScore[1]);
         provinceData.put("data", counterMap);
         return provinceData;
     }
 
-    private List<Map<String, Object>> getSchoolScoreSegment(String projectId, List<Document> projectSchools) {
+    private List<Map<String, Object>> getSchoolScoreSegment(String projectId, List<Document> projectSchools, int max, int min, int span) {
         List<Map<String, Object>> schoolsData = new ArrayList<>();
         for (Document schoolDoc : projectSchools) {
             String schoolId = schoolDoc.getString("school");
             Range schoolRange = Range.school(schoolId);
-            CounterMap<Integer> counterMap = getScoreSegmentMap(projectId, schoolRange);
+            CounterMap<Integer> counterMap = getScoreSegmentMap(projectId, schoolRange, max, min, span);
+            double[] minMaxScore = minMaxScoreService.getMinMaxScore(projectId, schoolRange, Target.project(projectId));
             Map<String, Object> schoolMap = new HashMap<>();
             schoolMap.put("name", schoolService.getSchoolName(projectId, schoolId));
+            schoolMap.put("count", studentService.getStudentCount(projectId, schoolRange, Target.project(projectId)));
+            schoolMap.put("max", minMaxScore[1]);
             schoolMap.put("data", counterMap);
             schoolsData.add(schoolMap);
         }
         return schoolsData;
     }
 
-    private CounterMap<Integer> getScoreSegmentMap(String projectId, Range range) {
-        ScoreSegmentCounter scoreSegmentCounter = new ScoreSegmentCounter(projectId, range, 900, 300, 100);
+    private CounterMap<Integer> getScoreSegmentMap(String projectId, Range range, int maxScore, int minScore, int span) {
+        ScoreSegmentCounter scoreSegmentCounter = new ScoreSegmentCounter(projectId, range, maxScore, minScore, span);
         int min = scoreSegmentCounter.getMin();
         int interval = scoreSegmentCounter.getInterval();
         int max = scoreSegmentCounter.getMax();
@@ -90,8 +116,7 @@ public class TotalScoreSegmentCountAnalysis implements Server {
         }
         int maxCount = scoreService.getCountByScoreSpan(projectId, range, Target.project(projectId), 0, max);
         scoreSegmentCounter.addToCounter(max, maxCount);
-        CounterMap<Integer> counterMap = scoreSegmentCounter.getCounterMap();
-        return counterMap;
+        return scoreSegmentCounter.getCounterMap();
     }
 
     public class ScoreSegmentCounter {

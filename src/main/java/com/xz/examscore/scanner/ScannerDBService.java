@@ -69,6 +69,9 @@ public class ScannerDBService {
     ScannerDBExceptionService scannerDBExceptionService;
 
     @Autowired
+    SubjectCombinationService subjectCombinationService;
+
+    @Autowired
     ProjectConfigService projectConfigService;
 
     public MongoClient getMongoClient(String project) {
@@ -613,10 +616,13 @@ public class ScannerDBService {
         String dbName = projectId + "_";
 
         boolean separateCombine = projectConfig.isSeparateCombine();
+
+        ArrayList<String> subjectCombinations = subjectCombinationService.getAllSubjectCombinations(projectId);
+
         if(separateCombine){
-            if(StringUtil.isOneOf(subjectId, "004", "005", "006")){
+            if(StringUtil.isOneOf(subjectId, "004", "005", "006") && subjectCombinations.contains("004005006")){
                 dbName += "004005006";
-            }else if(StringUtil.isOneOf(subjectId, "007", "008", "009")){
+            }else if(StringUtil.isOneOf(subjectId, "007", "008", "009") && subjectCombinations.contains("007008009")){
                 dbName += "007008009";
             }else{
                 dbName += subjectId;
