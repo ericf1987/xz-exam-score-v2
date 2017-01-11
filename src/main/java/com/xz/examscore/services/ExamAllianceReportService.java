@@ -44,7 +44,10 @@ public class ExamAllianceReportService {
             "联考成绩分析-->基础分析-->临界生人数及各科得分率.xlsx",
             "联考成绩分析-->基础分析-->整体平均分统计.xlsx",
             "联考成绩分析-->基础分析-->试卷难度系数.xlsx",
-            "联考成绩分析-->基础分析-->分数段表.xlsx"
+            "联考成绩分析-->基础分析-->分数段表.xlsx",
+            "联考成绩分析-->基础分析-->题目能力层级分析.xlsx",
+            "联考成绩分析-->基础分析-->学校分数分段统计（10分段）.xlsx",
+            "联考成绩分析-->基础分析-->学校分数段累积统计（10分段）.xlsx"
     };
 
     public Result downloadReports(String projectId) {
