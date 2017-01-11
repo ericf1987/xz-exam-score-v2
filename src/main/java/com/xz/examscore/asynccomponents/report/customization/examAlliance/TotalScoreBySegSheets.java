@@ -40,7 +40,7 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         fillSchoolData(excelWriter, schoolList);
     }
 
-    private void setHeader(ExcelWriter excelWriter, List<String> col) {
+    public void setHeader(ExcelWriter excelWriter, List<String> col) {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 0;
         excelWriter.set(row, column.incrementAndGet(), "学校");
@@ -51,12 +51,12 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), "总人数");
     }
 
-    private void fillProvinceData(ExcelWriter excelWriter, Map<String, Object> provinceMap) {
+    public void fillProvinceData(ExcelWriter excelWriter, Map<String, Object> provinceMap) {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 1;
         CounterMap<Integer> counterMap = (CounterMap<Integer>) provinceMap.get("data");
         List<Integer> keys = new ArrayList<>(counterMap.keySet());
-        Collections.sort(keys);
+        Collections.sort(keys, Collections.reverseOrder());
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("name"));
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("max"));
         for (Integer key : keys) {
@@ -65,13 +65,13 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("count"));
     }
 
-    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolList) {
+    public void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolList) {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 2;
         for (Map<String, Object> school : schoolList) {
             CounterMap<Integer> counterMap = (CounterMap<Integer>) school.get("data");
             List<Integer> keys = new ArrayList<>(counterMap.keySet());
-            Collections.sort(keys);
+            Collections.sort(keys, Collections.reverseOrder());
             excelWriter.set(row, column.incrementAndGet(), school.get("name"));
             excelWriter.set(row, column.incrementAndGet(), school.get("max"));
             for (Integer key : keys) {

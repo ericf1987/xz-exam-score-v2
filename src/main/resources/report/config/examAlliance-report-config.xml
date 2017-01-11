@@ -19,6 +19,8 @@
                 <report name="试卷难度系数" class=".TotalDegreeOfDifficultyReport"/>
                 <report name="分数段表" class=".TotalScoreSegmentCountReport"/>
                 <report name="题目能力层级分析" class=".TotalQuestAbilityLevelScoreReport"/>
+                <report name="学校分数分段统计（10分段）" class=".TotalScoreBySegReport"/>
+                <report name="学校分数段累积统计（10分段）" class=".TotalScoreMinAboveReport"/>
             </report-category>
         </report-category>
 
