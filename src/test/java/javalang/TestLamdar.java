@@ -1,10 +1,9 @@
 package javalang;
 
-import com.hyd.simplecache.utils.MD5;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -19,14 +18,9 @@ public class TestLamdar {
         System.out.println(csv);
     }
 
-
-    interface Converter<F, T> {
-        T convert(F from);
-    }
-
     class Person {
         private String name;
-        private int num;
+        private int weight;
         private int age;
 
         public int getAge() {
@@ -45,71 +39,54 @@ public class TestLamdar {
             this.name = name;
         }
 
-        public int getNum() {
-            return num;
+        public int getWeight() {
+            return weight;
         }
 
-        public void setNum(int num) {
-            this.num = num;
+        public void setWeight(int weight) {
+            this.weight = weight;
         }
 
         public Person() {
         }
 
-        public Person(String name, int num, int age) {
+        public Person(String name, int weight, int age) {
             this.name = name;
-            this.num = num;
+            this.weight = weight;
             this.age = age;
         }
 
-        public void isMature(Person person, Predicate<Person> p){
-            if(p.test(person)){
-                System.out.println(person.getName() + "is Mature at the age of" + person.getAge());
-            }else{
-                System.out.println(person.getName() + "is not Mature at the age of" + person.getAge());
-            }
-        }
+    }
 
-        public void isMultiple(Person person, Predicate<Person> p){
-            if(p.test(person)){
-                System.out.println(person.getName() + "is Multiple");
-            }
+    public void isMature(Person person, Predicate<Person> p) {
+        if (p.test(person)) {
+            System.out.println(person.getName() + "is Mature at the age of" + person.getAge());
+        } else {
+            System.out.println(person.getName() + "is not Mature at the age of" + person.getAge());
         }
     }
 
-    interface PersonFactory<P extends Person> {
-        P createPerson(String name, int num);
+    public void isMultiple(Person person, Predicate<Person> p) {
+        if (p.test(person)) {
+            System.out.println(person.getName() + "is Fat");
+        }
     }
-
 
     public static void main(String[] args) {
-/*        Predicate<Person> p1 = p -> p.getAge() >= 16;
-        Predicate<Person> p2 = p -> p.getName().length() > 2;
         TestLamdar t = new TestLamdar();
-        Person person1 = t.new Person("冯也", 1, 28);
-        Person person2 = t.new Person("冯也111", 2, 10);
-        person1.isMature(person1, p1);
-        person1.isMature(person2, p1);*/
-        System.out.println(Boolean.parseBoolean("1"));
-    }
-
-    public void test2() {
-        List<String> strList = Arrays.asList("1111", "22", "3333", "4444");
-        strList.forEach(
-                a -> System.out.println(a)
+        Predicate<Person> p1 = person -> person.getAge() >= 20;
+        Predicate<Person> p2 = person -> person.getWeight() >= 150;
+        List<Person> list = Arrays.asList(
+                t.new Person("ff", 160, 10),
+                t.new Person("ff", 160, 20),
+                t.new Person("ff", 71, 30),
+                t.new Person("ff", 200, 40),
+                t.new Person("ff", 200, 50)
         );
-
+        for (Person p : list){
+            t.isMature(p, p1);
+            t.isMultiple(p, p2);
+        }
     }
 
-    public void test3() {
-        List<String> subjectIds = Arrays.asList("AAAAAA", "AAAAAB", "AAAABC", "BAAACA", "AAACCC", "BBBBAC", "AAAAC");
-        //subjectIds.sort(String::compareTo);
-        subjectIds.sort((String s1, String s2) -> s1.compareTo(s2));
-        System.out.println(subjectIds.toString());
-    }
-
-    public void test4(){
-        Pattern like = Pattern.compile("^" + "2016");
-        System.out.println(like);
-    }
 }

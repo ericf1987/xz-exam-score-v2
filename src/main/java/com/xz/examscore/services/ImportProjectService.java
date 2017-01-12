@@ -764,12 +764,20 @@ public class ImportProjectService {
             combinedSubjectIds.add("007008009");
             artsFullScore.set(artsFullScore.get() + subjects.get("007") + subjects.get("008") + subjects.get("009"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
+        }else if(subjectIds.contains("007008009")){
+            combinedSubjectIds.add("007008009");
+            artsFullScore.set(artsFullScore.get() + subjects.get("007008009"));
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
         }
 
         if (subjectIds.containsAll(Arrays.asList("004", "005", "006"))) {
             combinedSubjectIds.add("004005006");
             scienceFullScore.set(scienceFullScore.get() + subjects.get("004") + subjects.get("005") + subjects.get("006"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
+        }else if(subjectIds.contains("004005006")){
+            combinedSubjectIds.add("004005006");
+            scienceFullScore.set(artsFullScore.get() + subjects.get("004005006"));
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), artsFullScore.get());
         }
 
         subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds);

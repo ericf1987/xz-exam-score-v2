@@ -38,7 +38,7 @@ public class StdDeviationDispatcher extends TaskDispatcher {
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
-        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT);
+        List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT, Target.SUBJECT_COMBINATION);
 
         int counter = 0;
         for (Target target : targets) {

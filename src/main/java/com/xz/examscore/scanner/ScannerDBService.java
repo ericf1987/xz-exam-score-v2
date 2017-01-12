@@ -363,7 +363,7 @@ public class ScannerDBService {
 
             if (StringUtil.isBlank(standardAnswer)) {
                 throw new IllegalStateException("客观题没有标准答案, project=" +
-                        projectId + ", subject=" + sid + ", quest=" + objectiveItem);
+                        projectId + ", studentId=" + studentId + ", standardAnswer=" + standardAnswer + ", subject=" + sid + ", quest=" + objectiveItem);
             }
 
             Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
@@ -430,7 +430,7 @@ public class ScannerDBService {
         if (numbers.length == 0) {
             return stdAnswer;
         } else {
-            for (int i = 1; i < numbers.length; i++) {
+            for (int i = 0; i < numbers.length; i++) {
                 builder.append(sortStudentAnswer(chars[i])).append(numbers[i]);
             }
             return builder.toString();

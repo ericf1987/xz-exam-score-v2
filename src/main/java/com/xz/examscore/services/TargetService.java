@@ -5,6 +5,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.Point;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
@@ -49,12 +50,21 @@ public class TargetService {
     QuestAbilityLevelService questAbilityLevelService;
 
     @Autowired
+    ProjectConfigService projectConfigService;
+
+    @Autowired
     SimpleCache cache;
 
     public Target getTarget(String projectId, String subjectId) {
         if (StringUtil.isNotBlank(subjectId)) {
             if(subjectId.length() > ImportProjectService.SUBJECT_LENGTH){
-                return Target.subjectCombination(subjectId);
+                //根据项目是否拆分判断
+                ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+                if (projectConfig.isSeparateCombine()){
+                    return Target.subjectCombination(subjectId);
+                }else{
+                    return Target.subject(subjectId);
+                }
             }
             return Target.subject(subjectId);
         } else {

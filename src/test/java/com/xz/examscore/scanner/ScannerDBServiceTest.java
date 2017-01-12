@@ -6,13 +6,10 @@ import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
-import static org.junit.Assert.assertEquals;
 
 /**
  * (description)
@@ -50,7 +47,8 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         assertEquals(1, calculateScore(4, "A,D", "", true).score, 0.1);*/
         /*System.out.println(calculateScore(3, "c", "c", null).score);
         System.out.println(calculateScore(4, "A1B1DA2BC2", "DA", null).score);*/
-        System.out.println(scannerDBService.sortStdAnswer("A2C2D2AC2AD2CD2DCA4"));
+        System.out.println(scannerDBService.sortStdAnswer("D3"));
+        System.out.println(calculateScore(3, "D3", "D", null).score);
     }
 
     @Test

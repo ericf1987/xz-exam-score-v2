@@ -50,8 +50,7 @@ public class ScoreSegmentService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     *
-     * @return  分数段
+     * @return 分数段
      */
     public List<Map<String, Object>> queryFullScoreSegment(String projectId, Target target, Range range) {
         List<Map<String, Object>> scoreSegmentList = new ArrayList<>();
@@ -96,7 +95,6 @@ public class ScoreSegmentService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     *
      * @return 分数段
      */
     @SuppressWarnings("unchecked")
@@ -124,6 +122,8 @@ public class ScoreSegmentService {
         if (target.match(Target.PROJECT)) {
             return 50;
         } else if (target.match(Target.SUBJECT)) {
+            return 10;
+        } else if (target.match(Target.SUBJECT_COMBINATION)) {
             return 10;
         } else {
             throw new IllegalArgumentException("Unsupported target: " + target);
