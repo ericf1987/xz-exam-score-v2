@@ -53,7 +53,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportProject() throws Exception {
-        String project = "433100-fef19389d6ce4b1f99847ab96d2cfeba";
+        String project = "430600-72314edfdbf54cd2873b0aa5826eafd9";
         scannerDBService.importProjectScore(project);
     }
 
@@ -66,9 +66,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetStudentCardSlices() throws Exception {
-        String project = "430400-20bdc0221ebc46ffa642fa316721a92e";
-        String subjectId = "006";
-        String studentId = "925bb587-16b0-41a0-8fa5-9ad0b0e7cdae";
+        String project = "430200-a911e2eecfa14bfcb614d62e87f8b77b";
+        String subjectId = "008";
+        String studentId = "2417c441-ce98-4b3d-88e1-672db4f51675";
         Map<String, Object> map = scannerDBService.getStudentCardSlices(project, subjectId, studentId);
         System.out.println(map.toString());
     }

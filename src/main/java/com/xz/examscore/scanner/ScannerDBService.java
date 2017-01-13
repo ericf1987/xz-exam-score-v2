@@ -289,24 +289,21 @@ public class ScannerDBService {
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
             Boolean missing = subjectiveItem.getBoolean("missing");
 
-            boolean isEffective = BooleanUtils.toBoolean(subjectiveItem.getBoolean("isEffective"));
-
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
 
-            if(!isEffective){
-                LOG.info("该主观题为选做题，不做记录, projectId={}, studentId={}, sid={}, subjectId={}, questionNo={}", projectId, studentId, sid, subjectId, questionNo);
-                continue;
-            }
+            //如果isEffective字段不为空，且为false，则无效，否则有效
+            boolean isEffective = !(null != subjectiveItem.getBoolean("isEffective") && !subjectiveItem.getBoolean("isEffective"));
 
             //如果该生作弊或缺考，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : score)
-                    .append("right", !(isCheating || (null != isAbsent && isAbsent)) && NumberUtil.equals(score, fullScore))
+                    .append("score", isCheating || (null != isAbsent && isAbsent) || !isEffective ? 0d : score)
+                    .append("right", !(isCheating || (null != isAbsent && isAbsent) || !isEffective) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
+                    .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
                     .append("school", student.getString("school"))
@@ -353,17 +350,16 @@ public class ScannerDBService {
                 throw new IllegalArgumentException("获取quest_list题号失败！统计失败");
             }
 
-            boolean isEffective = BooleanUtils.toBoolean(objectiveItem.getBoolean("isEffective"));
-
-            if(!isEffective){
-                LOG.info("该客观题为选做题，不做记录, projectId={}, studentId={}, sid={}, subjectId={}, questionNo={}", projectId, studentId, sid, subjectId, questionNo);
-                continue;
-            }
+            //如果isEffective字段不为空，且为false，则无效，否则有效
+            boolean isEffective = !(null != objectiveItem.getBoolean("isEffective") && !objectiveItem.getBoolean("isEffective"));
 
             double fullScore = getFullScore(quest, objectiveItem);
 
             //将学生作答排序
-            String studentAnswer = sortStudentAnswer(objectiveItem.getString("answerContent").toUpperCase());
+            String answerContent = StringUtil.isBlank(objectiveItem.getString("answerContent")) ?
+                    "*" : objectiveItem.getString("answerContent");
+
+            String studentAnswer = sortStudentAnswer(answerContent.toUpperCase());
 
             //标准答案数据从统计数据库的quest_list中获取
             //String standardAnswer = objectiveItem.getString("standardAnswer").toUpperCase();
@@ -392,10 +388,11 @@ public class ScannerDBService {
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", isCheating || (null != isAbsent && isAbsent) ? 0d : scoreAndRight.score)
+                    .append("score", isCheating || (null != isAbsent && isAbsent) || !isEffective ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    .append("right", !(isCheating || (null != isAbsent && isAbsent)) && scoreAndRight.right)
+                    .append("right", !(isCheating || (null != isAbsent && isAbsent) || !isEffective) && scoreAndRight.right)
                     .append("isObjective", true)
+                    .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
                     .append("class", student.getString("class"))
                     .append("school", student.getString("school"))
@@ -555,21 +552,6 @@ public class ScannerDBService {
         }
     }
 
-    private static List<String> parseUsrAnswer(String answerContent) {
-        List<String> result = new ArrayList<>();
-        for (char c : answerContent.toCharArray()) {
-            result.add(new String(new char[]{c}));
-        }
-        Collections.sort(result);
-        return result;
-    }
-
-    private static List<String> parseStdAnswer(String standardAnswer) {
-        List<String> result = new ArrayList<>(Arrays.asList(standardAnswer.split(",")));
-        Collections.sort(result);
-        return result;
-    }
-
     //////////////////////////////////////////////////////////////
 
     public static class ScoreAndRight {
@@ -637,15 +619,15 @@ public class ScannerDBService {
 
         ArrayList<String> subjectCombinations = subjectCombinationService.getAllSubjectCombinations(projectId);
 
-        if(separateCombine){
-            if(StringUtil.isOneOf(subjectId, "004", "005", "006") && subjectCombinations.contains("004005006")){
+        if (separateCombine) {
+            if (StringUtil.isOneOf(subjectId, "004", "005", "006") && subjectCombinations.contains("004005006")) {
                 dbName += "004005006";
-            }else if(StringUtil.isOneOf(subjectId, "007", "008", "009") && subjectCombinations.contains("007008009")){
+            } else if (StringUtil.isOneOf(subjectId, "007", "008", "009") && subjectCombinations.contains("007008009")) {
                 dbName += "007008009";
-            }else{
+            } else {
                 dbName += subjectId;
             }
-        }else{
+        } else {
             dbName += subjectId;
         }
 
