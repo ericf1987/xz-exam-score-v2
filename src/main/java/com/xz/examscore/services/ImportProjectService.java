@@ -777,7 +777,7 @@ public class ImportProjectService {
         }else if(subjectIds.contains("004005006")){
             combinedSubjectIds.add("004005006");
             scienceFullScore.set(scienceFullScore.get() + subjects.get("004005006"));
-            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), artsFullScore.get());
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
         }
 
         subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds);
