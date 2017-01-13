@@ -31,4 +31,10 @@ public class TargetServiceTest extends XzExamScoreV2ApplicationTests {
         String subjectId = targetService.getTargetSubjectId(PROJECT, Target.subjectLevel("003", "A"));
         System.out.println(subjectId);
     }
+
+    @Test
+    public void testGetTarget() throws Exception {
+        Target target = targetService.getTarget("430300-e5071423fc08404a813a2e004864cc82", "007008009");
+        System.out.println(target);
+    }
 }

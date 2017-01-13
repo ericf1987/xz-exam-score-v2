@@ -288,9 +288,18 @@ public class ScannerDBService {
             double score = Double.parseDouble(subjectiveItem.get("score").toString());
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
             Boolean missing = subjectiveItem.getBoolean("missing");
+
+            boolean isEffective = BooleanUtils.toBoolean(subjectiveItem.getBoolean("isEffective"));
+
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
+
+            if(!isEffective){
+                LOG.info("该主观题为选做题，不做记录, projectId={}, studentId={}, sid={}, subjectId={}, questionNo={}", projectId, studentId, sid, subjectId, questionNo);
+                continue;
+            }
+
             //如果该生作弊或缺考，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
@@ -323,6 +332,7 @@ public class ScannerDBService {
         List<Document> objectiveList = (List<Document>) document.get("objectiveList");
         Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
+
         if (null != isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以客观题得分为0", studentId, subjectId);
         }
@@ -342,6 +352,14 @@ public class ScannerDBService {
                 LOG.error("网阅客观题题号在quest_list中查找不到对应题目，projectId={}, subjectId={}, sid={}, questionNo={}", projectId, subjectId, sid, questionNo);
                 throw new IllegalArgumentException("获取quest_list题号失败！统计失败");
             }
+
+            boolean isEffective = BooleanUtils.toBoolean(objectiveItem.getBoolean("isEffective"));
+
+            if(!isEffective){
+                LOG.info("该客观题为选做题，不做记录, projectId={}, studentId={}, sid={}, subjectId={}, questionNo={}", projectId, studentId, sid, subjectId, questionNo);
+                continue;
+            }
+
             double fullScore = getFullScore(quest, objectiveItem);
 
             //将学生作答排序
