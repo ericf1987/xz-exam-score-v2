@@ -15,7 +15,7 @@ public class TotalScoreSegmentCountAnalysisTest extends XzExamScoreV2Application
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-501b96776dc348748e2afdb95d491516")
+        Param param = new Param().setParameter("projectId", "430300-32d8433951ce43cab5883abff77c8ea3")
                 .setParameter("max", "650")
                 .setParameter("min", "350")
                 .setParameter("span", "10");

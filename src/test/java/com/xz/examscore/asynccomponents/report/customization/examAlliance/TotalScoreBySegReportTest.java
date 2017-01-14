@@ -16,6 +16,6 @@ public class TotalScoreBySegReportTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        totalScoreBySegReport.generate("430100-501b96776dc348748e2afdb95d491516", null, "target/学校分数分段统计（10分段）.xlsx");
+        totalScoreBySegReport.generate("430300-32d8433951ce43cab5883abff77c8ea3", null, "target/学校分数分段统计（10分段）.xlsx");
     }
 }

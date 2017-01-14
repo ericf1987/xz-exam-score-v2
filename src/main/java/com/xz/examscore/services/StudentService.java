@@ -273,6 +273,12 @@ public class StudentService {
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
         students.deleteMany(doc("project", projectId).append("class", classId));
+        if(null == classStudents || classStudents.isEmpty()){
+            LOG.error("该班级考生全部缺考，无学生导入，classId={}", classId);
+            String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
+            cache.delete(cacheKey);
+            return;
+        }
         students.insertMany(classStudents);
 
         String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);

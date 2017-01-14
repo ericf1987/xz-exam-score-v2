@@ -10,10 +10,7 @@ import com.xz.examscore.asynccomponents.report.SheetTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,8 +33,8 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         Map<String, Object> provinceMap = result.get("project");
         List<Map<String, Object>> schoolList = result.get("schools");
         setHeader(excelWriter, column);
-        fillProvinceData(excelWriter, provinceMap);
-        fillSchoolData(excelWriter, schoolList);
+        fillProvinceData(excelWriter, provinceMap, null);
+        fillSchoolData(excelWriter, schoolList, null);
     }
 
     public void setHeader(ExcelWriter excelWriter, List<String> col) {
@@ -51,12 +48,15 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), "总人数");
     }
 
-    public void fillProvinceData(ExcelWriter excelWriter, Map<String, Object> provinceMap) {
+    public void fillProvinceData(ExcelWriter excelWriter, Map<String, Object> provinceMap, Comparator<Object> order) {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 1;
         CounterMap<Integer> counterMap = (CounterMap<Integer>) provinceMap.get("data");
         List<Integer> keys = new ArrayList<>(counterMap.keySet());
-        Collections.sort(keys, Collections.reverseOrder());
+        if (null == order)
+            Collections.sort(keys);
+        else
+            Collections.sort(keys, order);
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("name"));
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("max"));
         for (Integer key : keys) {
@@ -65,13 +65,16 @@ public class TotalScoreBySegSheets extends SheetGenerator {
         excelWriter.set(row, column.incrementAndGet(), provinceMap.get("count"));
     }
 
-    public void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolList) {
+    public void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> schoolList, Comparator<Object> order) {
         AtomicInteger column = new AtomicInteger(-1);
         int row = 2;
         for (Map<String, Object> school : schoolList) {
             CounterMap<Integer> counterMap = (CounterMap<Integer>) school.get("data");
             List<Integer> keys = new ArrayList<>(counterMap.keySet());
-            Collections.sort(keys, Collections.reverseOrder());
+            if (null == order)
+                Collections.sort(keys);
+            else
+                Collections.sort(keys, order);
             excelWriter.set(row, column.incrementAndGet(), school.get("name"));
             excelWriter.set(row, column.incrementAndGet(), school.get("max"));
             for (Integer key : keys) {

@@ -17,6 +17,6 @@ public class TotalScoreSegmentCountReportTest extends XzExamScoreV2ApplicationTe
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        totalScoreSegmentCountReport.generate("430100-6da6fefff9b74e67917950567b368910", null, "target/分数段表.xlsx");
+        totalScoreSegmentCountReport.generate("430300-32d8433951ce43cab5883abff77c8ea3", null, "target/分数段表.xlsx");
     }
 }

@@ -35,8 +35,8 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentCount() throws Exception {
-        Range range = Range.province("430000");
-        int studentCount = studentService.getStudentCount(PROJECT, range);
+        Range range = Range.school("15e70531-5ac0-475d-a2da-2fc04242ac75");
+        int studentCount = studentService.getStudentCount("430300-32d8433951ce43cab5883abff77c8ea3", range);
         System.out.println(studentCount);
     }
 

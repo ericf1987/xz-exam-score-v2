@@ -9,6 +9,7 @@ import com.xz.examscore.asynccomponents.report.SheetTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,9 @@ public class TotalScoreMinAboveSheets extends SheetGenerator {
         Map<String, Object> provinceMap = result.get("provinceData");
         List<Map<String, Object>> schoolList = result.get("schoolData");
         totalScoreBySegSheets.setHeader(excelWriter, column);
-        totalScoreBySegSheets.fillProvinceData(excelWriter, provinceMap);
-        totalScoreBySegSheets.fillSchoolData(excelWriter, schoolList);
+        totalScoreBySegSheets.fillProvinceData(excelWriter, provinceMap, Collections.reverseOrder());
+        totalScoreBySegSheets.fillSchoolData(excelWriter, schoolList, Collections.reverseOrder()
+        );
     }
 
 }
