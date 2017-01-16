@@ -73,7 +73,7 @@ public class TestLamdar {
     }
 
     public static void main(String[] args) {
-        TestLamdar t = new TestLamdar();
+/*        TestLamdar t = new TestLamdar();
         Predicate<Person> p1 = person -> person.getAge() >= 20;
         Predicate<Person> p2 = person -> person.getWeight() >= 150;
         List<Person> list = Arrays.asList(
@@ -86,7 +86,9 @@ public class TestLamdar {
         for (Person p : list){
             t.isMature(p, p1);
             t.isMultiple(p, p2);
-        }
+        }*/
+        List<String> list = Arrays.asList("123", "13", "12");
+        System.out.println(list.subList(0, 3).toString());
     }
 
 }

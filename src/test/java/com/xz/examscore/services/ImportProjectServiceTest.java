@@ -1,9 +1,13 @@
 package com.xz.examscore.services;
 
+import com.alibaba.fastjson.JSONArray;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.intclient.InterfaceClient;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
 
 /**
  * (description)
@@ -15,6 +19,9 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     ImportProjectService importProjectService;
+
+    @Autowired
+    InterfaceClient interfaceClient;
 
     @Test
     public void testImportProjectQuest() throws Exception {
@@ -30,12 +37,22 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportProjectInfo() throws Exception {
-        importProjectService.importProjectInfo("430100-553137a1e78741149104526aaa84393e", new Context());
+        importProjectService.importProjectInfo("430300-32d8433951ce43cab5883abff77c8ea3", new Context());
     }
 
     @Test
     public void testimportProject() throws Exception{
         importProjectService.importProject("430300-f529e0f0236d49559b0c27acbbb255ed", true);
+    }
+
+    @Test
+    public void testgetOptionalQuestNo() throws Exception{
+        String projectId = "430300-32d8433951ce43cab5883abff77c8ea3";
+        Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
+        Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
+        System.out.println("选做题->" + optionalQuestNo.toString());
+        JSONArray jsonArr = interfaceClient.queryQuestionByProject(projectId);
+        System.out.println("总分信息->" + importProjectService.gatherQuestScoreBySubject(jsonArr, map));
     }
 
 }

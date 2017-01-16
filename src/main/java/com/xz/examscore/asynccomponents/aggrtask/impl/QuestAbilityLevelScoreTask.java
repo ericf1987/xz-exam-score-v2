@@ -72,6 +72,7 @@ public class QuestAbilityLevelScoreTask extends AggrTask {
                 questAbilityLevelMap.putAll(distributor.getQuestAbilityLevelMap());
             } catch (InterruptedException e) {
                 LOG.error("等待题目能力层级得分处理线程结束失败,考试ID：{}，项目ID：{}, 学生ID：{}", distributor.getProjectId(), distributor.getSubjectId(), distributor.getStudentId());
+                return;
             }
         }
 

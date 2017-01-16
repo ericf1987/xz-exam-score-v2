@@ -319,10 +319,10 @@ public class ImportProjectService {
             questDoc.put("items", questObj.get("items"));
             questDoc.put("questionTypeId", questObj.getString("questionTypeId"));
             questDoc.put("questionTypeName", questObj.getString("questionTypeName"));
-            String levelOrAbility = generateByRandom();
-            //questDoc.put("levelOrAbility", questObj.getString("levelOrAbility"));
-            questDoc.put("levelOrAbility", levelOrAbility);
-            questDoc.put("questAbilityLevel", questAbilityLevelService.getId(sid, levelOrAbility));
+            questDoc.put("levelOrAbility", questObj.getString("levelOrAbility"));
+/*            String levelOrAbility = generateByRandom();
+            questDoc.put("levelOrAbility", levelOrAbility);*/
+            questDoc.put("questAbilityLevel", questAbilityLevelService.getId(sid, questObj.getString("levelOrAbility")));
             //是否直接给分
             questDoc.put("awardScoreTag", questObj.get("awardScoreTag"));
             questDoc.put("md5", MD5.digest(UUID.randomUUID().toString()));
@@ -337,8 +337,8 @@ public class ImportProjectService {
     }
 
     private String generateByRandom() {
-        int r = (int)(Math.random() * 10);
-        if(r > 7){
+        int r = (int) (Math.random() * 10);
+        if (r > 7) {
             return "ability";
         }
         return "level";
@@ -491,7 +491,7 @@ public class ImportProjectService {
             double score = quest.getDouble("score");
             String subject = quest.getString("subject");
             String levelOrAbility = quest.getString("levelOrAbility");
-            if(StringUtil.isBlank(levelOrAbility)){
+            if (StringUtil.isBlank(levelOrAbility)) {
                 continue;
             }
 
@@ -500,22 +500,22 @@ public class ImportProjectService {
 
             questAbilityLevelScore.incre(questAbilityLevel, score);
 
-            if(!questAbilityLevelMap.containsKey(questAbilityLevel)){
+            if (!questAbilityLevelMap.containsKey(questAbilityLevel)) {
                 questAbilityLevelMap.put(questAbilityLevel, doc("project", projectId)
-                .append("subject", subject)
-                .append("levelOrAbility", levelOrAbility)
-                .append("questAbilityLevel", questAbilityLevel)
-                .append("questAbilityLevelName", questAbilityLevelName));
+                        .append("subject", subject)
+                        .append("levelOrAbility", levelOrAbility)
+                        .append("questAbilityLevel", questAbilityLevel)
+                        .append("questAbilityLevelName", questAbilityLevelName));
             }
         }
 
         //保存题目能力层级
-        for(Document doc : questAbilityLevelMap.values()){
+        for (Document doc : questAbilityLevelMap.values()) {
             questAbilityLevelService.saveQuestAbilityLevel(doc);
         }
 
         //保存题目能力层级满分
-        for(String questAbilityLevel : questAbilityLevelMap.keySet()){
+        for (String questAbilityLevel : questAbilityLevelMap.keySet()) {
             fullScoreService.saveFullScore(projectId, Target.questAbilityLevel(questAbilityLevel), questAbilityLevelScore.get(questAbilityLevel));
         }
     }
@@ -699,9 +699,25 @@ public class ImportProjectService {
         }
     }
 
-    public Map<String, Double> gatherQuestScoreBySubject(JSONArray jsonQuest) {
+    //判断改题目是否是选做题
+    private boolean isOptionalQuest(Map<String, Object> optionalMap, String subjectId, String paperQuestNum) {
+        if(null == optionalMap || optionalMap.isEmpty()){
+            return false;
+        }
+        List<String> o = (List<String>) optionalMap.get(subjectId);
+        return o.contains(paperQuestNum);
+    }
+
+    public Map<String, Double> gatherQuestScoreBySubject(JSONArray jsonQuest, Map<String, Object> optionalQuestMap) {
         List<Map<String, Object>> quests = new ArrayList<>();
-        jsonQuest.forEach(quest -> {
+        Map<String, Object> optionalMap = getOptionalQuestNo(optionalQuestMap);
+
+        //过滤选做题
+        jsonQuest.stream().filter(quest -> {
+            JSONObject questObj = (JSONObject) quest;
+            String cardSubjectId = questObj.getString("cardSubjectId");
+            return !isOptionalQuest(optionalMap, cardSubjectId, questObj.getString("paperQuestNum"));
+        }).forEach(quest -> {
             JSONObject questObj = (JSONObject) quest;
             Map<String, Object> questMap = new HashMap<>();
             questMap.put("subjectId", questObj.getString("subjectId"));
@@ -709,10 +725,29 @@ public class ImportProjectService {
             quests.add(questMap);
         });
 
-        return quests.stream().collect(
+        Map<String, Double> subjectScoreMap = quests.stream().collect(
                 //分组计算各科的题目总分
                 Collectors.groupingBy(quest -> quest.get("subjectId").toString(), Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score")))
         );
+
+        return subjectScoreMap;
+    }
+
+    //获取选做题题号
+    public Map<String, Object> getOptionalQuestNo(Map<String, Object> optionalQuestMap) {
+        List<String> subjectInOptional = new ArrayList<>(optionalQuestMap.keySet());
+        Map<String, Object> map = new HashMap<>();
+        for (String subjectId : subjectInOptional) {
+            List<Map<String, Object>> optionals = (List<Map<String, Object>>) optionalQuestMap.get(subjectId);
+            List<String> withOut = new ArrayList<>();
+            optionals.forEach(option -> {
+                List<String> quest_nos = (List<String>) option.get("quest_nos");
+                int choose_count = MapUtils.getInteger(option, "choose_count");
+                withOut.addAll(quest_nos.subList(choose_count, quest_nos.size()));
+            });
+            map.put(subjectId, withOut);
+        }
+        return map;
     }
 
     private void importNormalSubjects(String projectId, Context context) {
@@ -724,8 +759,12 @@ public class ImportProjectService {
 
         //查询题目信息
         JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+
+        //获取选做题
+        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+
         //统计出每个考试的总分
-        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
 
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
@@ -764,7 +803,7 @@ public class ImportProjectService {
             combinedSubjectIds.add("007008009");
             artsFullScore.set(artsFullScore.get() + subjects.get("007") + subjects.get("008") + subjects.get("009"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
-        }else if(subjectIds.contains("007008009")){
+        } else if (subjectIds.contains("007008009")) {
             combinedSubjectIds.add("007008009");
             artsFullScore.set(artsFullScore.get() + subjects.get("007008009"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
@@ -774,7 +813,7 @@ public class ImportProjectService {
             combinedSubjectIds.add("004005006");
             scienceFullScore.set(scienceFullScore.get() + subjects.get("004") + subjects.get("005") + subjects.get("006"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
-        }else if(subjectIds.contains("004005006")){
+        } else if (subjectIds.contains("004005006")) {
             combinedSubjectIds.add("004005006");
             scienceFullScore.set(scienceFullScore.get() + subjects.get("004005006"));
             fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
@@ -787,8 +826,11 @@ public class ImportProjectService {
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
         //查询题目信息
         JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        //获取选做题
+        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+
         //统计出每个考试的总分
-        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest);
+        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
         LOG.info("CMS试题明细接口计算出的科目总分为：{}", subjectScore.toString());
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");

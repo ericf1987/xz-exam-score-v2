@@ -17,7 +17,7 @@ import java.util.Map;
  * @author by fengye on 2017/1/4.
  */
 @Component
-@TaskDispatcherInfo(taskType = "quest_ability_level_score", isAdvanced = true, isCustomized = true)
+@TaskDispatcherInfo(taskType = "quest_ability_level_score", isAdvanced = true)
 public class QuestAbilityLevelScoreDispatcher extends TaskDispatcher{
 
     static final Logger LOG = LoggerFactory.getLogger(QuestAbilityLevelScoreDispatcher.class);
@@ -38,6 +38,6 @@ public class QuestAbilityLevelScoreDispatcher extends TaskDispatcher{
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
             counter++;
         }
-        LOG.info("最终为项目 " + projectId + " 的 quest_ability_level 统计发布了 " + counter + " 个任务");
+        LOG.info("最终为项目 " + projectId + " 的 quest_ability_level_score 统计发布了 " + counter + " 个任务");
     }
 }

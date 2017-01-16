@@ -9,11 +9,8 @@ import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -45,7 +42,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430100-c2ed12467b2d481dbc833bda83dee21a");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430300-f001e524d31e4cd79adc9bd60f7e8a04");
         System.out.println(quests.toString());
         Map<String, Double> map = new HashMap<>();
         map.put("score", 0d);
@@ -61,11 +58,13 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430200-a911e2eecfa14bfcb614d62e87f8b77b");
+        JSONArray quests = interfaceClient.queryQuestionByProject("430300-e5071423fc08404a813a2e004864cc82");
+        Map<String, Object> map = interfaceClient.queryQuestionByProject("430300-e5071423fc08404a813a2e004864cc82", true);
         System.out.println(quests.toString());
-        Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests);
+        System.out.println(map.toString());
+        //Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests, optionalQuestMap);
         System.out.println(importProjectService.separateSubject("004005006").toString());
-        System.out.println(mm);
+//        System.out.println(mm);
     }
 
     @Test
@@ -101,7 +100,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById("430100-553137a1e78741149104526aaa84393e");
+        JSONObject project = interfaceClient.queryProjectById("430300-32d8433951ce43cab5883abff77c8ea3");
         System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
@@ -125,25 +124,20 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testCompareSubjectId() throws Exception {
-        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
+/*        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
         JSONArray questJson = interfaceClient.queryQuestionByProject(projectId);
         JSONArray subjectJson = interfaceClient.querySubjectListByProjectId(projectId);
         ApiResponse projectConfigJson = interfaceClient.queryProjectReportConfig(projectId);
         System.out.println(projectConfigJson.getData());
-        Map<String, Double> questMap = importProjectService.gatherQuestScoreBySubject(questJson);
+        Map<String, Double> questMap = importProjectService.gatherQuestScoreBySubject(questJson, optionalQuestMap);
         List<String> subjectInQuest = new ArrayList<>(questMap.keySet());
         System.out.println("题目的科目类型-->" + subjectInQuest.toString());
         List<String> subjectIds = subjectJson.stream().map(subject -> {
             JSONObject s = (JSONObject) subject;
             return s.getString("subjectId");
         }).collect(Collectors.toList());
-        System.out.println("科目ID-->" + subjectIds.toString());
+        System.out.println("科目ID-->" + subjectIds.toString());*/
     }
 
-    @Test
-    public void testQueryQuestionNosByTag() throws Exception {
-        String projectId = "430300-980ffcadc6c5494793c8b1dc5223d4c4";
-
-    }
 
 }

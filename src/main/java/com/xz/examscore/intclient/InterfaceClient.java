@@ -10,6 +10,9 @@ import com.xz.examscore.api.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Service
 public class InterfaceClient {
 
@@ -32,6 +35,13 @@ public class InterfaceClient {
                 new ApiRequest(ApiName.QueryQuestionByProject).setParameter("projectId", projectId));
 
         return apiResponse.get("quests");
+    }
+
+    public Map<String, Object> queryQuestionByProject(String projectId, boolean optional) {
+        ApiResponse apiResponse = apiClient.call(
+                new ApiRequest(ApiName.QueryQuestionByProject).setParameter("projectId", projectId));
+
+        return optional ? apiResponse.get("optionalGroups") : Collections.emptyMap();
     }
 
     public JSONArray queryExamSchoolByProject(String projectId, boolean needStudentCount) {
