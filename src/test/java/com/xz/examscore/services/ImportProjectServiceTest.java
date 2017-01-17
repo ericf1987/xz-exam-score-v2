@@ -47,7 +47,7 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetOptionalQuestNo() throws Exception{
-        String projectId = "430300-32d8433951ce43cab5883abff77c8ea3";
+        String projectId = "430200-35b5e848af1a41938532063893bf83c6";
         Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
         Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
         System.out.println("选做题->" + optionalQuestNo.toString());
