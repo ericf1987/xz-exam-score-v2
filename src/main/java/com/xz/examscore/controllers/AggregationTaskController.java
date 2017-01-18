@@ -85,7 +85,7 @@ public class AggregationTaskController {
         Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);
 
         aggregationService.runDispatchers(projectId, aggregationId, Collections.singletonList(taskDispatcher), rangesMap);
-        return Result.success("项目 " + projectId + " 的任务 " + taskType + " 已经分发完毕。");
+        return Result.success("项目 " + projectId + ", 轮次 " + aggregationId + " 的任务 " + taskType + " 已经分发完毕。");
     }
 
     /**

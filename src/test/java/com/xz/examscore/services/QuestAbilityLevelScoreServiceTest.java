@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 /**
  * @author by fengye on 2017/1/4.
  */
@@ -33,6 +31,9 @@ public class QuestAbilityLevelScoreServiceTest extends XzExamScoreV2ApplicationT
 
     @Test
     public void testGetStudentCount() throws Exception {
-
+        int count = questAbilityLevelScoreService.getStudentCount("430300-6f2f82b0ea1a4dcca29f692570eabb50",
+                "008_ability", "008", "ability",
+                Range.school("002e02d6-c036-4780-85d4-e54e3f1fbf9f"));
+        System.out.println(count);
     }
 }

@@ -9,6 +9,7 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.MapUtils;
@@ -51,6 +52,15 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
     @Autowired
     ScoreLevelService scoreLevelService;
 
+    @Autowired
+    ImportProjectService importProjectService;
+
+    @Autowired
+    InterfaceClient interfaceClient;
+
+    @Autowired
+    QuestService questService;
+
     public static final String[] keys = new String[]{
             "level", "ability"
     };
@@ -61,6 +71,10 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         List<String> subjectIds = subjectService.querySubjects(projectId);
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
 
+        //获取选做题的题号
+        Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
+        Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
+
         List<Map<String, Object>> result = new ArrayList<>();
         for(Document schoolDoc : projectSchools) {
             String schoolId = schoolDoc.getString("school");
@@ -69,7 +83,7 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
             int studentCount = studentService.getStudentCount(projectId, schoolRange, Target.project(projectId));
             List<Map<String, Object>> subjects = new ArrayList<>();
             for(String subjectId : subjectIds){
-                Map<String, Object> subjectMap = getOneSubjectData(projectId, schoolRange, subjectId, keys);
+                Map<String, Object> subjectMap = getOneSubjectData(projectId, schoolRange, subjectId, keys, optionalQuestNo);
                 subjects.add(subjectMap);
             }
             Map<String, Object> schoolMap = new HashMap<>();
@@ -84,14 +98,22 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         return Result.success().set("totalQuestAbilityLevel", result);
     }
 
-    private Map<String, Object> getOneSubjectData(String projectId, Range schoolRange, String subjectId, String[] keys) {
+    private Map<String, Object> getOneSubjectData(String projectId, Range schoolRange, String subjectId, String[] keys, Map<String, Object> optionalQuestNo) {
         Map<String, Object> subjectMap = new HashMap<>();
         subjectMap.put("subjectId", subjectId);
         subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
         for (String levelOrAbility : keys){
             String questAbilityLevel = questAbilityLevelService.getId(subjectId, levelOrAbility);
-            double totalScore = questAbilityLevelScoreService.getTotalScore(projectId, questAbilityLevel, subjectId, levelOrAbility, schoolRange);
-            int count = questAbilityLevelScoreService.getStudentCount(projectId, questAbilityLevel, subjectId, levelOrAbility, schoolRange);
+
+            List<String> optionQuestNos = (List<String>)optionalQuestNo.get(subjectId);
+
+            double optionQuestScore = getOptionQuestScore(projectId, subjectId, levelOrAbility, optionQuestNos);
+
+            //剔除选做题的得分
+            double totalScore = questAbilityLevelScoreService.getTotalScore(projectId, questAbilityLevel, subjectId, levelOrAbility, schoolRange) - optionQuestScore;
+
+            //int count = questAbilityLevelScoreService.getStudentCount(projectId, questAbilityLevel, subjectId, levelOrAbility, schoolRange);
+            int count = studentService.getStudentCount(projectId, schoolRange, Target.subject(subjectId));
             double average = count == 0 ? 0 : DoubleUtils.round(totalScore / count);
             double factor = levelOrAbility.equals("level") ? 0.6d : (levelOrAbility.equals("ability") ? 0.7d : 0.85d);
             int c = questAbilityLevelScoreService.filterStudentList(projectId, questAbilityLevel, subjectId, levelOrAbility, schoolRange, factor).size();
@@ -115,6 +137,19 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         totalMap.put("count", c);
         subjectMap.put("total", totalMap);
         return subjectMap;
+    }
+
+    //获取对应科目的选做题总分
+    public double getOptionQuestScore(String projectId, String subjectId, String levelOrAbility, List<String> optionalQuestNo) {
+        double totalScore = 0;
+        for (String questNo : optionalQuestNo){
+            Document quest = questService.findQuest(projectId, subjectId, questNo);
+            double score = quest.getDouble("score");
+            String loa = quest.getString("levelOrAbility");
+            if(levelOrAbility.equals(loa))
+                totalScore += score;
+        }
+        return totalScore;
     }
 
     private Map<String, Object> addTotalMap(String projectId, Range schoolRange, List<Map<String, Object>> subjects, List<String> subjectIds) {

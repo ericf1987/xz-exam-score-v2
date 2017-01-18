@@ -35,4 +35,9 @@ public class AggregationRoundServiceTest extends XzExamScoreV2ApplicationTests {
         aggregationRoundService.waitForRoundCompletion(AGGR_ID);
         System.out.println("All task finished.");
     }
+
+    @Test
+    public void testClearQueue() throws Exception {
+        aggregationRoundService.clearTask();
+    }
 }

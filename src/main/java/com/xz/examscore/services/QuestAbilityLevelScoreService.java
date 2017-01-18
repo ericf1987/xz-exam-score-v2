@@ -61,6 +61,10 @@ public class QuestAbilityLevelScoreService {
             Document query = questAbilityLevelService.getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
             if (range != null)
                 query.append(range.getName(), range.getId());
+
+            //剔除得分为0的学生
+            query.append("score", $ne(0));
+
             return (int) scoreDatabase.getCollection("quest_ability_level_score").count(query);
         });
 

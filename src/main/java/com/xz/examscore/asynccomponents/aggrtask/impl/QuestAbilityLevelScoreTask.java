@@ -10,6 +10,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
+import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +183,8 @@ public class QuestAbilityLevelScoreTask extends AggrTask {
         }
     }
 
-    private void doQuestAbilityLevelTaskDistribute(String projectId, String subjectId, String studentId, Map<String, Double> questTypeScoresMap) {
+    public void doQuestAbilityLevelTaskDistribute(String projectId, String subjectId, String studentId, Map<String, Double> questTypeScoresMap) {
+
         FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
 
         // 对题型进行归类，分数累加
