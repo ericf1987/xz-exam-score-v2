@@ -27,7 +27,7 @@ public class TotalQuestAbilityLevelAnalysisTest extends XzExamScoreV2Application
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430300-6f2f82b0ea1a4dcca29f692570eabb50");
+        Param param = new Param().setParameter("projectId", "430300-57b0625497644b8faf878045ea0c6439");
         Result result = totalQuestAbilityLevelAnalysis.execute(param);
         System.out.println(result.getData());
     }

@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 最高最低得分
+ */
 @TaskDispatcherInfo(taskType = "score_minmax", dependentTaskType = "total_score")
 @Component
 public class MinMaxTaskDispatcher extends TaskDispatcher {

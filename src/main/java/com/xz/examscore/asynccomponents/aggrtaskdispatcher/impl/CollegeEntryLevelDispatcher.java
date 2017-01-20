@@ -18,11 +18,11 @@ import java.util.Map;
 
 /**
  * @author by fengye on 2016/10/24.
- * 本科上线率统计
+ *         本科上线率统计
  */
 @Component
 @TaskDispatcherInfo(taskType = "college_entry_level", dependentTaskType = "rank_level")
-public class CollegeEntryLevelDispatcher extends TaskDispatcher{
+public class CollegeEntryLevelDispatcher extends TaskDispatcher {
 
     static final Logger LOG = LoggerFactory.getLogger(CollegeEntryLevelDispatcher.class);
 

@@ -40,7 +40,7 @@ public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
         }
 
         int counter = 0;
-        for(Range range : ranges){
+        for (Range range : ranges) {
             dispatchTask(createTask(projectId, aggregationId).setRange(range));
             counter++;
         }

@@ -13,7 +13,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @author by fengye on 2016/10/24.
+ *         平均分
+ */
 @Component
 @TaskDispatcherInfo(taskType = "average", dependentTaskType = "total_score")
 public class AverageTaskDispatcher extends TaskDispatcher {

@@ -382,12 +382,6 @@ public class ScoreService {
         }
     }
 
-    public void clearByTargetName(String projectId, String targetName) {
-        Document query = doc("project", projectId).append("target.name", targetName);
-        scoreDatabase.getCollection("total_score_combined").deleteMany(query);
-        scoreDatabase.getCollection("total_score").deleteMany(query);
-    }
-
     public ArrayList<Document> getScoreDocs(String projectId, Range range, String subjectId, String questId, String item) {
         String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + item;
         return cache.get(cacheKey, () -> {
