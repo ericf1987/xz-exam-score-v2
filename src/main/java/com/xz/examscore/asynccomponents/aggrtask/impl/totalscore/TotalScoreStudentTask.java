@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
+import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ImportProjectService;
@@ -22,6 +23,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 @Component
+@AggrTaskMeta(taskType = "total_score_student")
 public class TotalScoreStudentTask extends AggrTask {
 
     @Autowired
@@ -42,8 +44,8 @@ public class TotalScoreStudentTask extends AggrTask {
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
-        List<Document> studentList = studentService.getStudentList(taskInfo.getProjectId(), taskInfo.getRange());
 
+        List<Document> studentList = studentService.getStudentList(taskInfo.getProjectId(), taskInfo.getRange());
         MongoCollection<Document> scoreCollection = scoreDatabase.getCollection("score");
 
         for (Document document : studentList) {

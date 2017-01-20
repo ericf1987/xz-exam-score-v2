@@ -60,6 +60,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param questId   题目ID
      * @param range     范围
+     *
      * @return 答对人数
      */
     public int getQuestCorrentCount(String projectId, String questId, Range range) {
@@ -78,6 +79,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
+     *
      * @return 分数
      */
     public double getScore(String projectId, Range range, Target target) {
@@ -98,6 +100,7 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param questId   题目ID
+     *
      * @return 分数记录
      */
     public Document findOneJudgeQuestScore(String projectId, String questId) {
@@ -110,6 +113,7 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param studentId 学生ID
+     *
      * @return 分数记录
      */
     public List<Document> getStudentQuestScores(String projectId, String studentId) {
@@ -117,7 +121,7 @@ public class ScoreService {
         allSubjects.addAll(subjectService.querySubjects(projectId).stream().filter(subject -> subject.length() == 3).collect(Collectors.toList()));
         allSubjects.addAll(subjectCombinationService.getAllSubjectCombinations(projectId));
         List<Document> studentScores = new ArrayList<>();
-        for (String subjectId : allSubjects){
+        for (String subjectId : allSubjects) {
             studentScores.addAll(getStudentScoresBySubject(projectId, studentId, subjectId));
         }
         return studentScores;
@@ -129,6 +133,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 学生ID
+     *
      * @return 分数记录
      */
     public FindIterable<Document> getStudentSubjectScores(String projectId, String studentId, String subjectId) {
@@ -143,6 +148,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 学生ID
+     *
      * @return 分数记录
      */
     public ArrayList<Document> getStudentScoresBySubject(String projectId, String studentId, String subjectId) {
@@ -179,6 +185,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 科目ID
+     *
      * @return 成绩
      */
     public double getSubjectScore(String projectId, String studentId, String subjectId) {
@@ -258,12 +265,32 @@ public class ScoreService {
         return result;
     }
 
+    /**
+     * 保存一条总分记录
+     *
+     * @param projectId  项目ID
+     * @param range      范围
+     * @param target     目标
+     * @param totalScore 总分值
+     */
+    public void saveTotalScore(String projectId, Range range, Target target, double totalScore) {
+        saveTotalScore(projectId, range, null, target, totalScore, null);
+    }
+
+    /**
+     * 保存一条总分记录
+     *
+     * @param projectId  项目ID
+     * @param range      范围
+     * @param target     目标
+     * @param totalScore 总分值
+     */
     public void saveTotalScore(
-            String projectId, Range range, Range parent, Target target, double score, Document extra) {
+            String projectId, Range range, Range parent, Target target, double totalScore, Document extra) {
 
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
-        Document update = doc("totalScore", score);
+        Document update = doc("totalScore", totalScore);
 
         if (parent != null) {
             update.append("parent", range2Doc(parent));
@@ -289,6 +316,7 @@ public class ScoreService {
      * @param range     范围
      * @param target    目标
      * @param score     分数
+     *
      * @return 高于指定分数的记录总数
      */
     public int getCountByScore(String projectId, Range range, Target target, double score) {
@@ -317,6 +345,7 @@ public class ScoreService {
      * @param target    目标
      * @param max       最大值
      * @param min       最小值
+     *
      * @return 分数段内的学生人数
      */
     public int getCountByScoreSpan(String projectId, Range range, Target target, double max, double min) {

@@ -34,6 +34,11 @@ public class AggrTaskManager {
 
     void register(AggrTask aggrTask) {
         AggrTaskMeta info = aggrTask.getClass().getAnnotation(AggrTaskMeta.class);
+
+        if (info == null) {
+            throw new IllegalArgumentException("Task " + aggrTask.getClass().getName() + " not annotated.");
+        }
+
         taskInstanceMap.put(info.taskType(), aggrTask);
     }
 
