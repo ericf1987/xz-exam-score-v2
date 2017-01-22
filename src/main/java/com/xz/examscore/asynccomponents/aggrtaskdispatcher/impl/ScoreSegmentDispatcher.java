@@ -21,7 +21,7 @@ import java.util.Map;
  * @author yiding_he
  */
 @Component
-@TaskDispatcherInfo(taskType = "score_segment", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "score_segment", dependentTaskType = "total_score_province")
 public class ScoreSegmentDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(ScoreSegmentDispatcher.class);
 

@@ -2,6 +2,8 @@ package com.xz.examscore.asynccomponents.aggrtaskdispatcher;
 
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.services.AggregationRoundService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,17 +21,21 @@ import java.util.Map;
 @Component
 public class TaskDispatcherFactory {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TaskDispatcherFactory.class);
+
     @Autowired
-    AggregationRoundService aggregationRoundService;
+    private AggregationRoundService aggregationRoundService;
 
     // 保存所有统计对象
     private Map<String, TaskDispatcher> dispatcherMap = new HashMap<>();
 
-    // 注册 Dispater 对象
-    public void registerTaskDispatcher(TaskDispatcher taskDispatcher) {
+    // 注册 Dispatcher 对象
+    void registerTaskDispatcher(TaskDispatcher taskDispatcher) {
         String taskType = taskDispatcher.getTaskType();
+
         if (taskType != null) {
             this.dispatcherMap.put(taskType, taskDispatcher);
+            LOG.info("注册 TaskDispatcher: " + taskType + " = " + taskDispatcher.getClass().getSimpleName());
         }
     }
 
@@ -46,6 +52,7 @@ public class TaskDispatcherFactory {
         ArrayList<TaskDispatcher> dispatchers = new ArrayList<>(dispatcherMap.values());
         dispatchers.removeIf(dispatcher -> isDispatcherCompleted(dispatcher, completedTaskTypes));
         dispatchers.removeIf(dispatcher -> !isDependencyCompleted(dispatcher, completedTaskTypes));
+
         // 去掉个性化需求统计任务
         dispatchers.removeIf(this::isCustomized);
 

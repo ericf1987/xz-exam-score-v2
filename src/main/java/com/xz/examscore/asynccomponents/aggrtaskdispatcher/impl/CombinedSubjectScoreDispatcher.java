@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * 有些项目需要对文科理科分数合起来统计
  */
-@TaskDispatcherInfo(taskType = "combined_total_score", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "combined_total_score", dependentTaskType = "total_score_province")
 @Component
 public class CombinedSubjectScoreDispatcher extends TaskDispatcher {
 

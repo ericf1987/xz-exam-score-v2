@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-@TaskDispatcherInfo(taskType = "score_minmax", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "score_minmax", dependentTaskType = "total_score_province")
 @Component
 public class MinMaxTaskDispatcher extends TaskDispatcher {
 
