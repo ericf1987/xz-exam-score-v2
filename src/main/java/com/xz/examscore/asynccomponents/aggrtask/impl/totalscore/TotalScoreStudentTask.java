@@ -66,7 +66,6 @@ public class TotalScoreStudentTask extends AggrTask {
     private void aggrStudentSubjectCombinationScores(String projectId, Target target, MongoCollection<Document> c, Range studentRange) {
         String studentId = studentRange.getId();
         Document student = studentService.findStudent(projectId, studentId);
-        String classId = student.getString("class");
         String subjectCombinationId = target.getId().toString();
         List<String> subjectIds = importProjectService.separateSubject(subjectCombinationId);
         // 统计单个考生组合科目的总分
@@ -83,14 +82,13 @@ public class TotalScoreStudentTask extends AggrTask {
             Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                     .append("area", student.get("area")).append("city", student.get("city"))
                     .append("province", student.get("province"));
-            scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score, extra);
+            scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
         }
     }
 
     private void aggrStudentSubjectProjectScores(String projectId, Target target, MongoCollection<Document> c, Range studentRange) {
         String studentId = studentRange.getId();
         Document student = studentService.findStudent(projectId, studentId);
-        String classId = student.getString("class");
 
         // 统计单个考生的科目/项目总分
         AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
@@ -107,7 +105,7 @@ public class TotalScoreStudentTask extends AggrTask {
             Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                     .append("area", student.get("area")).append("city", student.get("city"))
                     .append("province", student.get("province"));
-            scoreService.saveTotalScore(projectId, studentRange, Range.clazz(classId), target, score, extra);
+            scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
         }
     }
 }

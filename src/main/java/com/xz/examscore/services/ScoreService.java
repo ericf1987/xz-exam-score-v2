@@ -37,22 +37,22 @@ import static com.xz.examscore.util.Mongo.target2Doc;
 public class ScoreService {
 
     @Autowired
-    MongoDatabase scoreDatabase;
+    private MongoDatabase scoreDatabase;
 
     @Autowired
-    ProjectConfigService projectConfigService;
+    private ProjectConfigService projectConfigService;
 
     @Autowired
-    SubjectService subjectService;
+    private SubjectService subjectService;
 
     @Autowired
-    SubjectCombinationService subjectCombinationService;
+    private SubjectCombinationService subjectCombinationService;
 
     @Autowired
-    ImportProjectService importProjectService;
+    private ImportProjectService importProjectService;
 
     @Autowired
-    SimpleCache cache;
+    private SimpleCache cache;
 
     /**
      * 查询题目的答对人数
@@ -103,7 +103,7 @@ public class ScoreService {
      *
      * @return 分数记录
      */
-    public Document findOneJudgeQuestScore(String projectId, String questId) {
+    Document findOneJudgeQuestScore(String projectId, String questId) {
         Document query = doc("project", projectId).append("quest", questId).append("answer", $nin("*", null));
         return scoreDatabase.getCollection("score").find(query).first();
     }
@@ -116,7 +116,7 @@ public class ScoreService {
      *
      * @return 分数记录
      */
-    public List<Document> getStudentQuestScores(String projectId, String studentId) {
+    List<Document> getStudentQuestScores(String projectId, String studentId) {
         List<String> allSubjects = new ArrayList<>();
         allSubjects.addAll(subjectService.querySubjects(projectId).stream().filter(subject -> subject.length() == 3).collect(Collectors.toList()));
         allSubjects.addAll(subjectCombinationService.getAllSubjectCombinations(projectId));
@@ -272,30 +272,13 @@ public class ScoreService {
      * @param range      范围
      * @param target     目标
      * @param totalScore 总分值
-     * @param extra      其他属性
-     */
-    public void saveTotalScore(String projectId, Range range, Target target, double totalScore, Document extra) {
-        saveTotalScore(projectId, range, null, target, totalScore, extra);
-    }
-
-    /**
-     * 保存一条总分记录
-     *
-     * @param projectId  项目ID
-     * @param range      范围
-     * @param target     目标
-     * @param totalScore 总分值
      */
     public void saveTotalScore(
-            String projectId, Range range, Range parent, Target target, double totalScore, Document extra) {
+            String projectId, Range range, Target target, double totalScore, Document extra) {
 
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
         Document update = doc("totalScore", totalScore);
-
-        if (parent != null) {
-            update.append("parent", range2Doc(parent));
-        }
 
         if (extra != null) {
             update.putAll(extra);

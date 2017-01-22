@@ -71,7 +71,7 @@ public class TotalScoreClassTask extends AggrTask {
 
     private void aggrFromTotalScore(AggrTaskMessage taskInfo) {
         aggrFromTotalScore(
-                taskInfo, scoreDatabase, scoreService, rangeService, "student", "class");
+                taskInfo, scoreDatabase, scoreService, rangeService, Range.STUDENT, Range.CLASS);
     }
 
     /**
