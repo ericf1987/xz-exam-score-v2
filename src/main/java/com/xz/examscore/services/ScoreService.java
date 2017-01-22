@@ -63,7 +63,7 @@ public class ScoreService {
      *
      * @return 答对人数
      */
-    public int getQuestCorrentCount(String projectId, String questId, Range range) {
+    public int getQuestCorrectCount(String projectId, String questId, Range range) {
 
         Document query = doc("project", projectId)
                 .append("quest", questId)
@@ -272,9 +272,10 @@ public class ScoreService {
      * @param range      范围
      * @param target     目标
      * @param totalScore 总分值
+     * @param extra      其他属性
      */
-    public void saveTotalScore(String projectId, Range range, Target target, double totalScore) {
-        saveTotalScore(projectId, range, null, target, totalScore, null);
+    public void saveTotalScore(String projectId, Range range, Target target, double totalScore, Document extra) {
+        saveTotalScore(projectId, range, null, target, totalScore, extra);
     }
 
     /**

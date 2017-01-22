@@ -6,7 +6,6 @@ import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.QuestService;
-import com.xz.examscore.services.RangeService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +22,10 @@ import java.util.Map;
 @TaskDispatcherInfo(taskType = "obj_correct_map")
 public class ObjCorrectMapDispatcher extends TaskDispatcher {
 
-    static final Logger LOG = LoggerFactory.getLogger(ObjCorrectMapDispatcher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ObjCorrectMapDispatcher.class);
 
     @Autowired
-    RangeService rangeService;
-
-    @Autowired
-    QuestService questService;
+    private QuestService questService;
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {

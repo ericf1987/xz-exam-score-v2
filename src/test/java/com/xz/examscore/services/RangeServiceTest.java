@@ -45,4 +45,9 @@ public class RangeServiceTest extends XzExamScoreV2ApplicationTests {
             System.out.println("key:" + key + ", size:" + list.size());
         }
     }
+
+    @Test
+    public void testQueryParentRange() throws Exception {
+
+    }
 }

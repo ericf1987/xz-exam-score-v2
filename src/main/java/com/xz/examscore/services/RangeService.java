@@ -149,6 +149,23 @@ public class RangeService {
         }
     }
 
+    public Document getParentsDocument(String projectId, Range range) {
+
+        String cacheKey = "parent:" + projectId + ":range:" + range.getName() + "=" + range.getId();
+
+        return cache.get(cacheKey, () -> {
+            Document result = new Document(range.getName(), range.getId());
+
+            Range parent = getParentRange(projectId, range);
+            while (parent != null) {
+                result.append(parent.getName(), parent.getId());
+                parent = getParentRange(projectId, parent);
+            }
+
+            return result;
+        });
+    }
+
     public Map<String, List<Range>> getRangesMap(String projectId) {
         Map<String, List<Range>> rangesMap = new HashMap<>();
         rangesMap.put(Range.STUDENT, queryRanges(projectId, Range.STUDENT));

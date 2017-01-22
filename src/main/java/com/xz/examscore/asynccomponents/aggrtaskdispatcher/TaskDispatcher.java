@@ -1,14 +1,11 @@
 package com.xz.examscore.asynccomponents.aggrtaskdispatcher;
 
-import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.AggregationRoundService;
-import com.xz.examscore.services.StudentService;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +14,6 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * (description)
@@ -34,13 +28,10 @@ public abstract class TaskDispatcher {
     private static final ThreadLocal<Value<Integer>> taskCounter = new ThreadLocal<>();
 
     @Autowired
-    TaskDispatcherFactory taskDispatcherFactory;
+    private TaskDispatcherFactory taskDispatcherFactory;
 
     @Autowired
-    AggregationRoundService aggregationRoundService;
-
-    @Autowired
-    StudentService studentService;
+    private AggregationRoundService aggregationRoundService;
 
     public void dispatch(Context context) {
         String projectId = context.get("projectId");
@@ -109,31 +100,6 @@ public abstract class TaskDispatcher {
     }
 
     //////////////////////////////////////////////////////////////
-
-    /**
-     * 每个考生发布一个任务，这个任务只有 Range
-     *
-     * @param projectId      项目ID
-     * @param aggregationId  统计ID
-     * @param beforeDispatch 发布每个任务之前需要进行的处理
-     */
-    protected void dispatchTaskForEveryStudent(
-            String projectId, String aggregationId, Consumer<String> beforeDispatch) {
-
-        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, 0, 0, doc("student", 1));
-        for (Document document : list) {
-            String studentId = document.getString("student");
-            if (beforeDispatch != null) {
-                beforeDispatch.accept(studentId);
-            }
-            dispatchTask(createTask(projectId, aggregationId).setRange(Range.student(studentId)));
-        }
-    }
-
-    // 每个考生发布一个任务，这个任务只有 Range
-    protected void dispatchTaskForEveryStudent(String projectId, String aggregationId) {
-        dispatchTaskForEveryStudent(projectId, aggregationId, null);
-    }
 
     public List<Range> fetchRanges(String[] rangeKeys, Map<String, List<Range>> rangesMap) {
         List<Range> ranges = new ArrayList<>();

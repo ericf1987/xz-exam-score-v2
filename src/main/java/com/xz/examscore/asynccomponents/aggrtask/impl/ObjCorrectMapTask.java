@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.query;
 
 @AggrTaskMeta(taskType = "obj_correct_map")
@@ -44,7 +45,7 @@ public class ObjCorrectMapTask extends AggrTask {
         String subject = targetService.getTargetSubjectId(projectId, target);
 
         int studentCount = studentService.getStudentCount(projectId, subject, range);
-        int correctCount = scoreService.getQuestCorrentCount(projectId, questId, range);
+        int correctCount = scoreService.getQuestCorrectCount(projectId, questId, range);
 
         double correctRate = studentCount == 0 ? 0 : ((double) correctCount / studentCount);
         UpdateResult result = scoreDatabase.getCollection("obj_correct_map").updateMany(
