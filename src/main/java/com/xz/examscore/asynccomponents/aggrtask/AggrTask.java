@@ -1,8 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask;
 
 import com.xz.examscore.services.AggregationRoundService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -16,13 +14,11 @@ import javax.annotation.PostConstruct;
  */
 public abstract class AggrTask {
 
-    static final Logger LOG = LoggerFactory.getLogger(AggrTask.class);
+    @Autowired
+    private AggrTaskManager aggrTaskManager;
 
     @Autowired
-    AggrTaskManager aggrTaskManager;
-
-    @Autowired
-    AggregationRoundService aggregationRoundService;
+    private AggregationRoundService aggregationRoundService;
 
     @Value("${redis.task.counter.key}")
     private String taskCounterKey;
@@ -32,12 +28,12 @@ public abstract class AggrTask {
         this.aggrTaskManager.register(this);
     }
 
-    public void taskReceived(AggrTaskMessage task) {
+    void taskReceived(AggrTaskMessage task) {
+
+        // 异常会在 com.xz.examscore.asynccomponents.MessageReceiver.executeTaskSafe() 方法截获
+
         try {
             runTask(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("执行任务失败", e);
         } finally {
             aggregationRoundService.taskFinished(task);
         }

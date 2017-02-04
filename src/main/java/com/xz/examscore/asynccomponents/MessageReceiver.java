@@ -85,7 +85,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
     private void executeTaskSafe(T message) {
         try {
             executeTask(message);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.error("执行消息失败", e);
         }
     }
@@ -115,7 +115,7 @@ public abstract class MessageReceiver<T extends QueueMessage> {
     }
 
     // 获得当前 MessageReceiver 对象可接受的 QueueMessage 类型
-    private String getAcceptableMessageTypeName() {
+    protected String getAcceptableMessageTypeName() {
         Type messageType = getAcceptableMessageType();
         return messageType == null ? null : ((Class) messageType).getSimpleName().toLowerCase();
     }

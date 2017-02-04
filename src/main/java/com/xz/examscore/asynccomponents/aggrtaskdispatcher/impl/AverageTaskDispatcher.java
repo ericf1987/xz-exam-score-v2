@@ -18,7 +18,7 @@ import java.util.Map;
  *         平均分
  */
 @Component
-@TaskDispatcherInfo(taskType = "average", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "average", dependentTaskType = "total_score_province")
 public class AverageTaskDispatcher extends TaskDispatcher {
 
     static final Logger LOG = LoggerFactory.getLogger(AverageTaskDispatcher.class);

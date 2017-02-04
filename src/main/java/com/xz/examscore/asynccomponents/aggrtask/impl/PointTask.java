@@ -5,7 +5,10 @@ import com.xz.ajiaedu.common.lang.DoubleCounterMap;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
-import com.xz.examscore.bean.*;
+import com.xz.examscore.bean.PointLevel;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.SubjectLevel;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -91,7 +94,7 @@ public class PointTask extends AggrTask {
         for (Map.Entry<String, Double> pointScoreEntry : pointScores.entrySet()) {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
-            scoreService.saveTotalScore(projectId, studentRange, null, point, score, null);
+            scoreService.saveTotalScore(projectId, studentRange, point, score, null);
             accumulatePointScore(classRange, pointScoreEntry.getKey(), score, pointMap);
             accumulatePointScore(schoolRange, pointScoreEntry.getKey(), score, pointMap);
             accumulatePointScore(provinceRange, pointScoreEntry.getKey(), score, pointMap);
@@ -101,7 +104,7 @@ public class PointTask extends AggrTask {
         for (Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelScores.entrySet()) {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
-            scoreService.saveTotalScore(projectId, studentRange, null, pointLevel, score, null);
+            scoreService.saveTotalScore(projectId, studentRange, pointLevel, score, null);
             accumulatePointLevelScore(classRange, pointLevelEntry.getKey(), score, pointLevelMap);
             accumulatePointLevelScore(schoolRange, pointLevelEntry.getKey(), score, pointLevelMap);
             accumulatePointLevelScore(provinceRange, pointLevelEntry.getKey(), score, pointLevelMap);
@@ -111,7 +114,7 @@ public class PointTask extends AggrTask {
         for (Map.Entry<SubjectLevel, Double> levelScoreEntry : subjectLevelScores.entrySet()) {
             Target subjectLevel = Target.subjectLevel(levelScoreEntry.getKey());
             double score = levelScoreEntry.getValue();
-            scoreService.saveTotalScore(projectId, studentRange, null, subjectLevel, score, null);
+            scoreService.saveTotalScore(projectId, studentRange, subjectLevel, score, null);
             accumulateSubjectLevelScore(classRange, levelScoreEntry.getKey(), score, subjectLevelMap);
             accumulateSubjectLevelScore(schoolRange, levelScoreEntry.getKey(), score, subjectLevelMap);
             accumulateSubjectLevelScore(provinceRange, levelScoreEntry.getKey(), score, subjectLevelMap);

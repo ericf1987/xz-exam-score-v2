@@ -20,7 +20,7 @@ import java.util.Map;
  * 统计班级/学校的得分率和个人的知识点/能力层级得分率，因为前者还需要进一步
  * 统计四率人数，后者只需要取平均分除以满分值即可。
  */
-@TaskDispatcherInfo(taskType = "score_rate", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "score_rate", dependentTaskType = "total_score_province")
 @Component
 public class ScoreRateDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(ScoreRateDispatcher.class);

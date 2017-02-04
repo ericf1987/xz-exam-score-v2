@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class AggrMessageReceiver extends MessageReceiver<AggrTaskMessage> {
 
     @Autowired
-    AggrTaskManager aggrTaskManager;
+    private AggrTaskManager aggrTaskManager;
 
     @Override
     protected void executeTask(AggrTaskMessage message) {
