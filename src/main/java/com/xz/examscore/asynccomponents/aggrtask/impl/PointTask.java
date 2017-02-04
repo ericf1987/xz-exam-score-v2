@@ -129,21 +129,21 @@ public class PointTask extends AggrTask {
     //将各个维度累加好的结果一次性写入Mongo
     private void rangeTotalScore(String projectId, Range range, Map<String, DoubleCounterMap<String>> pointMap, Map<String, DoubleCounterMap<PointLevel>> pointLevelMap, Map<String, DoubleCounterMap<SubjectLevel>> subjectLevelMap) {
         DoubleCounterMap<String> pointCounter = pointMap.get(range.getId());
-        for (Map.Entry<String, Double> pointScoreEntry : pointCounter.entrySet()){
+        for (Map.Entry<String, Double> pointScoreEntry : pointCounter.entrySet()) {
             Target point = Target.point(pointScoreEntry.getKey());
             double score = pointScoreEntry.getValue();
             addTotalScore(projectId, range, point, score);
         }
 
         DoubleCounterMap<PointLevel> pointLevelCounter = pointLevelMap.get(range.getId());
-        for(Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelCounter.entrySet()){
+        for (Map.Entry<PointLevel, Double> pointLevelEntry : pointLevelCounter.entrySet()) {
             Target pointLevel = Target.pointLevel(pointLevelEntry.getKey());
             double score = pointLevelEntry.getValue();
             addTotalScore(projectId, range, pointLevel, score);
         }
 
         DoubleCounterMap<SubjectLevel> subjectLevelCounter = subjectLevelMap.get(range.getId());
-        for(Map.Entry<SubjectLevel, Double> subjectLevelEntry : subjectLevelCounter.entrySet()){
+        for (Map.Entry<SubjectLevel, Double> subjectLevelEntry : subjectLevelCounter.entrySet()) {
             Target subjectLevel = Target.subjectLevel(subjectLevelEntry.getKey());
             double score = subjectLevelEntry.getValue();
             addTotalScore(projectId, range, subjectLevel, score);
@@ -259,7 +259,10 @@ public class PointTask extends AggrTask {
 
     }
 
-    private void doPointTaskDistribute(String projectId, String subjectId, String studentId, DoubleCounterMap<String> pointScores, DoubleCounterMap<SubjectLevel> subjectLevelScores, DoubleCounterMap<PointLevel> pointLevelScores) {
+    private void doPointTaskDistribute(String projectId, String subjectId, String studentId,
+                                       DoubleCounterMap<String> pointScores,
+                                       DoubleCounterMap<SubjectLevel> subjectLevelScores,
+                                       DoubleCounterMap<PointLevel> pointLevelScores) {
         FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
         for (Document scoreDoc : scores) {
             double score = scoreDoc.getDouble("score");

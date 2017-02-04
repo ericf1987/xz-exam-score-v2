@@ -1,4 +1,4 @@
-package com.xz.examscore.asynccomponents.aggrtask.impl;
+package com.xz.examscore.asynccomponents.aggrtask.impl.optionMap;
 
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.AggregateIterable;
@@ -22,11 +22,15 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.examscore.util.Mongo.query;
 
+/**
+ * @author by fengye on 2017/1/30.
+ */
 @Component
-@AggrTaskMeta(taskType = "option_map")
-public class OptionMapTask extends AggrTask {
+@AggrTaskMeta(taskType = "class_option_map")
+public class ClassOptionMapTask extends AggrTask{
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -49,6 +53,7 @@ public class OptionMapTask extends AggrTask {
             String projectId, String questId, Range range,
             MongoCollection<Document> scoreCollection, MongoCollection<Document> optionMapCollection) {
 
+        //查询当前维度的总人数
         AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
                 $match(doc("project", projectId).append("quest", questId)
                         .append(range.getName(), range.getId())),

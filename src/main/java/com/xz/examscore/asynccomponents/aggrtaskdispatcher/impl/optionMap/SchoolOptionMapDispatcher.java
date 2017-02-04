@@ -1,4 +1,4 @@
-package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
+package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl.optionMap;
 
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
@@ -17,15 +17,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 客观题各选项人数、比率
- *
- * @author yiding_he
+ * @author by fengye on 2017/1/30.
  */
 @Component
-@TaskDispatcherInfo(taskType = "option_map")
-public class OptionMapDispatcher extends TaskDispatcher {
+@TaskDispatcherInfo(taskType = "school_option_map", dependentTaskType = "class_option_map")
+public class SchoolOptionMapDispatcher extends TaskDispatcher {
 
-    static final Logger LOG = LoggerFactory.getLogger(OptionMapDispatcher.class);
+    static final Logger LOG = LoggerFactory.getLogger(SchoolOptionMapDispatcher.class);
 
     @Autowired
     QuestService questService;
@@ -35,23 +33,26 @@ public class OptionMapDispatcher extends TaskDispatcher {
 
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
-        List<Document> objecitveQuests = questService.getQuests(projectId, true);
-        String[] rangeKeys = new String[]{
-                Range.CLASS, Range.SCHOOL, Range.PROVINCE
+        String[] rangeKey = new String[]{
+                Range.SCHOOL
         };
 
-        List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
+        List<Range> ranges = fetchRanges(rangeKey, rangesMap);
 
-        // 对每个学校、班级和每个客观题发布一个任务
+        List<Document> objectiveQuests = questService.getQuests(projectId, true);
+
         int counter = 0;
-        for (Document quest : objecitveQuests) {
+
+        for (Document quest : objectiveQuests) {
             for (Range range : ranges) {
-                dispatchTask(createTask(projectId, aggregationId)
-                        .setRange(range)
-                        .setTarget(Target.quest(quest.getString("questId"))));
+                dispatchTask(
+                        createTask(projectId, aggregationId)
+                                .setRange(range)
+                                .setTarget(Target.quest(quest.getString("questId")))
+                );
                 counter++;
             }
         }
-        LOG.info("最终为项目 " + projectId + " 的 option_map 统计发布了 " + counter + " 个任务");
+        LOG.info("最终为项目 " + projectId + " 的 school_option_map 统计发布了 " + counter + " 个任务");
     }
 }

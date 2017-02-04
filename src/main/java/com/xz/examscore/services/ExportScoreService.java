@@ -86,7 +86,7 @@ public class ExportScoreService {
         }
     }
 
-    private String uploadPack(String projectId, String filePath) {
+    public String uploadPack(String projectId, String filePath) {
         String ossPath = "webmarking-score-pack/" + projectId + ".zip";
         scorePackOssFileClient.uploadFile(new File(filePath), ossPath);
         LOG.info("项目 " + projectId + "的成绩包在阿里云的上传路径为-->" + ossPath);
