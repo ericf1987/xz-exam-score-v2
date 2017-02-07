@@ -6,7 +6,10 @@ import com.xz.ajiaedu.common.redis.Redis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 /**
  * 消息队列服务。本应用的所有消息都是拉取式的，也就是消息并不会明确的指定哪台服务器来处理。
@@ -20,6 +23,9 @@ public class QueueService {
 
     @Autowired
     Redis redis;
+
+    @Value("${redis.task.counter.key}")
+    private String taskCounterKey;
 
     /**
      * 从队列中读取一条记录并转化为指定的 bean
@@ -66,4 +72,21 @@ public class QueueService {
         Redis.RedisQueue queue = redis.getQueue(queueKey);
         queue.clear();
     }
+
+    /**
+     * 清空统计队列keys
+     */
+    public void deleteByKey(String aggregationKey){
+        Set<String> keys = redis.keys(aggregationKey);
+        if(keys.isEmpty()){
+            LOG.info("未找到数据,{}", aggregationKey);
+            return;
+        }
+        for (String key : keys){
+            LOG.info("当前key-->{}", key);
+            redis.delete(key);
+        }
+        LOG.info("成功清理{}条数据", keys.size());
+    }
+
 }

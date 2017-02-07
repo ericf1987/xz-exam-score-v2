@@ -89,6 +89,7 @@ public class TestLamdar {
         }*/
         List<String> list = Arrays.asList("123", "13", "12");
         System.out.println(list.subList(0, 3).toString());
+        System.out.println(Double.POSITIVE_INFINITY);
     }
 
 }

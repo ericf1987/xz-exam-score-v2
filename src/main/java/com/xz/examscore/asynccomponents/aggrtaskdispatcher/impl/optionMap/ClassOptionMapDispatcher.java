@@ -49,6 +49,6 @@ public class ClassOptionMapDispatcher extends TaskDispatcher{
                 counter++;
             }
         }
-        LOG.info("最终为项目 " + projectId + " 的 option_map 统计发布了 " + counter + " 个任务");
+        LOG.info("最终为项目 " + projectId + " 的 class_option_map 统计发布了 " + counter + " 个任务");
     }
 }

@@ -161,5 +161,16 @@
     </form>
 </fieldset>
 
+<fieldset>
+    <legend>清理redis中残留的键值数据</legend>
+    <form action="aggr/redis/deleteKey" method="post">
+        <p>项目ID：<input type="text" name="aggregationKey"/></p>
+        <p>注：该功能用于清理redis中键值为completed_tasks和aggregation_task_count开头的数据, 追加"*"可批量清理</p>
+        <p>
+            <button type="submit">开始清理</button>
+        </p>
+    </form>
+</fieldset>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl;
+package com.xz.examscore.asynccomponents.aggrtaskdispatcher.impl.totalscore;
 
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherInfo;
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-@TaskDispatcherInfo(taskType = "total_score")
-@Component
-public class TotalScoreTaskDispatcher extends TaskDispatcher {
 
-    static final Logger LOG = LoggerFactory.getLogger(TotalScoreTaskDispatcher.class);
+@TaskDispatcherInfo(taskType = "total_score_class", dependentTaskType = "total_score_student")
+@Component
+public class TotalScoreClassDispatcher extends TaskDispatcher {
+    static final Logger LOG = LoggerFactory.getLogger(TotalScoreClassDispatcher.class);
 
     @Autowired
     TargetService targetService;

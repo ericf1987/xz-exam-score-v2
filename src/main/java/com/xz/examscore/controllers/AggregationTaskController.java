@@ -1,6 +1,7 @@
 package com.xz.examscore.controllers;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.examscore.asynccomponents.QueueService;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcher;
 import com.xz.examscore.asynccomponents.aggrtaskdispatcher.TaskDispatcherFactory;
 import com.xz.examscore.bean.*;
@@ -56,6 +57,9 @@ public class AggregationTaskController {
 
     @Autowired
     RangeService rangeService;
+
+    @Autowired
+    QueueService queueService;
 
     /**
      * 开始统计任务
@@ -156,5 +160,12 @@ public class AggregationTaskController {
     public Result cleanProjectData(@RequestParam("project") String projectId) {
         cleanProjectService.doCleanSchedule(projectId);
         return Result.success("项目 " + projectId + " 开始执行清理...");
+    }
+
+    @RequestMapping(value = "/redis/deleteKey", method = RequestMethod.POST)
+    @ResponseBody
+    public Result deleteAggregationKey(@RequestParam("aggregationKey") String aggregationKey) {
+        queueService.deleteByKey(aggregationKey);
+        return Result.success(" 开始执行清理...");
     }
 }
