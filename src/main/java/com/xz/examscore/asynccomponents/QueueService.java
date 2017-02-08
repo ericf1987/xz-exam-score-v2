@@ -114,10 +114,7 @@ public class QueueService {
         long currentTimeMillis = System.currentTimeMillis();
         long startTime = Long.valueOf(redis.get(key));
         //时间暂定24小时
-        if (currentTimeMillis - startTime >= REDIS_KEY_LIVE_CYCLE) {
-            return true;
-        }
-        return false;
+        return currentTimeMillis - startTime >= REDIS_KEY_LIVE_CYCLE;
     }
 
     public void clearOverdueAggr() {
@@ -131,13 +128,12 @@ public class QueueService {
     }
 
     public String[] getRedisKeys(String uuid) {
-        String[] keys = new String[]{
+        return new String[]{
                 taskCounterKey + ":" + uuid,
                 completedTaskKey + ":" + uuid,
                 aggregationStartTime + ":" + uuid,
                 taskRuntime + ":" + uuid
         };
-        return keys;
     }
 
     /**
