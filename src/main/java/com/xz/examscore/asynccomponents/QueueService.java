@@ -21,18 +21,28 @@ public class QueueService {
 
     static final Logger LOG = LoggerFactory.getLogger(QueueService.class);
 
+    private final static int REDIS_KEY_LIVE_CYCLE = 1000 * 60 * 60 * 24;
+
     @Autowired
     Redis redis;
 
     @Value("${redis.task.counter.key}")
     private String taskCounterKey;
 
+    @Value("${redis.task.list.completed.key}")
+    private String completedTaskKey;
+
+    @Value("${redis.aggregation.execution.start}")
+    private String aggregationStartTime;
+
+    @Value("${redis.task.execution.runtime}")
+    private String taskRuntime;
+
     /**
      * 从队列中读取一条记录并转化为指定的 bean
      *
      * @param queueType      队列类型
      * @param timeoutSeconds 读取超时时间（秒）
-     *
      * @return 读取结果，如果没有则返回 null
      */
     public <T extends QueueMessage> T readFromQueue(QueueType queueType, int timeoutSeconds) {
@@ -76,17 +86,66 @@ public class QueueService {
     /**
      * 清空统计队列keys
      */
-    public void deleteByKey(String aggregationKey){
+    public void deleteByKey(String aggregationKey) {
         Set<String> keys = redis.keys(aggregationKey);
-        if(keys.isEmpty()){
+        if (keys.isEmpty()) {
             LOG.info("未找到数据,{}", aggregationKey);
             return;
         }
-        for (String key : keys){
+        for (String key : keys) {
             LOG.info("当前key-->{}", key);
             redis.delete(key);
         }
         LOG.info("成功清理{}条数据", keys.size());
     }
 
+    /**
+     * 记录统计时间
+     */
+    public void recordAggrTime(String uuid) {
+        long currentTimeMillis = System.currentTimeMillis();
+        redis.set(aggregationStartTime + ":" + uuid, String.valueOf(currentTimeMillis));
+    }
+
+    /**
+     * 判断统计是否逾期
+     */
+    public boolean isAggrOverdue(String key) {
+        long currentTimeMillis = System.currentTimeMillis();
+        long startTime = Long.valueOf(redis.get(key));
+        //时间暂定24小时
+        if (currentTimeMillis - startTime >= REDIS_KEY_LIVE_CYCLE) {
+            return true;
+        }
+        return false;
+    }
+
+    public void clearOverdueAggr() {
+        redis.scan("aggr_start_time:*", (r, key) -> {
+            if (isAggrOverdue(key)) {
+                LOG.info("该统计任务{}已逾期，执行清理...", key);
+                String[] redisKeys = getRedisKeys(key.split(":")[1]);
+                redis.delete(redisKeys);
+            }
+        });
+    }
+
+    public String[] getRedisKeys(String uuid) {
+        String[] keys = new String[]{
+                taskCounterKey + ":" + uuid,
+                completedTaskKey + ":" + uuid,
+                aggregationStartTime + ":" + uuid,
+                taskRuntime + ":" + uuid
+        };
+        return keys;
+    }
+
+    /**
+     * 记录统计执行时间
+     * @param commandType 统计任务类型
+     * @param aggregationId 轮次ID
+     */
+    public void recordAggrRunTime(String commandType, String aggregationId) {
+        redis.getHash(taskRuntime + ":" + aggregationId).put(commandType, String.valueOf(System.currentTimeMillis()));
+    }
 }

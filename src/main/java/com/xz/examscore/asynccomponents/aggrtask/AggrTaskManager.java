@@ -1,7 +1,9 @@
 package com.xz.examscore.asynccomponents.aggrtask;
 
+import com.xz.examscore.asynccomponents.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,6 +22,9 @@ public class AggrTaskManager {
     static final Logger LOG = LoggerFactory.getLogger(AggrTaskManager.class);
 
     private Map<String, AggrTask> taskInstanceMap = new HashMap<>();
+
+    @Autowired
+    QueueService queueService;
 
     void handleMessage(AggrTaskMessage message) {
         String commandType = message.getType();

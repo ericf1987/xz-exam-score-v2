@@ -161,6 +161,11 @@ public class AggregationService {
 
     private void runAggregation0(String projectId, AggregationType aggregationType) {
         String aggregationId = UUID.randomUUID().toString();
+        queueService.recordAggrTime(aggregationId);
+        LOG.info("----开始清理逾期的统计残留数据----，本次统计ID={}", aggregationId);
+        queueService.clearOverdueAggr();
+        LOG.info("----清理结束----，本次统计ID={}", aggregationId);
+
         LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
 
         LOG.info("----开始查询项目{}的维度信息----");
