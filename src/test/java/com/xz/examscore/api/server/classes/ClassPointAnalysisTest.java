@@ -1,5 +1,6 @@
 package com.xz.examscore.api.server.classes;
 
+import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.api.Param;
 import org.junit.Test;
@@ -17,11 +18,15 @@ public class ClassPointAnalysisTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testExecute() throws Exception {
         String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
-        String classId = "a110e9c5-3b76-46a2-9de6-c1dd34769e37";
-        String subjectId = "004";
+        String classId = "0bc7b0a4-adfc-4cb2-8324-863b976ab543";
+        String subjectId = "003";
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("classId", classId)
                 .setParameter("subjectId", subjectId);
-        System.out.println(classPointAnalysis.execute(param).getData());
+        long begin = System.currentTimeMillis();
+        Result result = classPointAnalysis.execute(param);
+        long end = System.currentTimeMillis();
+        System.out.println(end - begin);
+        System.out.println(result.getData());
     }
 }

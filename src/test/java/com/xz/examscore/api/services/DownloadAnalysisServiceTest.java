@@ -64,7 +64,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testMain1() throws Exception{
-        String projectId = "430100-bdfa63b0070b431fbc5308c0d362e74f";
+        String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         String[] param = new String[]{"总体成绩分析","基础分析","分数分析.xlsx"};
         String result = getSaveFilePath(projectId, "F://", StringUtil.joinPaths(param));
         System.out.println(result);

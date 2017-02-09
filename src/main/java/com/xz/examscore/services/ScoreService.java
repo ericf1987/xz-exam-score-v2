@@ -1,5 +1,6 @@
 package com.xz.examscore.services;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
-import static com.xz.examscore.util.Mongo.range2Doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
 /**
@@ -60,7 +60,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param questId   题目ID
      * @param range     范围
-     *
      * @return 答对人数
      */
     public int getQuestCorrectCount(String projectId, String questId, Range range) {
@@ -79,7 +78,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param range     范围
      * @param target    目标
-     *
      * @return 分数
      */
     public double getScore(String projectId, Range range, Target target) {
@@ -100,7 +98,6 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param questId   题目ID
-     *
      * @return 分数记录
      */
     Document findOneJudgeQuestScore(String projectId, String questId) {
@@ -113,7 +110,6 @@ public class ScoreService {
      *
      * @param projectId 项目ID
      * @param studentId 学生ID
-     *
      * @return 分数记录
      */
     List<Document> getStudentQuestScores(String projectId, String studentId) {
@@ -133,7 +129,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 学生ID
-     *
      * @return 分数记录
      */
     public FindIterable<Document> getStudentSubjectScores(String projectId, String studentId, String subjectId) {
@@ -148,7 +143,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 学生ID
-     *
      * @return 分数记录
      */
     public ArrayList<Document> getStudentScoresBySubject(String projectId, String studentId, String subjectId) {
@@ -169,9 +163,7 @@ public class ScoreService {
                     FindIterable<Document> documents = collection.find(q);
                     list.addAll(toList(documents));
                 }
-                list.forEach(doc -> {
-                    doc.put("subject", subjectId);
-                });
+                list.forEach(doc -> doc.put("subject", subjectId));
                 return CollectionUtils.asArrayList(list);
             }
         }
@@ -185,7 +177,6 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param subjectId 科目ID
-     *
      * @return 成绩
      */
     public double getSubjectScore(String projectId, String studentId, String subjectId) {
@@ -238,9 +229,11 @@ public class ScoreService {
 
         MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
 
+        Document query = Mongo.query(projectId, range, target);
+/*
         Document query = new Document("project", projectId)
                 .append("range", range2Doc(range))
-                .append("target", target2Doc(target));
+                .append("target", target2Doc(target));*/
 
         List<Document> docs = MongoUtils.toList(totalScores.find(query).projection(doc("totalScore", 1)));
 
@@ -300,7 +293,6 @@ public class ScoreService {
      * @param range     范围
      * @param target    目标
      * @param score     分数
-     *
      * @return 高于指定分数的记录总数
      */
     public int getCountByScore(String projectId, Range range, Target target, double score) {
@@ -329,7 +321,6 @@ public class ScoreService {
      * @param target    目标
      * @param max       最大值
      * @param min       最小值
-     *
      * @return 分数段内的学生人数
      */
     public int getCountByScoreSpan(String projectId, Range range, Target target, double max, double min) {
@@ -452,6 +443,23 @@ public class ScoreService {
             default:
                 return false;
         }
+    }
+
+    public ArrayList<Document> getTotalScoreByName(String projectId, String rangeName, String targetName) {
+        String cacheKey = "getTotalScoreByName:" + projectId + ":" + rangeName + ":" + targetName;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
+            Document query = doc("project", projectId);
+            if (!StringUtils.isBlank(rangeName)) {
+                query.append("range.name", rangeName);
+            }
+            if (!StringUtils.isBlank(targetName)) {
+                query.append("target.name", targetName);
+            }
+            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("totalScore", 1))));
+        });
+
     }
 
 }

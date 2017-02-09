@@ -101,6 +101,14 @@ public class PointService {
         });
     }
 
+    public String getPointName(String pointId){
+        String cacheKey = "pointName:" + pointId;
+        return cache.get(cacheKey, () -> {
+            Document document = scoreDatabase.getCollection("points").find(doc("id", pointId)).first();
+            return null != document && !document.isEmpty() ? document.getString("name") : "无知识点信息!";
+        });
+    }
+
     public boolean exists(String pointId, String subject) {
         return scoreDatabase.getCollection("points").count(doc("id", pointId).append("subject", subject)) > 0;
     }

@@ -1,8 +1,10 @@
 package com.xz.examscore.services;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.bson.Document;
@@ -11,11 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 import static com.xz.examscore.util.Mongo.range2Doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
@@ -110,5 +114,22 @@ public class AverageService {
     public void deleteCache(String projectId, Range range, Target target) {
         String cacheKey = "average:" + projectId + ":" + range + ":" + target;
         cache.delete(cacheKey);
+    }
+
+    public ArrayList<Document> getAverageByName(String projectId, String rangeName, String targetName) {
+        String cacheKey = "getAverageByName:" + projectId + ":" + rangeName + ":" + targetName;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("average");
+            Document query = doc("project", projectId);
+            if (!StringUtils.isBlank(rangeName)) {
+                query.append("range.name", rangeName);
+            }
+            if (!StringUtils.isBlank(targetName)) {
+                query.append("target.name", targetName);
+            }
+            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("average", 1))));
+        });
+
     }
 }
