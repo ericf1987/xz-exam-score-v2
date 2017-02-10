@@ -1,12 +1,18 @@
 package com.xz.examscore.services;
 
+import com.hyd.simplecache.SimpleCache;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 import static com.xz.examscore.util.Mongo.range2Doc;
 
 @Service
@@ -14,6 +20,9 @@ public class QuestTypeScoreService {
 
     @Autowired
     MongoDatabase scoreDatabase;
+
+    @Autowired
+    private SimpleCache cache;
 
     /**
      * 查询题型得分
@@ -46,5 +55,23 @@ public class QuestTypeScoreService {
         ).first();
 
         return doc != null ? doc.getDouble("score") : 0d;
+    }
+
+    //查询学生维度的题型得分列表
+    public ArrayList<Document> getStudentQuestTypeScoreList(String projectId, Range range) {
+        String cacheKey = "quest_type_score:" + projectId + ":" + range.getId();
+        return cache.get(cacheKey, () -> {
+            FindIterable<Document> documents = scoreDatabase.getCollection("quest_type_score").find(doc("project", projectId).append("class", range.getId()));
+            return CollectionUtils.asArrayList(toList(documents));
+        });
+    }
+
+    //查询非学生维度的题型得分列表
+    public ArrayList<Document> getNonStudentQuestTypeScoreList(String projectId, Range range) {
+        String cacheKey = "quest_type_score_average:" + projectId + ":" + range;
+        return cache.get(cacheKey, () -> {
+            FindIterable<Document> documents = scoreDatabase.getCollection("quest_type_score_average").find(doc("project", projectId).append("range", range2Doc(range)));
+            return CollectionUtils.asArrayList(toList(documents));
+        });
     }
 }
