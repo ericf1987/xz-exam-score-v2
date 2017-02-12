@@ -6,6 +6,7 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.classes.ClassQuestTypeAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.asynccomponents.report.biz.classes.ClassQuestTypeBiz;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ClassService;
@@ -35,6 +36,9 @@ public class ClassQuestTypeSheets extends SheetGenerator {
     @Autowired
     ClassService classService;
 
+    @Autowired
+    ClassQuestTypeBiz classQuestTypeBiz;
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target subjectTarget = sheetTask.get("target");
@@ -43,7 +47,8 @@ public class ClassQuestTypeSheets extends SheetGenerator {
                 setParameter("subjectId", subjectTarget.getId().toString()).
                 setParameter("classId", classRange.getId());
         //设置表头
-        Result result = classQuestTypeAnalysis.execute(param);
+//        Result result = classQuestTypeAnalysis.execute(param);
+        Result result = classQuestTypeBiz.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStuData(excelWriter, result);

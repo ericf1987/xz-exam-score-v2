@@ -19,7 +19,7 @@ public class ClassPointAnalysisTest extends XzExamScoreV2ApplicationTests {
     public void testExecute() throws Exception {
         String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
         String classId = "0bc7b0a4-adfc-4cb2-8324-863b976ab543";
-        String subjectId = "003";
+        String subjectId = "001";
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("classId", classId)
                 .setParameter("subjectId", subjectId);

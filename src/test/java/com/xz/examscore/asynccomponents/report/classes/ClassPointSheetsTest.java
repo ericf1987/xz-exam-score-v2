@@ -14,6 +14,9 @@ public class ClassPointSheetsTest extends XzExamScoreV2ApplicationTests{
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classPointReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.clazz("0c738247-b62c-4c90-9016-1cc1163fd0b1"), "target/class-point.xlsx");
+        long begin = System.currentTimeMillis();
+        classPointReport.generate("430100-e7bd093d92d844819c7eda8b641ab6ee", Range.clazz("0bc7b0a4-adfc-4cb2-8324-863b976ab543"), "target/class-point.xlsx");
+        long end = System.currentTimeMillis();
+        System.out.println("生成报表耗时：" + (end - begin));
     }
 }

@@ -6,8 +6,6 @@ import com.xz.examscore.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * @author by fengye on 2017/2/9.
  */
@@ -18,9 +16,9 @@ public class ClassPointBizTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("project", "430100-e7bd093d92d844819c7eda8b641ab6ee")
+        Param param = new Param().setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
                 .setParameter("classId", "0bc7b0a4-adfc-4cb2-8324-863b976ab543")
-                .setParameter("subjectId", "003");
+                .setParameter("subjectId", "001");
 
         long begin = System.currentTimeMillis();
         Result result = classPointBiz.execute(param);

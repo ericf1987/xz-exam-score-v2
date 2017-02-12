@@ -3,9 +3,9 @@ package com.xz.examscore.asynccomponents.report.classes;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
-import com.xz.examscore.api.server.classes.ClassPointAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.asynccomponents.report.biz.classes.ClassPointBiz;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("unchecked")
 @Component
 public class ClassPointSheets extends SheetGenerator {
+
     @Autowired
-    ClassPointAnalysis classPointAnalysis;
+    ClassPointBiz classPointBiz;
 
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
@@ -34,7 +35,7 @@ public class ClassPointSheets extends SheetGenerator {
                 setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
-        Result result = classPointAnalysis.execute(param);
+        Result result = classPointBiz.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStudentData(excelWriter, result);
@@ -45,7 +46,7 @@ public class ClassPointSheets extends SheetGenerator {
         List<Map<String, Object>> classes = result.get("classes");
         excelWriter.set(0, column.incrementAndGet(), "考号");
         excelWriter.set(0, column.incrementAndGet(), "学校考号");
-        excelWriter.set(0, column.incrementAndGet(), "题型");
+        excelWriter.set(0, column.incrementAndGet(), "知识点");
         for(Map<String, Object> pointstat : classes){
             excelWriter.set(0, column.incrementAndGet(), pointstat.get("pointName"));
         }

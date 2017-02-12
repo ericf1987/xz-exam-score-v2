@@ -14,6 +14,9 @@ public class ClassQuestTypeSheetsTest extends XzExamScoreV2ApplicationTests{
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classQuestTypeReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.clazz("0bdc71cf-7443-474f-9ba9-1d15c91a5561"), "target/class-quest-type-data.xlsx");
+        long begin = System.currentTimeMillis();
+        classQuestTypeReport.generate("430300-672a0ed23d9148e5a2a31c8bf1e08e62", Range.clazz("0bdc71cf-7443-474f-9ba9-1d15c91a5561"), "target/class-quest-type-data-new.xlsx");
+        long end = System.currentTimeMillis();
+        System.out.println("生成报表耗时：" + (end - begin));
     }
 }
