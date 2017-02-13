@@ -6,6 +6,7 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.asynccomponents.report.biz.school.SchoolPointAbilityLevelBiz;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class SchoolPointAbilityLevelSheets extends SheetGenerator {
     @Autowired
     ProjectPointAbilityLevelAnalysis projectPointAbilityLevelAnalysis;
 
+    @Autowired
+    SchoolPointAbilityLevelBiz schoolPointAbilityLevelBiz;
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
@@ -34,7 +38,8 @@ public class SchoolPointAbilityLevelSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
                 .setParameter("schoolId", schoolRange.getId());
-        Result result = projectPointAbilityLevelAnalysis.execute(param);
+        //Result result = projectPointAbilityLevelAnalysis.execute(param);
+        Result result = schoolPointAbilityLevelBiz.execute(param);
         setupHeader(excelWriter, result);
         setupSecondaryHeader(excelWriter, result);
         fillDetailData(excelWriter, result);

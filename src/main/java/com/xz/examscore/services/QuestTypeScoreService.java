@@ -59,7 +59,7 @@ public class QuestTypeScoreService {
 
     //查询学生维度的题型得分列表
     public ArrayList<Document> getStudentQuestTypeScoreList(String projectId, Range range) {
-        String cacheKey = "quest_type_score:" + projectId + ":" + range.getId();
+        String cacheKey = "quest_type_score:" + projectId + ":" + range;
         return cache.get(cacheKey, () -> {
             FindIterable<Document> documents = scoreDatabase.getCollection("quest_type_score").find(doc("project", projectId).append("class", range.getId()));
             return CollectionUtils.asArrayList(toList(documents));

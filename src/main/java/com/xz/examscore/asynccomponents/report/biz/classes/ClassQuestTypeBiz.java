@@ -13,10 +13,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +42,7 @@ public class ClassQuestTypeBiz implements Server {
 
     @Override
     public Result execute(Param param) throws Exception {
-        String projectId = param.getString("project");
+        String projectId = param.getString("projectId");
         String classId = param.getString("classId");
         String subjectId = param.getString("subjectId");
 
@@ -66,8 +63,10 @@ public class ClassQuestTypeBiz implements Server {
 
         List<Document> studentData = studentQuestTypeScoreList.stream().filter(p -> questTypeFilter(questTypes, p)).collect(Collectors.toList());
 
+        List<Map<String, Object>> students = packStudentData(projectId, subjectId, classId, studentData, questTypeMaps);
+
         return Result.success().set("classes", packClassData(projectId, classData))
-                .set("students", packStudentData(projectId, subjectId, classId, studentData, questTypeMaps));
+                .set("students", students);
     }
 
     private List<Map<String, Object>> packClassData(String projectId, List<Document> classData) {
@@ -117,7 +116,14 @@ public class ClassQuestTypeBiz implements Server {
             map.put("studentName", studentName);
 
             //学生每个试卷题型的得分信息
-            List<Map<String, Object>> questTypes = packScoreAndRate(studentId, studentData, questTypeList);
+            //List<Map<String, Object>> questTypes = packScoreAndRate(studentId, studentData, questTypeList);
+            List<Map<String, Object>> questTypes = new ArrayList<>();
+            for(Map<String, Object> questTypeMap : questTypeList){
+                Map<String, Object> newMap = new HashMap<>();
+                newMap.putAll(questTypeMap);
+                packScoreAndRateMap(studentId, studentData, newMap);
+                questTypes.add(newMap);
+            }
             map.put("questTypes", questTypes);
             result.add(map);
         }
@@ -125,22 +131,15 @@ public class ClassQuestTypeBiz implements Server {
         return result;
     }
 
-    private List<Map<String, Object>> packScoreAndRate(String studentId, List<Document> studentData, List<Map<String, Object>> questTypeList) {
-        for (Map<String, Object> questTypeMap : questTypeList){
+    private void packScoreAndRateMap(String studentId, List<Document> studentData, Map<String, Object> questTypeMap) {
+        for(Document doc : studentData){
             String questTypeId = MapUtils.getString(questTypeMap, "questTypeId");
-            double score = 0;
-            double rate = 0;
-            for(Document doc : studentData){
-                if(doc.getString("student").equals(studentId) && doc.getString("questType").equals(questTypeId)){
-                    score = doc.getDouble("score");
-                    rate = doc.getDouble("rate");
-                    break;
-                }
+            if(doc.getString("student").equals(studentId) && doc.getString("questType").equals(questTypeId)){
+                questTypeMap.put("score", doc.getDouble("score"));
+                questTypeMap.put("scoreRate", doc.getDouble("rate"));
+                return;
             }
-            questTypeMap.put("score", score);
-            questTypeMap.put("rate", rate);
         }
-        return questTypeList;
     }
 
     public boolean questTypeFilter(List<QuestType> questTypeList, Document p) {
