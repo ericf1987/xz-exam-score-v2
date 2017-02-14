@@ -2,7 +2,6 @@ package com.xz.examscore.services;
 
 import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.SimpleCache;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
@@ -145,10 +144,7 @@ public class AverageService {
             if (!StringUtils.isBlank(targetName)) {
                 query.append("target.name", targetName);
             }
-            FindIterable<Document> documents = collection.find(query);
-            System.out.println(toList(documents).size());
-            FindIterable<Document> projection = documents.projection(doc("range", 1).append("target", 1).append("average", 1));
-            return CollectionUtils.asArrayList(toList(projection));
+            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("average", 1))));
         });
     }
 }

@@ -27,7 +27,7 @@ public class ClassPointAbilityLevelReport extends ReportGenerator{
         List<Target> subjects = targetService.queryTargets(projectId, Target.SUBJECT);
         for (Target subject : subjects) {
             String subjectName = SubjectService.getSubjectName(subject.getId().toString());
-            SheetTask projectTask = new SheetTask(subjectName, ClassPointAblilityLevelSheets.class);
+            SheetTask projectTask = new SheetTask(subjectName, ClassPointAbilityLevelSheets.class);
             projectTask.put("target", subject);
             tasks.add(projectTask);
         }

@@ -38,7 +38,7 @@ public class SchoolPointAbilityLevelSheets extends SheetGenerator {
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("subjectId", subjectId)
                 .setParameter("schoolId", schoolRange.getId());
-        //Result result = projectPointAbilityLevelAnalysis.execute(param);
+//        Result result = projectPointAbilityLevelAnalysis.execute(param);
         Result result = schoolPointAbilityLevelBiz.execute(param);
         setupHeader(excelWriter, result);
         setupSecondaryHeader(excelWriter, result);
