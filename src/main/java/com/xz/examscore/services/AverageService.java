@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 import static com.xz.examscore.util.Mongo.range2Doc;
@@ -116,24 +117,9 @@ public class AverageService {
         cache.delete(cacheKey);
     }
 
-    public ArrayList<Document> getAverageByName(String projectId, String rangeName, String targetName) {
-        String cacheKey = "getAverageByName:" + projectId + ":" + rangeName + ":" + targetName;
-
-        return cache.get(cacheKey, () -> {
-            MongoCollection<Document> collection = scoreDatabase.getCollection("average");
-            Document query = doc("project", projectId);
-            if (!StringUtils.isBlank(rangeName)) {
-                query.append("range.name", rangeName);
-            }
-            if (!StringUtils.isBlank(targetName)) {
-                query.append("target.name", targetName);
-            }
-            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("average", 1))));
-        });
-    }
-
-    public ArrayList<Document> getAverageByRangeAndTargetName(String projectId, Range range, String targetName){
-        String cacheKey = "getAverageByRangeAndTargetName:" + projectId + ":" + range + ":" + targetName;
+    //根据多个目标ID查询平均分
+    public ArrayList<Document> getAverageByTargetIds(String projectId, Range range, List<String> targetIds) {
+        String cacheKey = "getAverageByTargetIds:" + projectId + ":" + range + ":" + targetIds.toString();
 
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("average");
@@ -141,10 +127,11 @@ public class AverageService {
             if (null != range) {
                 query.append("range.id", range.getId());
             }
-            if (!StringUtils.isBlank(targetName)) {
-                query.append("target.name", targetName);
+            if(!targetIds.isEmpty()){
+                query.append("target.id", $in(targetIds));
             }
             return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("average", 1))));
         });
+
     }
 }

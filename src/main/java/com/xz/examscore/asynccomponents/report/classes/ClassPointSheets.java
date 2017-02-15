@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.report.classes;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
+import com.xz.examscore.api.server.classes.ClassPointAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.asynccomponents.report.biz.classes.ClassPointBiz;
@@ -26,6 +27,9 @@ public class ClassPointSheets extends SheetGenerator {
     @Autowired
     ClassPointBiz classPointBiz;
 
+    @Autowired
+    ClassPointAnalysis classPointAnalysis;
+
     @Override
     protected void generateSheet(String projectId, ExcelWriter excelWriter, SheetTask sheetTask) throws Exception {
         Target target = sheetTask.get("target");
@@ -35,7 +39,8 @@ public class ClassPointSheets extends SheetGenerator {
                 setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
-        Result result = classPointBiz.execute(param);
+//        Result result = classPointBiz.execute(param);
+        Result result = classPointAnalysis.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStudentData(excelWriter, result);

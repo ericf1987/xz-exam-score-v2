@@ -445,21 +445,19 @@ public class ScoreService {
         }
     }
 
-    public ArrayList<Document> getTotalScoreByName(String projectId, String rangeName, String targetName) {
-        String cacheKey = "getTotalScoreByName:" + projectId + ":" + rangeName + ":" + targetName;
+    public ArrayList<Document> getTotalScoreByTargetIds(String projectId, String rangeName, List<String> targetIds) {
+        String cacheKey = "getTotalScoreByTargetIds:" + projectId + ":" + rangeName + ":" + targetIds.toString();
 
         return cache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
             Document query = doc("project", projectId);
-            if (!StringUtils.isBlank(rangeName)) {
+            if (StringUtils.isBlank(rangeName)) {
                 query.append("range.name", rangeName);
             }
-            if (!StringUtils.isBlank(targetName)) {
-                query.append("target.name", targetName);
+            if(null != targetIds && !targetIds.isEmpty()){
+                query.append("target.id", $in(targetIds));
             }
             return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("totalScore", 1))));
         });
-
     }
-
 }
