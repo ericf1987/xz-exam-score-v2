@@ -117,6 +117,22 @@ public class AverageService {
         cache.delete(cacheKey);
     }
 
+    public ArrayList<Document> getAverageByRangeAndTargetName(String projectId, Range range, String targetName){
+        String cacheKey = "getAverageByRangeAndTargetName:" + projectId + ":" + range + ":" + targetName;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("average");
+            Document query = doc("project", projectId);
+            if (null != range) {
+                query.append("range.id", range.getId());
+            }
+            if (!StringUtils.isBlank(targetName)) {
+                query.append("target.name", targetName);
+            }
+            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("average", 1))));
+        });
+    }
+
     //根据多个目标ID查询平均分
     public ArrayList<Document> getAverageByTargetIds(String projectId, Range range, List<String> targetIds) {
         String cacheKey = "getAverageByTargetIds:" + projectId + ":" + range + ":" + targetIds.toString();

@@ -6,8 +6,6 @@ import com.xz.examscore.api.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
-
 /**
  * @author by fengye on 2016/9/1.
  */
