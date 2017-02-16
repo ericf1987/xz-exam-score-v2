@@ -64,7 +64,7 @@ public class TotalBasicScoreSheet extends SheetGenerator {
         setupHeader(excelWriter, subjectId);
         setupSecondaryHeader(excelWriter, subjectId);
         fillProvinceData(result.get("totals"), excelWriter, subjectId);
-        fillSchoolData(result.getList("schools", null), excelWriter, subjectId);
+        fillSchoolData(result.get("schools"), excelWriter, subjectId);
     }
 
     // 填充学校数据

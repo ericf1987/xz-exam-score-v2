@@ -55,7 +55,7 @@ public class SchoolBasicRankSheet extends SheetGenerator {
         Result result = schoolRankStat.execute(param);
         setupHeader(excelWriter);
         setupSecondaryHeader(excelWriter);
-        fillClassData(result.getList("classes", null), excelWriter);
+        fillClassData(result.get("classes"), excelWriter);
     }
 
     private void fillClassData(List<Map<String, Object>> classes, ExcelWriter excelWriter) {

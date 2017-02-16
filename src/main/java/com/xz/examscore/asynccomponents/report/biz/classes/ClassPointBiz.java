@@ -54,17 +54,14 @@ public class ClassPointBiz implements Server {
         //查询当前班级当前科目下所有知识点的平均分集合
         ArrayList<Document> pointByClazz = averageService.getAverageByTargetIds(projectId, Range.clazz(classId), pointIds);
         //查询出所有学生知识点
-        ArrayList<Document> pointByStudent = scoreService.getTotalScoreByTargetIds(projectId, Range.STUDENT, pointIds);
+//        ArrayList<Document> pointByStudent = scoreService.getTotalScoreByTargetIds(projectId, Range.STUDENT, pointIds);
 
         List<String> studentIds = studentService.getStudentIds(projectId, subjectId, Range.clazz(classId));
         List<Document> pointByStudentList = new ArrayList<>();
         for (String studentId : studentIds) {
             //找出当前学生和指定科目的数据
-            List<Document> students = pointByStudent.stream().filter(p -> {
-                Document rangeDoc = (Document) p.get("range");
-                return studentId.equals(rangeDoc.getString("id"));
-            }).collect(Collectors.toList());
-            pointByStudentList.addAll(students);
+            ArrayList<Document> totalScoreByTargetIds = scoreService.getTotalScoreByTargetIds(projectId, Range.student(studentId), pointIds);
+            pointByStudentList.addAll(totalScoreByTargetIds);
         }
 
         List<Map<String, Object>> points = pointByClazz.stream().map(p -> {

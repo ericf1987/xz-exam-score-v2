@@ -144,6 +144,8 @@ public class ClassPointAbilityLevelBiz implements Server{
         List<Document> result = new ArrayList<>();
         for(Document quest : quests){
             Document points = (Document) quest.get("points");
+            if(null == points || points.isEmpty())
+                return result;
             if (points.containsKey(pointId)) {
                 List<String> levels = (List<String>)points.get(pointId);
                 if(levels.contains(levelId)){

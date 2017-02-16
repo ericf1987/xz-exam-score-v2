@@ -63,7 +63,7 @@ public class TotalBasicRankSheet extends SheetGenerator {
         //设置表头
         setupHeader(excelWriter);
         setupSecondaryHeader(excelWriter);
-        fillSchoolData(result.getList("schools", null), excelWriter);
+        fillSchoolData(result.get("schools"), excelWriter);
     }
 
     private void fillSchoolData(List<Map<String, Object>> school, ExcelWriter excelWriter) {

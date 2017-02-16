@@ -43,7 +43,7 @@ public class TotalBasicSubjectSheet extends SheetGenerator {
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillProvinceData(result.get("totals"), excelWriter);
-        fillSchoolData(result.getList("schools", null), excelWriter);
+        fillSchoolData(result.get("schools"), excelWriter);
     }
 
     private void fillProvinceData(Map<String, Object> totals, ExcelWriter excelWriter) {
