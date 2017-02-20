@@ -14,7 +14,6 @@ public class TotalQuestScoreDetailSheetsTest extends XzExamScoreV2ApplicationTes
 
     @Test
     public void testGenerateSheet() throws Exception {
-        totalQuestScoreDetailReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.province("430000"), "target/total-paper-subjective.xlsx");
-
+        totalQuestScoreDetailReport.generate("FAKE_PROJ_1486524671547_0", Range.province("430000"), "target/total-quest-score-detail.xlsx");
     }
 }

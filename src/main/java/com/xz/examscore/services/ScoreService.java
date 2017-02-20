@@ -451,7 +451,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param rangeName 范围名称
      * @param targetIds 目标ID集合
-     * @return
+     * @return 分数集合
      */
     public ArrayList<Document> getTotalScoreByTargetIds(String projectId, String rangeName, List<String> targetIds) {
         String cacheKey = "getTotalScoreByTargetIds:" + projectId + ":" + rangeName + ":" + targetIds.toString();
@@ -462,7 +462,7 @@ public class ScoreService {
             if (StringUtils.isBlank(rangeName)) {
                 query.append("range.name", rangeName);
             }
-            if (null != targetIds && !targetIds.isEmpty()) {
+            if (!targetIds.isEmpty()) {
                 query.append("target.id", $in(targetIds));
             }
             return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("totalScore", 1))));
@@ -475,7 +475,7 @@ public class ScoreService {
      * @param projectId 项目ID
      * @param range     范围
      * @param targetIds 目标ID集合
-     * @return
+     * @return 分数集合
      */
     public ArrayList<Document> getTotalScoreByTargetIds(String projectId, Range range, List<String> targetIds) {
         String cacheKey = "getTotalScoreByTargetIds:" + projectId + ":" + range + ":" + targetIds.toString();
@@ -486,10 +486,34 @@ public class ScoreService {
             if (null != range) {
                 query.append("range.id", range.getId());
             }
-            if (null != targetIds && !targetIds.isEmpty()) {
+            if (!targetIds.isEmpty()) {
                 query.append("target.id", $in(targetIds));
             }
             return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("totalScore", 1))));
+        });
+    }
+
+    /**
+     * 根据科目和题目ID查询得分
+     *
+     * @param projectId 考试ID
+     * @param subjectId 科目ID
+     * @return 分数集合
+     */
+    public List<Document> getScoreAndQuestId(String projectId, String subjectId) {
+        String cacheKey = "getScoreAndQuestId:" + projectId + ":" + subjectId;
+
+        return cache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId);
+            if (!StringUtils.isBlank(subjectId)) {
+                query.append("subject", subjectId);
+            }
+            return CollectionUtils.asArrayList(
+                    toList(collection.find(query).projection(
+                            doc("quest", 1).append("student", 1).append("subject", 1).append("score", 1).append("isObjective", 1).append("questNo", 1)
+                    ))
+            );
         });
     }
 }
