@@ -16,8 +16,8 @@ public class ClassPointBizTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
-                .setParameter("classId", "0bc7b0a4-adfc-4cb2-8324-863b976ab543")
+        Param param = new Param().setParameter("projectId", "FAKE_PROJ_1486524671547_0")
+                .setParameter("classId", "CLASS_1486524671577_2")
                 .setParameter("subjectId", "001");
 
         long begin = System.currentTimeMillis();
