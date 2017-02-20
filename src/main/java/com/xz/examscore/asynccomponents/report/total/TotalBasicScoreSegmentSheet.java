@@ -50,7 +50,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
         fillProviceData(result.get("totals"), excelWriter);
-        fillSchoolData(result.getList("schools", null), excelWriter);
+        fillSchoolData(result.get("schools"), excelWriter);
     }
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> list) {

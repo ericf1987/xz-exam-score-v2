@@ -45,9 +45,9 @@ public class ClassBasicRankSheet extends SheetGenerator {
                 setParameter("classId", classRange.getId());
 
         Result result = classRankAnalysis.execute(param);
-        setupHeader(excelWriter, result.getList("rankstats", null));
-        setupSecondaryHeader(excelWriter, result.getList("rankstats", null));
-        fillStudentData(excelWriter, result.getList("rankstats", null));
+        setupHeader(excelWriter, result.get("rankstats"));
+        setupSecondaryHeader(excelWriter, result.get("rankstats"));
+        fillStudentData(excelWriter, result.get("rankstats"));
     }
 
     private void fillStudentData(ExcelWriter excelWriter, List<Map<String, Object>> rankstats) {

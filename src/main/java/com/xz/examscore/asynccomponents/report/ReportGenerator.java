@@ -1,9 +1,9 @@
 package com.xz.examscore.asynccomponents.report;
 
 import com.xz.ajiaedu.common.excel.ExcelWriter;
-import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.examscore.asynccomponents.report.classes.ReportGeneratorInfo;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.services.ReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,9 @@ public abstract class ReportGenerator {
     @Autowired
     SheetManager sheetManager;
 
+    @Autowired
+    ReportService reportService;
+
     /**
      * 生成并保存报表文件
      *
@@ -32,6 +35,7 @@ public abstract class ReportGenerator {
      * @param savePath  保存路径
      */
     public void generate(String projectId, Range range, String savePath) {
+        long start = System.currentTimeMillis();
         try {
             List<SheetTask> sheetTasks = getSheetTasks(projectId, range);
             InputStream stream = getClass().getResourceAsStream("report/templates/default.xlsx");
@@ -52,6 +56,8 @@ public abstract class ReportGenerator {
             LOG.error("生成报表失败", e);
         }
 
+        long end = System.currentTimeMillis();
+        reportService.recordReportRuntime(projectId, range, null, this.getClass().getName(), end - start);
         LOG.info("生成报表 " + this.getClass() + " 结束。");
     }
 

@@ -3,6 +3,7 @@ package com.xz.examscore.asynccomponents.report.biz.classes;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.bean.Point;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
@@ -45,31 +46,25 @@ public class ClassPointBiz implements Server {
         String subjectId = param.getString("subjectId");
         String classId = param.getString("classId");
 
+        //获取当前科目的所有知识点
+        List<String> pointIds = pointService.getPoints(projectId, subjectId).stream().map(Point::getId).collect(Collectors.toList());
 
-        //查询出所有班级知识点
-        ArrayList<Document> pointByClazz = averageService.getAverageByName(projectId, Range.CLASS, Target.POINT);
+        Collections.sort(pointIds);
 
+        //查询当前班级当前科目下所有知识点的平均分集合
+        ArrayList<Document> pointByClazz = averageService.getAverageByTargetIds(projectId, Range.clazz(classId), pointIds);
         //查询出所有学生知识点
-        ArrayList<Document> pointByStudent = scoreService.getTotalScoreByName(projectId, Range.STUDENT, Target.POINT);
-
-        //找出当前班级和指定科目的数据
-        List<Document> pointByClazzList = pointByClazz.stream().filter(p -> {
-            Document rangeDoc = (Document) p.get("range");
-            return rangeDoc.getString("id").equals(classId);
-        }).filter(p -> gg(projectId, subjectId, p)).collect(Collectors.toList());
+//        ArrayList<Document> pointByStudent = scoreService.getTotalScoreByTargetIds(projectId, Range.STUDENT, pointIds);
 
         List<String> studentIds = studentService.getStudentIds(projectId, subjectId, Range.clazz(classId));
         List<Document> pointByStudentList = new ArrayList<>();
         for (String studentId : studentIds) {
             //找出当前学生和指定科目的数据
-            List<Document> one = pointByStudent.stream().filter(p -> {
-                Document rangeDoc = (Document) p.get("range");
-                return rangeDoc.getString("id").equals(studentId);
-            }).filter(p -> gg(projectId, subjectId, p)).collect(Collectors.toList());
-            pointByStudentList.addAll(one);
+            ArrayList<Document> totalScoreByTargetIds = scoreService.getTotalScoreByTargetIds(projectId, Range.student(studentId), pointIds);
+            pointByStudentList.addAll(totalScoreByTargetIds);
         }
 
-        List<Map<String, Object>> points = pointByClazzList.stream().map(p -> {
+        List<Map<String, Object>> points = pointByClazz.stream().map(p -> {
             Document doc = (Document) p.get("target");
             String pointId = doc.getString("id");
             String pointName = pointService.getPointName(pointId);
@@ -81,13 +76,8 @@ public class ClassPointBiz implements Server {
             return map;
         }).collect(Collectors.toList());
 
-        return Result.success().set("classes", packClazzData(projectId, pointByClazzList))
+        return Result.success().set("classes", packClazzData(projectId, pointByClazz))
                 .set("students", packStudentData(projectId, pointByStudentList, studentIds, points));
-    }
-
-    public boolean gg(String projectId, String subjectId, Document p) {
-        Document targetDoc = (Document) p.get("target");
-        return targetService.getTargetSubjectId(projectId, Target.point(targetDoc.getString("id"))).equals(subjectId);
     }
 
     private List<Map<String, Object>> packClazzData(String projectId, List<Document> pointByClazz) {

@@ -6,6 +6,7 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.school.SchoolQuestScoreDetailAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
+import com.xz.examscore.asynccomponents.report.biz.school.SchoolQuestScoreDetailBiz;
 import com.xz.examscore.asynccomponents.report.classes.ClassQuestScoreDetailSheets;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -29,6 +30,9 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
     SchoolQuestScoreDetailAnalysis schoolQuestScoreDetailAnalysis;
 
     @Autowired
+    SchoolQuestScoreDetailBiz schoolQuestScoreDetailBiz;
+
+    @Autowired
     TargetService targetService;
 
     @Autowired
@@ -43,7 +47,8 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
                 setParameter("schoolId", schoolRange.getId());
-        Result result = schoolQuestScoreDetailAnalysis.execute(param);
+//        Result result = schoolQuestScoreDetailAnalysis.execute(param);
+        Result result = schoolQuestScoreDetailBiz.execute(param);
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }

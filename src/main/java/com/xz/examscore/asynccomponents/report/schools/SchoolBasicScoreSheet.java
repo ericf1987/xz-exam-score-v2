@@ -72,7 +72,7 @@ public class SchoolBasicScoreSheet extends SheetGenerator {
             setupSecondaryHeader(excelWriter, COLUMNS);
         }
         fillSchoolData(result.get("schools"), excelWriter, subjectId);
-        fillClassData(result.getList("classes", null), excelWriter, subjectId);
+        fillClassData(result.get("classes"), excelWriter, subjectId);
     }
 
     private void setupHeader(ExcelWriter excelWriter, String[] COLUMNS) {
