@@ -76,22 +76,23 @@ public class ScannerDBService {
 
     public MongoClient getMongoClient(String project) {
 
-        Document projectDoc = scannerMongoClient.getDatabase("project_database")
-                .getCollection("project").find(doc("projectId", project)).first();
-        Document projectDoc2 = scannerMongoClient2.getDatabase("project_database")
-                .getCollection("project").find(doc("projectId", project)).first();
-        Document projectDoc3 = scannerMongoClient3.getDatabase("project_database")
-                .getCollection("project").find(doc("projectId", project)).first();
-        if (null != projectDoc) {
-            return scannerMongoClient;
+        MongoClient[] availableClients =
+                new MongoClient[]{scannerMongoClient, scannerMongoClient2, scannerMongoClient3};
+
+        for (MongoClient client : availableClients) {
+            if (projectExists(client, project)) {
+                return client;
+            }
         }
-        if (null != projectDoc2) {
-            return scannerMongoClient2;
-        }
-        if (null != projectDoc3) {
-            return scannerMongoClient3;
-        }
+
         throw new IllegalArgumentException("查找不到项目的网阅数据源：" + project);
+    }
+
+    private boolean projectExists(MongoClient client, String project) {
+        return client
+                .getDatabase("project_database")
+                .getCollection("project")
+                .count(doc("projectId", project)) > 0;
     }
 
     public Document findProject(String project) {
