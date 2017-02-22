@@ -76,7 +76,6 @@ public class ProjectQuestScoreDetailAnalysis implements Server{
                 studentMap.put("quests", classQuestScoreDetailAnalysis.getQuestListBySubject(projectId, subjectId, student.getString("student")));
                 studentMap.put("studentName", student.getString("name"));
                 studentMap.put("examNo", student.getString("examNo"));
-                studentMap.put("customExamNo", student.getString("customExamNo"));
                 studentMap.put("className", className);
                 studentMap.put("schoolName", schoolName);
                 studentMap.put("studentId", student.getString("student"));

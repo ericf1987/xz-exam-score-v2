@@ -39,8 +39,8 @@ public class ClassPointSheets extends SheetGenerator {
                 setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
-        Result result = classPointBiz.execute(param);
-//        Result result = classPointAnalysis.execute(param);
+//        Result result = classPointBiz.execute(param);
+        Result result = classPointAnalysis.execute(param);
         setupHeader(excelWriter, result);
         fillClassData(excelWriter, result);
         fillStudentData(excelWriter, result);

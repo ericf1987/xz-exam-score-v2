@@ -6,7 +6,6 @@ import com.xz.examscore.api.Param;
 import com.xz.examscore.api.server.school.SchoolQuestScoreDetailAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
-import com.xz.examscore.asynccomponents.report.biz.school.SchoolQuestScoreDetailBiz;
 import com.xz.examscore.asynccomponents.report.classes.ClassQuestScoreDetailSheets;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -25,12 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SuppressWarnings("unchecked")
 @Component
-public class SchoolQuestScoreDetailSheets extends SheetGenerator {
-    @Autowired
-    SchoolQuestScoreDetailAnalysis schoolQuestScoreDetailAnalysis;
+public class SchoolQuestScoreDetailSheets extends SheetGenerator{
 
     @Autowired
-    SchoolQuestScoreDetailBiz schoolQuestScoreDetailBiz;
+    SchoolQuestScoreDetailAnalysis schoolQuestScoreDetailAnalysis;
 
     @Autowired
     TargetService targetService;
@@ -64,14 +61,7 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "客观题总分");
         excelWriter.set(0, column.incrementAndGet(), "主观题总分");
         List<Map<String, Object>> quests = result.get("questList");
-        for(Map<String, Object> quest : quests){
-            if(null != quest.get("isObjective")){
-                String questName = Boolean.valueOf(quest.get("isObjective").toString()) ? "客观题" + quest.get("questNo") : "主观题" + quest.get("questNo");
-                excelWriter.set(0, column.incrementAndGet(), questName);
-            }else{
-                excelWriter.set(0, column.incrementAndGet(), quest.get("questNo"));
-            }
-        }
+        classQuestScoreDetailSheets.fillQuestColumnHead(excelWriter, column, quests);
     }
 
     public void fillData(ExcelWriter excelWriter, Result result) {

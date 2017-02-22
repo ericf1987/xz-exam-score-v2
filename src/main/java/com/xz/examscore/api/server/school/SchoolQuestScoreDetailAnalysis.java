@@ -30,11 +30,8 @@ import java.util.Map;
         @Parameter(name = "subjectId", type = Type.String, description = "考试科目id", required = true)
 })
 @Service
-public class SchoolQuestScoreDetailAnalysis implements Server {
+public class SchoolQuestScoreDetailAnalysis implements Server{
     public static Logger LOG = LoggerFactory.getLogger(SchoolQuestScoreDetailAnalysis.class);
-
-    @Autowired
-    ClassQuestScoreDetailAnalysis classQuestScoreDetailAnalysis;
 
     @Autowired
     StudentService studentService;
@@ -54,6 +51,9 @@ public class SchoolQuestScoreDetailAnalysis implements Server {
     @Autowired
     QuestService questService;
 
+    @Autowired
+    ClassQuestScoreDetailAnalysis classQuestScoreDetailAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -66,7 +66,7 @@ public class SchoolQuestScoreDetailAnalysis implements Server {
         return Result.success().set("questList", questList).set("studentList", studentList);
     }
 
-    private List<Map<String,Object>> getStudentBySchoolId(String projectId, String subjectId, String schoolId) {
+    protected List<Map<String,Object>> getStudentBySchoolId(String projectId, String subjectId, String schoolId) {
         List<Map<String, Object>> students = new ArrayList<>();
         List<Document> studentList = studentService.getStudentList(projectId, Range.school(schoolId));
         for(Document student : studentList){

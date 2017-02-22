@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("unchecked")
 @Component
 public class ClassQuestScoreDetailSheets extends SheetGenerator {
+
     @Autowired
     ClassQuestScoreDetailAnalysis classQuestScoreDetailAnalysis;
 
@@ -40,6 +41,7 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("subjectId", subjectId).
                 setParameter("classId", classRange.getId());
         Result result = classQuestScoreDetailAnalysis.execute(param);
+//        Result result = classQuestScoreDetailBiz.execute(param);
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }
@@ -54,6 +56,10 @@ public class ClassQuestScoreDetailSheets extends SheetGenerator {
         excelWriter.set(0, column.incrementAndGet(), "客观题总分");
         excelWriter.set(0, column.incrementAndGet(), "主观题总分");
         List<Map<String, Object>> quests = result.get("questList");
+        fillQuestColumnHead(excelWriter, column, quests);
+    }
+
+    public void fillQuestColumnHead(ExcelWriter excelWriter, AtomicInteger column, List<Map<String, Object>> quests) {
         for(Map<String, Object> quest : quests){
             //在题型没有录入的情况下，会拿到null属性
             if(null != quest.get("isObjective")){

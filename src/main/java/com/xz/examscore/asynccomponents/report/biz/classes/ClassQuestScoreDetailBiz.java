@@ -9,6 +9,7 @@ import com.xz.examscore.services.*;
 import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2017/2/20.
  */
+@Service
 public class ClassQuestScoreDetailBiz implements Server{
 
     @Autowired
