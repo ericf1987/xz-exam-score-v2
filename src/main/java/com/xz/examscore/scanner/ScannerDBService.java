@@ -611,6 +611,8 @@ public class ScannerDBService {
 
     //查询学生某以科目的答题切图和留痕
     public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId) {
+        //获取数据源
+        MongoClient mongoClient = getMongoClient(projectId);
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
 
@@ -633,8 +635,10 @@ public class ScannerDBService {
         }
 
         //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
-        MongoCollection<Document> cardCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("card");
-        MongoCollection<Document> studentsCollection = getMongoClient(projectId).getDatabase(dbName).getCollection("students");
+
+
+        MongoCollection<Document> cardCollection = mongoClient.getDatabase(dbName).getCollection("card");
+        MongoCollection<Document> studentsCollection = mongoClient.getDatabase(dbName).getCollection("students");
         //是否有整张答题卡切图
         boolean hasPaperPosition = true;
         //查找学生的答题卡留痕

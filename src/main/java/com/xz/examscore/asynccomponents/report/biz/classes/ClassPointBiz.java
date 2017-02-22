@@ -40,8 +40,6 @@ public class ClassPointBiz implements Server {
     @Autowired
     FullScoreService fullScoreService;
 
-    public static final int POINT_TASK_COUNT = 10;
-
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
@@ -59,18 +57,11 @@ public class ClassPointBiz implements Server {
 //        ArrayList<Document> pointByStudent = scoreService.getTotalScoreByTargetIds(projectId, Range.STUDENT, pointIds);
 
         List<String> studentIds = studentService.getStudentIds(projectId, subjectId, Range.clazz(classId));
-
         List<Document> pointByStudentList = new ArrayList<>();
-
-        List<StuGroupPointTask> stuGroupPointTasks = runStuGroupPointTask(projectId, pointIds, studentIds);
-
-        try {
-            for (StuGroupPointTask task : stuGroupPointTasks) {
-                task.join();
-                pointByStudentList.addAll(task.getResult());
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (String studentId : studentIds) {
+            //找出当前学生和指定科目的数据
+            ArrayList<Document> totalScoreByTargetIds = scoreService.getTotalScoreByTargetIds(projectId, Range.student(studentId), pointIds);
+            pointByStudentList.addAll(totalScoreByTargetIds);
         }
 
         List<Map<String, Object>> points = pointByClazz.stream().map(p -> {
@@ -87,14 +78,6 @@ public class ClassPointBiz implements Server {
 
         return Result.success().set("classes", packClazzData(projectId, pointByClazz))
                 .set("students", packStudentData(projectId, pointByStudentList, studentIds, points));
-    }
-
-    public void packStudentPointData(String projectId, List<String> pointIds, List<String> studentIds, List<Document> pointByStudentList) {
-        for (String studentId : studentIds) {
-            //找出当前学生和指定科目的数据
-            ArrayList<Document> totalScoreByTargetIds = scoreService.getTotalScoreByTargetIds(projectId, Range.student(studentId), pointIds);
-            pointByStudentList.addAll(totalScoreByTargetIds);
-        }
     }
 
     private List<Map<String, Object>> packClazzData(String projectId, List<Document> pointByClazz) {
@@ -161,70 +144,5 @@ public class ClassPointBiz implements Server {
             }
         }
         return 0;
-    }
-
-    public List<StuGroupPointTask> runStuGroupPointTask(String projectId, List<String> targetIds, List<String> studentIds) {
-        List<StuGroupPointTask> group = new ArrayList<>();
-        int count = studentIds.size();
-        int q = count / POINT_TASK_COUNT;
-        for (int i = 0; i <= POINT_TASK_COUNT; i++) {
-            int fromIndex = i * q;
-            int endIndex = fromIndex + q;
-            List<String> subList = studentIds.subList(fromIndex, endIndex > count ? count : endIndex);
-            StuGroupPointTask task = new StuGroupPointTask(projectId, studentIds, targetIds);
-            task.start();
-            group.add(task);
-        }
-        return group;
-    }
-
-    class StuGroupPointTask extends Thread {
-
-        private String projectId;
-
-        private List<String> studentIds;
-
-        private List<String> targetIds;
-
-        private List<Document> result = new ArrayList<>();
-
-        public String getProjectId() {
-            return projectId;
-        }
-
-        public void setProjectId(String projectId) {
-            this.projectId = projectId;
-        }
-
-        public List<String> getStudentIds() {
-            return studentIds;
-        }
-
-        public void setStudentIds(List<String> studentIds) {
-            this.studentIds = studentIds;
-        }
-
-        public List<String> getTargetIds() {
-            return targetIds;
-        }
-
-        public void setTargetIds(List<String> targetIds) {
-            this.targetIds = targetIds;
-        }
-
-        public List<Document> getResult() {
-            return result;
-        }
-
-        public StuGroupPointTask(String projectId, List<String> studentIds, List<String> targetIds) {
-            this.projectId = projectId;
-            this.studentIds = studentIds;
-            this.targetIds = targetIds;
-        }
-
-        @Override
-        public void run() {
-            packStudentPointData(this.getProjectId(), this.getTargetIds(), this.getStudentIds(), this.getResult());
-        }
     }
 }

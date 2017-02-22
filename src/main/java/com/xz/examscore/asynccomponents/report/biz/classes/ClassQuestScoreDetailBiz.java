@@ -43,9 +43,13 @@ public class ClassQuestScoreDetailBiz implements Server{
     }
 
     protected Result getResultData(String projectId, Range range, String subjectId) {
+
+        //参考学生列表
         List<String> studentIds = studentService.getStudentIds(projectId, subjectId, range);
 
+        //科目试题列表
         List<Document> questList = questService.getQuests(projectId, subjectId);
+
         //按照题号排序
         Collections.sort(questList, ClassQuestScoreDetailAnalysis.QUEST_NO_COMPARATOR);
 

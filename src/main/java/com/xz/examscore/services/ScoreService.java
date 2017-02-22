@@ -446,30 +446,6 @@ public class ScoreService {
     }
 
     /**
-     * 根据范围名称获取目标ID获取
-     *
-     * @param projectId 项目ID
-     * @param rangeName 范围名称
-     * @param targetIds 目标ID集合
-     * @return 分数集合
-     */
-    public ArrayList<Document> getTotalScoreByTargetIds(String projectId, String rangeName, List<String> targetIds) {
-        String cacheKey = "getTotalScoreByTargetIds:" + projectId + ":" + rangeName + ":" + targetIds.toString();
-
-        return cache.get(cacheKey, () -> {
-            MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
-            Document query = doc("project", projectId);
-            if (StringUtils.isBlank(rangeName)) {
-                query.append("range.name", rangeName);
-            }
-            if (!targetIds.isEmpty()) {
-                query.append("target.id", $in(targetIds));
-            }
-            return CollectionUtils.asArrayList(toList(collection.find(query).projection(doc("range", 1).append("target", 1).append("totalScore", 1))));
-        });
-    }
-
-    /**
      * 根据目标列表获取得分信息
      *
      * @param projectId 项目ID

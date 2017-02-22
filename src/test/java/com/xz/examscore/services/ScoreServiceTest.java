@@ -142,18 +142,4 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(countByScoreSpan);
         System.out.println(schoolCount);
     }
-
-    @Test
-    public void testGetTotalScoreByTargetId() throws Exception {
-        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
-        String subjectId = "001";
-        List<String> pointIds = pointService.getPoints(projectId, subjectId).stream().map(p -> p.getId()).collect(Collectors.toList());
-        System.out.println(pointIds.size());
-        System.out.println(pointIds.toString());
-        long begin = System.currentTimeMillis();
-        ArrayList<Document> averageByTargetIds = scoreService.getTotalScoreByTargetIds(projectId, Range.STUDENT, pointIds);
-        System.out.println(averageByTargetIds.size());
-        long end = System.currentTimeMillis();
-        System.out.println(end - begin);
-    }
 }

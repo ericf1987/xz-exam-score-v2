@@ -47,8 +47,8 @@ public class SchoolQuestScoreDetailSheets extends SheetGenerator {
                 setParameter("projectId", projectId).
                 setParameter("subjectId", subjectId).
                 setParameter("schoolId", schoolRange.getId());
-//        Result result = schoolQuestScoreDetailAnalysis.execute(param);
-        Result result = schoolQuestScoreDetailBiz.execute(param);
+        Result result = schoolQuestScoreDetailAnalysis.execute(param);
+//        Result result = schoolQuestScoreDetailBiz.execute(param);
         setupHeader(excelWriter, result);
         fillData(excelWriter, result);
     }
