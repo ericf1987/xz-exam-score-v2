@@ -1,6 +1,7 @@
 package com.xz.examscore.scanner;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
 
@@ -66,11 +68,32 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetStudentCardSlices() throws Exception {
-        String project = "430200-a911e2eecfa14bfcb614d62e87f8b77b";
-        String subjectId = "008";
-        String studentId = "2417c441-ce98-4b3d-88e1-672db4f51675";
+        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        String subjectId = "001";
+        String studentId = "599e38a8-41af-40e8-be01-23c2b9898fcd";
         Map<String, Object> map = scannerDBService.getStudentCardSlices(project, subjectId, studentId);
         System.out.println(map.toString());
     }
 
+    @Test
+    public void testImportOneSubject() throws Exception {
+        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        MongoClient mongoClient = scannerDBService.getMongoClient(project);
+        scannerDBService.ImportOneSubjectTask(project, mongoClient, "001");
+    }
+
+    @Test
+    public void testImportStudentCardSlice() throws Exception {
+        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        scannerDBService.importStudentCardSlice(project);
+    }
+
+    @Test
+    public void test2() throws Exception {
+        MongoClient mongoClient = scannerDBService.getMongoClient("430300-9cef9f2059ce4a36a40a7a60b07c7e00");
+        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        String subjectId = "001";
+        MongoCollection<Document> collection = mongoClient.getDatabase(project + "_" + subjectId).getCollection("students");
+        collection.find().limit(100).forEach((Consumer<Document>) s -> System.out.println(s.getString("paper_positive")));
+    }
 }

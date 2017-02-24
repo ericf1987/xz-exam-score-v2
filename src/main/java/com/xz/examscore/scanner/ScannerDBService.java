@@ -4,12 +4,14 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.NumberUtil;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.services.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -24,8 +26,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.$in;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
 
 /**
  * (description)
@@ -42,10 +43,7 @@ public class ScannerDBService {
     MongoClient scannerMongoClient;
 
     @Autowired
-    MongoClient scannerMongoClient2;
-
-    @Autowired
-    MongoClient scannerMongoClient3;
+    MongoClient scannerMongoClient_g10;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -77,7 +75,7 @@ public class ScannerDBService {
     public MongoClient getMongoClient(String project) {
 
         MongoClient[] availableClients =
-                new MongoClient[]{scannerMongoClient, scannerMongoClient2, scannerMongoClient3};
+                new MongoClient[]{scannerMongoClient, scannerMongoClient_g10};
 
         for (MongoClient client : availableClients) {
             if (projectExists(client, project)) {
@@ -124,6 +122,126 @@ public class ScannerDBService {
             LOG.info("导入分数包完成！");
         } else {
             throw new IllegalStateException("导入分数包出现异常，请核查问题后重新导入！");
+        }
+
+        importStudentCardSlice(project);
+
+    }
+
+    public void importStudentCardSlice(String project) {
+        MongoClient mongoClient = getMongoClient(project);
+        LOG.info("------开始导入学生试卷留痕信息------");
+        List<String> subjects = subjectService.querySubjects(project);
+        List<ImportStudentCardSliceTask> tasks = subjects.stream().map(
+                subject -> runImportStudentCardSliceTasks(project, subject, mongoClient)
+        ).collect(Collectors.toList());
+
+        LOG.info("科目数{}", tasks.size());
+        tasks.forEach(task -> LOG.info("任务队列中科目为：{}", task.getSubjectId()));
+
+        for(ImportStudentCardSliceTask task : tasks){
+            try {
+                task.join();
+            } catch (InterruptedException e) {
+                LOG.info("导入试卷留痕出错，科目{}", task.getSubjectId());
+                throw new IllegalStateException("导入试卷留痕出现异常，请核查问题后重新导入！");
+            }
+        }
+        LOG.info("------完成导入学生试卷留痕信息------");
+    }
+
+    public void ImportOneSubjectTask(String project, MongoClient mongoClient, String subject) {
+        LOG.info("导入开始...当前科目为：{}", SubjectService.getSubjectName(subject));
+        //根据考试科目获取数据库名
+        String dbName = getScannerDBName(project, subject);
+        MongoCollection<Document> students = mongoClient.getDatabase(dbName).getCollection("students");
+        AtomicInteger counter = new AtomicInteger();
+        students.find().forEach((Consumer<Document>) student -> doImportStuCardSlice(project, subject, student, counter));
+        LOG.info("导入完成！科目{}， 学生人数{}！", SubjectService.getSubjectName(subject), counter.get());
+    }
+
+    public void doImportStuCardSlice(String project, String subject, Document student, AtomicInteger counter) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("scanner_student_card_slice");
+
+        List<Document> objectiveList = leaveOnlyRect((List<Document>)student.get("objectiveList"));
+        List<Document> subjectiveList = leaveOnlyRect((List<Document>)student.get("subjectiveList"));
+
+        Document query = doc("project", project).append("subject", subject)
+                .append("student", student.getString("studentId"));
+        Document questInfo = doc("paper_positive", student.getString("paper_positive"))
+                .append("paper_reverse", student.getString("paper_reverse"))
+                .append("objectiveList", objectiveList)
+                .append("subjectiveList", subjectiveList);
+        UpdateResult result = collection.updateMany(query, $set(questInfo));
+        if (result.getMatchedCount() == 0) {
+            collection.insertOne(
+                    query.append("paper_positive", student.getString("paper_positive"))
+                            .append("paper_reverse", student.getString("paper_reverse"))
+                            .append("objectiveList", objectiveList)
+                            .append("subjectiveList", subjectiveList)
+                            .append("md5", MD5.digest(UUID.randomUUID().toString()))
+            );
+        }
+
+        if(counter.incrementAndGet() % 1000 == 0){
+            LOG.info("当前科目为：{}， 已完成{}学生的试卷留痕数据导入", SubjectService.getSubjectName(subject), counter.get());
+        }
+    }
+
+    private List<Document> leaveOnlyRect(List<Document> questList) {
+        return questList.stream().map(
+                q -> doc("questionNo", q.getString("questionNo"))
+                        .append("score", q.get("score"))
+                        .append("fullScore", q.get("fullScore"))
+                        .append("isEffective", q.getBoolean("isEffective"))
+                        .append("rects", q.get("rects"))
+        ).collect(Collectors.toList());
+    }
+
+    public ImportStudentCardSliceTask runImportStudentCardSliceTasks(String project, String subject, MongoClient mongoClient){
+        ImportStudentCardSliceTask task = new ImportStudentCardSliceTask(project, subject, mongoClient);
+        task.start();
+        return task;
+    }
+
+    class ImportStudentCardSliceTask extends Thread{
+        private String project;
+        private String subjectId;
+        private MongoClient mongoClient;
+
+        public String getProject() {
+            return project;
+        }
+
+        public void setProject(String project) {
+            this.project = project;
+        }
+
+        public String getSubjectId() {
+            return subjectId;
+        }
+
+        public void setSubjectId(String subjectId) {
+            this.subjectId = subjectId;
+        }
+
+        public MongoClient getMongoClient() {
+            return mongoClient;
+        }
+
+        public void setMongoClient(MongoClient mongoClient) {
+            this.mongoClient = mongoClient;
+        }
+
+        public ImportStudentCardSliceTask(String project, String subjectId, MongoClient mongoClient){
+            this.project = project;
+            this.subjectId = subjectId;
+            this.mongoClient = mongoClient;
+        }
+
+        @Override
+        public void run() {
+            ImportOneSubjectTask(this.getProject(), this.getMongoClient(), this.getSubjectId());
         }
     }
 
@@ -196,7 +314,6 @@ public class ScannerDBService {
         Document student = studentService.findStudent(projectId, studentId);
 
         if (student == null) {
-            //throw new IllegalStateException("找不到项目 " + projectId + " 的考生 " + studentId);
             String desc = "找不到项目 " + projectId + ", 科目 " + subjectId + " 的考生 " + studentId;
             LOG.error(desc);
             scannerDBExceptionService.recordScannerDBException(projectId, studentId, subjectId, desc);
@@ -610,10 +727,31 @@ public class ScannerDBService {
     }
 
     //查询学生某以科目的答题切图和留痕
-    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId) {
-        //获取数据源
-        MongoClient mongoClient = getMongoClient(projectId);
+    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId){
+        MongoCollection<Document> collection = scoreDatabase.getCollection("scanner_student_card_slice");
+        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
+        Document document = collection.find(query).first();
 
+        Map<String, Object> map = new HashMap<>();
+        if(null != document){
+            List<Document> objectiveList = document.get("objectiveList", List.class);
+            List<Document> subjectiveList = document.get("subjectiveList", List.class);
+
+            List<Document> newObjectiveList = objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+            List<Document> newSubjectiveList = subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
+
+            map.put("paper_positive", DocumentUtils.getString(document, "paper_positive", ""));
+            map.put("paper_reverse", DocumentUtils.getString(document, "paper_reverse", ""));
+            map.put("objectiveList", newObjectiveList);
+            map.put("subjectiveList", newSubjectiveList);
+            map.put("hasPaperPosition", CollectionUtils.isNotEmpty(newObjectiveList) && CollectionUtils.isNotEmpty(newSubjectiveList));
+        }else{
+            map.put("hasPaperPosition", false);
+        }
+        return map;
+    }
+
+    public String getScannerDBName(String projectId, String subjectId) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
 
         String dbName = projectId + "_";
@@ -633,105 +771,7 @@ public class ScannerDBService {
         } else {
             dbName += subjectId;
         }
-
-        //LOG.info("查询考试项目{}，科目{}, 学生{}的答题卡切图信息...", projectId, subjectId, studentId);
-
-
-        MongoCollection<Document> cardCollection = mongoClient.getDatabase(dbName).getCollection("card");
-        MongoCollection<Document> studentsCollection = mongoClient.getDatabase(dbName).getCollection("students");
-        //是否有整张答题卡切图
-        boolean hasPaperPosition = true;
-        //查找学生的答题卡留痕
-        Document studentDoc = studentsCollection.find(doc("studentId", studentId)).first();
-        String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
-        Document cardDoc = cardCollection.find(doc("cardId", cardId)).first();
-        //适配老版本数据结构，如果没有偏移量，则使用新版本数据结构，反之，则使用老版本数据结构
-        if (null != studentDoc && null != cardDoc) {
-            if (null != cardDoc.get("positions")) {
-                LOG.info("使用老版本网阅数据结构");
-                List<Document> positions = cardDoc.get("positions", List.class);
-                if (positions.isEmpty() || StringUtil.isBlank(DocumentUtils.getString(studentDoc, "paper_positive", ""))) {
-                    hasPaperPosition = false;
-                }
-                return getPreviousCardSlice(studentDoc, cardDoc, hasPaperPosition);
-            } else {
-                LOG.info("使用新版本网阅数据结构");
-                return getCurrentCardSlice(studentDoc, true);
-            }
-        } else {
-            Map<String, Object> resultMap = new HashMap<>();
-            resultMap.put("hasPaperPosition", false);
-            return resultMap;
-        }
+        return dbName;
     }
 
-    private Map<String, Object> getPreviousCardSlice(Document studentDoc, Document cardDoc, boolean hasPaperPosition) {
-        Map<String, Object> resultMap = new HashMap<>();
-
-        resultMap.put("cardId", DocumentUtils.getString(studentDoc, "cardId", ""));
-        resultMap.put("paper_positive", DocumentUtils.getString(studentDoc, "paper_positive", ""));
-        resultMap.put("paper_reverse", DocumentUtils.getString(studentDoc, "paper_reverse", ""));
-        resultMap.put("offset1X", DocumentUtils.getString(studentDoc, "offset1X", ""));
-        resultMap.put("offset1Y", DocumentUtils.getString(studentDoc, "offset1Y", ""));
-        resultMap.put("offset2X", DocumentUtils.getString(studentDoc, "offset2X", ""));
-        resultMap.put("offset2Y", DocumentUtils.getString(studentDoc, "offset2Y", ""));
-
-        List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
-
-        for (Document doc : subjectiveList) {
-            String questionNo = doc.getString("questionNo");
-            List<Document> rects = getRect(questionNo, cardDoc);
-            doc.append("rects", rects);
-        }
-
-        //老版本网阅数据客观题没有坐标信息，所以不传客观题列表
-        resultMap.put("objectiveList", Collections.emptyList());
-        resultMap.put("subjectiveList", subjectiveList);
-        resultMap.put("hasPaperPosition", hasPaperPosition);
-        return resultMap;
-    }
-
-    //获取题目的坐标信息
-    private List<Document> getRect(String questionNo, Document cardDoc) {
-        List<Document> rects = new ArrayList<>();
-        List<Document> positions = cardDoc.get("positions", List.class);
-        positions.forEach(position -> {
-            String qNo = position.getString("questionNo");
-            if (questionNo.equals(qNo)) {
-                rects.addAll(position.get("positionsBeanList", List.class));
-            }
-        });
-        return rects;
-    }
-
-    private Map<String, Object> getCurrentCardSlice(Document studentDoc, boolean hasPaperPosition) {
-        Map<String, Object> resultMap = new HashMap<>();
-        //答题卡ID
-        String cardId = DocumentUtils.getString(studentDoc, "cardId", "");
-        //答题卡正面
-        String paper_positive = DocumentUtils.getString(studentDoc, "paper_positive", "");
-        //答题卡反面
-        String paper_reverse = DocumentUtils.getString(studentDoc, "paper_reverse", "");
-
-        //客观题信息
-        List<Document> objectiveList = studentDoc.get("objectiveList", List.class);
-        //主观题作答
-        List<Document> subjectiveList = studentDoc.get("subjectiveList", List.class);
-        //获取学生作答了的题目（过滤选做题）
-        List<Document> newObjectiveList = objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
-        List<Document> newSubjectiveList = subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
-
-        resultMap.put("cardId", cardId);
-        resultMap.put("offset1X", "");
-        resultMap.put("offset1Y", "");
-        resultMap.put("offset2X", "");
-        resultMap.put("offset2Y", "");
-        resultMap.put("paper_positive", paper_positive);
-        resultMap.put("paper_reverse", paper_reverse);
-        resultMap.put("objectiveList", newObjectiveList);
-        resultMap.put("subjectiveList", newSubjectiveList);
-        resultMap.put("hasPaperPosition", hasPaperPosition);
-
-        return resultMap;
-    }
 }
