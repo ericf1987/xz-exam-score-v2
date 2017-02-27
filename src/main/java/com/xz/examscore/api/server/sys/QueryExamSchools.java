@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,6 +39,12 @@ public class QueryExamSchools implements Server {
         String area = param.getString("area");
 
         List<Document> examSchools = schoolService.getProjectSchools(projectId, area);
+
+        Collections.sort(examSchools, (Document d1, Document d2) -> {
+            String n1 = d1.getString("name");
+            String n2 = d2.getString("name");
+            return n2.compareTo(n1);
+        });
         return Result.success().set("schools", examSchools);
     }
 }

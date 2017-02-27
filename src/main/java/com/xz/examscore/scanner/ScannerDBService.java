@@ -171,7 +171,15 @@ public class ScannerDBService {
         Document questInfo = doc("paper_positive", student.getString("paper_positive"))
                 .append("paper_reverse", student.getString("paper_reverse"))
                 .append("objectiveList", objectiveList)
-                .append("subjectiveList", subjectiveList);
+                .append("subjectiveList", subjectiveList)
+                .append("batchId", student.get("batchId"))
+                .append("cardUUID", student.get("cardUUID"))
+                .append("asteriskTotal", student.get("asteriskTotal"))
+                .append("ossPath", student.get("ossPath"))
+                .append("fileBasePath", student.get("fileBasePath"))
+                .append("examRoom", student.get("examRoom"))
+                .append("cardId", student.get("cardId"))
+                .append("examNo", student.get("examNo"));
         UpdateResult result = collection.updateMany(query, $set(questInfo));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(
@@ -179,6 +187,14 @@ public class ScannerDBService {
                             .append("paper_reverse", student.getString("paper_reverse"))
                             .append("objectiveList", objectiveList)
                             .append("subjectiveList", subjectiveList)
+                            .append("batchId", student.get("batchId"))
+                            .append("cardUUID", student.get("cardUUID"))
+                            .append("asteriskTotal", student.get("asteriskTotal"))
+                            .append("ossPath", student.get("ossPath"))
+                            .append("fileBasePath", student.get("fileBasePath"))
+                            .append("examRoom", student.get("examRoom"))
+                            .append("cardId", student.get("cardId"))
+                            .append("examNo", student.get("examNo"))
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }

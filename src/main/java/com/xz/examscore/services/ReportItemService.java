@@ -12,6 +12,7 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.util.DocUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -73,9 +74,10 @@ public class ReportItemService {
      * 查询指定项目报表条目信息
      *
      * @param projectId 考试项目id
+     * @param isEduBureauAccount
      * @return 报表条目信息
      */
-    public Map<String, Object> querySchoolReportItems(String projectId) {
+    public Map<String, Object> querySchoolReportItems(String projectId, String isEduBureauAccount) {
         String cacheKey = "school_report_items:" + projectId;
         return instantCache.get(cacheKey, () -> {
             HashMap<String, Object> reportItems = new LinkedHashMap<>();
@@ -86,7 +88,7 @@ public class ReportItemService {
                 Range range = new Range(rangeName, projectId);
                 Map<String, List<Document>> reportItemMap = queryReportItems(range);
                 for (String type : reportItemMap.keySet()) {
-                    map.put(type, checkAndGetItemsData(projectId, type, reportItemMap));
+                    map.put(type, checkAndGetItemsData(projectId, type, reportItemMap, isEduBureauAccount));
                 }
 
                 reportItems.put(rangeName, map);
@@ -98,7 +100,7 @@ public class ReportItemService {
 
     @SuppressWarnings("unchecked")
     private List<Map<String, Object>> checkAndGetItemsData(String projectId, String type,
-                                                           Map<String, List<Document>> reportItemMap) {
+                                                           Map<String, List<Document>> reportItemMap, String isEduBureauAccount) {
         List<Map<String, Object>> list = new ArrayList<>();
 
         List<Document> reportItemList = reportItemMap.get(type);
@@ -122,7 +124,7 @@ public class ReportItemService {
                 reportItem.put("dataStatus", checkItemDate(projectId, document));
                 //根据联考开关判断该报表是否允许下载
                 if(!projectConfig.isShareSchoolReport() && rangeName.equals("province")){
-                    downloadAllowed = false;
+                    downloadAllowed = false || BooleanUtils.toBoolean(isEduBureauAccount);
                 }
             }
 
