@@ -66,7 +66,7 @@ public class AggregationRoundService {
         queueService.addToQueue(QueueType.AggregationTaskList, task);
         redis.getHash(taskCounterKey + ":" + task.getAggregationId()).incr(taskType);
 
-        //如果该任务已经存在与taskRuntime中，增跳出任务
+        //如果该任务已经存在与taskRuntime中，则跳出任务
         if(StringUtils.isBlank(redis.getHash(taskRuntime + ":" + task.getAggregationId()).get(taskType))){
             queueService.recordAggrRunTime(taskType, task.getAggregationId());
         }

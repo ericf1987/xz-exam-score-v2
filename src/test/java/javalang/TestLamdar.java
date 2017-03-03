@@ -1,5 +1,7 @@
 package javalang;
 
+import com.xz.ajiaedu.common.lang.CounterMap;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -73,23 +75,17 @@ public class TestLamdar {
     }
 
     public static void main(String[] args) {
-/*        TestLamdar t = new TestLamdar();
-        Predicate<Person> p1 = person -> person.getAge() >= 20;
-        Predicate<Person> p2 = person -> person.getWeight() >= 150;
-        List<Person> list = Arrays.asList(
-                t.new Person("ff", 160, 10),
-                t.new Person("ff", 160, 20),
-                t.new Person("ff", 71, 30),
-                t.new Person("ff", 200, 40),
-                t.new Person("ff", 200, 50)
-        );
-        for (Person p : list){
-            t.isMature(p, p1);
-            t.isMultiple(p, p2);
-        }*/
-        List<String> list = Arrays.asList("123", "13", "12");
-        System.out.println(list.subList(0, 3).toString());
-        System.out.println(Double.POSITIVE_INFINITY);
+        CounterMap<String> counterMap = new CounterMap();
+
+        String[] arr = new String[]{
+                "100001", "100002", "10003"
+        };
+
+        for(String id : arr){
+            counterMap.incre(id);
+        }
+
+        System.out.println(counterMap.toString());
     }
 
 }
