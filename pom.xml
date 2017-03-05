@@ -147,6 +147,15 @@
             <optional>true</optional>
         </dependency>
 
+        <!--Evo HtmltoPdf tools -->
+        <dependency>
+            <groupId>com.evopdf</groupId>
+            <artifactId>evohtmltopdf</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/local-lib/evohtmltopdf-v6.15.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>

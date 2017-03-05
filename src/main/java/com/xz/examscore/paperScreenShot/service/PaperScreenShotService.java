@@ -7,10 +7,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
 import com.xz.examscore.paperScreenShot.manager.PaperScreenShotTaskManager;
 import com.xz.examscore.scanner.ScannerDBService;
-import com.xz.examscore.services.ClassService;
-import com.xz.examscore.services.SchoolService;
-import com.xz.examscore.services.StudentService;
-import com.xz.examscore.services.SubjectService;
+import com.xz.examscore.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +37,9 @@ public class PaperScreenShotService {
 
     @Autowired
     SchoolService schoolService;
+
+    @Autowired
+    ProjectService projectService;
 
     @Autowired
     SubjectService subjectService;

@@ -4,6 +4,9 @@ import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author by fengye on 2017/3/1.
  */
@@ -23,4 +26,5 @@ public class PaperScreenShotServiceTest extends XzExamScoreV2ApplicationTests{
         String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         paperScreenShotService.startPaperScreenShotTask(projectId);
     }
+
 }
