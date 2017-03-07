@@ -11,6 +11,7 @@ import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
 import com.xz.examscore.util.SubjectUtil;
 import org.apache.commons.lang.BooleanUtils;
@@ -53,6 +54,9 @@ public class ScoreService {
 
     @Autowired
     private SimpleCache cache;
+
+    @Autowired
+    private ProjectCacheManager projectCacheManager;
 
     /**
      * 查询题目的答对人数
@@ -192,7 +196,9 @@ public class ScoreService {
     private double getQuestScore(String projectId, String studentId, String questId) {
         String cacheKey = "quest_score:" + projectId + ":" + studentId + ":" + questId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
             Document query = doc("project", projectId).append("student", studentId).append("quest", questId);
             Document document = collection.find(query).first();
@@ -202,7 +208,10 @@ public class ScoreService {
 
     public Document getScoreDoc(String projectId, String studentId, String questId, boolean isObjective) {
         String cacheKey = "quest_score:" + projectId + ":" + studentId + ":" + questId + ":" + isObjective;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
             Document query = doc("project", projectId)
                     .append("student", studentId)
@@ -220,7 +229,9 @@ public class ScoreService {
     private double getTotalScore(String collection, String projectId, Range range, Target target) {
         String cacheKey = "score:" + collection + ":" + projectId + ":" + range + ":" + target;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             return getTotalScore0(collection, projectId, range, target);
         });
     }
@@ -303,7 +314,9 @@ public class ScoreService {
         String collectionName = getTotalScoreCollection(projectId, target);
         String cacheKey = "listByScore:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + score;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("range.name", Range.STUDENT)
                     .append(range.getName(), range.getId())
                     .append("target", target2Doc(target))
@@ -327,6 +340,8 @@ public class ScoreService {
         String collectionName = getTotalScoreCollection(projectId, target);
         String cacheKey = "countByScoreSpan:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + max + ":" + min;
 
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         Document doc = new Document();
         if (min != 0) {
             doc.append("$gte", min);
@@ -335,7 +350,7 @@ public class ScoreService {
             doc.append("$lt", max);
         }
 
-        return cache.get(cacheKey, () -> {
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("range.name", Range.STUDENT)
                     .append(range.getName(), range.getId())
                     .append("target", target2Doc(target))
@@ -388,7 +403,10 @@ public class ScoreService {
 
     public ArrayList<Document> getScoreDocs(String projectId, Range range, String subjectId, String questId, String item) {
         String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + item;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
             Document query = doc("project", projectId)
                     .append(range.getName(), range.getId())
@@ -401,6 +419,7 @@ public class ScoreService {
 
     public ArrayList<Document> getScoreDocsByScoreSegment(String projectId, Range range, String subjectId, String questId, Double min, Double max) {
         String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + min + ":" + max;
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
         Document query = doc("project", projectId)
                 .append(range.getName(), range.getId())
                 .append("subject", subjectId)
@@ -410,7 +429,7 @@ public class ScoreService {
         } else {
             query.append("score", doc("$gt", min).append("$lte", max));
         }
-        return cache.get(cacheKey, () -> {
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
             return CollectionUtils.asArrayList(toList(collection.find(query)));
         });
@@ -419,7 +438,8 @@ public class ScoreService {
     //查询试题作答的学生数
     public int getScoreRecordCount(String projectId, Range range, String subjectId, String questId) {
         String cacheKey = "score_quest_count:" + projectId + ":" + range + ":" + subjectId + ":" + questId;
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append(range.getName(), range.getId())
                     .append("subject", subjectId).append("quest", questId);
             return (int) scoreDatabase.getCollection("score").count(query);
@@ -456,7 +476,9 @@ public class ScoreService {
     public ArrayList<Document> getTotalScoreByTargetIds(String projectId, Range range, List<String> targetIds) {
         String cacheKey = "getTotalScoreByTargetIds:" + projectId + ":" + range + ":" + targetIds.toString();
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
             Document query = doc("project", projectId);
             if (null != range) {
@@ -479,7 +501,9 @@ public class ScoreService {
     public List<Document> getScoreAndQuestId(String projectId, String subjectId) {
         String cacheKey = "getScoreAndQuestId:" + projectId + ":" + subjectId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score");
             Document query = doc("project", projectId);
             if (!StringUtils.isBlank(subjectId)) {

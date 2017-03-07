@@ -54,9 +54,9 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetTotalScore() throws Exception {
-        double score = scoreService.getScore("430200-b73f03af1d74484f84f1aa93f583caaa",
-                Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700"),
-                Target.point("1025605"));
+        double score = scoreService.getScore("430500-858a2da0e24f4c329aafb9071e022e3b",
+                Range.student("d86cd293-ecff-41a8-ae8e-3700e24fcddd"),
+                Target.quest("58b39c412d5602875578ea32"));
 
         System.out.println(score);
     }

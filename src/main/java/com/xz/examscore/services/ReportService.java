@@ -7,6 +7,7 @@ import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.asynccomponents.report.ReportManager;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,13 @@ public class ReportService {
     @Autowired
     private MongoDatabase scoreDatabase;
 
+    @Autowired
+    private ProjectCacheManager projectCacheManager;
+
     public void generateReports(String projectId, boolean async, boolean isExamAlliance) {
         deleteReportRuntimeRecord(projectId);
+        //清除项目缓存，确保EXCEL数据生成的准确性
+        projectCacheManager.deleteProjectCache(projectId);
         reportManager.generateReports(projectId, async, isExamAlliance);
     }
 
