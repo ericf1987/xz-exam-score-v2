@@ -48,8 +48,10 @@ public class PaintService {
                 String paper_reverse = MapUtils.getString(student, "paper_reverse");
                 List<Rect> rectList = new ArrayList<>();
                 subjectiveList.forEach(subjective -> {
+                    //题号
+                    String questNo = MapUtils.getString(subjective, "questionNo");
                     //获取主观题每个题目的坐标信息
-                    List<Rect> rects = convertToRectsObj(subjective, paper_positive, paper_reverse);
+                    List<Rect> rects = convertToRectsObj(subjective, paper_positive, paper_reverse, questNo);
                     rectList.add(rects.get(0));
                 });
                 saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, rectList);
@@ -76,9 +78,7 @@ public class PaintService {
             return;
         }
         String filePath = StringUtil.joinPaths(directory, fileName);
-        LOG.info("当前学生为：{}", fileName);
         paintRects(rectList, filePath, paper_positive, paper_reverse);
-        LOG.info("完成保存,  保存路径为：{}", filePath);
     }
 
     /**
@@ -89,7 +89,7 @@ public class PaintService {
      * @param paper_positive 正面URL地址
      * @param paper_reverse  反面URL地址
      */
-    private void paintRects(List<Rect> rects, String path, String paper_positive, String paper_reverse) {
+    public void paintRects(List<Rect> rects, String path, String paper_positive, String paper_reverse) {
         //将正反面截图读取到内存中
         BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
         BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
@@ -103,31 +103,32 @@ public class PaintService {
             }
         }
         //保存正面
-        PaintUtils.writeImageLocal(renderByIndex(path, true, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_positive, PaintUtils.SCREEN_SHOT_SUFFIX_PNG);
+        PaintUtils.writeImageLocal(renderSuffixByIndex(path, true, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_positive, PaintUtils.PNG);
         //保存反面
-        PaintUtils.writeImageLocal(renderByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.SCREEN_SHOT_SUFFIX_PNG);
+        PaintUtils.writeImageLocal(renderSuffixByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.PNG);
     }
 
-    private String renderByIndex(String path, boolean b, String suffix) {
+    private String renderSuffixByIndex(String path, boolean b, String suffix) {
         return b ? path + "_positive" + suffix : path + "_reverse" + suffix;
     }
 
     private BufferedImage doPaint(BufferedImage bufferedImage, Rect rect) {
         Font font = new Font("华文彩云", Font.PLAIN, 40);
-        String content = "得分" + rect.getScore() + "分， 满分（" + rect.getFullScore() + ")";
+        String content = "题号：" + rect.getQuestNo() + ", 得分" + rect.getScore() + "分， 满分（" + rect.getFullScore() + ")";
         return PaintUtils.modifyImage(bufferedImage, content, font,
-                (float) (rect.getCoordinateX() + rect.getWidth()),
-                (float) (rect.getCoordinateY() + rect.getHeight()));
+                (float) (rect.getCoordinateX()),
+                (float) (rect.getCoordinateY()));
     }
 
     /**
      * 将作答区域封装成rect对象
      */
-    private List<Rect> convertToRectsObj(Map<String, Object> subjective, String paper_positive, String paper_reverse) {
+    private List<Rect> convertToRectsObj(Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo) {
         List<Map<String, Object>> rects = (List<Map<String, Object>>) subjective.get("rects");
         List<Rect> list = new ArrayList<>();
         for (Map<String, Object> rect : rects) {
             Rect r = new Rect();
+            r.setQuestNo(questionNo);
             r.setCoordinateX(MapUtils.getDouble(rect, "coordinateX"));
             r.setCoordinateY(MapUtils.getDouble(rect, "coordinateY"));
             r.setWidth(MapUtils.getDouble(rect, "width"));

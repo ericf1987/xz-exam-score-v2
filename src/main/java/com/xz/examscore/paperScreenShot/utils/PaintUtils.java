@@ -17,8 +17,10 @@ public class PaintUtils {
 
     static final Logger LOG = LoggerFactory.getLogger(PaintUtils.class);
 
-    public static final String SCREEN_SHOT_SUFFIX_PNG = ".png";
+    public static final String PNG = "png";
+    public static final String JPG = "jpg";
 
+    public static final String SCREEN_SHOT_SUFFIX_PNG = ".png";
     public static final String SCREEN_SHOT_SUFFIX_JPG = ".jpg";
 
     /**
@@ -61,8 +63,8 @@ public class PaintUtils {
      * @param img       图片缓存对象
      * @param content   内容
      * @param font      字体
-     * @param positionX 宽度
-     * @param positionY 高度
+     * @param positionX 宽度坐标
+     * @param positionY 高度坐标
      * @return 修改后的图片缓存对象
      */
     public static BufferedImage modifyImage(BufferedImage img, Object content, Font font, float positionX, float positionY) {
@@ -77,11 +79,13 @@ public class PaintUtils {
 
             //计算画笔起始位置
             if (positionX > w || positionY > h) {
-                x = w - font.getSize() * content.toString().length() + 2;
-                y = h - font.getSize() + 2;
+                /*x = w - font.getSize() * content.toString().length() + 2;
+                y = h - font.getSize() + 2;*/
+                LOG.info("试卷扫描截图出现异常，坐标位置大于图片识别区域！");
+                return img;
             } else {
-                x = w - positionX;//宽度
-                y = h - positionY;//高度
+                x = positionX;//宽度
+                y = positionY + font.getSize() + 2;//高度
             }
 
 

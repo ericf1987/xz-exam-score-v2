@@ -150,7 +150,7 @@ public class ScannerDBService {
         LOG.info("------完成导入学生试卷留痕信息------");
     }
 
-    public void ImportOneSubjectTask(String project, MongoClient mongoClient, String subject) {
+    public void importOneSubjectTask(String project, MongoClient mongoClient, String subject) {
         LOG.info("导入开始...当前科目为：{}", SubjectService.getSubjectName(subject));
         //根据考试科目获取数据库名
         String dbName = getScannerDBName(project, subject);
@@ -163,8 +163,8 @@ public class ScannerDBService {
     public void doImportStuCardSlice(String project, String subject, Document student, AtomicInteger counter) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("scanner_student_card_slice");
 
-        List<Document> objectiveList = leaveOnlyRect((List<Document>)student.get("objectiveList"));
-        List<Document> subjectiveList = leaveOnlyRect((List<Document>)student.get("subjectiveList"));
+        List<Document> objectiveList = leaveOnlyRect(DocumentUtils.getList(student, "objectiveList", Collections.emptyList()));
+        List<Document> subjectiveList = leaveOnlyRect(DocumentUtils.getList(student, "subjectiveList", Collections.emptyList()));
 
         Document query = doc("project", project).append("subject", subject)
                 .append("student", student.getString("studentId"));
@@ -257,7 +257,7 @@ public class ScannerDBService {
 
         @Override
         public void run() {
-            ImportOneSubjectTask(this.getProject(), this.getMongoClient(), this.getSubjectId());
+            importOneSubjectTask(this.getProject(), this.getMongoClient(), this.getSubjectId());
         }
     }
 
@@ -589,7 +589,8 @@ public class ScannerDBService {
 
     //修正客观题列表
     private void fixMissingObjectiveQuest(String projectId, String subjectId, Boolean isAbsent, Document student) {
-        List<Document> questDocs = questService.getQuests(projectId, subjectId);
+        //获取所有客观的题列表
+        List<Document> questDocs = questService.getQuests(projectId, subjectId, true);
         for (Document questDoc : questDocs) {
             Document scoreDoc = doc("project", projectId)
                     .append("subject", subjectId)
@@ -761,7 +762,8 @@ public class ScannerDBService {
             map.put("paper_reverse", DocumentUtils.getString(document, "paper_reverse", ""));
             map.put("objectiveList", newObjectiveList);
             map.put("subjectiveList", newSubjectiveList);
-            map.put("hasPaperPosition", CollectionUtils.isNotEmpty(newObjectiveList) && CollectionUtils.isNotEmpty(newSubjectiveList));
+            //只要主观题和客观题有一项目为空，则返回有数据坐标
+            map.put("hasPaperPosition", CollectionUtils.isNotEmpty(newObjectiveList) || CollectionUtils.isNotEmpty(newSubjectiveList));
         }else{
             map.put("hasPaperPosition", false);
         }

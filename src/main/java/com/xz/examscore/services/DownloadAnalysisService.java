@@ -117,7 +117,7 @@ public class DownloadAnalysisService {
         }
     }
 
-    public int getZipSize(String fileName) {
+    public static int getZipSize(String fileName) {
         try {
             ZipFile zipFile = new ZipFile(fileName);
             return zipFile.size();

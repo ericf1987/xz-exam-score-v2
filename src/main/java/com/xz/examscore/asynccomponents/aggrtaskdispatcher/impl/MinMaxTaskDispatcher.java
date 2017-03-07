@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * 最高最低得分
  */
-@TaskDispatcherInfo(taskType = "score_minmax", dependentTaskType = "total_score")
+@TaskDispatcherInfo(taskType = "score_minmax", dependentTaskType = "total_score_province")
 @Component
 public class MinMaxTaskDispatcher extends TaskDispatcher {
 

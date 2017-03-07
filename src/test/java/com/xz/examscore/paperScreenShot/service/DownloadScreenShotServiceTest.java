@@ -4,9 +4,6 @@ import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,8 +26,7 @@ public class DownloadScreenShotServiceTest extends XzExamScoreV2ApplicationTests
         String[] classIds = new String[]{
                 "5e43902d-954d-4483-a431-8931a5d7e2bf"//,"671d7704-11b9-47b6-9958-3900fe38217d","1359d983-8344-4596-b76f-9077dcf66551"
         };
-        List<String[]> subjectIds = new ArrayList<>();
-        subjectIds.add(new String[]{"001", "004", "008"});
+        String[] subjectIds = new String[]{"001", "004", "008"};
         Map<String, Object> map = downloadScreenShotService.generateDownloadPath(projectId, schoolId, classIds, subjectIds);
         System.out.println(
                 "文件路径列表：" + map.toString()

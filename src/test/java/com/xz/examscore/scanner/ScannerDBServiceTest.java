@@ -79,7 +79,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     public void testImportOneSubject() throws Exception {
         String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         MongoClient mongoClient = scannerDBService.getMongoClient(project);
-        scannerDBService.ImportOneSubjectTask(project, mongoClient, "001");
+        scannerDBService.importOneSubjectTask(project, mongoClient, "001");
     }
 
     @Test
@@ -95,5 +95,13 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String subjectId = "001";
         MongoCollection<Document> collection = mongoClient.getDatabase(project + "_" + subjectId).getCollection("students");
         collection.find().limit(100).forEach((Consumer<Document>) s -> System.out.println(s.getString("paper_positive")));
+    }
+
+    @Test
+    public void testImportOneSubjectTask() throws Exception {
+        String project = "430500-858a2da0e24f4c329aafb9071e022e3b";
+        MongoClient mongoClient = scannerDBService.getMongoClient("430500-858a2da0e24f4c329aafb9071e022e3b");
+        String subjectId = "001";
+        scannerDBService.importOneSubjectTask(project, mongoClient, subjectId);
     }
 }

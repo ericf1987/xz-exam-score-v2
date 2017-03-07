@@ -1,5 +1,6 @@
 package com.xz.examscore.services;
 
+import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
@@ -11,6 +12,7 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +48,9 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     PointService pointService;
+
+    @Autowired
+    SimpleCache cache;
 
     @Test
     public void testGetTotalScore() throws Exception {
@@ -141,5 +146,18 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         int schoolCount = studentService.getStudentCount(projectId, range);
         System.out.println(countByScoreSpan);
         System.out.println(schoolCount);
+    }
+
+    @Test
+    public void testGetScoreByCacheKey() throws Exception {
+        String projectId = "430500-858a2da0e24f4c329aafb9071e022e3b";
+        String studentId = "d86cd293-ecff-41a8-ae8e-3700e24fcddd";
+        String subjectId = "003";
+        Range range = Range.student(studentId);
+        Target target = Target.subject(subjectId);
+        String collectionName = scoreService.getTotalScoreCollection(projectId, target);
+        String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
+        System.out.println(cacheKey);
+        cache.get(cacheKey);
     }
 }

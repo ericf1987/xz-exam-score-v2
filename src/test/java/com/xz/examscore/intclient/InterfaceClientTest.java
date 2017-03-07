@@ -42,8 +42,17 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430300-9cef9f2059ce4a36a40a7a60b07c7e00");
-        System.out.println(quests.toString());
+        JSONArray quests = interfaceClient.queryQuestionByProject("430500-858a2da0e24f4c329aafb9071e022e3b");
+        quests.stream().filter(q -> {
+            JSONObject obj = (JSONObject)q;
+            if(obj.getString("subjectId").equals("001")){
+                System.out.println(obj.toString());
+                return true;
+            }
+            return false;
+        });
+
+/*        System.out.println(quests.toString());
         Map<String, Double> map = new HashMap<>();
         map.put("score", 0d);
         quests.forEach(quest -> {
@@ -53,7 +62,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         });
         System.out.println(map.get("score"));
         assertNotNull(quests);
-        assertFalse(quests.isEmpty());
+        assertFalse(quests.isEmpty());*/
     }
 
     @Test

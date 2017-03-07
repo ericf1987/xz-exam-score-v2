@@ -54,7 +54,7 @@ public class DownloadScreenShotService {
      * @param subjectIds 科目列表
      * @return  结果信息
      */
-    public Map<String, Object> downloadPaperScreenShot(String projectId, String schoolId, String[] classIds, List<String[]> subjectIds) {
+    public Map<String, Object> downloadPaperScreenShot(String projectId, String schoolId, String[] classIds, String[] subjectIds) {
         return generateDownloadPath(projectId, schoolId, classIds, subjectIds);
     }
 
@@ -67,7 +67,7 @@ public class DownloadScreenShotService {
      * @param subjectIds 科目列表
      * @return 结果信息
      */
-    public Map<String, Object> generateDownloadPath(String projectId, String schoolId, String[] classIds, List<String[]> subjectIds){
+    public Map<String, Object> generateDownloadPath(String projectId, String schoolId, String[] classIds, String[] subjectIds){
         List<String> idPath = new LinkedList<>();
         List<String> namePath = new LinkedList<>();
         //项目名称
@@ -78,7 +78,8 @@ public class DownloadScreenShotService {
         for (int i = 0; i < classIds.length; i++) {
             //班级名称
             String className = classService.findClass(projectId, classIds[i]).getString("name");
-            String[] subjectIdArr = subjectIds.get(i);
+            String oneSubjectId = subjectIds[i];
+            String[] subjectIdArr = oneSubjectId.split("-");
             for (String subjectId : subjectIdArr) {
                 String subjectName = SubjectService.getSubjectName(subjectId);
                 //已生成的文件路径
@@ -125,6 +126,8 @@ public class DownloadScreenShotService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        int zipSize = DownloadAnalysisService.getZipSize(outputFile.getName());
+        map.put("downloadUrl", zipSize == 0 ? "" : outputFile.getName());
         map.put("failPathList", failPathList);
         map.put("failZipItemList", failZipItemList);
         return map;

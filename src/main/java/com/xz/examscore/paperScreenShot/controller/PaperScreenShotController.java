@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,8 +30,7 @@ public class PaperScreenShotController {
     public Result startPaperScreenShotTask(
             @RequestParam("projectId") String projectId
     ) {
-        paperScreenShotService.startPaperScreenShotTask(projectId);
-        return Result.success();
+        return paperScreenShotService.startPaperScreenShotTask(projectId);
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.POST)
@@ -41,7 +39,7 @@ public class PaperScreenShotController {
             @RequestParam("projectId") String projectId,
             @RequestParam("schoolId") String schoolId,
             @RequestParam("classIds") String[] classIds,
-            @RequestParam("subjectIds") List<String[]> subjectIds
+            @RequestParam("subjectIds") String[] subjectIds
             ){
         Map<String, Object> downloadInfo = downloadScreenShotService.downloadPaperScreenShot(projectId, schoolId, classIds, subjectIds);
         return Result.success().set("downloadInfo", downloadInfo);

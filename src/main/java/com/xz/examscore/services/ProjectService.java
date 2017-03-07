@@ -10,6 +10,7 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.AggregationStatus;
+import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.bean.Range;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -70,7 +71,6 @@ public class ProjectService {
      * 通过考试项目id查询项目所属学段
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public String findProjectStudyStage(String projectId) {
@@ -91,7 +91,6 @@ public class ProjectService {
      * 通过考试项目id查询考试项目
      *
      * @param projectId 考试项目id
-     *
      * @return 考试项目信息
      */
     public Document findProject(String projectId) {
@@ -131,7 +130,6 @@ public class ProjectService {
      * @param area      区县id
      * @param schoolId  学校id
      * @param examMonth 考试月份 格式 yyyy-MM
-     *
      * @return 考试项目列表
      */
     public List<Document> querySchoolProjects(String city, String area, String schoolId, String examMonth) {
@@ -169,7 +167,9 @@ public class ProjectService {
                 .append("grade", project.getGrade())
                 .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
                 .append("startDate", project.getExamStartDate())
-                .append("category", project.getCategory());
+                .append("category", project.getCategory())
+                .append("aggregationStatus", AggregationStatus.Empty.name())
+                .append("paperScreenShotStatus", PaperScreenShotStatus.EMPTY.name());
 
         UpdateResult result = c.updateMany(query, $set(update));
         if (result.getMatchedCount() == 0) {
@@ -178,6 +178,8 @@ public class ProjectService {
                     .append("importDate", DateFormatUtils.format(project.getCreateTime(), "yyyy-MM-dd"))
                     .append("startDate", project.getExamStartDate())
                     .append("category", project.getCategory())
+                    .append("aggregationStatus", AggregationStatus.Empty.name())
+                    .append("paperScreenShotStatus", PaperScreenShotStatus.EMPTY.name())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -207,15 +209,6 @@ public class ProjectService {
     }
 
     /**
-     * 查询所有项目信息
-     *
-     * @return 所有项目
-     */
-    public List<Document> queryProjects() {
-        return toList(scoreDatabase.getCollection("project_list").find(doc()));
-    }
-
-    /**
      * 设置项目状态
      *
      * @param projectId 项目ID
@@ -235,7 +228,6 @@ public class ProjectService {
      * 查询项目状态
      *
      * @param projectId 项目ID
-     *
      * @return 状态
      */
     public ProjectStatus getProjectStatus(String projectId) {
@@ -297,6 +289,47 @@ public class ProjectService {
         // 清除缓存
         String cacheKey = "project_info:" + projectId;
         cache.delete(cacheKey);
+    }
+
+    /**
+     * 设置考试项目试卷截图生成状态
+     *
+     * @param projectId 考试项目ID
+     */
+    public void setPaperScreenShotStatus(String projectId, PaperScreenShotStatus paperScreenShotStatus) {
+        MongoCollection<Document> c = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+        c.updateMany(query, $set("paperScreenShotStatus", paperScreenShotStatus.name()));
+        String cacheKey = "project_info:" + projectId;
+        cache.delete(cacheKey);
+    }
+
+    /**
+     * 查询考试项目试卷截图生成状态
+     *
+     * @param projectId 考试项目ID
+     * @return 试卷截图生成状态
+     */
+    public PaperScreenShotStatus getPaperScreenShotStatus(String projectId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("project_list");
+        Document query = doc("project", projectId);
+
+        Document project = collection.find(query).projection(doc("paperScreenShotStatus", 1)).first();
+
+        if (project == null) {
+            return PaperScreenShotStatus.EMPTY;
+        }
+
+        String status = project.getString("paperScreenShotStatus");
+        if (StringUtil.isEmpty(status)) {
+            return PaperScreenShotStatus.EMPTY;
+        }
+        try {
+            return PaperScreenShotStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            LOG.error("项目" + projectId + "的试卷截图生成状态为：" + status);
+            return PaperScreenShotStatus.EMPTY;
+        }
     }
 
     public AggregationStatus getAggregationStatus(String projectId) {

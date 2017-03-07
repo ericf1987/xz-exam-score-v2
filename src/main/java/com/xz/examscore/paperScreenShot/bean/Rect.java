@@ -4,6 +4,7 @@ package com.xz.examscore.paperScreenShot.bean;
  * @author by fengye on 2017/3/1.
  */
 public class Rect {
+    private String questNo;
     private double coordinateX;
     private double coordinateY;
     private double height;
@@ -14,6 +15,14 @@ public class Rect {
 
     private String paper_positive;
     private String paper_reverse;
+
+    public String getQuestNo() {
+        return questNo;
+    }
+
+    public void setQuestNo(String questNo) {
+        this.questNo = questNo;
+    }
 
     public double getCoordinateX() {
         return coordinateX;
@@ -90,7 +99,8 @@ public class Rect {
     public Rect() {
     }
 
-    public Rect(double coordinateX, double coordinateY, double height, double width, int pageIndex, String paper_positive, String paper_reverse) {
+    public Rect(String questNo, double coordinateX, double coordinateY, double height, double width, int pageIndex, String paper_positive, String paper_reverse) {
+        this.questNo = questNo;
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.height = height;
@@ -103,7 +113,8 @@ public class Rect {
     @Override
     public String toString() {
         return "Rect{" +
-                "coordinateX=" + coordinateX +
+                "questNo='" + questNo + '\'' +
+                ", coordinateX=" + coordinateX +
                 ", coordinateY=" + coordinateY +
                 ", height=" + height +
                 ", width=" + width +

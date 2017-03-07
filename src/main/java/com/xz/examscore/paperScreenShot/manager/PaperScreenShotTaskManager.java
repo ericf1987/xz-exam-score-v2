@@ -1,16 +1,6 @@
 package com.xz.examscore.paperScreenShot.manager;
 
 import com.xz.ajiaedu.common.concurrent.Executors;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.xz.examscore.paperScreenShot.service.PaperScreenShotService;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.SchoolService;
@@ -22,6 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.concurrent.Executors.newBlockingThreadPoolExecutor;
 
@@ -77,6 +75,9 @@ public class PaperScreenShotTaskManager {
         ThreadPoolExecutor pool = async ? threadPoolExecutor : newBlockingThreadPoolExecutor(10, 10, 100);
         for (Map<String, Object> map : list) {
             for (String schoolId : map.keySet()) {
+
+                LOG.info("====项目{}, 学校{}, 试卷截图生成开始", projectId, schoolId);
+
                 List<String> classIds = (List<String>) map.get(schoolId);
 
                 CountDownLatch countDownLatch = new CountDownLatch(classIds.size());
@@ -84,11 +85,9 @@ public class PaperScreenShotTaskManager {
                 for (String classId : classIds) {
                     Runnable runnable = () -> {
                         try {
-                            LOG.info("开始生成试卷截图, 项目{}， 学校{}， 班级{}", projectId, schoolId, classId);
                             paperScreenShotService.dispatchOneClassTask(projectId, schoolId, classId, subjectIds);
                         } catch (Exception e) {
                             LOG.info("生成试卷截图失败, 项目{}， 学校{}， 班级{}", projectId, schoolId, classId);
-                            e.printStackTrace();
                         } finally {
                             countDownLatch.countDown();
                         }

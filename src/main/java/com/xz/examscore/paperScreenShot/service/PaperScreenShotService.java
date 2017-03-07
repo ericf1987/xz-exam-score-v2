@@ -2,6 +2,8 @@ package com.xz.examscore.paperScreenShot.service;
 
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
+import com.xz.ajiaedu.common.lang.Result;
+import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
@@ -59,9 +61,17 @@ public class PaperScreenShotService {
     @Autowired
     PaperScreenShotTaskManager paperScreenShotTaskManager;
 
-    public void startPaperScreenShotTask(String projectId) {
+    public Result startPaperScreenShotTask(String projectId) {
+        if(projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)){
+            return Result.fail("该考试项目正在保存截图，请等待...");
+        }
+        projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATING);
         paperScreenShotTaskManager.generatePaperScreenShots(projectId, true);
+        projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATED);
+        return Result.success("试卷截图生成完毕！");
     }
+
+
 
     /**
      * 按班级和科目分发生成试卷截图任务
@@ -114,7 +124,6 @@ public class PaperScreenShotService {
         for (PaperScreenShotsTaskByClassAndSubject task : tasks) {
             try {
                 task.join();
-                LOG.info("----生成完毕：项目{}，学校{}，班级{}，科目{}", projectId, schoolId, task.getClassId(), task.getSubjectId());
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 LOG.info("----生成失败：项目{}，学校{}，班级{}，科目{}", projectId, schoolId, task.getClassId(), task.getSubjectId());
