@@ -73,8 +73,15 @@ public class DownloadScreenShotService {
         //项目名称
         String projectName = projectService.findProject(projectId).getString("name");
         //学校名称
+
+        //创建下载文件根目录文件夹
+        File directory = new File(savePath);
+        if(!directory.exists()){
+            directory.mkdirs();
+        }
+
         String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
-        String outputFileName = StringUtil.joinPaths(downloadUrl, projectName, ".zip");
+        String outputFileName = StringUtil.joinPaths(savePath, projectName + "_试卷截图" + ".zip");
         for (int i = 0; i < classIds.length; i++) {
             //班级名称
             String className = classService.findClass(projectId, classIds[i]).getString("name");
@@ -96,6 +103,7 @@ public class DownloadScreenShotService {
     public Map<String, Object> generateDownloadZip(String projectId, File outputFile, List<String> idPath, List<String> namePath) {
         Map<String, Object> map = new HashMap<>();
         map.put("downloadUrl", outputFile.getName());
+        LOG.info("试卷截图保存路径，savePath:{}", StringUtil.joinPaths(savePath, outputFile.getName()));
         List<String> failPathList = new ArrayList<>();
         List<String> failZipItemList = new ArrayList<>();
         try {
@@ -126,10 +134,11 @@ public class DownloadScreenShotService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        int zipSize = DownloadAnalysisService.getZipSize(outputFile.getName());
-        map.put("downloadUrl", zipSize == 0 ? "" : outputFile.getName());
+        int zipSize = DownloadAnalysisService.getZipSize(outputFile.getAbsolutePath());
+        map.put("downloadUrl", zipSize == 0 ? "" : StringUtil.joinPaths(downloadUrl, outputFile.getName()));
         map.put("failPathList", failPathList);
         map.put("failZipItemList", failZipItemList);
+        LOG.info("试卷截图下载路径，downloadUrl:{}", StringUtil.joinPaths(downloadUrl, outputFile.getName()));
         return map;
     }
 

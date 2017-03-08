@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +114,7 @@ public class PaintService {
     }
 
     private BufferedImage doPaint(BufferedImage bufferedImage, Rect rect) {
-        Font font = new Font("华文彩云", Font.PLAIN, 40);
+        Font font = new Font("宋体", Font.PLAIN, 40);
         String content = "题号：" + rect.getQuestNo() + ", 得分" + rect.getScore() + "分， 满分（" + rect.getFullScore() + ")";
         return PaintUtils.modifyImage(bufferedImage, content, font,
                 (float) (rect.getCoordinateX()),

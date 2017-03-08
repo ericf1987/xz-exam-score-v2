@@ -67,7 +67,7 @@ public class PaintUtils {
      * @param positionY 高度坐标
      * @return 修改后的图片缓存对象
      */
-    public static BufferedImage modifyImage(BufferedImage img, Object content, Font font, float positionX, float positionY) {
+    public static BufferedImage modifyImage(BufferedImage img, String content, Font font, float positionX, float positionY) {
         Graphics2D g;
         try {
             int w = img.getWidth();
@@ -95,7 +95,7 @@ public class PaintUtils {
             g.setFont(font);
 
             if (content != null) {
-                g.drawString(content.toString(), x, y);
+                g.drawString(new String(content.getBytes(), "GBK"), x, y);
             }
             g.dispose();
         } catch (Exception e) {
