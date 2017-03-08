@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class TScoreService {
     static final Logger LOG = LoggerFactory.getLogger(TScoreService.class);
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -45,7 +46,10 @@ public class TScoreService {
      */
     public double queryTScore(String projectId, Target target, Range range) {
         String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("t_score");
             Document document = collection.find(
                     new Document("project", projectId)
@@ -83,6 +87,9 @@ public class TScoreService {
         }
 
         String cacheKey = "t_score_value:" + projectId + ":" + range + ":" + target;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 }

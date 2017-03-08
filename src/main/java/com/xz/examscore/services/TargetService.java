@@ -8,6 +8,7 @@ import com.xz.examscore.bean.Point;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class TargetService {
     ProjectConfigService projectConfigService;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     public Target getTarget(String projectId, String subjectId) {
         if (StringUtil.isNotBlank(subjectId)) {
@@ -175,7 +176,9 @@ public class TargetService {
     private List<Target> querySubjectObjectives(String projectId) {
         String cacheKey = "project_subject_objectives:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<Target> result = new ArrayList<>();
 
             subjectService.querySubjects(projectId).forEach(subjectId -> {
@@ -209,7 +212,9 @@ public class TargetService {
 
         String cacheKey = "project_quest_target_list:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<Document> questDocs = questService.getQuests(projectId);
 
             List<Target> targets = questDocs.stream()

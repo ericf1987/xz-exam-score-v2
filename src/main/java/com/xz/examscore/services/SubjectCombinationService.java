@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class SubjectCombinationService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     ImportProjectService importProjectService;
@@ -35,7 +36,10 @@ public class SubjectCombinationService {
     //获取所有科目组合
     public ArrayList<String> getAllSubjectCombinations(String projectId) {
         String cacheKey = "subject_combination_list:" + projectId;
-        return new ArrayList<>(cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return new ArrayList<>(simpleCache.get(cacheKey, () -> {
             ArrayList<String> targets = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("subject_combination_list");
             collection.find(doc("project", projectId)).forEach((Consumer<Document>) document -> {

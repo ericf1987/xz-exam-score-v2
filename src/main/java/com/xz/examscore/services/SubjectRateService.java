@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class SubjectRateService {
     static final Logger LOG = LoggerFactory.getLogger(SubjectRateService.class);
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -45,7 +46,10 @@ public class SubjectRateService {
     @SuppressWarnings("unchecked")
     public Map<String, Document> querySubjectRateMap(String projectId, Range range) {
         String cacheKey = "subject_rate_map:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<Document> subjectRates = querySubjectRate(projectId, range);
             return new HashMap<>(CollectionUtils.toMap(subjectRates,
                     subjectRate -> subjectRate.getString("subject")));
@@ -63,7 +67,10 @@ public class SubjectRateService {
     @SuppressWarnings("unchecked")
     public List<Document> querySubjectRate(String projectId, Range range) {
         String cacheKey = "subject_rate:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("subject_rate");
             Document document = collection.find(
                     new Document("project", projectId)

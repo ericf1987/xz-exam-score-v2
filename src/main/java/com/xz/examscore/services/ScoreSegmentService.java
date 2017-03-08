@@ -7,6 +7,7 @@ import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class ScoreSegmentService {
     StudentService studentService;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询完整分数段(科目10分段，项目50分段)
@@ -100,7 +101,10 @@ public class ScoreSegmentService {
     @SuppressWarnings("unchecked")
     public List<Document> getScoreSegment(String projectId, Range range, Target target) {
         String cacheKey = "score_segment:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> averageCollection = scoreDatabase.getCollection("score_segment");
             Document document = averageCollection.find(
                     new Document("project", projectId)

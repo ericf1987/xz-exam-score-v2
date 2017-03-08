@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class ClassService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询考试班级名称
@@ -61,7 +62,9 @@ public class ClassService {
     public Document findClass(String projectId, String classId) {
         String cacheKey = "class:" + projectId + ":" + classId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("class_list");
             Document query = doc("project", projectId).append("class", classId);
             return collection.find(query).first();
@@ -78,7 +81,9 @@ public class ClassService {
     public List<Document> listClasses(String projectId, String schoolId) {
         String cacheKey = "class_list:" + projectId + ":" + schoolId;
 
-        return new ArrayList<>(cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return new ArrayList<>(simpleCache.get(cacheKey, () -> {
             ArrayList<Document> classes = new ArrayList<>();
 
             MongoCollection<Document> collection = scoreDatabase.getCollection("class_list");

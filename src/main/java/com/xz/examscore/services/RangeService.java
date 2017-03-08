@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.concurrent.LockFactory;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class RangeService {
     SchoolService schoolService;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询指定项目的省份范围
@@ -101,8 +102,10 @@ public class RangeService {
     private List<Range> queryStudentRangeList(String projectId) {
         String cacheKey = "student_ranges:" + projectId;
 
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         synchronized (LockFactory.getLock(cacheKey)) {
-            return cache.get(cacheKey, () -> {
+            return simpleCache.get(cacheKey, () -> {
                 List<Range> result = new ArrayList<>();
                 Document query = doc("project", projectId);
 
@@ -153,7 +156,9 @@ public class RangeService {
 
         String cacheKey = "parent:" + projectId + ":range:" + range.getName() + "=" + range.getId();
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document result = new Document(range.getName(), range.getId());
 
             Range parent = getParentRange(projectId, range);

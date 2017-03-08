@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class TopStudentListService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     StudentService studentService;
@@ -50,7 +51,10 @@ public class TopStudentListService {
 
         String cacheKey = "top_student_rate:" + projectId + ":" + rankRange + ":" +
                 compareRange + ":" + target + ":" + minRank + ":" + maxRank;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
             Document query = query(projectId, rankRange, target)
                     .append("rank", doc("$gte", minRank).append("$lte", maxRank));
@@ -79,7 +83,9 @@ public class TopStudentListService {
 
         String cacheKey = "top_student_rank_segment:" + projectId + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             ArrayList<Map<String, Object>> list = new ArrayList<>();
             int totalTopStudentCount = getTopStudentMaxRank(projectId, range);
             int startIndex = 1;
@@ -115,7 +121,10 @@ public class TopStudentListService {
      */
     private int getTopStudentMaxRank(String projectId, Range range) {
         String cacheKey = "top_student_max_rank:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
             Document document = collection.find(query(projectId, range)).sort(doc("rank", -1)).first();
 
@@ -137,7 +146,10 @@ public class TopStudentListService {
      */
     public int getTopStudentTotalCount(String projectId, Range range) {
         String cacheKey = "top_student_count:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
 
             MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
             return (int) collection.count(query(projectId, range));
@@ -159,7 +171,10 @@ public class TopStudentListService {
             String projectId, Range range, Target target, int minRank, int maxRank) {
         String cacheKey = "top_student_list:" + projectId + ":" + range
                 + ":" + target + ":" + minRank + ":" + maxRank;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
             Document query = query(projectId, range, target)
                     .append("rank", doc("$gte", minRank).append("$lte", maxRank));
@@ -178,7 +193,10 @@ public class TopStudentListService {
      */
     public Document getTopStudentLastOne(String projectId, Range range, Target target){
         String cacheKey = "top_student_last_one:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("top_student_list");
             return collection.find(query(projectId, range, target)).sort(doc("rank", -1)).first();
         });

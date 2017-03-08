@@ -11,6 +11,7 @@ import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,6 @@ public class StudentService {
     static final Logger LOG = LoggerFactory.getLogger(StudentService.class);
 
     @Autowired
-    SimpleCache cache;
-
-    @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
@@ -51,6 +49,9 @@ public class StudentService {
 
     @Autowired
     ImportProjectService importProjectService;
+
+    @Autowired
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询项目考生数量
@@ -94,7 +95,9 @@ public class StudentService {
     public int getStudentCount(String projectId, String subjectId, Range range) {
         String cacheKey = getCacheKey("student_count:", projectId, subjectId, range);
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
             if (subjectId != null) {
                 query.append("subjects", subjectId);
@@ -162,8 +165,11 @@ public class StudentService {
     public List<String> getStudentIds(String projectId, Range range, Target target) {
         String cacheKey = "student_id_list:" + projectId + ":" + range + ":" + target;
         //如果是科目组合，则统计至少包含参与了三科中其中至少一科的学生的人数
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         if (target.getName().equals(Target.SUBJECT_COMBINATION)) {
-            return cache.get(cacheKey, () -> {
+            return simpleCache.get(cacheKey, () -> {
                 List<String> subjectIds = importProjectService.separateSubject(target.getId().toString());
                 List<String> studentIds = new ArrayList<>();
                 for (String subjectId : subjectIds) {
@@ -175,7 +181,7 @@ public class StudentService {
                 return (ArrayList<String>) studentIds;
             });
         } else {
-            return cache.get(cacheKey, () -> {
+            return simpleCache.get(cacheKey, () -> {
                 String subjectId = targetService.getTargetSubjectId(projectId, target);
                 return (ArrayList<String>) getStudentIds(projectId, subjectId, range);
             });
@@ -202,8 +208,10 @@ public class StudentService {
 
         String cacheKey = getCacheKey("student_list:", projectId, subjectIdValue.get(), range);
 
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         synchronized (LockFactory.getLock(cacheKey)) {
-            return cache.get(cacheKey, () -> {
+            return simpleCache.get(cacheKey, () -> {
                 MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
                 ArrayList<String> studentIds = new ArrayList<>();
                 Document query = new Document("project", projectId);
@@ -235,7 +243,9 @@ public class StudentService {
     public List<Document> getStudentList(String projectId, Range range) {
         String cacheKey = "student_list_range:" + projectId + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("student_list");
             Document query = new Document("project", projectId).append(range.getName(), range.getId());
 
@@ -263,7 +273,9 @@ public class StudentService {
     public Document findStudent(String projectId, String studentId) {
         String cacheKey = "student:" + projectId + ":" + studentId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
             return students.find(doc("student", studentId).append("project", projectId)).first();
         });
@@ -272,22 +284,27 @@ public class StudentService {
     public void saveProjectClassStudents(String projectId, String classId, List<Document> classStudents) {
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         students.deleteMany(doc("project", projectId).append("class", classId));
         if(null == classStudents || classStudents.isEmpty()){
             LOG.error("该班级考生全部缺考，无学生导入，classId={}", classId);
             String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
-            cache.delete(cacheKey);
+            simpleCache.delete(cacheKey);
             return;
         }
         students.insertMany(classStudents);
 
         String cacheKey = "student_list_range:" + projectId + ":" + Range.clazz(classId);
-        cache.delete(cacheKey);
+        simpleCache.delete(cacheKey);
     }
 
     public ArrayList<Document> pickStudentsByRange(String projectId, List<String> studentIds, String rangeName) {
         String cacheKey = "studentInRange:" + rangeName + ":" + studentIds;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
             Document match = doc("project", projectId);
             if(null != studentIds && !studentIds.isEmpty()){
@@ -303,7 +320,10 @@ public class StudentService {
 
     public boolean hasAllSubjects(String projectId, String studentId, List<String> subjectIds) {
         String cacheKey = "hasAllSubjects:" + projectId + ":" + studentId + ":" + subjectIds;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
             Document query = doc("project", projectId).append("student", studentId).append("subjects", doc("$all", subjectIds));
             Document first = students.find(query).first();

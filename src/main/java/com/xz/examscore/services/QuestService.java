@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,12 +28,14 @@ public class QuestService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     public Document findQuest(String projectId, String questId) {
         String cacheKey = "quest:" + projectId + ":" + questId;
 
-        return cache.get(cacheKey, () ->
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () ->
                 scoreDatabase.getCollection("quest_list")
                         .find(doc("questId", questId).append("project", projectId)).first());
     }
@@ -84,7 +87,9 @@ public class QuestService {
     public List<Document> getQuests(String projectId, String point, String level) {
         String cacheKey = "quests_by_pointlevel:" + projectId + ":" + point + ":" + level;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("points." + point, level);
             return asArrayList(toList(scoreDatabase.getCollection("quest_list").find(query)));
         });
@@ -139,7 +144,9 @@ public class QuestService {
     public Document findQuest(String projectId, String subject, String questNo) {
         String cacheKey = "quest_by_no:" + projectId + ":" + subject + ":" + questNo;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
             Document query = doc("project", projectId)
@@ -154,7 +161,9 @@ public class QuestService {
     public Document findQuest(String projectId, List<String> subjectIds, String questNo){
         String cacheKey = "quest_by_no_in_subject:" + projectId + ":" + subjectIds.toString() + ":" + questNo;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
 
             Document query = doc("project", projectId)

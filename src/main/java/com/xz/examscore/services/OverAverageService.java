@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ public class OverAverageService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询超均率
@@ -41,7 +42,10 @@ public class OverAverageService {
      */
     public double getOverAverage(String projectId, Range range, Target target) {
         String cacheKey = "over_average:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("over_average");
             Document document = collection.find(
                     new Document("project", projectId)

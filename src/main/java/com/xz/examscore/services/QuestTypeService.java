@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class QuestTypeService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询指定的项目中有哪些题型（项目初始化用，从 quest_list 中查询，其他方法从 quest_type_list 中查询）
@@ -36,7 +37,9 @@ public class QuestTypeService {
     public List<QuestType> generateQuestTypeList(String projectId) {
         String cacheKey = "quest_type_list:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             ArrayList<QuestType> result = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_list");
             Document query = doc("project", projectId).append("questTypeId", $ne(null));
@@ -70,7 +73,9 @@ public class QuestTypeService {
     public QuestType getQuestType(String projectId, String questTypeId) {
         String cacheKey = "quest_type:" + projectId + ":" + questTypeId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
             Document query = doc("project", projectId).append("questTypeId", questTypeId);
             Document projection = doc("questTypeName", 1).append("subject", 1);
@@ -96,8 +101,11 @@ public class QuestTypeService {
      */
     public List<QuestType> getQuestTypeList(String projectId, String subjectId) {
         String cacheKey = "subject_quest_type:" + projectId + ":" + subjectId;
-        return cache.get(cacheKey, () -> {
-            ArrayList<QuestType> result = new ArrayList<QuestType>();
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
+            ArrayList<QuestType> result = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_type_list");
 
             Document query = doc("project", projectId);

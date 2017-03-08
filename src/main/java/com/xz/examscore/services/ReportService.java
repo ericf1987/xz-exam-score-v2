@@ -10,6 +10,8 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,10 +35,14 @@ public class ReportService {
     @Autowired
     private ProjectCacheManager projectCacheManager;
 
+    static final Logger LOG = LoggerFactory.getLogger(ReportService.class);
+
     public void generateReports(String projectId, boolean async, boolean isExamAlliance) {
         deleteReportRuntimeRecord(projectId);
         //清除项目缓存，确保EXCEL数据生成的准确性
+        LOG.info("----报表统计阶段----开始清理项目缓存----");
         projectCacheManager.deleteProjectCache(projectId);
+        LOG.info("----报表统计阶段----项目缓存清理完成----");
         reportManager.generateReports(projectId, async, isExamAlliance);
     }
 

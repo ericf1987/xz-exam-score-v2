@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class OptionMapService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 试题选项选率统计（map 格式）
@@ -45,7 +46,10 @@ public class OptionMapService {
      */
     public Map<String, Document> getOptionMap(String projectId, String questId, Range range) {
         String cacheKey = "option_maps:" + projectId + ":" + questId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<Document> optionList = getOptionList(projectId, questId, range);
             return new HashMap<>(CollectionUtils.toMap(optionList, document -> document.getString("answer")));
         });
@@ -63,7 +67,10 @@ public class OptionMapService {
     @SuppressWarnings("unchecked")
     public List<Document> getOptionList(String projectId, String questId, Range range) {
         String cacheKey = "option_lists:" + projectId + ":" + questId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("option_map");
             Document document = collection.find(
                     new Document("project", projectId)

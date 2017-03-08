@@ -13,6 +13,7 @@ import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class ProjectService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     private static final Map<String, String> GRADE_STUDYSTAGE_MAP = new HashMap<>();
 
@@ -75,7 +76,10 @@ public class ProjectService {
      */
     public String findProjectStudyStage(String projectId) {
         String cacheKey = "project_studystage:" + projectId;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document projectInfo = findProject(projectId);
 
             int grade = 0;
@@ -95,7 +99,10 @@ public class ProjectService {
      */
     public Document findProject(String projectId) {
         String cacheKey = "project_info:" + projectId;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId);
 
             MongoCollection<Document> collection = scoreDatabase.getCollection("project_list");
@@ -114,7 +121,10 @@ public class ProjectService {
             return findProject(projectId);
         } else {
             String cacheKey = "project_info:" + projectId + "category:" + category;
-            return cache.get(cacheKey, () -> {
+
+            SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+            return simpleCache.get(cacheKey, () -> {
                 Document query = doc("project", projectId).append("category", category);
 
                 MongoCollection<Document> collection = scoreDatabase.getCollection("project_list");
@@ -221,7 +231,10 @@ public class ProjectService {
 
         // 清除缓存
         String cacheKey = "project_info:" + projectId;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 
     /**
@@ -288,7 +301,10 @@ public class ProjectService {
 
         // 清除缓存
         String cacheKey = "project_info:" + projectId;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 
     /**
@@ -301,7 +317,10 @@ public class ProjectService {
         Document query = doc("project", projectId);
         c.updateMany(query, $set("paperScreenShotStatus", paperScreenShotStatus.name()));
         String cacheKey = "project_info:" + projectId;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 
     /**

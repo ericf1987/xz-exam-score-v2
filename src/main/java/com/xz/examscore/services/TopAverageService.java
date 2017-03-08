@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class TopAverageService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询高分段（各校总分前30%）平均得分
@@ -46,7 +47,10 @@ public class TopAverageService {
      */
     public double getTopAverage(String projectId, Target target, Range range, double percent) {
         String cacheKey = "top_averages:" + projectId + ":" + target + ":" + range + ":" + percent;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
 
             Document query = new Document("project", projectId)
                     .append("target", target2Doc(target))

@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class RankPositionService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询中位数
@@ -46,7 +47,10 @@ public class RankPositionService {
     @SuppressWarnings("unchecked")
     public List<Document> getRankPositions(String projectId, Range range, Target target) {
         String cacheKey = "rank_positions:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> averageCollection = scoreDatabase.getCollection("rank_position");
             Document document = averageCollection.find(
                     new Document("project", projectId)

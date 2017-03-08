@@ -8,6 +8,7 @@ import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class QuestAbilityLevelScoreService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     QuestAbilityLevelService questAbilityLevelService;
@@ -41,7 +42,9 @@ public class QuestAbilityLevelScoreService {
 
         String cacheKey = "QuestAbilityLevelScoreService_getTotalScore:" + projectId + ":" + questAbilityLevel + ":" + subjectId + ":" + levelOrAbility + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document m = questAbilityLevelService.getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
             Document g = doc("_id", null).append("totalScore", doc("$sum", "$score"));
             if (range != null)
@@ -57,7 +60,9 @@ public class QuestAbilityLevelScoreService {
     public int getStudentCount(String projectId, String questAbilityLevel, String subjectId, String levelOrAbility, Range range) {
         String cacheKey = "QuestAbilityLevelScoreService_getStudentCount:" + projectId + ":" + questAbilityLevel + ":" + subjectId + ":" + levelOrAbility + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = questAbilityLevelService.getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
             if (range != null)
                 query.append(range.getName(), range.getId());
@@ -74,7 +79,9 @@ public class QuestAbilityLevelScoreService {
 
         String cacheKey = "QuestAbilityLevelScoreService_getStudentList:" + projectId + ":" + questAbilityLevel + ":" + subjectId + ":" + levelOrAbility + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = questAbilityLevelService.getQuery(projectId, questAbilityLevel, subjectId, levelOrAbility);
             if (range != null)
                 query.append(range.getName(), range.getId());
@@ -88,7 +95,9 @@ public class QuestAbilityLevelScoreService {
 
         String cacheKey = "QuestAbilityLevelScoreService_filterStudentList:" + projectId + ":" + questAbilityLevel + ":" + subjectId + ":" + levelOrAbility + ":" + range + ":" + factor;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<Document> studentList = getStudentList(projectId, questAbilityLevel, subjectId, levelOrAbility, range);
             double fullScore = fullScoreService.getFullScore(projectId, Target.questAbilityLevel(questAbilityLevel));
             double score = fullScore * factor;
@@ -119,7 +128,6 @@ public class QuestAbilityLevelScoreService {
         }
         int allPassCount = passCounter.getCount("allPass");
         int totalCount = studentList.size();
-        double allPassRate = totalCount == 0 ? 0 :  DoubleUtils.round((double)allPassCount / studentList.size());
-        return allPassRate;
+        return totalCount == 0 ? 0 :  DoubleUtils.round((double)allPassCount / studentList.size());
     }
 }

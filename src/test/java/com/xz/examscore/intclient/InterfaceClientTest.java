@@ -67,8 +67,8 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430300-e5071423fc08404a813a2e004864cc82");
-        Map<String, Object> map = interfaceClient.queryQuestionByProject("430300-e5071423fc08404a813a2e004864cc82", true);
+        JSONArray quests = interfaceClient.queryQuestionByProject("430300-564140e278df4e92a2a739a6f27ac391");
+        Map<String, Object> map = interfaceClient.queryQuestionByProject("430300-564140e278df4e92a2a739a6f27ac391", true);
         System.out.println(quests.toString());
         System.out.println(map.toString());
         //Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests, optionalQuestMap);

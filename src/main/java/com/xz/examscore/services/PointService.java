@@ -91,10 +91,11 @@ public class PointService {
 
     public Point getPoint(String pointId) {
         String cacheKey = "point:" + pointId;
+
         return cache.get(cacheKey, () -> {
             Document document = scoreDatabase.getCollection("points").find(doc("id", pointId)).first();
             if (document == null) {
-                return new Point(pointId, "(知识点" + pointId + ")", document.getString("subject"));
+                return new Point(pointId, "(知识点" + pointId + ")", "");
             } else {
                 return new Point(pointId, document.getString("name"), document.getString("subject"));
             }
@@ -103,6 +104,7 @@ public class PointService {
 
     public String getPointName(String pointId){
         String cacheKey = "pointName:" + pointId;
+
         return cache.get(cacheKey, () -> {
             Document document = scoreDatabase.getCollection("points").find(doc("id", pointId)).first();
             return null != document && !document.isEmpty() ? document.getString("name") : "无知识点信息!";

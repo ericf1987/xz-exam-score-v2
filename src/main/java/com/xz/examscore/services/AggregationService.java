@@ -11,6 +11,7 @@ import com.xz.examscore.bean.AggregationConfig;
 import com.xz.examscore.bean.AggregationStatus;
 import com.xz.examscore.bean.AggregationType;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,9 @@ public class AggregationService {
 
     @Autowired
     RecordExceptionService recordExceptionService;
+
+    @Autowired
+    ProjectCacheManager projectCacheManager;
 
     private Set<String> runningProjects = Collections.synchronizedSet(new HashSet<>());
 
@@ -166,8 +170,11 @@ public class AggregationService {
         queueService.clearOverdueAggr();
         LOG.info("----清理结束----，本次统计ID={}", aggregationId);
 
-        LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
+        LOG.info("----项目统计阶段----开始清理项目缓存----，本次统计ID={}", aggregationId);
+        projectCacheManager.deleteProjectCache(projectId);
+        LOG.info("----项目统计阶段----项目缓存清理完成----，本次统计ID={}", aggregationId);
 
+        LOG.info("----开始对项目{}的统计，本次统计ID={}", projectId, aggregationId);
         LOG.info("----开始查询项目{}的维度信息----");
         long begin = System.currentTimeMillis();
         Map<String, List<Range>> rangesMap = rangeService.getRangesMap(projectId);

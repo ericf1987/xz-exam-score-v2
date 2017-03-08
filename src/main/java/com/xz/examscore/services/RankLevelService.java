@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +40,16 @@ public class RankLevelService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     public String getRankLevel(
             String projectId, String studentId, Target target, String rankRange, String defaultValue) {
 
         String cacheKey = "rank_level:" + projectId + ":" + studentId + ":" + target + ":" + rankRange;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             return getRankLevel0(projectId, studentId, target, rankRange, defaultValue);
         });
     }
@@ -76,7 +79,10 @@ public class RankLevelService {
 
     public List<Map<String, Object>> getRankLevelMap(String projectId, Range range, Target target) {
         String cacheKey = "rank_level_map:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             return getRankLevelMap0(projectId, range, target);
         });
     }

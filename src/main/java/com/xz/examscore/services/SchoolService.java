@@ -5,6 +5,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class SchoolService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询考试学校名称
@@ -59,7 +60,9 @@ public class SchoolService {
     public Document findSchool(String projectId, String schoolId) {
         String cacheKey = "school_info:" + projectId + ":" + schoolId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
 
             Document query = doc("project", projectId).append("school", schoolId);
             return scoreDatabase.getCollection("school_list").find(query).projection(WITHOUT_INNER_ID).first();
@@ -76,7 +79,10 @@ public class SchoolService {
      */
     public List<String> getProjectSchoolIds(String projectId, String area) {
         String cacheKey = "school_id_list:" + projectId + ":" + area;
-        return new ArrayList<>(cache.get(cacheKey, () ->
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return new ArrayList<>(simpleCache.get(cacheKey, () ->
                 new ArrayList<>(getProjectSchools(projectId, area).stream().map(
                         document -> document.getString("school")).collect(Collectors.toList()))));
     }
@@ -92,7 +98,9 @@ public class SchoolService {
     public List<Document> getProjectSchools(String projectId, String area) {
         String cacheKey = "school_list:" + projectId + ":" + area;
 
-        return new ArrayList<>(cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return new ArrayList<>(simpleCache.get(cacheKey, () -> {
             ArrayList<Document> result = new ArrayList<>();
             List<Document> ands = new ArrayList<>();
 
@@ -145,9 +153,6 @@ public class SchoolService {
     public List<Document> getSchoolsByTags(String projectId, List<String> params) {
         MongoCollection<Document> c = scoreDatabase.getCollection("school_list");
         ArrayList<Document> result = new ArrayList<>();
-        ArrayList<Document> ands = new ArrayList<>();
-
-        ands.add(doc("project", projectId));
 
         Document doc = doc("project", projectId);
 

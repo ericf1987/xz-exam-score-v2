@@ -5,15 +5,16 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 
 /**
  * (description)
@@ -55,7 +56,7 @@ public class SubjectService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询考试项目的科目列表
@@ -68,7 +69,9 @@ public class SubjectService {
     public List<String> querySubjects(String projectId) {
         String cacheKey = "subject_list:" + projectId;
 
-        return new ArrayList<>(cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return new ArrayList<>(simpleCache.get(cacheKey, () -> {
             ArrayList<String> targets = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("subject_list");
 

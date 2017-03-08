@@ -53,9 +53,6 @@ public class ScoreService {
     private ImportProjectService importProjectService;
 
     @Autowired
-    private SimpleCache cache;
-
-    @Autowired
     private ProjectCacheManager projectCacheManager;
 
     /**
@@ -294,7 +291,10 @@ public class ScoreService {
             scoreDatabase.getCollection(collectionName).insertOne(query.append("md5", Mongo.md5()));
         }
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 
     /**
@@ -388,7 +388,9 @@ public class ScoreService {
         MongoCollection<Document> col = scoreDatabase.getCollection(collectionName);
         UpdateResult result = col.updateMany(query, $inc("totalScore", score));
 
-        cache.delete(cacheKey);
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
         return (int) result.getModifiedCount();
     }
 

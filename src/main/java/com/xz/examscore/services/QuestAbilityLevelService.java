@@ -8,6 +8,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class QuestAbilityLevelService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     public void clearQuestAbilityLevel(String projectId) {
         scoreDatabase.getCollection("quest_ability_level_list").deleteMany(doc("project", projectId));
@@ -56,7 +57,9 @@ public class QuestAbilityLevelService {
     public List<String> queryQuestAbilityLevels(String projectId) {
         String cacheKey = "quest_ability_level_list:" + projectId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             List<String> result = new ArrayList<>();
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_ability_level_list");
             Document query = doc("project", projectId).append("questAbilityLevel", $ne(null));

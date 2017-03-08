@@ -860,7 +860,7 @@ public class ImportProjectService {
             // 科目没有录入或没有答题卡
             if (fullScore == null) {
                 LOG.error("科目'" + subjectId + "'没有总分: " + jsonArray);
-                return;
+                continue;
             }
             projectFullScore.set(projectFullScore.get() + fullScore);
             subjects.add(subjectId);

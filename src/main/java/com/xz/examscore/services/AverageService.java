@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class AverageService {
     SubjectService subjectService;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询指定范围的所有科目平均分总和
@@ -73,7 +74,10 @@ public class AverageService {
      */
     public boolean isExistAverage(String projectId, String targetName) {
         String cacheKey = "average_status" + projectId + ":" + targetName;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> averageCollection = scoreDatabase.getCollection("average");
             return averageCollection.find(
                     doc("project", projectId).append("target.name", targetName)
@@ -92,7 +96,10 @@ public class AverageService {
      */
     public double getAverage(String projectId, Range range, Target target) {
         String cacheKey = "average:" + projectId + ":" + range + ":" + target;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             return getAverage0(projectId, range, target);
         });
     }
@@ -114,13 +121,18 @@ public class AverageService {
 
     public void deleteCache(String projectId, Range range, Target target) {
         String cacheKey = "average:" + projectId + ":" + range + ":" + target;
-        cache.delete(cacheKey);
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 
     public ArrayList<Document> getAverageByRangeAndTargetName(String projectId, Range range, String targetName){
         String cacheKey = "getAverageByRangeAndTargetName:" + projectId + ":" + range + ":" + targetName;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("average");
             Document query = doc("project", projectId);
             if (null != range) {
@@ -137,7 +149,9 @@ public class AverageService {
     public ArrayList<Document> getAverageByTargetIds(String projectId, Range range, List<String> targetIds) {
         String cacheKey = "getAverageByTargetIds:" + projectId + ":" + range + ":" + targetIds.toString();
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("average");
             Document query = doc("project", projectId);
             if (null != range) {

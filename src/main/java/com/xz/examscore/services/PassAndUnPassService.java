@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class PassAndUnPassService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询全科及格率与全科不及格率
@@ -38,7 +39,10 @@ public class PassAndUnPassService {
      */
     public double[] getAllSubjectPassAndUnPass(String projectId, Range range) {
         String cacheKey = "pass_rate:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> averageCollection = scoreDatabase.getCollection("all_subject_pass_rate");
             Document document = averageCollection.find(
                     new Document("project", projectId)

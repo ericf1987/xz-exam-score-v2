@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class QuestDeviationService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询试题区分度
@@ -39,7 +40,10 @@ public class QuestDeviationService {
      */
     public double getQuestDeviation(String projectId, String questId, Range range) {
         String cacheKey = "quest_deviations:" + projectId + ":" + questId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("quest_deviation");
             Document document = collection.find(
                     new Document("project", projectId)

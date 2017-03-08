@@ -10,6 +10,7 @@ import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,13 +29,13 @@ public class CollegeEntryLevelService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
-
-    @Autowired
     SimpleCache instantCache;
 
     @Autowired
     ProjectConfigService projectConfigService;
+
+    @Autowired
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询本科录取学生列表
@@ -49,7 +50,10 @@ public class CollegeEntryLevelService {
     public List<Document> getEntryLevelStudent(String projectId, Range range, Target target, int minRank, int maxRank) {
         String cacheKey = "entry_level_student:" + projectId + ":" + range
                 + ":" + target + ":" + minRank + ":" + maxRank;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target)
                     .append("rank", doc("$gte", minRank).append("$lte", maxRank));
@@ -69,7 +73,10 @@ public class CollegeEntryLevelService {
      */
     private int getEntryLevelStudentMaxRank(String projectId, Range range) {
         String cacheKey = "entry_level_student_max_rank:" + projectId + ":" + range;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document document = collection.find(query(projectId, range)).sort(doc("rank", -1)).first();
 
@@ -92,7 +99,9 @@ public class CollegeEntryLevelService {
 
         String cacheKey = "entry_level_student_rank_segment:" + projectId + ":" + range;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             ArrayList<Map<String, Object>> list = new ArrayList<>();
             int totalTopStudentCount = getEntryLevelStudentMaxRank(projectId, range);
 
@@ -139,7 +148,10 @@ public class CollegeEntryLevelService {
      */
     public int getEntryLevelStudentCount(String projectId, Range range, Target target, String key) {
         String cacheKey = "entry_level_student_count:" + projectId + ":" + range + ":" + target + ":" + key;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target);
 
@@ -162,7 +174,10 @@ public class CollegeEntryLevelService {
      */
     public double getEntryLevelTotalScore(String projectId, Range range, Target target, String key) {
         String cacheKey = "entry_level_student_totalScore:" + projectId + ":" + range + ":" + target + ":" + key;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target);
             if (!StringUtils.isBlank(key)) {
@@ -188,7 +203,10 @@ public class CollegeEntryLevelService {
      */
     public List<String> getEntryLevelKey(String projectId) {
         String cacheKey = "entry_level_key:" + projectId;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             List<String> list = new ArrayList<>();
             Document query = query(projectId, null, null);
@@ -207,7 +225,10 @@ public class CollegeEntryLevelService {
      */
     public List<Document> getEntryLevelDoc(String projectId) {
         String cacheKey = "entry_level_doc:" + projectId;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             List<Document> list = new ArrayList<>();
             Document query = query(projectId, null, null);
@@ -229,7 +250,10 @@ public class CollegeEntryLevelService {
      */
     public ArrayList<Document> getEntryLevelStudentByKey(String projectId, Range range, Target target, String key) {
         String cacheKey = "entry_level_student_by_key:" + projectId + ":" + range + ":" + target + ":" + key;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("college_entry_level");
             Document query = query(projectId, range, target);
 

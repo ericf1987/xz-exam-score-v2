@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class RankService {
     ProjectConfigService projectConfigService;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     @Autowired
     ImportProjectService importProjectService;
@@ -57,7 +58,9 @@ public class RankService {
     public int getRank(String projectId, Range range, Target target, String studentId) {
         String cacheKey = "student_rank:" + projectId + ":" + range + ":" + target + ":" + studentId;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             double score = scoreService.getScore(projectId, Range.student(studentId), target);
             return getRank(projectId, range, target, score);
         });
@@ -75,7 +78,10 @@ public class RankService {
     public int getRank(String projectId, Range range, Target target, double score) {
 
         String cacheKey = "score_rank:" + projectId + ":" + range + ":" + target + ":" + score;
-        return cache.get(cacheKey, () -> {
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
             Document id = Mongo.query(projectId, range, target);
 
@@ -105,7 +111,9 @@ public class RankService {
     public double getRankScore(String projectId, Range range, Target target, int rankIndex) {
         String cacheKey = "rank_score:" + projectId + ":" + range + ":" + target + ":" + rankIndex;
 
-        return cache.get(cacheKey, () -> {
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
             Document id = Mongo.query(projectId, range, target);
             Document doc = collection.find(id).first();

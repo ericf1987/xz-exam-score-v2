@@ -5,6 +5,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class FullScoreService {
     MongoDatabase scoreDatabase;
 
     @Autowired
-    SimpleCache cache;
+    ProjectCacheManager projectCacheManager;
 
     /**
      * 查询满分。其中题目满分在 quest_list，其他满分在 full_score
@@ -49,8 +50,11 @@ public class FullScoreService {
     }
 
     private double getNonQuestFullScore(String projectId, Target target) {
-        String cacheKey = "fullscore:" + projectId + ":" + target;
-        return cache.get(cacheKey, () -> {
+        String cacheKey = "fullScore:" + projectId + ":" + target;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("target", Mongo.target2Doc(target));
             Document document = scoreDatabase.getCollection("full_score").find(query).first();
 
@@ -64,10 +68,13 @@ public class FullScoreService {
     }
 
     private double getQuestFullScore(String projectId, Target target) {
-        String cacheKey = "fullscore:" + projectId + ":" + target;
+        String cacheKey = "fullScore:" + projectId + ":" + target;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
         String questId = target.getId().toString();
 
-        return cache.get(cacheKey, () -> {
+        return simpleCache.get(cacheKey, () -> {
             Document query = doc("project", projectId).append("questId", questId);
             Document document = scoreDatabase.getCollection("quest_list").find(query).first();
 
@@ -118,7 +125,10 @@ public class FullScoreService {
         }
 
         // 2. 删除缓存
-        String cacheKey = "fullscore:" + projectId + ":" + target;
-        cache.delete(cacheKey);
+        String cacheKey = "fullScore:" + projectId + ":" + target;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        simpleCache.delete(cacheKey);
     }
 }

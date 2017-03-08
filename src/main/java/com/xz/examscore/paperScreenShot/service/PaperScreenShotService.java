@@ -1,6 +1,5 @@
 package com.xz.examscore.paperScreenShot.service;
 
-import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.bean.PaperScreenShotStatus;
@@ -27,9 +26,6 @@ import java.util.stream.Collectors;
 public class PaperScreenShotService {
 
     static final Logger LOG = LoggerFactory.getLogger(PaperScreenShotService.class);
-
-    @Autowired
-    SimpleCache cache;
 
     @Autowired
     MongoDatabase scoreDatabase;
