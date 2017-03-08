@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -157,5 +156,19 @@ public class PaintService {
                     paperScreenShotBean.getSubjectId());
         }
         return "";
+    }
+
+    /**
+     * 查询操作系统可用字体
+     */
+    public List<String> getAvailableFontFamilyNames(){
+        List<String> fonts = new ArrayList<>();
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFontFamilyNames = ge.getAvailableFontFamilyNames();
+        for(String name : availableFontFamilyNames){
+            LOG.info("可用字体有：{}", name);
+            fonts.add(name);
+        }
+        return fonts;
     }
 }

@@ -95,7 +95,7 @@ public class PaintUtils {
             g.setFont(font);
 
             if (content != null) {
-                g.drawString(new String(content.getBytes(), "GBK"), x, y);
+                g.drawString(new String(content.getBytes(), "UTF-8"), x, y);
             }
             g.dispose();
         } catch (Exception e) {
