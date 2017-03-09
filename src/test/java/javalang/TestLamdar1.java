@@ -1,8 +1,11 @@
 package javalang;
 
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.util.ChineseName;
 import org.apache.commons.lang.BooleanUtils;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -58,8 +61,10 @@ public class TestLamdar1 {
     }
 
     public static void main(String[] args) {
-        List<String> s = Arrays.asList("111", "123123", "123125", "aaaa", "sdasdf");
-        System.out.println(s.subList(0, 100).toString());
+        File file = new File("F:\\paper\\screenshot\\paperScreenShot-zip\\湘潭市高一联考\\湘乡市第二中学\\所有班级\\1601_试卷截图.zip");
+        System.out.println(file.getPath());
+        System.out.println(file.getAbsoluteFile());
+        System.out.println(file.getName().split("_")[0]);
     }
 
 }

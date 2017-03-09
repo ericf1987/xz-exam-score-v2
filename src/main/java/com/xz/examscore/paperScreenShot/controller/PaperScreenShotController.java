@@ -50,6 +50,16 @@ public class PaperScreenShotController {
         return Result.success().set("downloadInfo", downloadInfo);
     }
 
+    @RequestMapping(value = "/downloadByClass", method = RequestMethod.POST)
+    @ResponseBody
+    public Result downloadPaperScreenShot(
+            @RequestParam("projectId") String projectId,
+            @RequestParam("schoolId") String schoolId
+            ){
+        List<Map<String, Object>> downloadInfo = paperScreenShotService.generateClassPaperScreenShot(projectId, schoolId);
+        return Result.success().set("downloadInfo", downloadInfo);
+    }
+
     @RequestMapping(value = "/fonts", method = RequestMethod.POST)
     @ResponseBody
     public Result getAvailableFontFamilyNames(){

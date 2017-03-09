@@ -3,6 +3,7 @@ package com.xz.examscore.paperScreenShot.service;
 import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -10,12 +11,16 @@ import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
 import com.xz.examscore.paperScreenShot.manager.PaperScreenShotTaskManager;
 import com.xz.examscore.scanner.ScannerDBService;
 import com.xz.examscore.services.*;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -61,8 +66,17 @@ public class PaperScreenShotService {
     @Autowired
     PaperScreenShotTaskManager paperScreenShotTaskManager;
 
+    @Autowired
+    DownloadScreenShotService downloadScreenShotService;
+
+    @Value("${paper.screenshot.zip.location}")
+    private String savePath;
+
+    @Value("${paper.screenshot.savepath}")
+    private String srcPath;
+
     public Result startPaperScreenShotTask(String projectId) {
-        if(projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)){
+        if (projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)) {
             return Result.fail("该考试项目正在保存截图，请等待...");
         }
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATING);
@@ -70,7 +84,6 @@ public class PaperScreenShotService {
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATED);
         return Result.success("试卷截图生成完毕！");
     }
-
 
 
     /**
@@ -129,6 +142,47 @@ public class PaperScreenShotService {
                 LOG.info("----生成失败：项目{}，学校{}，班级{}，科目{}", projectId, schoolId, task.getClassId(), task.getSubjectId());
             }
         }
+    }
+
+    /**
+     * 将学校下所有班级的试卷留痕文件打包保存
+     *
+     * @param projectId 项目ID
+     * @param schoolId  学校ID
+     * @return 返回结果
+     */
+    public List<Map<String, Object>> generateClassPaperScreenShot(String projectId, String schoolId) {
+        String projectName = projectService.findProject(projectId).getString("name");
+        String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
+
+        //保存路径
+        File directory = new File(StringUtil.joinPaths(savePath, projectName, schoolName, "所有班级"));
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        List<Document> classDocs = classService.listClasses(projectId, schoolId);
+        List<String> subjects = subjectService.querySubjects(projectId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Document doc : classDocs) {
+            String classId = doc.getString("class");
+            String className = classService.getClassName(projectId, classId);
+            //班级留痕文件的文件名
+            String outputFileName = StringUtil.joinPaths(directory.getAbsolutePath(), className + "_试卷截图" + ".zip");
+            List<String> idPath = new LinkedList<>();
+            List<String> namePath = new LinkedList<>();
+            for (String subjectId : subjects) {
+                String subjectName = SubjectService.getSubjectName(subjectId);
+                //已生成的文件路径
+                String path = StringUtil.joinPaths(srcPath, projectId, schoolId, classId, subjectId);
+                String dir = StringUtil.joinPaths(className, subjectName);
+                //下载的压缩包文件路径
+                idPath.add(path);
+                namePath.add(dir);
+            }
+            result.add(downloadScreenShotService.generateDownloadZip(projectId, new File(outputFileName), idPath, namePath));
+        }
+        return result;
     }
 
     class PaperScreenShotsTaskByClassAndSubject extends Thread {
