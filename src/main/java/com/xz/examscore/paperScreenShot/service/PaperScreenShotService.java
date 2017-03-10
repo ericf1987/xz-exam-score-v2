@@ -75,6 +75,12 @@ public class PaperScreenShotService {
     @Value("${paper.screenshot.savepath}")
     private String srcPath;
 
+    /**
+     * 开始执行考试项目的截图文件保存任务
+     *
+     * @param projectId 项目ID
+     * @return 执行结果
+     */
     public Result startPaperScreenShotTask(String projectId) {
         if (projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)) {
             return Result.fail("该考试项目正在保存截图，请等待...");
@@ -122,7 +128,7 @@ public class PaperScreenShotService {
     }
 
     /**
-     * 按班级分发任务
+     * 按班级和科目分发任务
      *
      * @param projectId  项目ID
      * @param schoolId   学校ID
@@ -232,7 +238,7 @@ public class PaperScreenShotService {
 
         @Override
         public void run() {
-            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), subjectId, ""));
+            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), this.getSubjectId(), ""));
         }
     }
 

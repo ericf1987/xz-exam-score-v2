@@ -52,7 +52,7 @@ public class PaintUtils {
             try {
                 ImageIO.write(img, suffix, outputFile);
             } catch (IOException e) {
-                LOG.error("图片保存至本地失败！保存路径为：{}", newImage);
+                LOG.error("试卷截图图片保存至本地失败！保存路径为：{}", newImage);
             }
         }
     }

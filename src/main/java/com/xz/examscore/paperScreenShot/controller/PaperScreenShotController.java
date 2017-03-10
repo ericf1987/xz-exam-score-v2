@@ -38,18 +38,6 @@ public class PaperScreenShotController {
         return paperScreenShotService.startPaperScreenShotTask(projectId);
     }
 
-    @RequestMapping(value = "/download", method = RequestMethod.POST)
-    @ResponseBody
-    public Result downloadPaperScreenShot(
-            @RequestParam("projectId") String projectId,
-            @RequestParam("schoolId") String schoolId,
-            @RequestParam("classIds") String[] classIds,
-            @RequestParam("subjectIds") String[] subjectIds
-            ){
-        Map<String, Object> downloadInfo = downloadScreenShotService.downloadPaperScreenShot(projectId, schoolId, classIds, subjectIds);
-        return Result.success().set("downloadInfo", downloadInfo);
-    }
-
     @RequestMapping(value = "/downloadByClass", method = RequestMethod.POST)
     @ResponseBody
     public Result downloadPaperScreenShot(

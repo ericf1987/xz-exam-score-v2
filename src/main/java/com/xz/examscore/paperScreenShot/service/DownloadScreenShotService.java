@@ -47,47 +47,7 @@ public class DownloadScreenShotService {
     @Value("${paper.screenshot.savepath}")
     private String srcPath;
 
-    /**
-     * 下载试卷截图压缩包
-     *
-     * @param projectId  项目ID
-     * @param schoolId   学校ID
-     * @param classIds   班级ID
-     * @param subjectIds 科目列表
-     * @return 结果信息
-     */
-    public Map<String, Object> downloadPaperScreenShot(String projectId, String schoolId, String[] classIds, String[] subjectIds) {
-        if (null != subjectIds && subjectIds.length != 0) {
-            return generateDownloadPath(projectId, schoolId, classIds, subjectIds);
-        } else {
-            List<String> sids = subjectService.querySubjects(projectId);
-            return generateDownloadPath(projectId, schoolId, classIds, sids.toArray(new String[sids.size()]));
-        }
-    }
-
-    /**
-     * 下载班级试卷留痕zip包
-     */
-    public Map<String, Object> downloadGeneratedPaperScreenShot2(String projectId, String schoolId, String[] classIds) {
-        String projectName = projectService.findProject(projectId).getString("name");
-        String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
-
-        //生成的压缩包路径
-        File directory = new File(StringUtil.joinPaths(savePath, projectName, schoolName));
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        File outputFile = new File(StringUtil.joinPaths(directory.getAbsolutePath(), schoolName + "_所选班级_试卷截图" + ".zip"));
-
-        File[] srcFiles = new File(StringUtil.joinPaths(savePath, projectName, schoolName, "所有班级")).listFiles();
-
-        File[] requiredFiles = filterByClassName(srcFiles, projectId, classIds);
-
-        Map<String, Object> map = doExecLinuxZipCMD(requiredFiles, outputFile);
-
-        return map;
-    }
+    public static final long SCREENSHOT_ZIP_FILE_VALIDITY = 1000 * 60 * 60;
 
     /**
      * 下载班级试卷留痕zip包
@@ -96,59 +56,45 @@ public class DownloadScreenShotService {
         String projectName = projectService.findProject(projectId).getString("name");
         String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
 
-        Map<String, Object> map = new HashMap<>();
-
         //生成的压缩包路径
         File directory = new File(StringUtil.joinPaths(savePath, projectName, schoolName));
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        File outputFile = new File(StringUtil.joinPaths(directory.getAbsolutePath(), schoolName + "_所选班级_试卷截图" + ".zip"));
+        //清理时间超过一个小时的文件包
+        clearScreenShotZips(directory);
 
-        ZipOutputStream out = null;
-        FileInputStream fis = null;
+        //时间戳
+        long currentTimeMillis = System.currentTimeMillis();
+
+        File outputFile = new File(StringUtil.joinPaths(directory.getAbsolutePath(), schoolName + "_所选班级_试卷截图_" + String.valueOf(currentTimeMillis) + ".zip"));
+
+        File[] srcFiles = new File(StringUtil.joinPaths(savePath, projectName, schoolName, "所有班级")).listFiles();
+
+        File[] requiredFiles = filterByClassName(srcFiles, projectId, classIds);
+
+        return doExecLinuxZipCMD(requiredFiles, outputFile);
+    }
+
+    private void clearScreenShotZips(File directory) {
         try {
-            File[] files = new File(StringUtil.joinPaths(savePath, projectName, schoolName, "所有班级")).listFiles();
+            long now = System.currentTimeMillis();
+            for(File file : directory.listFiles()){
+                if(file.isFile()){
+                    String[] slice = file.getName().split("\\.")[0].split("_");
+                    String timeStamp = slice[slice.length - 1];
 
-            if (null != files && files.length != 0) {
-
-                out = new ZipOutputStream(new FileOutputStream(outputFile));
-
-                //设置压缩级别
-                out.setLevel(0);
-
-                File[] requiredFiles = filterByClassName(files, projectId, classIds);
-
-                for (File file : requiredFiles) {
-                    fis = new FileInputStream(file);
-                    ZipEntry entry = new ZipEntry(file.getName());
-                    out.putNextEntry(entry);
-                    int temp;
-                    while ((temp = fis.read()) != -1) {
-                        out.write(temp);
+                    LOG.info("当前文件为：{}, 文件的创建时间为：{}", file.getName(), timeStamp);
+                    if(Long.valueOf(timeStamp) < now - SCREENSHOT_ZIP_FILE_VALIDITY){
+                        boolean success = file.delete();
+                        LOG.info("清理截图文件, 文件名：{}, 操作结果：{}", file.getAbsoluteFile(), success ? "成功" : "失败");
                     }
-                    fis.close();
                 }
-                out.closeEntry();
-                out.close();
-            } else {
-                map.put("downloadUrl", "");
-                map.put("failPathList", "");
-                map.put("failZipItemList", "");
-                return map;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            //关闭流
-            closeStream(out, fis);
+        } catch (NumberFormatException e) {
+            LOG.error("清理截图文件包出现异常！");
         }
-        int zipSize = DownloadAnalysisService.getZipSize(outputFile.getAbsolutePath());
-        map.put("downloadUrl", zipSize == 0 ? "" : StringUtil.joinPaths(downloadUrl, projectName, schoolName, outputFile.getName()));
-        map.put("failPathList", "");
-        map.put("failZipItemList", "");
-        return map;
     }
 
     public void closeStream(ZipOutputStream out, FileInputStream fis) {
@@ -176,48 +122,6 @@ public class DownloadScreenShotService {
         List<File> fileList = Arrays.asList(files).stream().filter(file -> classNames.contains(file.getName().split("_")[0])).collect(Collectors.toList());
 
         return fileList.toArray(new File[fileList.size()]);
-    }
-
-    /**
-     * 获取下载文件压缩包中的路径
-     *
-     * @param projectId  项目ID
-     * @param schoolId   学校ID
-     * @param classIds   班级列表
-     * @param subjectIds 科目列表
-     * @return 结果信息
-     */
-    public Map<String, Object> generateDownloadPath(String projectId, String schoolId, String[] classIds, String[] subjectIds) {
-        List<String> idPath = new LinkedList<>();
-        List<String> namePath = new LinkedList<>();
-        //项目名称
-        String projectName = projectService.findProject(projectId).getString("name");
-        //学校名称
-
-        //创建下载文件根目录文件夹
-        File directory = new File(savePath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
-        String outputFileName = StringUtil.joinPaths(savePath, projectName + "_试卷截图" + ".zip");
-        for (int i = 0; i < classIds.length; i++) {
-            //班级名称
-            String className = classService.findClass(projectId, classIds[i]).getString("name");
-            String oneSubjectId = subjectIds[i];
-            String[] subjectIdArr = oneSubjectId.split("-");
-            for (String subjectId : subjectIdArr) {
-                String subjectName = SubjectService.getSubjectName(subjectId);
-                //已生成的文件路径
-                String path = StringUtil.joinPaths(srcPath, projectId, schoolId, classIds[i], subjectId);
-                String dir = StringUtil.joinPaths(schoolName, className, subjectName);
-                //下载的压缩包文件路径
-                idPath.add(path);
-                namePath.add(dir);
-            }
-        }
-        return generateDownloadZip(projectId, new File(outputFileName), idPath, namePath);
     }
 
     /**
@@ -285,9 +189,7 @@ public class DownloadScreenShotService {
 
     public Map<String, Object> doExecLinuxZipCMD(File[] srcFiles, File targetFile){
 
-        File wd = new File("/bin");
-
-        String cmd = "zip -r " + targetFile.getPath() + " " + getSrcFileZipedItems(srcFiles);
+        String cmd = "zip -r " + targetFile.getPath() + " " + getSrcFileZippedItems(srcFiles);
         Runtime runtime = Runtime.getRuntime();
         try {
             LOG.info("执行压缩命令为：{}", cmd);
@@ -304,7 +206,7 @@ public class DownloadScreenShotService {
         return map;
     }
 
-    private String getSrcFileZipedItems(File[] srcFiles) {
+    private String getSrcFileZippedItems(File[] srcFiles) {
         StringBuilder builder = new StringBuilder();
         for(File file : srcFiles){
             builder.append(file.getPath());
