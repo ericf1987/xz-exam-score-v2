@@ -5,6 +5,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,9 @@ public class SubjectService {
     @Autowired
     ProjectCacheManager projectCacheManager;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     /**
      * 查询考试项目的科目列表
      *
@@ -106,6 +110,33 @@ public class SubjectService {
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
+    }
+
+    public String getCombineOrSingle(String projectId, String subjectId){
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        boolean separateCombine = projectConfig.isSeparateCombine();
+        //如果该考试项目拆分文理科
+        if(separateCombine){
+            if(containAllArts(projectId) && SubjectCombinationService.isW(subjectId)){
+                return "007008009";
+            }else if (containAllSciences(projectId) && SubjectCombinationService.isL(subjectId)){
+                return "004005006";
+            }else{
+                return subjectId;
+            }
+        }else{
+            return subjectId;
+        }
+    }
+
+    public boolean containAllArts(String projectId){
+        List<String> subjects = querySubjects(projectId);
+        return subjects.containsAll(Arrays.asList("007", "008", "009"));
+    }
+
+    public boolean containAllSciences(String projectId){
+        List<String> subjects = querySubjects(projectId);
+        return subjects.containsAll(Arrays.asList("004", "005", "006"));
     }
 
 }

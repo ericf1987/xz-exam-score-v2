@@ -151,16 +151,18 @@ public class ScannerDBService {
     }
 
     public void importOneSubjectTask(String project, MongoClient mongoClient, String subject) {
-        LOG.info("导入开始...当前科目为：{}", SubjectService.getSubjectName(subject));
+        String cardSubjectId = subjectService.getCombineOrSingle(project, subject);
+        LOG.info("当前科目为{}， 答题卡科目为{}", subject, cardSubjectId);
+        LOG.info("导入开始...答题卡科目为：{}", SubjectService.getSubjectName(cardSubjectId));
         //根据考试科目获取数据库名
-        String dbName = getScannerDBName(project, subject);
+        String dbName = getScannerDBName(project, cardSubjectId);
         MongoCollection<Document> students = mongoClient.getDatabase(dbName).getCollection("students");
         AtomicInteger counter = new AtomicInteger();
-        students.find().forEach((Consumer<Document>) student -> doImportStuCardSlice(project, subject, student, counter));
-        LOG.info("导入完成！科目{}， 学生人数{}！", SubjectService.getSubjectName(subject), counter.get());
+        students.find().forEach((Consumer<Document>) student -> doImportStuCardSlice(project, subject, cardSubjectId, student, counter));
+        LOG.info("导入完成！答题卡科目为{}， 学生人数{}！", SubjectService.getSubjectName(cardSubjectId), counter.get());
     }
 
-    public void doImportStuCardSlice(String project, String subject, Document student, AtomicInteger counter) {
+    public void doImportStuCardSlice(String project, String subject, String cardSubjectId, Document student, AtomicInteger counter) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("scanner_student_card_slice");
 
         List<Document> objectiveList = leaveOnlyRect(DocumentUtils.getList(student, "objectiveList", Collections.emptyList()));
@@ -168,7 +170,8 @@ public class ScannerDBService {
 
         Document query = doc("project", project).append("subject", subject)
                 .append("student", student.getString("studentId"));
-        Document questInfo = doc("paper_positive", student.getString("paper_positive"))
+        Document questInfo = doc("cardSubjectId", cardSubjectId)
+                .append("paper_positive", student.getString("paper_positive"))
                 .append("paper_reverse", student.getString("paper_reverse"))
                 .append("objectiveList", objectiveList)
                 .append("subjectiveList", subjectiveList)
@@ -183,7 +186,8 @@ public class ScannerDBService {
         UpdateResult result = collection.updateMany(query, $set(questInfo));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(
-                    query.append("paper_positive", student.getString("paper_positive"))
+                    query.append("cardSubjectId", cardSubjectId)
+                            .append("paper_positive", student.getString("paper_positive"))
                             .append("paper_reverse", student.getString("paper_reverse"))
                             .append("objectiveList", objectiveList)
                             .append("subjectiveList", subjectiveList)
