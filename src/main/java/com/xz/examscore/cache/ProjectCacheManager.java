@@ -12,7 +12,7 @@ import java.util.Map;
 public class ProjectCacheManager {
 
     @Autowired
-    CacheConfig cacheConfig;
+    private CacheConfig cacheConfig;
 
     private Map<String, SimpleCache> projectCacheMap = new HashMap<>();
 
@@ -54,7 +54,10 @@ public class ProjectCacheManager {
      * @param projectId 项目ID
      */
     public synchronized void deleteProjectCache(String projectId) {
-        projectCacheMap.remove(projectId);
-        projectCacheLastAccess.remove(projectId);
+        if (projectCacheMap.containsKey(projectId)) {
+            projectCacheMap.get(projectId).close();
+            projectCacheMap.remove(projectId);
+            projectCacheLastAccess.remove(projectId);
+        }
     }
 }
