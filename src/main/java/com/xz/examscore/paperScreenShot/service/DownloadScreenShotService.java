@@ -103,7 +103,6 @@ public class DownloadScreenShotService {
             if(null != out) out.close();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
@@ -189,7 +188,8 @@ public class DownloadScreenShotService {
 
     public Map<String, Object> doExecLinuxZipCMD(File[] srcFiles, File targetFile){
 
-        String cmd = "zip -r " + targetFile.getPath() + " " + getSrcFileZippedItems(srcFiles);
+        //不压缩子目录
+        String cmd = "zip -j " + targetFile.getPath() + " " + getSrcFileZippedItems(srcFiles);
         Runtime runtime = Runtime.getRuntime();
         try {
             LOG.info("执行压缩命令为：{}", cmd);
