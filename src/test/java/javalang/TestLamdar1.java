@@ -1,16 +1,21 @@
 package javalang;
 
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.util.ChineseName;
 import org.apache.commons.lang.BooleanUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author by fengye on 2016/6/3.
  */
 public class TestLamdar1 {
+
+    private static String string;
+
     class Counter {
         int count = 0;
 
@@ -58,8 +63,11 @@ public class TestLamdar1 {
     }
 
     public static void main(String[] args) {
-        List<String> s = Arrays.asList("111", "123123", "123125", "aaaa", "sdasdf");
-        System.out.println(s.subList(0, 100).toString());
+        Runtime runtime = Runtime.getRuntime();
+        System.out.println(runtime.availableProcessors());
+        System.out.println(runtime.freeMemory());
     }
+
+
 
 }

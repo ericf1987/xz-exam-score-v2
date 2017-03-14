@@ -6,6 +6,7 @@ import com.xz.examscore.paperScreenShot.bean.Rect;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,5 +66,20 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests{
         rects.add(r2);
 
         paintService.paintRects(rects, savePath, img_positive, img_reverse);
+    }
+
+    @Test
+    public void testPaint() throws Exception {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFontFamilyNames = ge.getAvailableFontFamilyNames();
+        for(String name : availableFontFamilyNames){
+            System.out.println("可用字体有：" + name);
+        }
+    }
+
+    @Test
+    public void test1() throws Exception {
+        String ss = "试卷题号";
+        System.out.println(new String(ss.getBytes(), "UTF-8"));
     }
 }

@@ -59,11 +59,11 @@ public class PaperScreenShotTaskManager {
         //所有参考科目
         List<String> subjectIds = subjectService.querySubjects(projectId);
 
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Map<String, List<String>>> list = new ArrayList<>();
 
         //获取所有学校的班级ID列表
         schoolIds.forEach(schoolId -> {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, List<String>> map = new HashMap<>();
             map.put(schoolId, classService.listClasses(projectId, schoolId).stream().map(c -> c.getString("class")).collect(Collectors.toList()));
             list.add(map);
         });
@@ -73,12 +73,12 @@ public class PaperScreenShotTaskManager {
         LOG.info("====项目{}======, 试卷截图任务开始执行======", projectId);
 
         ThreadPoolExecutor pool = async ? threadPoolExecutor : newBlockingThreadPoolExecutor(10, 10, 100);
-        for (Map<String, Object> map : list) {
+        for (Map<String, List<String>> map : list) {
             for (String schoolId : map.keySet()) {
 
                 LOG.info("====项目{}, 学校{}, 试卷截图生成开始", projectId, schoolId);
 
-                List<String> classIds = (List<String>) map.get(schoolId);
+                List<String> classIds = map.get(schoolId);
 
                 CountDownLatch countDownLatch = new CountDownLatch(classIds.size());
 

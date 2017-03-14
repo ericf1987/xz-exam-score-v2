@@ -751,8 +751,9 @@ public class ScannerDBService {
 
         Map<String, Object> map = new HashMap<>();
         if(null != document){
-            List<Document> objectiveList = document.get("objectiveList", List.class);
-            List<Document> subjectiveList = document.get("subjectiveList", List.class);
+
+            List<Document> objectiveList = fixFullScore(projectId, subjectId, document.get("objectiveList", List.class));
+            List<Document> subjectiveList = fixFullScore(projectId, subjectId, document.get("subjectiveList", List.class));
 
             List<Document> newObjectiveList = objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
             List<Document> newSubjectiveList = subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
@@ -768,6 +769,15 @@ public class ScannerDBService {
             map.put("hasPaperPosition", false);
         }
         return map;
+    }
+
+    private List<Document> fixFullScore(String projectId, String subjectId, List<Document> questList) {
+        for(Document questDoc : questList){
+            Document quest = questService.findQuest(projectId, subjectId, questDoc.getString("questionNo"));
+            double fullScore = DocumentUtils.getDouble(quest, "score", 0);
+            questDoc.put("fullScore", fullScore);
+        }
+        return questList;
     }
 
     public String getScannerDBName(String projectId, String subjectId) {

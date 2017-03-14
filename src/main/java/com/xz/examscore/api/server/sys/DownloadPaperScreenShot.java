@@ -18,12 +18,11 @@ import java.util.Map;
 @Function(description = "打包下载学生试卷留痕", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "项目ID", required = true),
         @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true),
-        @Parameter(name = "classIds", type = Type.StringArray, description = "班级列表", required = true),
-        @Parameter(name = "subjectIds", type = Type.StringArray, description = "科目列表", required = true)
+        @Parameter(name = "classIds", type = Type.StringArray, description = "班级列表", required = true)
 })
 @Component
 public class DownloadPaperScreenShot implements Server{
-    
+
     @Autowired
     DownloadScreenShotService downloadScreenShotService;
 
@@ -32,8 +31,7 @@ public class DownloadPaperScreenShot implements Server{
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
         String[] classIds = param.getStringValues("classIds");
-        String[] subjectIds = param.getStringValues("subjectIds");
-        Map<String, Object> map = downloadScreenShotService.downloadPaperScreenShot(projectId, schoolId, classIds, subjectIds);
+        Map<String, Object> map = downloadScreenShotService.downloadGeneratedPaperScreenShot(projectId, schoolId, classIds);
         return Result.success().set("downloadInfo", map);
     }
 }

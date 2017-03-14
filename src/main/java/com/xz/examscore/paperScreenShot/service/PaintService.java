@@ -74,7 +74,7 @@ public class PaintService {
         try {
             FileUtils.getOrCreateDir(directory);
         } catch (IOException e) {
-            LOG.error("创建文件目录失败！");
+            LOG.error("生成试卷留痕截图目录失败！");
             return;
         }
         String filePath = StringUtil.joinPaths(directory, fileName);
@@ -108,12 +108,20 @@ public class PaintService {
         PaintUtils.writeImageLocal(renderSuffixByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.PNG);
     }
 
+    /**
+     * 生成试卷截图文件名
+     *
+     * @param path   保存路径
+     * @param b      正面/反面
+     * @param suffix 扩展名
+     * @return
+     */
     private String renderSuffixByIndex(String path, boolean b, String suffix) {
         return b ? path + "_positive" + suffix : path + "_reverse" + suffix;
     }
 
     private BufferedImage doPaint(BufferedImage bufferedImage, Rect rect) {
-        Font font = new Font("华文彩云", Font.PLAIN, 40);
+        Font font = new Font("宋体", Font.PLAIN, 40);
         String content = "题号：" + rect.getQuestNo() + ", 得分" + rect.getScore() + "分， 满分（" + rect.getFullScore() + ")";
         return PaintUtils.modifyImage(bufferedImage, content, font,
                 (float) (rect.getCoordinateX()),
@@ -156,5 +164,19 @@ public class PaintService {
                     paperScreenShotBean.getSubjectId());
         }
         return "";
+    }
+
+    /**
+     * 查询操作系统可用字体
+     */
+    public List<String> getAvailableFontFamilyNames() {
+        List<String> fonts = new ArrayList<>();
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] availableFontFamilyNames = ge.getAvailableFontFamilyNames();
+        for (String name : availableFontFamilyNames) {
+            LOG.info("可用字体有：{}", name);
+            fonts.add(name);
+        }
+        return fonts;
     }
 }

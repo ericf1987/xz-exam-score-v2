@@ -102,6 +102,17 @@
 </fieldset>
 
 <fieldset>
+    <legend>将学校下所有班级的试卷留痕文件打包保存</legend>
+    <form action="paperScreenShot/downloadByClass" method="post">
+        <p>项目ID：<input type="text" name="projectId"/></p>
+        <p>学校ID：<input type="text" name="schoolId"/></p>
+        <p>
+            <button type="submit">开始保存</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>统计单个任务</legend>
     <form action="aggr/start/task" method="post">
         <p>项目ID：<input type="text" name="project"/></p>
@@ -197,6 +208,15 @@
     <form action="aggr/project/cleanMoreData" method="post">
         <p>
             <button type="submit">开始清理</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>查询JAVA运行环境中支持的字体类型</legend>
+    <form action="paperScreenShot/fonts" method="post">
+        <p>
+            <button type="submit">查询</button>
         </p>
     </form>
 </fieldset>
