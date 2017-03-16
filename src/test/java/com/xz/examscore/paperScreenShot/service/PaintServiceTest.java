@@ -65,7 +65,7 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests{
         rects.add(r1);
         rects.add(r2);
 
-        paintService.paintRects(rects, savePath, img_positive, img_reverse);
+        paintService.paintPaper(null, null, rects, savePath, img_positive, img_reverse);
     }
 
     @Test

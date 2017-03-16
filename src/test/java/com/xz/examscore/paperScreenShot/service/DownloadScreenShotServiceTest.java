@@ -27,8 +27,6 @@ public class DownloadScreenShotServiceTest extends XzExamScoreV2ApplicationTests
     public void testDownloadPaperScreenShotByClass() throws Exception {
         String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         String schoolId = "dd46843a-0ea9-4d49-a664-7eb1fb869e79";
-        List<Map<String, Object>> list = paperScreenShotService.generateClassPaperScreenShot(projectId, schoolId);
-        System.out.println(list.toString());
     }
 
     @Test

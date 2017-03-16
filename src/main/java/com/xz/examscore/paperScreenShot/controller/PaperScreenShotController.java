@@ -1,9 +1,11 @@
 package com.xz.examscore.paperScreenShot.controller;
 
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.paperScreenShot.service.DownloadScreenShotService;
 import com.xz.examscore.paperScreenShot.service.PaintService;
 import com.xz.examscore.paperScreenShot.service.PaperScreenShotService;
+import com.xz.examscore.services.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author by fengye on 2017/2/28.
@@ -30,6 +31,9 @@ public class PaperScreenShotController {
     @Autowired
     PaintService paintService;
 
+    @Autowired
+    ProjectService projectService;
+
     @RequestMapping(value = "/start/task", method = RequestMethod.POST)
     @ResponseBody
     public Result startPaperScreenShotTask(
@@ -41,11 +45,16 @@ public class PaperScreenShotController {
     @RequestMapping(value = "/downloadByClass", method = RequestMethod.POST)
     @ResponseBody
     public Result downloadPaperScreenShot(
-            @RequestParam("projectId") String projectId,
-            @RequestParam("schoolId") String schoolId
+            @RequestParam("projectId") String projectId
             ){
-        List<Map<String, Object>> downloadInfo = paperScreenShotService.generateClassPaperScreenShot(projectId, schoolId);
-        return Result.success().set("downloadInfo", downloadInfo);
+
+        if (projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)) {
+            return Result.fail("该考试项目正在保存截图，请等待...");
+        }
+
+        paperScreenShotService.generateClassPaperScreenShotZip(projectId);
+
+        return Result.success("保存截图任务开始执行...");
     }
 
     @RequestMapping(value = "/fonts", method = RequestMethod.POST)

@@ -139,6 +139,26 @@ public class ScoreService {
     }
 
     /**
+     * 查询指定学生的的得分明细总数
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 学生ID
+     * @return 分数记录
+     */
+    public long getStudentSubjectScoresCount(String projectId, String studentId, String subjectId) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
+        return collection.count(query);
+    }
+
+    public long getObjectiveCorrectCount(String projectId, String studentId, String subjectId, boolean isObjective) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId).append("isObjective", isObjective).append("right", true);
+        return collection.count(query);
+    }
+
+    /**
      * 查询指定学生的具体科目的所有分数记录列表
      *
      * @param projectId 项目ID

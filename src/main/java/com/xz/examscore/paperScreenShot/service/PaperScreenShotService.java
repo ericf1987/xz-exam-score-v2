@@ -7,10 +7,10 @@ import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
+import com.xz.examscore.paperScreenShot.manager.AllClassScreenShotZipGenerator;
 import com.xz.examscore.paperScreenShot.manager.PaperScreenShotTaskManager;
 import com.xz.examscore.scanner.ScannerDBService;
 import com.xz.examscore.services.*;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +63,9 @@ public class PaperScreenShotService {
     PaperScreenShotTaskManager paperScreenShotTaskManager;
 
     @Autowired
+    AllClassScreenShotZipGenerator allClassScreenShotZipGenerator;
+
+    @Autowired
     DownloadScreenShotService downloadScreenShotService;
 
     @Value("${paper.screenshot.zip.location}")
@@ -72,19 +75,29 @@ public class PaperScreenShotService {
     private String srcPath;
 
     /**
-     * 开始执行考试项目的截图文件保存任务
+     * 试卷截图保存任务执行入口
      *
      * @param projectId 项目ID
      * @return 执行结果
      */
     public Result startPaperScreenShotTask(String projectId) {
-        if (projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)) {
-            return Result.fail("该考试项目正在保存截图，请等待...");
-        }
+
+        LOG.info("----项目{}，开始执行试卷截图保存任务----");
+
+        LOG.info("====项目{}， 开始保存截图====");
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATING);
         paperScreenShotTaskManager.generatePaperScreenShots(projectId, true);
+        LOG.info("====项目{}， 保存截图完成====");
+
+        LOG.info("====项目{}， 开始打包班级试卷截图压缩包====");
+        allClassScreenShotZipGenerator.generateClassPaperScreenShot(projectId, true);
+        LOG.info("====项目{}， 班级试卷截图压缩包生成完毕====");
+
+        LOG.info("----项目{}，试卷截图任务执行完成----");
+
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATED);
-        return Result.success("试卷截图生成完毕！");
+
+        return Result.success("试卷截图保存任务执行完成！");
     }
 
 
@@ -147,13 +160,25 @@ public class PaperScreenShotService {
     }
 
     /**
-     * 将学校下所有班级的试卷留痕文件打包保存
+     * 将考试项目下所有班级的试卷留痕文件打包保存
+     *
+     * @param projectId 项目ID
+     * @return 返回结果
+     */
+    public Result generateClassPaperScreenShotZip(String projectId) {
+        allClassScreenShotZipGenerator.generateClassPaperScreenShot(projectId, true);
+        return Result.success();
+    }
+
+    /**
+     * 生成单个班级的试卷截图压缩包
      *
      * @param projectId 项目ID
      * @param schoolId  学校ID
-     * @return 返回结果
+     * @param classId   班级ID
+     * @param subjects  科目列表
      */
-    public List<Map<String, Object>> generateClassPaperScreenShot(String projectId, String schoolId) {
+    public void generateOneClassZip(String projectId, String schoolId, String classId, List<String> subjects) {
         String projectName = projectService.findProject(projectId).getString("name");
         String schoolName = schoolService.findSchool(projectId, schoolId).getString("name");
 
@@ -163,28 +188,21 @@ public class PaperScreenShotService {
             directory.mkdirs();
         }
 
-        List<Document> classDocs = classService.listClasses(projectId, schoolId);
-        List<String> subjects = subjectService.querySubjects(projectId);
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Document doc : classDocs) {
-            String classId = doc.getString("class");
-            String className = classService.getClassName(projectId, classId);
-            //班级留痕文件的文件名
-            String outputFileName = StringUtil.joinPaths(directory.getAbsolutePath(), className + "_试卷截图" + ".zip");
-            List<String> idPath = new LinkedList<>();
-            List<String> namePath = new LinkedList<>();
-            for (String subjectId : subjects) {
-                String subjectName = SubjectService.getSubjectName(subjectId);
-                //已生成的文件路径
-                String path = StringUtil.joinPaths(srcPath, projectId, schoolId, classId, subjectId);
-                String dir = StringUtil.joinPaths(className, subjectName);
-                //下载的压缩包文件路径
-                idPath.add(path);
-                namePath.add(dir);
-            }
-            result.add(downloadScreenShotService.generateDownloadZip(projectId, new File(outputFileName), idPath, namePath));
+        String className = classService.getClassName(projectId, classId);
+        //班级留痕文件的文件名
+        String outputFileName = StringUtil.joinPaths(directory.getAbsolutePath(), className + "_试卷截图" + ".zip");
+        List<String> idPath = new LinkedList<>();
+        List<String> namePath = new LinkedList<>();
+        for (String subjectId : subjects) {
+            String subjectName = SubjectService.getSubjectName(subjectId);
+            //已生成的文件路径
+            String path = StringUtil.joinPaths(srcPath, projectId, schoolId, classId, subjectId);
+            String dir = StringUtil.joinPaths(className, subjectName);
+            //下载的压缩包文件路径
+            idPath.add(path);
+            namePath.add(dir);
         }
-        return result;
+        downloadScreenShotService.generateDownloadZip(projectId, new File(outputFileName), idPath, namePath);
     }
 
     class PaperScreenShotsTaskByClassAndSubject extends Thread {
