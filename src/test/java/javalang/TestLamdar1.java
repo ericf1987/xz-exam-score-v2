@@ -64,7 +64,7 @@ public class TestLamdar1 {
 /*        Runtime runtime = Runtime.getRuntime();
         System.out.println(runtime.availableProcessors());
         System.out.println(runtime.freeMemory());*/
-        TestLamdar1 t = new TestLamdar1();
+/*        TestLamdar1 t = new TestLamdar1();
         String imgPath = "F:/77094b36acaf2eddef675a92881001e939019332.jpg";
         try {
 
@@ -78,7 +78,10 @@ public class TestLamdar1 {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+        String s = "F:\\评鉴个（123123）（123123）(1231231aasdasd)\\123123123.txt";
+        File f = new File(s);
+        System.out.println(f.getAbsolutePath());
     }
 
     public BufferedImage drawString(BufferedImage bufferedImage, String content, Font font, int x, int y) {

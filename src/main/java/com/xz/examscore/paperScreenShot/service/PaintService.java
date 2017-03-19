@@ -1,8 +1,10 @@
 package com.xz.examscore.paperScreenShot.service;
 
+import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.paperScreenShot.bean.ObjectiveQuestZone;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
 import com.xz.examscore.paperScreenShot.bean.Rect;
@@ -12,6 +14,7 @@ import com.xz.examscore.services.ProvinceService;
 import com.xz.examscore.services.RankService;
 import com.xz.examscore.services.ScoreService;
 import org.apache.commons.collections.MapUtils;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +70,7 @@ public class PaintService {
                 //反面试卷截图
                 String paper_reverse = MapUtils.getString(student, "paper_reverse");
                 List<Rect> rectList = new ArrayList<>();
+
                 subjectiveList.forEach(subjective -> {
                     //题号
                     String questNo = MapUtils.getString(subjective, "questionNo");
@@ -79,34 +83,33 @@ public class PaintService {
                 TotalScoreZone totalScoreZone = getTotalScoreZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId);
 
                 //客观题标记区域
-                ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId);
+                //ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId);
 
-                saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, totalScoreZone, objectiveQuestZone, rectList);
+                saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, totalScoreZone, null, rectList);
             });
         }
     }
 
     private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
-/*        double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subjectId));
+        double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subjectId));
         int rankInClass = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), totalScore);
         int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subject(subjectId), totalScore);
-        int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);*/
+        int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);
         Map<String, Integer> rankMap = new HashMap<>();
-        rankMap.put(Range.CLASS, 30);
-        rankMap.put(Range.SCHOOL, 40);
-        rankMap.put(Range.PROVINCE, 50);
-        return new TotalScoreZone(100, 100, 100, rankMap);
+        rankMap.put(Range.CLASS, rankInClass);
+        rankMap.put(Range.SCHOOL, rankInSchool);
+        rankMap.put(Range.PROVINCE, rankInProvince);
+        return new TotalScoreZone(200, 100, totalScore, rankMap);
     }
 
     private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
-/*        FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
         long correctCount = scoreService.getObjectiveCorrectCount(projectId, studentId, subjectId, true);
-        long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId);*/
+        long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId);
         ObjectiveQuestZone objectiveQuestZone = new ObjectiveQuestZone();
         objectiveQuestZone.setCoordinateX(150);
         objectiveQuestZone.setCoordinateY(400);
-        objectiveQuestZone.setTotalCount(30);
-        objectiveQuestZone.setCorrectCount(15);
+        objectiveQuestZone.setTotalCount((int)totalCount);
+        objectiveQuestZone.setCorrectCount((int)correctCount);
         objectiveQuestZone.setErrorQuestList(Arrays.asList("1", "2", "3"));
         return objectiveQuestZone;
     }
@@ -151,13 +154,13 @@ public class PaintService {
         BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
         BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
 
-/*        //标记总分区域
-        if (totalScoreZone != null) {
+        //标记总分区域
+/*        if (totalScoreZone != null) {
             img_positive = paintTotalScoreZone(img_positive, totalScoreZone);
-        }
+        }*/
 
         //标记客观题区域
-        if (objectiveQuestZone != null) {
+/*        if (objectiveQuestZone != null) {
             img_positive = paintObjectiveQuestZone(img_positive, objectiveQuestZone);
         }*/
 

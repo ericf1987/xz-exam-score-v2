@@ -3,6 +3,7 @@ package com.xz.examscore.services;
 import com.hyd.simplecache.utils.MD5;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
+import com.xz.examscore.bean.ProjectStatus;
 import com.xz.examscore.util.ReportNameMappings;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -45,9 +46,25 @@ public class DownloadAnalysisService {
     @Autowired
     ClassService classService;
 
+    @Autowired
+    ProjectService projectService;
+
     public static final Logger LOG = LoggerFactory.getLogger(DownloadAnalysisService.class);
 
     public Result generateZipFiles(String projectId, String schoolId, String[] filePath) {
+
+        //查询报表生成状态，如果未生成完毕，不允许下载
+        ProjectStatus projectStatus = projectService.getProjectStatus(projectId);
+        if(!projectStatus.equals(ProjectStatus.ReportGenerated)){
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("failureList", "");
+            resultMap.put("downloadURL", "");
+            resultMap.put("status", projectStatus.name());
+            resultMap.put("downloadFlag", false);
+            resultMap.put("desc", "报表尚未生成好，请耐心等待");
+            return Result.success().set("downloadInfo", resultMap);
+        }
+
         //根据文件参数获取文件路径
         String[] paths = ReportNameMappings.getFileName(filePath);
         List<Map<String, String>> pathList = new ArrayList<>();
@@ -60,6 +77,9 @@ public class DownloadAnalysisService {
         }
         //追加考试id和学校id
         Map<String, Object> resultMap = createZipFiles(projectId, schoolId, pathList, zipFileName);
+        resultMap.put("status", projectStatus.name());
+        resultMap.put("downloadFlag", true);
+        resultMap.put("desc", "报表生成完毕！");
         return Result.success().set("downloadInfo", resultMap);
     }
 

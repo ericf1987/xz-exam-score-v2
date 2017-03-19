@@ -204,7 +204,7 @@ public class RankLevelTask extends AggrTask {
     }
 
     // 计算并保存科目排名等级
-    private String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
+    public String saveRankLevel(String projectId, String studentId, Range rankRange, Target sbjTarget) {
 
         String rankLevel = rankService.getRankLevel(projectId, rankRange, sbjTarget, studentId);
         if (rankLevel == null) {

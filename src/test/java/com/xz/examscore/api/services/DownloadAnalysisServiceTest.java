@@ -54,8 +54,8 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
         };
 /*        Result result = downloadAnalysisService.generateZipFiles("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68", arr);*/
-        Result result = downloadAnalysisService.generateZipFiles("430100-e7bd093d92d844819c7eda8b641ab6ee",
-                "d00faaa0-8a9b-45c4-ae16-ea2688353cd0", arr);
+        Result result = downloadAnalysisService.generateZipFiles("430600-fafb16b81a394f369f0863bfaab766eb",
+                "a8e50b61-547a-485d-87b1-9a1527993b80", arr);
         System.out.println(result.getData());
 /*        String s = downloadAnalysisService.getZipFilePrefix("431100-903288f61a5547f1a08a7e20420c4e9e",
                 "b49b8e85-f390-4e09-a709-8ab1175b0c68");

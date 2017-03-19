@@ -33,17 +33,17 @@ public class RankServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
-    public void testGetRank2() throws Exception {
-        String projectId = "430200-3e67c524f149491597279ef6ae31baef";
-        Range range = Range.province("430000");
-        Target target = Target.subjectCombination("004005006");
+    public void testGetRankByStudentId() throws Exception {
+        String projectId = "430200-83943be3c36f43a8aab0b545e66dbe3d";
+        Range schoolRange = Range.school("7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52");
+        Range classRange = Range.clazz("fbc457d7-865c-4599-86e3-baf857f7a75d");
+        Target target = Target.subject("002");
 
         int rank = rankService.getRank(projectId,
-                range, target, "c8a246f3-cb0e-4eee-a295-b0730b5f2e1e");
+                classRange, target, "c6864656-f372-4ffa-91ba-50bcb56dad1a");
 
-        int studentCount = studentService.getStudentCount(projectId, range, target);
-        double average = studentCompetitiveService.getAverage(projectId, range, target, rank);
-        System.out.println(rank + ", " + studentCount + ", " + average);
+        int studentCount = studentService.getStudentCount(projectId, classRange, target);
+        System.out.println(rank + ", " + studentCount);
     }
 
     @Test

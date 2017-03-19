@@ -180,6 +180,12 @@ public class RankService {
         Collections.sort(levelKeys);
 
         double sum = 0, rankLevelValue = studentCount == 0 ? 0 : ((double) rank / studentCount);
+
+        //如果该学生排名为最后一名，则返回排名等级的最后一级
+        if(rankLevelValue == 1){
+            return levelKeys.get(levelKeys.size() - 1);
+        }
+
         for (String levelKey : levelKeys) {
             sum += rankingLevels.get(levelKey);
             if (rankLevelValue <= sum) {

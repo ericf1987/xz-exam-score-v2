@@ -13,6 +13,7 @@ public class AggregationProgressParam {
 
     public static final Map<String, String> PROGRESS_MAP_STATUS = new HashMap<>();
 
+    //统计进度
     static{
         PROGRESS_MAP.put(ProjectStatus.Empty.name(), "0");
         PROGRESS_MAP.put(ProjectStatus.Initializing.name(), "0");
@@ -23,11 +24,12 @@ public class AggregationProgressParam {
         PROGRESS_MAP.put(ProjectStatus.AggregationStarted.name(), "0.5");
         PROGRESS_MAP.put(ProjectStatus.AggregationFailed.name(), "0.5");
         PROGRESS_MAP.put(ProjectStatus.AggregationCompleted.name(), "1");
-        PROGRESS_MAP.put(ProjectStatus.ReportGenerating.name(), "0.9");
-        PROGRESS_MAP.put(ProjectStatus.ReportGenerateTimeOut.name(), "0.9");
+        PROGRESS_MAP.put(ProjectStatus.ReportGenerating.name(), "1");
+        PROGRESS_MAP.put(ProjectStatus.ReportGenerateTimeOut.name(), "1");
         PROGRESS_MAP.put(ProjectStatus.ReportGenerated.name(), "1");
     }
 
+    //是否执行完成
     static{
         PROGRESS_MAP_STATUS.put(ProjectStatus.Empty.name(), "0");
         PROGRESS_MAP_STATUS.put(ProjectStatus.Initializing.name(), "0");
@@ -38,8 +40,8 @@ public class AggregationProgressParam {
         PROGRESS_MAP_STATUS.put(ProjectStatus.AggregationStarted.name(), "0");
         PROGRESS_MAP_STATUS.put(ProjectStatus.AggregationFailed.name(), "0");
         PROGRESS_MAP_STATUS.put(ProjectStatus.AggregationCompleted.name(), "1");
-        PROGRESS_MAP_STATUS.put(ProjectStatus.ReportGenerating.name(), "0");
-        PROGRESS_MAP_STATUS.put(ProjectStatus.ReportGenerateTimeOut.name(), "0");
+        PROGRESS_MAP_STATUS.put(ProjectStatus.ReportGenerating.name(), "1");
+        PROGRESS_MAP_STATUS.put(ProjectStatus.ReportGenerateTimeOut.name(), "1");
         PROGRESS_MAP_STATUS.put(ProjectStatus.ReportGenerated.name(), "1");
     }
 
