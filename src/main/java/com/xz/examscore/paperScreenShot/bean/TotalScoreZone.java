@@ -1,7 +1,6 @@
 package com.xz.examscore.paperScreenShot.bean;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author by fengye on 2017/3/15.
@@ -14,7 +13,7 @@ public class TotalScoreZone {
 
     private double totalScore;
 
-    private Map<String, Integer> rankMap = new HashMap<>();
+    private List<TextRect> textRects;
 
     public double getCoordinateX() {
         return coordinateX;
@@ -40,29 +39,20 @@ public class TotalScoreZone {
         this.totalScore = totalScore;
     }
 
-    public Map<String, Integer> getRankMap() {
-        return rankMap;
+    public List<TextRect> getTextRects() {
+        return textRects;
     }
 
-    public void setRankMap(Map<String, Integer> rankMap) {
-        this.rankMap = rankMap;
+    public void setTextRects(List<TextRect> textRects) {
+        this.textRects = textRects;
     }
 
-    public TotalScoreZone(double coordinateX, double coordinateY, double totalScore, Map<String, Integer> rankMap) {
+    public TotalScoreZone(double coordinateX, double coordinateY, double totalScore, List<TextRect> textRects) {
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.totalScore = totalScore;
-        this.rankMap = rankMap;
+        this.textRects = textRects;
     }
 
-    public String getRankDesc(TotalScoreZone zone){
-        StringBuilder builder = new StringBuilder();
-        if(null != zone){
-            Map<String, Integer> rankMap = zone.getRankMap();
-            rankMap.forEach((k, v) -> builder.append(k).append("排名：").append(v).append(",").append("\n"));
-            return builder.toString().substring(0, builder.length() - 1);
-        }else{
-            return "";
-        }
-    }
+
 }

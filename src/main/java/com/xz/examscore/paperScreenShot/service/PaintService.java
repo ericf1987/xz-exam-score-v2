@@ -1,20 +1,15 @@
 package com.xz.examscore.paperScreenShot.service;
 
-import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.paperScreenShot.bean.ObjectiveQuestZone;
-import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
-import com.xz.examscore.paperScreenShot.bean.Rect;
-import com.xz.examscore.paperScreenShot.bean.TotalScoreZone;
+import com.xz.examscore.paperScreenShot.bean.*;
 import com.xz.examscore.paperScreenShot.utils.PaintUtils;
 import com.xz.examscore.services.ProvinceService;
 import com.xz.examscore.services.RankService;
 import com.xz.examscore.services.ScoreService;
 import org.apache.commons.collections.MapUtils;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,14 +90,26 @@ public class PaintService {
         int rankInClass = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), totalScore);
         int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subject(subjectId), totalScore);
         int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);
-        Map<String, Integer> rankMap = new HashMap<>();
-        rankMap.put(Range.CLASS, rankInClass);
-        rankMap.put(Range.SCHOOL, rankInSchool);
-        rankMap.put(Range.PROVINCE, rankInProvince);
-        return new TotalScoreZone(200, 100, totalScore, rankMap);
+
+        Font font = new Font("华文彩云", Font.PLAIN, 35);
+
+        int verticalInterval = font.getSize() + 5;
+
+        TextRect totalScoreRect = new TextRect(50, 50, "得分：" + totalScore, font);
+        TextRect rankInClassRect = new TextRect(50, 50 + verticalInterval, "班级排名：" + rankInClass, font);
+        TextRect rankInSchoolRect = new TextRect(50, 50 + verticalInterval * 2, "学校排名：" + rankInSchool, font);
+        TextRect rankInProvinceRect = new TextRect(50, 50 + verticalInterval * 3, "总体排名：" + rankInProvince, font);
+
+        List<TextRect> rectList = new LinkedList<>();
+        rectList.add(totalScoreRect);
+        rectList.add(rankInClassRect);
+        rectList.add(rankInSchoolRect);
+        rectList.add(rankInProvinceRect);
+
+        return new TotalScoreZone(100, 100, totalScore, rectList);
     }
 
-    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
+/*    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
         long correctCount = scoreService.getObjectiveCorrectCount(projectId, studentId, subjectId, true);
         long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId);
         ObjectiveQuestZone objectiveQuestZone = new ObjectiveQuestZone();
@@ -112,7 +119,7 @@ public class PaintService {
         objectiveQuestZone.setCorrectCount((int)correctCount);
         objectiveQuestZone.setErrorQuestList(Arrays.asList("1", "2", "3"));
         return objectiveQuestZone;
-    }
+    }*/
 
     /**
      * 保存单个学生的试卷留痕截图文件
@@ -121,8 +128,8 @@ public class PaintService {
      * @param fileName            文件名
      * @param paper_positive      正面URL地址
      * @param paper_reverse       反面URL地址
-     * @param totalScoreZone
-     * @param objectiveQuestZone
+     * @param totalScoreZone      总分区域
+     * @param objectiveQuestZone  客观题区域
      * @param rectList            切图列表
      */
     public void saveOneStudentScreenShot(PaperScreenShotBean paperScreenShotBean, String fileName, String paper_positive, String paper_reverse,
@@ -142,8 +149,8 @@ public class PaintService {
     /**
      * 将图片修改后保存
      *
-     * @param totalScoreZone
-     * @param objectiveQuestZone
+     * @param totalScoreZone     总分区域
+     * @param objectiveQuestZone 客观题区域
      * @param rects              图片切图区域列表
      * @param path               保存路径
      * @param paper_positive     正面URL地址
@@ -155,9 +162,9 @@ public class PaintService {
         BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
 
         //标记总分区域
-/*        if (totalScoreZone != null) {
+        if (totalScoreZone != null) {
             img_positive = paintTotalScoreZone(img_positive, totalScoreZone);
-        }*/
+        }
 
         //标记客观题区域
 /*        if (objectiveQuestZone != null) {
@@ -179,22 +186,30 @@ public class PaintService {
     }
 
     private BufferedImage paintTotalScoreZone(BufferedImage img_positive, TotalScoreZone totalScoreZone) {
-        Font font = new Font("华文彩云", Font.BOLD, 40);
-        double totalScore = totalScoreZone.getTotalScore();
-        double coordinateX = totalScoreZone.getCoordinateX();
-        double coordinateY = totalScoreZone.getCoordinateY();
-        String rankDesc = totalScoreZone.getRankDesc(totalScoreZone);
-        return PaintUtils.modifyImage(img_positive, "得分：" + totalScore + ", " + rankDesc, font, (float) coordinateX, (float) coordinateY + font.getSize());
+
+        Optional<TotalScoreZone> optional = Optional.of(totalScoreZone);
+
+        if (optional.isPresent()) {
+            for (TextRect textRect : optional.get().getTextRects()) {
+                Font font = textRect.getFont();
+                float coordinateX = textRect.getCoordinateX();
+                float coordinateY = textRect.getCoordinateY();
+                String textContent = textRect.getTextContent();
+                img_positive = PaintUtils.modifyImage(img_positive, textContent, font, coordinateX, coordinateY + font.getSize());
+            }
+        }
+
+        return img_positive;
     }
 
-    private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
+/*    private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
         Font font = new Font("华文彩云", Font.BOLD, 50);
         String correctDecs = objectiveQuestZone.getCorrectDecs(objectiveQuestZone);
         double coordinateX = objectiveQuestZone.getCoordinateX();
         double coordinateY = objectiveQuestZone.getCoordinateY();
         String errorDesc = objectiveQuestZone.getErrorDesc(objectiveQuestZone);
         return PaintUtils.modifyImage(img_positive, correctDecs + ", " + errorDesc, font, (float) coordinateX, (float) coordinateY);
-    }
+    }*/
 
     /**
      * 生成试卷截图文件名
@@ -202,7 +217,7 @@ public class PaintService {
      * @param path   保存路径
      * @param b      正面/反面
      * @param suffix 扩展名
-     * @return
+     * @return 截图文件名
      */
     private String renderSuffixByIndex(String path, boolean b, String suffix) {
         return b ? path + "_positive" + suffix : path + "_reverse" + suffix;

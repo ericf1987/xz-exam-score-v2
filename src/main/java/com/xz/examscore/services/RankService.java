@@ -183,7 +183,11 @@ public class RankService {
 
         //如果该学生排名为最后一名，则返回排名等级的最后一级
         if(rankLevelValue == 1){
-            return levelKeys.get(levelKeys.size() - 1);
+            for(int i = levelKeys.size() - 1; i >= 0; i--){
+                if(rankingLevels.get(levelKeys.get(i)) != 0){
+                    return levelKeys.get(i);
+                }
+            }
         }
 
         for (String levelKey : levelKeys) {
