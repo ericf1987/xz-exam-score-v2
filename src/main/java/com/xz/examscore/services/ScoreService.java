@@ -146,16 +146,64 @@ public class ScoreService {
      * @param subjectId 学生ID
      * @return 分数记录
      */
-    public long getStudentSubjectScoresCount(String projectId, String studentId, String subjectId) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
-        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
-        return collection.count(query);
+    public long getStudentSubjectScoresCount(String projectId, String studentId, String subjectId, boolean isObjective) {
+        String cacheKey = "quest_score_count:" + projectId + ":" + studentId + ":" + subjectId;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId).append("isObjective", isObjective);
+            return collection.count(query);
+        });
     }
 
-    public long getObjectiveCorrectCount(String projectId, String studentId, String subjectId, boolean isObjective) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("score");
-        Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId).append("isObjective", isObjective).append("right", true);
-        return collection.count(query);
+    /**
+     * 获取正确的题目数量
+     *
+     * @param projectId   项目ID
+     * @param studentId   学生ID
+     * @param subjectId   科目ID
+     * @param isObjective 是否是客观题
+     * @return 正确的题目数量
+     */
+    public long getQuestCorrectCount(String projectId, String studentId, String subjectId, boolean isObjective) {
+
+        String cacheKey = "quest_score_count:" + projectId + ":" + studentId + ":" + subjectId + ":" + isObjective;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId).append("isObjective", isObjective).append("right", true);
+            return collection.count(query);
+        });
+
+    }
+
+    /**
+     * 获取错题题号
+     *
+     * @param projectId   项目ID
+     * @param studentId   学生ID
+     * @param subjectId   科目ID
+     * @param isObjective 是否是客观题
+     * @param isRight     是否正确
+     * @return 错题题号
+     */
+    public List<String> getErrorQuestNo(String projectId, String studentId, String subjectId, boolean isObjective, boolean isRight) {
+        String cacheKey = "quest_score_questNo:" + projectId + ":" + studentId + ":" + subjectId + ":" + isObjective + ":" + isRight;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> collection = scoreDatabase.getCollection("score");
+            Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId).append("isObjective", isObjective).append("right", isRight);
+            Document projection = doc("questNo", 1);
+            FindIterable<Document> findIterable = collection.find(query).projection(projection);
+            List<String> questNo = toList(findIterable).stream().map(l -> l.getString("questNo")).collect(Collectors.toList());
+            return CollectionUtils.asArrayList(questNo);
+        });
     }
 
     /**
@@ -439,6 +487,17 @@ public class ScoreService {
         });
     }
 
+    /**
+     * 查询分数段内的记录
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param subjectId 科目ID
+     * @param questId   题目ID
+     * @param min       最小分值
+     * @param max       最大分值
+     * @return 返回记录
+     */
     public ArrayList<Document> getScoreDocsByScoreSegment(String projectId, Range range, String subjectId, String questId, Double min, Double max) {
         String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + min + ":" + max;
         SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
@@ -457,7 +516,15 @@ public class ScoreService {
         });
     }
 
-    //查询试题作答的学生数
+    /**
+     * 查询试题作答的学生数
+     *
+     * @param projectId 项目ID
+     * @param range     范围
+     * @param subjectId 科目ID
+     * @param questId   题目ID
+     * @return 学生数
+     */
     public int getScoreRecordCount(String projectId, Range range, String subjectId, String questId) {
         String cacheKey = "score_quest_count:" + projectId + ":" + range + ":" + subjectId + ":" + questId;
         SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
@@ -468,7 +535,14 @@ public class ScoreService {
         });
     }
 
-    //判断学生是否缺考
+    /**
+     * 判断学生是否缺考
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param target    目标
+     * @return 是否缺考
+     */
     public boolean isStudentAbsent(String projectId, String studentId, Target target) {
         String targetName = target.getName();
         MongoCollection<Document> collection = scoreDatabase.getCollection("score");

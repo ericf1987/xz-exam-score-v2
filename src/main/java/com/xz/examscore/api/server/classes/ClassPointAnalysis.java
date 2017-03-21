@@ -121,6 +121,13 @@ public class ClassPointAnalysis implements Server {
         return getPointStats(projectId, subjectId, range);
     }
 
+    /**
+     * 查询知识点详细数据
+     * @param projectId    项目ID
+     * @param subjectId    科目ID
+     * @param range        范围
+     * @return
+     */
     public List<Map<String, Object>> getPointStats(String projectId, String subjectId, Range range) {
         List<Map<String, Object>> pointStats = new ArrayList<>();
         List<Point> points = pointService.getPoints(projectId, subjectId);

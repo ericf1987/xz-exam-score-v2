@@ -12,10 +12,7 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
@@ -159,5 +156,15 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         String cacheKey = "score:" + collectionName + ":" + projectId + ":" + range + ":" + target;
         System.out.println(cacheKey);
         cache.get(cacheKey);
+    }
+
+    @Test
+    public void testgetErrorQuestNo() throws Exception {
+        String projectId = "430500-858a2da0e24f4c329aafb9071e022e3b";
+        String studentId = "d86cd293-ecff-41a8-ae8e-3700e24fcddd";
+        String subjectId = "003";
+
+        List<String> errorQuestNo = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false);
+        System.out.println(errorQuestNo.toString());
     }
 }

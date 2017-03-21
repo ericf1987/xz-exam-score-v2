@@ -68,10 +68,35 @@ public class SchoolPointAnalysis implements Server{
         Range schoolRange = Range.school(schoolId);
 
         List<Map<String, Object>> schoolPointAnalysis = classPointAnalysis.getPointStats(projectId, subjectId, schoolRange);
-        List<Map<String, Object>> studentPointAnalysis = getStudentPointAnalysis(projectId, subjectId, schoolRange);
+//        List<Map<String, Object>> studentPointAnalysis = getStudentPointAnalysis(projectId, subjectId, schoolRange);
+        List<Map<String, Object>> classPointAnalysis = getClassPointAnalysis(projectId, subjectId, schoolRange);
+        return Result.success().set("school", schoolPointAnalysis).set("classes", classPointAnalysis);
 
-        return Result.success().set("schools", schoolPointAnalysis).set("students", studentPointAnalysis);
+    }
 
+    /**
+     * 查询学校下每个班级的知识点详细信息
+     * @param projectId      项目ID
+     * @param subjectId      科目ID
+     * @param schoolRange    学校维度
+     * @return
+     */
+    private List<Map<String, Object>> getClassPointAnalysis(String projectId, String subjectId, Range schoolRange) {
+        List<Document> listClasses = classService.listClasses(projectId, schoolRange.getId());
+
+        List<Map<String, Object>> pointStats = new ArrayList<>();
+        for(Document classDoc : listClasses){
+            String classId = classDoc.getString("class");
+            String className = classDoc.getString("name");
+            Range classRange = Range.clazz(classId);
+            List<Map<String, Object>> classPointStats = classPointAnalysis.getPointStats(projectId, subjectId, classRange);
+            Map<String, Object> classPointMap = new HashMap<>();
+            classPointMap.put("classId", classId);
+            classPointMap.put("className", className);
+            classPointMap.put("pointStats", classPointStats);
+            pointStats.add(classPointMap);
+        }
+        return pointStats;
     }
 
     private List<Map<String,Object>> getStudentPointAnalysis(String projectId, String subjectId, Range schoolRange) {

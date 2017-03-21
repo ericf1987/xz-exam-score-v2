@@ -14,5 +14,8 @@ public class SchoolPointSheetsTest extends XzExamScoreV2ApplicationTests{
 
     @Test
     public void testGenerateSheet() throws Exception {
-        schoolPointReport.generate("430200-b73f03af1d74484f84f1aa93f583caaa", Range.school("200f3928-a8bd-48c4-a2f4-322e9ffe3700"), "target/school-point.xlsx");    }
+        schoolPointReport.generate("430200-9583fddde42d42b2b480b1c5c8cdaf82",
+                Range.school("7e34fa5e-9023-4ad4-b4fa-fe4e3d7d1b52"),
+                "target/school-point.xlsx");
+    }
 }

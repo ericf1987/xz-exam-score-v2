@@ -77,12 +77,37 @@ public class PaintService {
                 //总分标记区域
                 TotalScoreZone totalScoreZone = getTotalScoreZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId);
 
-                //客观题标记区域
-                //ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId);
+                //获取第一个客观题的高度
+                double firstObjectiveHeight = getFirstObjectiveHeight(student);
 
-                saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, totalScoreZone, null, rectList);
+                //客观题标记区域
+                ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, firstObjectiveHeight);
+
+                saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, totalScoreZone, objectiveQuestZone, rectList);
             });
         }
+    }
+
+    public double getFirstObjectiveHeight(Map<String, Object> student) {
+        List<Map<String, Object>> objectiveList = (List<Map<String, Object>>) student.get("objectiveList");
+
+        if(null != objectiveList){
+            Collections.sort(objectiveList, (o1, o2) -> {
+                Double qNo1 = Double.parseDouble(o1.get("questionNo").toString());
+                Double qNo2 = Double.parseDouble(o2.get("questionNo").toString());
+                return qNo1.compareTo(qNo2);
+            });
+
+            Map<String, Object> obj1 = objectiveList.get(0);
+            List<Map<String, Object>> rects = (List<Map<String, Object>>)obj1.get("rects");
+            if(null != rects){
+                Map<String, Object> rect = rects.get(0);
+                double coordinateY = MapUtils.getDoubleValue(rect, "coordinateY");
+                return coordinateY;
+            }
+        }
+
+        return 0;
     }
 
     private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
@@ -109,17 +134,19 @@ public class PaintService {
         return new TotalScoreZone(100, 100, totalScore, rectList);
     }
 
-/*    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId) {
-        long correctCount = scoreService.getObjectiveCorrectCount(projectId, studentId, subjectId, true);
-        long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId);
+    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, double firstObjectiveHeight) {
+        long correctCount = scoreService.getQuestCorrectCount(projectId, studentId, subjectId, true);
+        long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId, true);
         ObjectiveQuestZone objectiveQuestZone = new ObjectiveQuestZone();
-        objectiveQuestZone.setCoordinateX(150);
-        objectiveQuestZone.setCoordinateY(400);
+        objectiveQuestZone.setCoordinateX(50);
+        objectiveQuestZone.setCoordinateY(firstObjectiveHeight);
         objectiveQuestZone.setTotalCount((int)totalCount);
         objectiveQuestZone.setCorrectCount((int)correctCount);
-        objectiveQuestZone.setErrorQuestList(Arrays.asList("1", "2", "3"));
+        List<String> errorQuestNo = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false);
+        Collections.sort(errorQuestNo);
+        objectiveQuestZone.setErrorQuestList(errorQuestNo);
         return objectiveQuestZone;
-    }*/
+    }
 
     /**
      * 保存单个学生的试卷留痕截图文件
@@ -167,9 +194,9 @@ public class PaintService {
         }
 
         //标记客观题区域
-/*        if (objectiveQuestZone != null) {
+        if (objectiveQuestZone != null) {
             img_positive = paintObjectiveQuestZone(img_positive, objectiveQuestZone);
-        }*/
+        }
 
         for (Rect rect : rects) {
             int pageIndex = rect.getPageIndex();
@@ -202,14 +229,14 @@ public class PaintService {
         return img_positive;
     }
 
-/*    private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
+    private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
         Font font = new Font("华文彩云", Font.BOLD, 50);
         String correctDecs = objectiveQuestZone.getCorrectDecs(objectiveQuestZone);
         double coordinateX = objectiveQuestZone.getCoordinateX();
-        double coordinateY = objectiveQuestZone.getCoordinateY();
+        double coordinateY = objectiveQuestZone.getCoordinateY() - font.getSize() - 10;
         String errorDesc = objectiveQuestZone.getErrorDesc(objectiveQuestZone);
         return PaintUtils.modifyImage(img_positive, correctDecs + ", " + errorDesc, font, (float) coordinateX, (float) coordinateY);
-    }*/
+    }
 
     /**
      * 生成试卷截图文件名

@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author by fengye on 2016/6/3.
@@ -79,9 +81,10 @@ public class TestLamdar1 {
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-        String s = "F:\\评鉴个（123123）（123123）(1231231aasdasd)\\123123123.txt";
-        File f = new File(s);
-        System.out.println(f.getAbsolutePath());
+        List<String> strings = Arrays.asList("6", "5", "4", "3", "2", "1");
+        for(int i = strings.size() - 1; i >=0 ;i--){
+            System.out.println(strings.get(i));
+        }
     }
 
     public BufferedImage drawString(BufferedImage bufferedImage, String content, Font font, int x, int y) {

@@ -40,6 +40,8 @@
                 <report name="客观题分析" class=".schools.SchoolPaperObjectiveReport"/>
                 <report name="主观题分析" class=".schools.SchoolPaperSubjectiveReport"/>
                 <report name="双向细目分析" class=".schools.SchoolPointAbilityLevelReport"/>
+                <report name="能力层级分析" class=".schools.SchoolAbilityLevelReport"/>
+                <report name="知识点分析" class=".schools.SchoolPointReport"/>
             </report-category>
             <report-category name="尖子生情况">
                 <report name="尖子生统计" class=".schools.SchoolTopStudentReport"/>
