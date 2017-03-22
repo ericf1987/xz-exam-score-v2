@@ -2,6 +2,7 @@ package com.xz.examscore.services;
 
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
+import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.report.Keys;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
@@ -34,7 +35,6 @@ public class ScoreLevelService {
      *
      * @param projectId 项目ID
      * @param scoreRate 得分率
-     *
      * @return 得分等级
      */
     public String calculateScoreLevel(String projectId, double scoreRate) {
@@ -58,7 +58,6 @@ public class ScoreLevelService {
      * @param projectId 项目ID
      * @param studentId 学生ID
      * @param target    目标
-     *
      * @return 得分等级
      */
     public String getScoreLevel(String projectId, String studentId, Target target) {
@@ -100,5 +99,31 @@ public class ScoreLevelService {
         }
 
         return fullScoreLevels;
+    }
+
+    /**
+     * 获取指定分数排名的人数
+     *
+     * @param projectId  项目ID
+     * @param range      范围
+     * @param target     目标
+     * @param scoreLevel 分数等级参数
+     * @return 人数
+     */
+    public int getScoreLevelCount(String projectId, Range range, Target target, String scoreLevel) {
+        Document query = doc("project", projectId)
+                .append("range", range2Doc(range)).append("target", target2Doc(target));
+        Document doc = scoreDatabase.getCollection("score_level_map").find(query).first();
+        List<Document> scoreLevels = DocumentUtils.getList(doc, "scoreLevels", Collections.emptyList());
+        if (scoreLevels.isEmpty()) {
+            return 0;
+        } else {
+            for (Document scoreLevelMap : scoreLevels) {
+                if (scoreLevelMap.getString("scoreLevel").equals(scoreLevel)) {
+                    return scoreLevelMap.getInteger("count");
+                }
+            }
+            return 0;
+        }
     }
 }

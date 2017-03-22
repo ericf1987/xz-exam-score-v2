@@ -45,7 +45,6 @@ public class SchoolAbilityLevelSheets extends SheetGenerator {
     private void setHeader(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> schools = result.get("schools");
-        excelWriter.set(0, column.incrementAndGet(), "能力层级");
         excelWriter.set(0, column.incrementAndGet(), "班级");
         for(Map<String, Object> pointstat : schools){
             excelWriter.set(0, column.incrementAndGet(), pointstat.get("levelName"));
@@ -55,7 +54,6 @@ public class SchoolAbilityLevelSheets extends SheetGenerator {
     private void fillSchoolData(ExcelWriter excelWriter, Result result) {
         AtomicInteger column = new AtomicInteger(-1);
         List<Map<String, Object>> classes = result.get("schools");
-        excelWriter.set(1, column.incrementAndGet(), "本校");
         excelWriter.set(1, column.incrementAndGet(), "本校");
         for(Map<String, Object> pointstat : classes){
             excelWriter.set(1, column.incrementAndGet(), pointstat.get("score"));
@@ -68,7 +66,6 @@ public class SchoolAbilityLevelSheets extends SheetGenerator {
         List<Map<String, Object>> classes = result.get("classes");
         for(Map<String, Object> clazz : classes){
             List<Map<String, Object>> pointStats = (List<Map<String, Object>>)clazz.get("levelStats");
-            excelWriter.set(row, column.incrementAndGet(), clazz.get("studentName"));
             excelWriter.set(row, column.incrementAndGet(), clazz.get("className"));
             for(Map<String, Object> pointStat : pointStats) {
                 excelWriter.set(row, column.incrementAndGet(), pointStat.get("score"));
