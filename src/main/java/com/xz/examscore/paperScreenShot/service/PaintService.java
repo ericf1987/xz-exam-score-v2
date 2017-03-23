@@ -42,6 +42,12 @@ public class PaintService {
     @Autowired
     ProvinceService provinceService;
 
+    public static final Font TOTAL_SCORE_FONT = new Font("华文彩云", Font.PLAIN, 35);
+
+    public static final Font OBJECTIVE_DESC_FONT = new Font("华文彩云", Font.BOLD, 25);
+
+    public static final Font SUBJECTIVE_DESC_FONT = new Font("华文彩云", Font.BOLD, 35);
+
     /**
      * 保存试卷截图对象到本地文件系统
      *
@@ -91,7 +97,7 @@ public class PaintService {
     public double getFirstObjectiveHeight(Map<String, Object> student) {
         List<Map<String, Object>> objectiveList = (List<Map<String, Object>>) student.get("objectiveList");
 
-        if(null != objectiveList){
+        if (null != objectiveList) {
             Collections.sort(objectiveList, (o1, o2) -> {
                 Double qNo1 = Double.parseDouble(o1.get("questionNo").toString());
                 Double qNo2 = Double.parseDouble(o2.get("questionNo").toString());
@@ -99,8 +105,8 @@ public class PaintService {
             });
 
             Map<String, Object> obj1 = objectiveList.get(0);
-            List<Map<String, Object>> rects = (List<Map<String, Object>>)obj1.get("rects");
-            if(null != rects){
+            List<Map<String, Object>> rects = (List<Map<String, Object>>) obj1.get("rects");
+            if (null != rects) {
                 Map<String, Object> rect = rects.get(0);
                 double coordinateY = MapUtils.getDoubleValue(rect, "coordinateY");
                 return coordinateY;
@@ -116,14 +122,13 @@ public class PaintService {
         int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subject(subjectId), totalScore);
         int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);
 
-        Font font = new Font("华文彩云", Font.PLAIN, 35);
+        //垂直间距
+        int verticalInterval = TOTAL_SCORE_FONT.getSize() + 5;
 
-        int verticalInterval = font.getSize() + 5;
-
-        TextRect totalScoreRect = new TextRect(50, 50, "得分：" + totalScore, font);
-        TextRect rankInClassRect = new TextRect(50, 50 + verticalInterval, "班级排名：" + rankInClass, font);
-        TextRect rankInSchoolRect = new TextRect(50, 50 + verticalInterval * 2, "学校排名：" + rankInSchool, font);
-        TextRect rankInProvinceRect = new TextRect(50, 50 + verticalInterval * 3, "总体排名：" + rankInProvince, font);
+        TextRect totalScoreRect = new TextRect(50, 50, "得分：" + totalScore, TOTAL_SCORE_FONT);
+        TextRect rankInClassRect = new TextRect(50, 50 + verticalInterval, "班级排名：" + rankInClass, TOTAL_SCORE_FONT);
+        TextRect rankInSchoolRect = new TextRect(50, 50 + verticalInterval * 2, "学校排名：" + rankInSchool, TOTAL_SCORE_FONT);
+        TextRect rankInProvinceRect = new TextRect(50, 50 + verticalInterval * 3, "总体排名：" + rankInProvince, TOTAL_SCORE_FONT);
 
         List<TextRect> rectList = new LinkedList<>();
         rectList.add(totalScoreRect);
@@ -140,8 +145,8 @@ public class PaintService {
         ObjectiveQuestZone objectiveQuestZone = new ObjectiveQuestZone();
         objectiveQuestZone.setCoordinateX(50);
         objectiveQuestZone.setCoordinateY(firstObjectiveHeight);
-        objectiveQuestZone.setTotalCount((int)totalCount);
-        objectiveQuestZone.setCorrectCount((int)correctCount);
+        objectiveQuestZone.setTotalCount((int) totalCount);
+        objectiveQuestZone.setCorrectCount((int) correctCount);
         List<String> errorQuestNo = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false);
         Collections.sort(errorQuestNo);
         objectiveQuestZone.setErrorQuestList(errorQuestNo);
@@ -194,10 +199,11 @@ public class PaintService {
         }
 
         //标记客观题区域
-        if (objectiveQuestZone != null) {
+        if (objectiveQuestZone != null && objectiveQuestZone.getCoordinateY() != 0) {
             img_positive = paintObjectiveQuestZone(img_positive, objectiveQuestZone);
         }
 
+        //标记主观题区域
         for (Rect rect : rects) {
             int pageIndex = rect.getPageIndex();
             if (pageIndex == 0) {
@@ -230,12 +236,29 @@ public class PaintService {
     }
 
     private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
-        Font font = new Font("华文彩云", Font.BOLD, 50);
         String correctDecs = objectiveQuestZone.getCorrectDecs(objectiveQuestZone);
+
         double coordinateX = objectiveQuestZone.getCoordinateX();
-        double coordinateY = objectiveQuestZone.getCoordinateY() - font.getSize() - 10;
-        String errorDesc = objectiveQuestZone.getErrorDesc(objectiveQuestZone);
-        return PaintUtils.modifyImage(img_positive, correctDecs + ", " + errorDesc, font, (float) coordinateX, (float) coordinateY);
+
+        //在客观题答题区域上方一个字体高度+10的位置开始绘制客观题正确率信息
+        double coordinateY = objectiveQuestZone.getCoordinateY() - OBJECTIVE_DESC_FONT.getSize() - 10;
+
+        //错题列表的起始位置
+        double errorDescX = coordinateX + OBJECTIVE_DESC_FONT.getSize() * correctDecs.length();
+
+        BufferedImage bufferedImage = PaintUtils.modifyImage(img_positive, correctDecs, OBJECTIVE_DESC_FONT, (float) coordinateX, (float) coordinateY);
+
+        //获取错误题号列表
+        List<String> errorQuestList = objectiveQuestZone.getErrorQuestList();
+
+        //将题号封装成多个文字区域
+        List<TextRect> textRects = objectiveQuestZone.getTextRects(errorQuestList, errorDescX, coordinateY, OBJECTIVE_DESC_FONT);
+
+        for (TextRect textRect : textRects) {
+            bufferedImage = PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), OBJECTIVE_DESC_FONT, textRect.getCoordinateX(), textRect.getCoordinateY());
+        }
+
+        return bufferedImage;
     }
 
     /**
@@ -251,9 +274,8 @@ public class PaintService {
     }
 
     private BufferedImage doPaint(BufferedImage bufferedImage, Rect rect) {
-        Font font = new Font("宋体", Font.PLAIN, 40);
-        String content = "题号：" + rect.getQuestNo() + ", 得分" + rect.getScore() + "分， 满分（" + rect.getFullScore() + ")";
-        return PaintUtils.modifyImage(bufferedImage, content, font,
+        String content = "题号：" + rect.getQuestNo() + " " + rect.getScore() + "/" + rect.getFullScore();
+        return PaintUtils.modifyImage(bufferedImage, content, SUBJECTIVE_DESC_FONT,
                 (float) (rect.getCoordinateX()),
                 (float) (rect.getCoordinateY()));
     }

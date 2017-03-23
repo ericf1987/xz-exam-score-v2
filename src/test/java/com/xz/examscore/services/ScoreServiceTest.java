@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -118,7 +119,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
                 .append("totalScore", score);
         FindIterable<Document> documents = scoreDatabase.getCollection(collectionName).find(query);
         toList(documents).forEach(document -> {
-            Document studentDoc = (Document)document.get("range");
+            Document studentDoc = (Document) document.get("range");
             String studentId = studentDoc.getString("id");
             Document doc = studentService.findStudent(projectId, studentId);
             int rank = rankService.getRank(projectId, Range.clazz(doc.getString("class")), target, studentId);
@@ -160,11 +161,13 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetErrorQuestNo() throws Exception {
-        String projectId = "430500-858a2da0e24f4c329aafb9071e022e3b";
-        String studentId = "d86cd293-ecff-41a8-ae8e-3700e24fcddd";
-        String subjectId = "003";
+        String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+//        String studentId = "d86cd293-ecff-41a8-ae8e-3700e24fcddd";
+        String studentId = "0da6026e-325e-4d7b-89a2-7fe28669eb17";
+        String subjectId = "006";
 
         List<String> errorQuestNo = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false);
+        Collections.sort(errorQuestNo);
         System.out.println(errorQuestNo.toString());
     }
 }

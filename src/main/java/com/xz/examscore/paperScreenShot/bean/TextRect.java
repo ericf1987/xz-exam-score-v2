@@ -54,19 +54,19 @@ public class TextRect {
         this.font = font;
     }
 
-    public float getHorizenTailX(float offsetX){
+    public float getHorizenTailX(float offsetX) {
         return this.getCoordinateX() + this.getFont().getSize() * this.getTextContent().length() + offsetX;
     }
 
-    public float getHorizenTailY(float offsetY){
+    public float getHorizenTailY(float offsetY) {
         return this.getCoordinateY() + this.getFont().getSize() + offsetY;
     }
 
-    public float getVerticalTailX(float offsetX){
+    public float getVerticalTailX(float offsetX) {
         return this.getCoordinateX() + this.getFont().getSize() + offsetX;
     }
 
-    public float getVerticalTailY(float offsetY){
+    public float getVerticalTailY(float offsetY) {
         return this.getCoordinateX() + this.getFont().getSize() * this.getTextContent().length() + offsetY;
     }
 

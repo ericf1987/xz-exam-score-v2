@@ -1,5 +1,6 @@
 package com.xz.examscore.paperScreenShot.bean;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,11 +71,51 @@ public class ObjectiveQuestZone {
         this.errorQuests = errorQuests;
     }
 
-    public String getErrorDesc(ObjectiveQuestZone zone){
-        return zone == null ? "" : "错题：" + zone.getErrorQuestList().toString();
+    public String getCorrectDecs(ObjectiveQuestZone zone) {
+        return zone == null ? "" : zone.getCorrectCount() + "/" + zone.getTotalCount() + " 错题：";
     }
 
-    public String getCorrectDecs(ObjectiveQuestZone zone){
-        return zone == null ? "" : zone.getCorrectCount() + "/" + zone.getTotalCount();
+    /**
+     * 将错误描述截取成多个文字区域
+     *
+     * @param errorDesc   错误描述信息
+     * @param errorDescX  错误描述信息的起始位置X
+     * @param coordinateY 错误描述信息的起始位置Y
+     * @param font        字体
+     * @return 文本区域对象列表
+     */
+    public List<TextRect> getTextRects(List<String> errorDesc, double errorDescX, double coordinateY, Font font) {
+
+        int fontSize = font.getSize();
+
+        //剩余宽度中可以容纳的字符数
+        int count = 10;
+
+        int size = errorDesc.size();
+
+        //行数
+        int row = errorDesc.size() / count;
+
+        List<TextRect> textRects = new LinkedList<>();
+        for (int x = 0; x <= row; x++) {
+            int tail = count * (x + 1);
+            int lastIndex = tail > size ? size : tail;
+            TextRect textRect = new TextRect((float) errorDescX, (float) coordinateY + fontSize * x,
+                    getErrorNoString(errorDesc.subList(count * x, lastIndex)), font);
+            textRects.add(textRect);
+        }
+
+        return textRects;
+    }
+
+    public String getErrorNoString(List<String> errorQuests) {
+        StringBuilder builder = new StringBuilder();
+        if (null != errorQuests && !errorQuests.isEmpty()) {
+            for (String errorNo : errorQuests) {
+                builder.append(errorNo).append("、");
+            }
+            return builder.substring(0, builder.length() - 1);
+        }
+        return "";
     }
 }
