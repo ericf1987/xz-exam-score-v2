@@ -14,6 +14,7 @@ import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.SubjectLevel;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.intclient.InterfaceClient;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.apache.commons.collections.MapUtils;
@@ -99,6 +100,9 @@ public class ImportProjectService {
     @Autowired
     QuestAbilityLevelService questAbilityLevelService;
 
+    @Autowired
+    ProjectCacheManager projectCacheManager;
+
     public static final int SUBJECT_LENGTH = 3;
 
     /**
@@ -109,6 +113,9 @@ public class ImportProjectService {
      * @return ?
      */
     public Context importProject(String projectId, boolean reimportStudents) {
+
+        projectCacheManager.deleteProjectCache(projectId);
+
         Context context = new Context();
 
         // 下面的导入顺序不能变更，否则可能造成数据错误

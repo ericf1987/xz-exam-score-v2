@@ -42,6 +42,17 @@ public class PaperScreenShotController {
         return paperScreenShotService.startPaperScreenShotTask(projectId);
     }
 
+    @RequestMapping(value = "/start/task/oneStudent", method = RequestMethod.POST)
+    @ResponseBody
+    public Result startPaperScreenShotTask(
+            @RequestParam("projectId") String projectId,
+            @RequestParam("studentId") String studentId,
+            @RequestParam("subjectId") String subjectId,
+            @RequestParam(value = "generateClassZip", required = false, defaultValue = "false") String generateClassZip
+    ) {
+        return paperScreenShotService.generateOneStuPaperScreenShot(projectId, studentId, subjectId, Boolean.valueOf(generateClassZip));
+    }
+
     @RequestMapping(value = "/downloadByClass", method = RequestMethod.POST)
     @ResponseBody
     public Result downloadPaperScreenShot(

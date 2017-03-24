@@ -7,6 +7,7 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.ScoreService;
@@ -58,8 +59,33 @@ public class TotalScoreStudentTask extends AggrTask {
                 aggrStudentSubjectCombinationScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
             } else if (target.match(Target.SUBJECT) || target.match(Target.PROJECT)) {
                 aggrStudentSubjectProjectScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
+            } else if (target.match(Target.SUBJECT_OBJECTIVE)){
+                aggrStudentSubjectObjectiveScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
             }
 
+        }
+    }
+
+    private void aggrStudentSubjectObjectiveScores(String projectId, Target target, MongoCollection<Document> scoreCollection, Range studentRange) {
+        SubjectObjective subjectObjective = target.getId(SubjectObjective.class);
+        String studentId = studentRange.getId();
+        Document student = studentService.findStudent(projectId, studentId);
+        AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
+                doc("$match", doc("project", projectId)
+                        .append("student", studentId)
+                        .append("subject", subjectObjective.getSubject())
+                        .append("isObjective", subjectObjective.isObjective())),
+                doc("$group", TOTAL_SCORE_GROUP)
+        ));
+
+        Document aggregateResult = aggregate.first();
+
+        if (aggregateResult != null) {
+            Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
+            Document extra = doc("class", student.get("class")).append("school", student.get("school"))
+                    .append("area", student.get("area")).append("city", student.get("city"))
+                    .append("province", student.get("province"));
+            scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
         }
     }
 

@@ -16,6 +16,10 @@ public class Rect {
     private String paper_positive;
     private String paper_reverse;
 
+    private int rankInProvince;
+    private int rankInSchool;
+    private int rankInClass;
+
     public String getQuestNo() {
         return questNo;
     }
@@ -96,16 +100,58 @@ public class Rect {
         this.score = score;
     }
 
+    public int getRankInProvince() {
+        return rankInProvince;
+    }
+
+    public void setRankInProvince(int rankInProvince) {
+        this.rankInProvince = rankInProvince;
+    }
+
+    public int getRankInSchool() {
+        return rankInSchool;
+    }
+
+    public void setRankInSchool(int rankInSchool) {
+        this.rankInSchool = rankInSchool;
+    }
+
+    public int getRankInClass() {
+        return rankInClass;
+    }
+
+    public void setRankInClass(int rankInClass) {
+        this.rankInClass = rankInClass;
+    }
+
     public Rect() {
     }
 
-    public Rect(String questNo, double coordinateX, double coordinateY, double height, double width, int pageIndex, String paper_positive, String paper_reverse) {
+    public Rect(String questNo, double coordinateX, double coordinateY, double height, double width, int pageIndex, double fullScore, double score, String paper_positive, String paper_reverse, int rankInProvince, int rankInSchool, int rankInClass) {
         this.questNo = questNo;
         this.coordinateX = coordinateX;
         this.coordinateY = coordinateY;
         this.height = height;
         this.width = width;
         this.pageIndex = pageIndex;
+        this.fullScore = fullScore;
+        this.score = score;
+        this.paper_positive = paper_positive;
+        this.paper_reverse = paper_reverse;
+        this.rankInProvince = rankInProvince;
+        this.rankInSchool = rankInSchool;
+        this.rankInClass = rankInClass;
+    }
+
+    public Rect(String questNo, double coordinateX, double coordinateY, double height, double width, int pageIndex, double fullScore, double score, String paper_positive, String paper_reverse) {
+        this.questNo = questNo;
+        this.coordinateX = coordinateX;
+        this.coordinateY = coordinateY;
+        this.height = height;
+        this.width = width;
+        this.pageIndex = pageIndex;
+        this.fullScore = fullScore;
+        this.score = score;
         this.paper_positive = paper_positive;
         this.paper_reverse = paper_reverse;
     }

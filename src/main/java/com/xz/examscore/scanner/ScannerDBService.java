@@ -10,6 +10,7 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.services.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -72,6 +73,9 @@ public class ScannerDBService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    ProjectCacheManager projectCacheManager;
+
     public MongoClient getMongoClient(String project) {
 
         MongoClient[] availableClients =
@@ -104,6 +108,8 @@ public class ScannerDBService {
      * @param project 项目ID
      */
     public void importProjectScore(String project) {
+
+        projectCacheManager.deleteProjectCache(project);
 
         Document projectDoc = findProject(project);
         if (projectDoc == null) {
@@ -508,14 +514,20 @@ public class ScannerDBService {
                 throw new IllegalStateException("客观题没有考生作答, project=" + projectId +
                         ", studentId=" + studentId +
                         ", subject=" + sid +
-                        ", quest=" + objectiveItem +
+                        ", objectiveItem=" + objectiveItem +
+                        ", quest=" + quest +
                         ", isAbsent=" + isAbsent +
                         ", isCheating=" + isCheating);
             }
 
             if (StringUtil.isBlank(standardAnswer)) {
-                throw new IllegalStateException("客观题没有标准答案, project=" +
-                        projectId + ", studentId=" + studentId + ", standardAnswer=" + standardAnswer + ", subject=" + sid + ", quest=" + objectiveItem);
+                throw new IllegalStateException("客观题没有标准答案, project=" + projectId +
+                        ", studentId=" + studentId +
+                        ", standardAnswer=" + standardAnswer +
+                        ", subject=" + sid +
+                        ", objectiveItem=" + objectiveItem +
+                        ", quest=" + quest
+                );
             }
 
             Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
@@ -640,7 +652,7 @@ public class ScannerDBService {
     }
 
     //获取标准答案
-    private String getStdAnswerFromQuest(Document quest) {
+    public String getStdAnswerFromQuest(Document quest) {
 
         Boolean isObjective = quest.getBoolean("isObjective");
         if (isObjective != null && isObjective) {

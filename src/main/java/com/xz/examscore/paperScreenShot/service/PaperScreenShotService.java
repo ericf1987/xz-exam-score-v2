@@ -11,6 +11,7 @@ import com.xz.examscore.paperScreenShot.manager.AllClassScreenShotZipGenerator;
 import com.xz.examscore.paperScreenShot.manager.PaperScreenShotTaskManager;
 import com.xz.examscore.scanner.ScannerDBService;
 import com.xz.examscore.services.*;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -100,6 +98,34 @@ public class PaperScreenShotService {
         return Result.success("试卷截图保存任务执行完成！");
     }
 
+    /**
+     * 重新生成单个学生的试卷截图
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 科目ID
+     * @param aBoolean
+     * @return 返回结果
+     */
+    public Result generateOneStuPaperScreenShot(String projectId, String studentId, String subjectId, Boolean generateClassZip) {
+        Document student = studentService.findStudent(projectId, studentId);
+        String schoolId = student.getString("school");
+        String classId = student.getString("class");
+        PaperScreenShotBean paperScreenShotBean = packOneStuScreenShotTaskBean(projectId, schoolId, classId, subjectId, studentId, "");
+
+        LOG.info("====项目{}， 重新生成学生{}，科目{}的试卷截图====");
+        paintService.saveScreenShot(paperScreenShotBean);
+        LOG.info("====项目{}， 学生{}，科目{}的试卷截图生成完毕====");
+
+        if(generateClassZip){
+            LOG.info("====项目{}， 重新打包班级{}的试卷截图压缩包====");
+            generateOneClassZip(projectId, schoolId, classId, Collections.singletonList(subjectId));
+            LOG.info("====项目{}， 班级{}的试卷截图压缩包生成完毕====");
+        }
+
+        return Result.success("执行完成！");
+
+    }
 
     /**
      * 按班级和科目分发生成试卷截图任务
@@ -133,6 +159,27 @@ public class PaperScreenShotService {
             Map<String, Object> studentCardSlices = scannerDBService.getStudentCardSlices(projectId, subjectId, studentId);
             result.add(studentCardSlices);
         }
+        return new PaperScreenShotBean(projectId, schoolId, classId, subjectId, result, taskId);
+    }
+
+    /**
+     * 单个学生的试卷截图任务
+     *
+     * @param projectId 项目ID
+     * @param schoolId  学校ID
+     * @param classId   班级ID
+     * @param subjectId 科目ID
+     * @param studentId 学生ID
+     * @param taskId    任务ID
+     * @return 试卷截图任务对象
+     */
+    public PaperScreenShotBean packOneStuScreenShotTaskBean(String projectId, String schoolId, String classId, String subjectId, String studentId, String taskId) {
+        ArrayList<Map<String, Object>> result = new ArrayList<>();
+
+        Map<String, Object> studentCardSlices = scannerDBService.getStudentCardSlices(projectId, subjectId, studentId);
+
+        result.add(studentCardSlices);
+
         return new PaperScreenShotBean(projectId, schoolId, classId, subjectId, result, taskId);
     }
 

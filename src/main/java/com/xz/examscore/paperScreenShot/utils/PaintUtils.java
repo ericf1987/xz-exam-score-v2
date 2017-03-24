@@ -90,8 +90,8 @@ public class PaintUtils {
 
 
             g = img.createGraphics();
-            g.setBackground(Color.WHITE);//背景颜色
-            g.setColor(Color.BLACK);//字体颜色
+            g.setBackground(Color.RED);//背景颜色
+            g.setColor(Color.RED);//字体颜色
             g.setFont(font);
 
             if (content != null) {

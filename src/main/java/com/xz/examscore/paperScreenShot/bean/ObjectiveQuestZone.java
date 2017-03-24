@@ -10,6 +10,9 @@ import java.util.Map;
  * @author by fengye on 2017/3/15.
  */
 public class ObjectiveQuestZone {
+
+    private double totalScore;
+
     private int correctCount;
 
     private int totalCount;
@@ -22,6 +25,21 @@ public class ObjectiveQuestZone {
 
     private List<String> errorQuests = new LinkedList<>();
 
+    public double getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(double totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public List<String> getErrorQuests() {
+        return errorQuests;
+    }
+
+    public void setErrorQuests(List<String> errorQuests) {
+        this.errorQuests = errorQuests;
+    }
 
     public int getCorrectCount() {
         return correctCount;
@@ -72,7 +90,8 @@ public class ObjectiveQuestZone {
     }
 
     public String getCorrectDecs(ObjectiveQuestZone zone) {
-        return zone == null ? "" : zone.getCorrectCount() + "/" + zone.getTotalCount() + " 错题：";
+//        return zone == null ? "" : zone.getCorrectCount() + "/" + zone.getTotalCount() + " 错题：";
+        return zone == null ? "" : zone.getTotalScore() + "分 错题：";
     }
 
     /**

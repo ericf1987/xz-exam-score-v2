@@ -6,7 +6,9 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
+import com.xz.examscore.paperScreenShot.service.PaintService;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.junit.Test;
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
@@ -46,6 +50,9 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     PointService pointService;
+    
+    @Autowired
+    PaintService packScoreData;
 
     @Autowired
     SimpleCache cache;
@@ -89,9 +96,10 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetScore() throws Exception {
-        String projectId = "430100-2c641a3e36ff492aa535da7fb4cf28cf";
-        Range range = Range.clazz("27bb692f-a179-41b1-a57f-ab51ee42b71d");
-        Target target = Target.subjectCombination("007008009");
+        String projectId = "430900-8f11fe8dbac842a3805d45e05eb31095";
+        Range range = Range.student("5eaf29f7-c9a6-47e1-a73e-9c91462f5de6");
+        SubjectObjective subjectObjective = new SubjectObjective("005", true);
+        Target target = Target.subjectObjective(subjectObjective);
         System.out.println(projectId + "|" + range.toString() + "|" + target.toString());
         System.out.println(Mongo.target2Doc(target).toString());
         double d = scoreService.getScore(projectId, range, target);
@@ -167,6 +175,17 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         String subjectId = "006";
 
         List<String> errorQuestNo = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false);
+
+        List<Double> nos = errorQuestNo.stream().map(Double::valueOf).collect(Collectors.toList());
+
+        Collections.sort(nos);
+
+        List<String> collect = nos.stream().map(packScoreData::packScoreData).collect(Collectors.toList());
+
+        System.out.println(collect);
+
+        System.out.println(nos);
+
         Collections.sort(errorQuestNo);
         System.out.println(errorQuestNo.toString());
     }

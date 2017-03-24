@@ -3,6 +3,7 @@ package com.xz.examscore.scanner;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.services.QuestService;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.junit.Test;
@@ -26,6 +27,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     MongoClient mongoClient;
+
+    @Autowired
+    QuestService questService;
 
     @Test
     public void testFindProject() throws Exception {
@@ -103,5 +107,19 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         MongoClient mongoClient = scannerDBService.getMongoClient("430500-858a2da0e24f4c329aafb9071e022e3b");
         String subjectId = "001";
         scannerDBService.importOneSubjectTask(project, mongoClient, subjectId);
+    }
+
+    @Test
+    public void testsortStudentAnswer() throws Exception {
+        String a = scannerDBService.sortStudentAnswer("A");
+        System.out.println(a);
+    }
+
+    @Test
+    public void testgetStdAnswerFromQuest() throws Exception {
+        String projectId = "430100-4f461da047f04f81be437e7522e68cab";
+        Document quest = questService.findQuest(projectId, "005", "11");
+        String stdAnswerFromQuest = scannerDBService.getStdAnswerFromQuest(quest);
+        System.out.println(stdAnswerFromQuest);
     }
 }

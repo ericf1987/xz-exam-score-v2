@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -81,10 +83,14 @@ public class TestLamdar1 {
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-        List<String> strings = Arrays.asList("6", "5", "4", "3", "2", "1");
+/*        List<String> strings = Arrays.asList("6", "5", "4", "3", "2", "1");
         for(int i = strings.size() - 1; i >=0 ;i--){
             System.out.println(strings.get(i));
-        }
+        }*/
+        DecimalFormat df = new DecimalFormat("###.####");
+        float f = 20.f;
+        System.out.println(f);
+        System.out.println(df.format(f));
     }
 
     public BufferedImage drawString(BufferedImage bufferedImage, String content, Font font, int x, int y) {

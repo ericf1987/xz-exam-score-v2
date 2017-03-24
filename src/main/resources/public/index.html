@@ -102,6 +102,19 @@
 </fieldset>
 
 <fieldset>
+    <legend>重新生成单个学生单个科目答题卡截图到本地</legend>
+    <form action="paperScreenShot/start/task/oneStudent" method="post">
+        <p>项目ID：<input type="text" name="projectId"/></p>
+        <p>学生ID：<input type="text" name="studentId"/></p>
+        <p>科目ID：<input type="text" name="subjectId"/></p>
+        <p><label><input type="checkbox" name="generateClassZip" value="true"> 重新生成班级zip</label></p>
+        <p>
+            <button type="submit">开始保存</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>将学校下所有班级的试卷留痕文件打包保存</legend>
     <form action="paperScreenShot/downloadByClass" method="post">
         <p>项目ID：<input type="text" name="projectId"/></p>
