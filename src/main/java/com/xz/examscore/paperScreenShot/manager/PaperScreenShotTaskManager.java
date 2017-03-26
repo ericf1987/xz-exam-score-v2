@@ -1,6 +1,8 @@
 package com.xz.examscore.paperScreenShot.manager;
 
 import com.xz.ajiaedu.common.concurrent.Executors;
+import com.xz.examscore.paperScreenShot.bean.TaskProcess;
+import com.xz.examscore.paperScreenShot.service.MonitorService;
 import com.xz.examscore.paperScreenShot.service.PaperScreenShotService;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.SchoolService;
@@ -47,6 +49,9 @@ public class PaperScreenShotTaskManager {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    MonitorService monitorService;
+
     @PostConstruct
     public void init() {
         this.threadPoolExecutor = Executors.newBlockingThreadPoolExecutor(poolSize, poolSize, 100);
@@ -71,6 +76,7 @@ public class PaperScreenShotTaskManager {
         //每个班级生成一个任务
 
         LOG.info("====项目{}======, 试卷截图任务开始执行======", projectId);
+        monitorService.reset(projectId, TaskProcess.GENERATE_PAPER_SCREEN_SHOT);
 
         ThreadPoolExecutor pool = async ? threadPoolExecutor : newBlockingThreadPoolExecutor(10, 10, 100);
         for (Map<String, List<String>> map : list) {

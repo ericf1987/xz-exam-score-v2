@@ -39,6 +39,9 @@ public class PaperScreenShotController {
     public Result startPaperScreenShotTask(
             @RequestParam("projectId") String projectId
     ) {
+        if (projectService.getPaperScreenShotStatus(projectId).equals(PaperScreenShotStatus.GENERATING)) {
+            return Result.fail("该考试项目正在保存截图，请等待...");
+        }
         return paperScreenShotService.startPaperScreenShotTask(projectId);
     }
 

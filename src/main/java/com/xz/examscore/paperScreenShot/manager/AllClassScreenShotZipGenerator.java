@@ -1,6 +1,8 @@
 package com.xz.examscore.paperScreenShot.manager;
 
 import com.xz.examscore.AppException;
+import com.xz.examscore.paperScreenShot.bean.TaskProcess;
+import com.xz.examscore.paperScreenShot.service.MonitorService;
 import com.xz.examscore.paperScreenShot.service.PaperScreenShotService;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.SchoolService;
@@ -48,6 +50,9 @@ public class AllClassScreenShotZipGenerator {
     @Autowired
     SubjectService subjectService;
 
+    @Autowired
+    MonitorService monitorService;
+
     @PostConstruct
     public void init() {
         this.threadPoolExecutor = newBlockingThreadPoolExecutor(poolSize, poolSize, 100);
@@ -69,6 +74,9 @@ public class AllClassScreenShotZipGenerator {
             List<Document> classDocs = classService.listClasses(projectId, schoolId);
             allClasses.addAll(classDocs);
         }
+
+        monitorService.reset(projectId, TaskProcess.GENERATE_CLASS_ZIP);
+
 
         CountDownLatch countDownLatch = new CountDownLatch(allClasses.size());
 

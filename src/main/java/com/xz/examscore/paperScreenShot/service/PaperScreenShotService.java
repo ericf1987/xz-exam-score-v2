@@ -7,6 +7,7 @@ import com.xz.examscore.bean.PaperScreenShotStatus;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
+import com.xz.examscore.paperScreenShot.bean.TaskProcess;
 import com.xz.examscore.paperScreenShot.manager.AllClassScreenShotZipGenerator;
 import com.xz.examscore.paperScreenShot.manager.PaperScreenShotTaskManager;
 import com.xz.examscore.scanner.ScannerDBService;
@@ -66,6 +67,9 @@ public class PaperScreenShotService {
     @Autowired
     DownloadScreenShotService downloadScreenShotService;
 
+    @Autowired
+    MonitorService monitorService;
+
     @Value("${paper.screenshot.zip.location}")
     private String savePath;
 
@@ -101,10 +105,10 @@ public class PaperScreenShotService {
     /**
      * 重新生成单个学生的试卷截图
      *
-     * @param projectId 项目ID
-     * @param studentId 学生ID
-     * @param subjectId 科目ID
-     * @param aBoolean
+     * @param projectId        项目ID
+     * @param studentId        学生ID
+     * @param subjectId        科目ID
+     * @param generateClassZip 是否创建班级试卷截图压缩包
      * @return 返回结果
      */
     public Result generateOneStuPaperScreenShot(String projectId, String studentId, String subjectId, Boolean generateClassZip) {
@@ -117,7 +121,7 @@ public class PaperScreenShotService {
         paintService.saveScreenShot(paperScreenShotBean);
         LOG.info("====项目{}， 学生{}，科目{}的试卷截图生成完毕====");
 
-        if(generateClassZip){
+        if (generateClassZip) {
             LOG.info("====项目{}， 重新打包班级{}的试卷截图压缩包====");
             generateOneClassZip(projectId, schoolId, classId, Collections.singletonList(subjectId));
             LOG.info("====项目{}， 班级{}的试卷截图压缩包生成完毕====");
@@ -204,6 +208,7 @@ public class PaperScreenShotService {
                 LOG.info("----生成失败：项目{}，学校{}，班级{}，科目{}", projectId, schoolId, task.getClassId(), task.getSubjectId());
             }
         }
+        monitorService.increaseFinished(projectId, TaskProcess.GENERATE_PAPER_SCREEN_SHOT);
     }
 
     /**
@@ -250,6 +255,7 @@ public class PaperScreenShotService {
             namePath.add(dir);
         }
         downloadScreenShotService.generateDownloadZip(projectId, new File(outputFileName), idPath, namePath);
+        monitorService.increaseFinished(projectId, TaskProcess.GENERATE_CLASS_ZIP);
     }
 
     class PaperScreenShotsTaskByClassAndSubject extends Thread {

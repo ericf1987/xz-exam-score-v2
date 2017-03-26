@@ -29,14 +29,14 @@ public class PaintUtils {
      * @param imgName URL地址
      * @return 图片缓存对象
      */
-    public static BufferedImage loadImageUrl(String imgName) {
+    public static BufferedImage loadImageUrl(String imgName) throws Exception{
         try {
             URL url = new URL(imgName);
             return ImageIO.read(url);
         } catch (Exception e) {
             LOG.error("获取网络图片URL失败！URL:{}", imgName);
+            throw new Exception("获取网络图片URL失败！");
         }
-        return null;
     }
 
     /**
@@ -46,13 +46,14 @@ public class PaintUtils {
      * @param img      图片缓存
      * @param suffix   扩展名
      */
-    public static void writeImageLocal(String newImage, BufferedImage img, String suffix) {
+    public static void writeImageLocal(String newImage, BufferedImage img, String suffix) throws Exception{
         if (newImage != null && img != null) {
             File outputFile = new File(newImage);
             try {
                 ImageIO.write(img, suffix, outputFile);
             } catch (IOException e) {
                 LOG.error("试卷截图图片保存至本地失败！保存路径为：{}", newImage);
+                throw new Exception("试卷截图图片保存至本地失败！");
             }
         }
     }

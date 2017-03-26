@@ -10,6 +10,7 @@ import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.Mongo;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.examscore.util.Mongo.range2Doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
 /**
@@ -305,7 +307,18 @@ public class ScoreService {
 
         MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
 
-        Document query = Mongo.query(projectId, range, target);
+        Document query;
+
+        if(target.match(Target.SUBJECT_OBJECTIVE)){
+            SubjectObjective subjectObjective = target.getId(SubjectObjective.class);
+            query = doc("project", projectId)
+                    .append("range", range2Doc(range))
+                    .append("target.name", Target.SUBJECT_OBJECTIVE)
+                    .append("target.id.subject", subjectObjective.getSubject())
+                    .append("target.id.objective", subjectObjective.isObjective());
+        }else {
+            query = Mongo.query(projectId, range, target);
+        }
 /*
         Document query = new Document("project", projectId)
                 .append("range", range2Doc(range))

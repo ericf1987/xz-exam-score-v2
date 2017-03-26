@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
@@ -51,6 +50,9 @@ public class PaintService {
     @Autowired
     QuestService questService;
 
+    @Autowired
+    MonitorService monitorService;
+
     public static final Font TOTAL_SCORE_FONT = new Font("华文彩云", Font.BOLD, 35);
 
     public static final Font OBJECTIVE_DESC_FONT = new Font("华文彩云", Font.BOLD, 25);
@@ -74,7 +76,7 @@ public class PaintService {
         } else {
             studentCardSlices.forEach(student -> {
                 List<Map<String, Object>> subjectiveList = (List<Map<String, Object>>) student.get("subjectiveList");
-                String fileName = MapUtils.getString(student, "studentId");
+                String studentId = MapUtils.getString(student, "studentId");
                 //正面试卷截图
                 String paper_positive = MapUtils.getString(student, "paper_positive");
                 //反面试卷截图
@@ -101,7 +103,12 @@ public class PaintService {
                 //客观题标记区域
                 ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, firstObjectiveHeight, firstSubjectiveWidth);
 
-                saveOneStudentScreenShot(paperScreenShotBean, fileName, paper_positive, paper_reverse, totalScoreZone, objectiveQuestZone, rectList);
+                try {
+                    saveOneStudentScreenShot(paperScreenShotBean, studentId, paper_positive, paper_reverse, totalScoreZone, objectiveQuestZone, rectList);
+                } catch (Exception e) {
+                    LOG.error("生成学生试卷截图出现异常，项目ID:{}， 学生ID:{}, 科目ID:{}", projectId, studentId, subjectId);
+                    monitorService.recordFailedStudent(projectId, schoolId, classId, studentId, subjectId);
+                }
             });
         }
     }
@@ -183,7 +190,8 @@ public class PaintService {
         objectiveQuestZone.setTotalCount((int) totalCount);
         objectiveQuestZone.setCorrectCount((int) correctCount);
         //转化成双精度
-        List<Double> errorQuestNo1 = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false).stream().map(Double::valueOf).collect(Collectors.toList());
+        List<Double> errorQuestNo1 = scoreService.getErrorQuestNo(projectId, studentId, subjectId, true, false)
+                .stream().map(Double::valueOf).collect(Collectors.toList());
         //降序
         Collections.sort(errorQuestNo1);
 
@@ -204,7 +212,7 @@ public class PaintService {
      * @param rectList            切图列表
      */
     public void saveOneStudentScreenShot(PaperScreenShotBean paperScreenShotBean, String fileName, String paper_positive, String paper_reverse,
-                                         TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rectList) {
+                                         TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rectList) throws Exception{
         String directory = StringUtil.joinPaths(paperScreenShotSavePath,
                 getScreenShotFilePath(paperScreenShotBean));
         try {
@@ -227,7 +235,7 @@ public class PaintService {
      * @param paper_positive     正面URL地址
      * @param paper_reverse      反面URL地址
      */
-    public void paintPaper(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rects, String path, String paper_positive, String paper_reverse) {
+    public void paintPaper(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rects, String path, String paper_positive, String paper_reverse) throws Exception{
         //将正反面截图读取到内存中
         BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
         BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
@@ -292,13 +300,13 @@ public class PaintService {
         bufferedImage = PaintUtils.modifyImage(img_positive, scoreDesc, TOTAL_SCORE_FONT, (float) coordinateX, (float) coordinateY);
 
         //错题
-        bufferedImage = PaintUtils.modifyImage(bufferedImage, "错题：", OBJECTIVE_DESC_FONT, (float) scoreDescX, (float) coordinateY);
+        bufferedImage = PaintUtils.modifyImage(bufferedImage, "错题：", TOTAL_SCORE_FONT, (float) scoreDescX, (float) coordinateY);
 
         //获取错误题号列表
         List<String> errorQuestList = objectiveQuestZone.getErrorQuestList();
 
         //将题号封装成多个文字区域
-        List<TextRect> textRects = objectiveQuestZone.getTextRects(errorQuestList, scoreDescX + OBJECTIVE_DESC_FONT.getSize() * 3, coordinateY, OBJECTIVE_DESC_FONT);
+        List<TextRect> textRects = objectiveQuestZone.getTextRects(errorQuestList, scoreDescX + TOTAL_SCORE_FONT.getSize() * 3, coordinateY, OBJECTIVE_DESC_FONT);
 
         for (TextRect textRect : textRects) {
             bufferedImage = PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), OBJECTIVE_DESC_FONT, textRect.getCoordinateX(), textRect.getCoordinateY());
@@ -326,16 +334,26 @@ public class PaintService {
         bufferedImage = PaintUtils.modifyImage(bufferedImage, scoreContent, TOTAL_SCORE_FONT,
                 (float) (rect.getCoordinateX()),
                 (float) (rect.getCoordinateY()));
-        bufferedImage = PaintUtils.modifyImage(bufferedImage, rankContent, SUBJECTIVE_DESC_FONT,
+        bufferedImage = PaintUtils.modifyImage(bufferedImage, rankContent, TOTAL_SCORE_FONT,
                 (float) (rect.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length()),
                 (float) (rect.getCoordinateY()));
         return PaintUtils.modifyImage(bufferedImage, descContent, SUBJECTIVE_DESC_FONT,
-                (float) (rect.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length() + SUBJECTIVE_DESC_FONT.getSize() * 3),
+                (float) (rect.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length() + TOTAL_SCORE_FONT.getSize() * 3),
                 (float) (rect.getCoordinateY()) + TOTAL_SCORE_FONT.getSize() - SUBJECTIVE_DESC_FONT.getSize());
     }
 
     /**
      * 将作答区域封装成rect对象
+     *
+     * @param projectId      项目ID
+     * @param schoolId       学校ID
+     * @param classId        班级ID
+     * @param subjectId      科目ID
+     * @param subjective     主观题列表
+     * @param paper_positive 试卷正面URL
+     * @param paper_reverse  试卷反面URL
+     * @param questionNo     试卷题号
+     * @return 返回Rect对象
      */
     private List<Rect> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo) {
         List<Map<String, Object>> rects = (List<Map<String, Object>>) subjective.get("rects");
