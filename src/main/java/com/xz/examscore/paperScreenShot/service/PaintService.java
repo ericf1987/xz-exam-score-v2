@@ -176,7 +176,7 @@ public class PaintService {
         rectList.add(rankInSchoolRect);
         rectList.add(rankInProvinceRect);
 
-        return new TotalScoreZone(100, 100, totalScore, rectList);
+        return new TotalScoreZone(totalScore, rectList);
     }
 
     private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, double firstObjectiveHeight, double firstSubjectiveWidth) {
