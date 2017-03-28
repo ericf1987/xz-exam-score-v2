@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 /**
  * @author by fengye on 2017/3/1.
  */
+@SuppressWarnings("unchecked")
 @Service
 public class PaintService {
 
@@ -55,20 +56,19 @@ public class PaintService {
 
     public static final Font TOTAL_SCORE_FONT = new Font("华文彩云", Font.BOLD, 35);
 
-    public static final Font OBJECTIVE_DESC_FONT = new Font("华文彩云", Font.BOLD, 25);
-
-    public static final Font SUBJECTIVE_DESC_FONT = new Font("华文彩云", Font.BOLD, 25);
-
     /**
      * 保存试卷截图对象到本地文件系统
      *
      * @param paperScreenShotBean 试卷截图对象
      */
-    public void saveScreenShot(PaperScreenShotBean paperScreenShotBean) {
+    public void saveScreenShot(PaperScreenShotBean paperScreenShotBean, Map<String, Object> subjectRuleMap) {
         String projectId = paperScreenShotBean.getProjectId();
         String schoolId = paperScreenShotBean.getSchoolId();
         String classId = paperScreenShotBean.getClassId();
         String subjectId = paperScreenShotBean.getSubjectId();
+
+        //排名显示规则配置
+        Map<String, Object> rankRuleMap = null == subjectRuleMap ? Collections.emptyMap() : (Map<String, Object>) subjectRuleMap.get(subjectId);
 
         List<Map<String, Object>> studentCardSlices = paperScreenShotBean.getStudentCardSlices();
         if (studentCardSlices.isEmpty()) {
@@ -81,14 +81,15 @@ public class PaintService {
                 String paper_positive = MapUtils.getString(student, "paper_positive");
                 //反面试卷截图
                 String paper_reverse = MapUtils.getString(student, "paper_reverse");
-                List<Rect> rectList = new ArrayList<>();
+                List<SubjectiveQuestZone> subjectiveQuestZoneList = new ArrayList<>();
 
                 subjectiveList.forEach(subjective -> {
                     //题号
                     String questNo = MapUtils.getString(subjective, "questionNo");
                     //获取主观题每个题目的坐标信息
-                    List<Rect> rects = convertToRectsObj(projectId, schoolId, classId, subjectId, subjective, paper_positive, paper_reverse, questNo);
-                    rectList.add(rects.get(0));
+                    List<SubjectiveQuestZone> subjectiveQuestZones = convertToRectsObj(projectId, schoolId, classId, subjectId, subjective, paper_positive, paper_reverse, questNo, rankRuleMap);
+                    //获取主观题最靠前的区域
+                    subjectiveQuestZoneList.add(subjectiveQuestZones.get(0));
                 });
 
                 //获取第一个客观题的高度
@@ -98,13 +99,16 @@ public class PaintService {
                 double firstSubjectiveWidth = getFirstSubjectiveWidth(student);
 
                 //总分标记区域
-                TotalScoreZone totalScoreZone = getTotalScoreZone(projectId, student.get("studentId").toString(), subjectId, schoolId, classId, firstSubjectiveWidth);
+                TotalScoreZone totalScoreZone = getTotalScoreZone(projectId, student.get("studentId").toString(), subjectId, schoolId,
+                        classId, firstSubjectiveWidth, rankRuleMap);
 
                 //客观题标记区域
-                ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, firstObjectiveHeight, firstSubjectiveWidth);
+                ObjectiveQuestZone objectiveQuestZone = getObjectiveQuestZone(projectId, student.get("studentId").toString(), subjectId, schoolId,
+                        classId, firstObjectiveHeight, firstSubjectiveWidth, rankRuleMap);
 
                 try {
-                    saveOneStudentScreenShot(paperScreenShotBean, studentId, paper_positive, paper_reverse, totalScoreZone, objectiveQuestZone, rectList);
+                    saveOneStudentScreenShot(paperScreenShotBean, studentId, paper_positive, paper_reverse,
+                            totalScoreZone, objectiveQuestZone, subjectiveQuestZoneList);
                 } catch (Exception e) {
                     LOG.error("生成学生试卷截图出现异常，项目ID:{}， 学生ID:{}, 科目ID:{}", projectId, studentId, subjectId);
                     monitorService.recordFailedStudent(projectId, schoolId, classId, studentId, subjectId);
@@ -126,8 +130,7 @@ public class PaintService {
             List<Map<String, Object>> rects = (List<Map<String, Object>>) obj1.get("rects");
             if (null != rects) {
                 Map<String, Object> rect = rects.get(0);
-                double coordinateX = MapUtils.getDoubleValue(rect, "coordinateX");
-                return coordinateX;
+                return MapUtils.getDoubleValue(rect, "coordinateX");
             }
         }
         return 0;
@@ -148,44 +151,109 @@ public class PaintService {
             List<Map<String, Object>> rects = (List<Map<String, Object>>) obj1.get("rects");
             if (null != rects) {
                 Map<String, Object> rect = rects.get(0);
-                double coordinateY = MapUtils.getDoubleValue(rect, "coordinateY");
-                return coordinateY;
+                return MapUtils.getDoubleValue(rect, "coordinateY");
             }
         }
 
         return 0;
     }
 
-    private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId, double firstSubjectiveWidth) {
+    private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
+                                             double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
+
+        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankInClass");
+        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankInSchool");
+        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankInProvince");
+
+        boolean isClassOn = MapUtils.getBooleanValue(rankInClass, "total");
+        boolean isSchoolOn = MapUtils.getBooleanValue(rankInSchool, "total");
+        boolean isProvinceOn = MapUtils.getBooleanValue(rankInProvince, "total");
+
         double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subjectId));
-        int rankInClass = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), totalScore);
-        int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subject(subjectId), totalScore);
-        int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);
-
-        //垂直间距
-        int verticalInterval = TOTAL_SCORE_FONT.getSize() + 5;
-
-        TextRect totalScoreRect = new TextRect((float) firstSubjectiveWidth, 50, "得分：" + packScoreData(totalScore), TOTAL_SCORE_FONT);
-        TextRect rankInClassRect = new TextRect((float) firstSubjectiveWidth, 50 + verticalInterval, "班级排名：" + rankInClass, TOTAL_SCORE_FONT);
-        TextRect rankInSchoolRect = new TextRect((float) firstSubjectiveWidth, 50 + verticalInterval * 2, "学校排名：" + rankInSchool, TOTAL_SCORE_FONT);
-        TextRect rankInProvinceRect = new TextRect((float) firstSubjectiveWidth, 50 + verticalInterval * 3, "总体排名：" + rankInProvince, TOTAL_SCORE_FONT);
-
         List<TextRect> rectList = new LinkedList<>();
+        TextRect totalScoreRect = new TextRect((float) firstSubjectiveWidth, 50, "得分：" + packScoreData(totalScore), TOTAL_SCORE_FONT);
         rectList.add(totalScoreRect);
-        rectList.add(rankInClassRect);
-        rectList.add(rankInSchoolRect);
-        rectList.add(rankInProvinceRect);
+
+        fillTotalRanks(projectId, subjectId, schoolId, classId, (float) firstSubjectiveWidth, totalScore, rectList,
+                isClassOn, isSchoolOn, isProvinceOn);
 
         return new TotalScoreZone(totalScore, rectList);
     }
 
-    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, double firstObjectiveHeight, double firstSubjectiveWidth) {
+    /**
+     * 填充总分区域的排名信息
+     *
+     * @param projectId            考试项目ID
+     * @param subjectId            科目ID
+     * @param schoolId             学校ID
+     * @param classId              班级ID
+     * @param firstSubjectiveWidth 主观题高度
+     * @param totalScore           总分
+     * @param rectList             主观题答题区域
+     * @param isClassOn            班级排名显示开关
+     * @param isSchoolOn           学校排名显示开关
+     * @param isProvinceOn         总体排名显示开关
+     */
+    private void fillTotalRanks(String projectId, String subjectId, String schoolId, String classId, float firstSubjectiveWidth, double totalScore, List<TextRect> rectList, boolean isClassOn, boolean isSchoolOn, boolean isProvinceOn) {
+        //垂直间距
+        int verticalInterval = TOTAL_SCORE_FONT.getSize() + 5;
+
+        if (isClassOn) {
+            int rankInClass = rankService.getRank(projectId, Range.clazz(classId), Target.subject(subjectId), totalScore);
+            TextRect rankInClassRect = new TextRect(firstSubjectiveWidth, 50 + verticalInterval, "班级排名：" + rankInClass, TOTAL_SCORE_FONT);
+            rectList.add(rankInClassRect);
+        }
+
+        if (isSchoolOn) {
+            int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subject(subjectId), totalScore);
+            TextRect rankInSchoolRect = new TextRect(firstSubjectiveWidth, 50 + verticalInterval * 2, "学校排名：" + rankInSchool, TOTAL_SCORE_FONT);
+            rectList.add(rankInSchoolRect);
+        }
+
+        if (isProvinceOn) {
+            int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subject(subjectId), totalScore);
+            TextRect rankInProvinceRect = new TextRect(firstSubjectiveWidth, 50 + verticalInterval * 3, "总体排名：" + rankInProvince, TOTAL_SCORE_FONT);
+            rectList.add(rankInProvinceRect);
+        }
+
+        //调整总分排名位置的各项排名的高度
+        for (int i = 1; i <= rectList.size(); i++) {
+            TextRect textRect = rectList.get(i - 1);
+            textRect.setCoordinateY(50 + verticalInterval * i);
+        }
+
+    }
+
+    /**
+     * 客观题答题区域
+     *
+     * @param projectId            项目ID
+     * @param studentId            学生ID
+     * @param subjectId            科目ID
+     * @param schoolId             学校ID
+     * @param classId              班级ID
+     * @param firstObjectiveHeight 第一个客观题的高度
+     * @param firstSubjectiveWidth 第一个主观题的宽度
+     * @param rankRuleMap          排名显示规则
+     * @return 返回结果
+     */
+    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
+                                                     double firstObjectiveHeight, double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
+
+        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankInClass");
+        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankInSchool");
+        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankInProvince");
+
+        boolean isClassOn = MapUtils.getBooleanValue(rankInClass, "objective");
+        boolean isSchoolOn = MapUtils.getBooleanValue(rankInSchool, "objective");
+        boolean isProvinceOn = MapUtils.getBooleanValue(rankInProvince, "objective");
+
         long correctCount = scoreService.getQuestCorrectCount(projectId, studentId, subjectId, true);
         long totalCount = scoreService.getStudentSubjectScoresCount(projectId, studentId, subjectId, true);
         double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.subjectObjective(new SubjectObjective(subjectId, true)));
         ObjectiveQuestZone objectiveQuestZone = new ObjectiveQuestZone();
         objectiveQuestZone.setTotalScore(totalScore);
-        objectiveQuestZone.setCoordinateX((float) firstSubjectiveWidth);
+        objectiveQuestZone.setCoordinateX(firstSubjectiveWidth);
         objectiveQuestZone.setCoordinateY(firstObjectiveHeight);
         objectiveQuestZone.setTotalCount((int) totalCount);
         objectiveQuestZone.setCorrectCount((int) correctCount);
@@ -195,24 +263,70 @@ public class PaintService {
         //降序
         Collections.sort(errorQuestNo1);
 
+        //错题列表
         List<String> errorQuestNo = errorQuestNo1.stream().map(this::packScoreData).collect(Collectors.toList());
-        objectiveQuestZone.setErrorQuestList(errorQuestNo);
+        objectiveQuestZone.setErrorQuests(errorQuestNo);
+
+        //计算排名
+        fillObjectiveRanks(projectId, studentId, subjectId, schoolId, classId, objectiveQuestZone.getTextRects(),
+                firstObjectiveHeight, firstSubjectiveWidth,
+                isClassOn, isSchoolOn, isProvinceOn);
+
         return objectiveQuestZone;
+    }
+
+    /**
+     * 填充客观题排名
+     *
+     * @param projectId            项目ID
+     * @param studentId            学生ID
+     * @param subjectId            科目ID
+     * @param schoolId             学校ID
+     * @param classId              班级ID
+     * @param firstObjectiveHeight 第一个客观题的高度
+     * @param firstSubjectiveWidth 第一个主观题的宽度
+     * @param isClassOn            班级排名显示开关
+     * @param isSchoolOn           学校排名显示开关
+     * @param isProvinceOn         总体排名显示开关
+     */
+    private void fillObjectiveRanks(String projectId, String studentId, String subjectId, String schoolId, String classId, List<TextRect> textRects, double firstObjectiveHeight, double firstSubjectiveWidth, boolean isClassOn, boolean isSchoolOn, boolean isProvinceOn) {
+        SubjectObjective subjectObjective = new SubjectObjective(subjectId, true);
+        double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.subjectObjective(subjectObjective));
+
+        StringBuilder builder = new StringBuilder();
+
+        if (isClassOn) {
+            int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.subjectObjective(subjectObjective), totalScore);
+            builder.append("班-").append(rankInProvince).append("名 ");
+        }
+
+        if (isSchoolOn) {
+            int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), Target.subjectObjective(subjectObjective), totalScore);
+            builder.append("校-").append(rankInSchool).append("名 ");
+        }
+
+        if (isProvinceOn) {
+            int rankInClass = rankService.getRank(projectId, Range.clazz(classId), Target.subjectObjective(subjectObjective), totalScore);
+            builder.append("总-").append(rankInClass).append("名 ");
+        }
+
+        TextRect textRect = new TextRect((float) firstSubjectiveWidth, (float) firstObjectiveHeight, builder.toString(), TOTAL_SCORE_FONT);
+        textRects.add(textRect);
     }
 
     /**
      * 保存单个学生的试卷留痕截图文件
      *
-     * @param paperScreenShotBean 试卷截图对象
-     * @param fileName            文件名
-     * @param paper_positive      正面URL地址
-     * @param paper_reverse       反面URL地址
-     * @param totalScoreZone      总分区域
-     * @param objectiveQuestZone  客观题区域
-     * @param rectList            切图列表
+     * @param paperScreenShotBean     试卷截图对象
+     * @param fileName                文件名
+     * @param paper_positive          正面URL地址
+     * @param paper_reverse           反面URL地址
+     * @param totalScoreZone          总分区域
+     * @param objectiveQuestZone      客观题区域
+     * @param subjectiveQuestZoneList 切图列表
      */
     public void saveOneStudentScreenShot(PaperScreenShotBean paperScreenShotBean, String fileName, String paper_positive, String paper_reverse,
-                                         TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rectList) throws Exception{
+                                         TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<SubjectiveQuestZone> subjectiveQuestZoneList) throws Exception {
         String directory = StringUtil.joinPaths(paperScreenShotSavePath,
                 getScreenShotFilePath(paperScreenShotBean));
         try {
@@ -222,20 +336,21 @@ public class PaintService {
             return;
         }
         String filePath = StringUtil.joinPaths(directory, fileName);
-        paintPaper(totalScoreZone, objectiveQuestZone, rectList, filePath, paper_positive, paper_reverse);
+        paintPaper(totalScoreZone, objectiveQuestZone, subjectiveQuestZoneList, filePath, paper_positive, paper_reverse);
     }
 
     /**
      * 将图片修改后保存
      *
-     * @param totalScoreZone     总分区域
-     * @param objectiveQuestZone 客观题区域
-     * @param rects              图片切图区域列表
-     * @param path               保存路径
-     * @param paper_positive     正面URL地址
-     * @param paper_reverse      反面URL地址
+     * @param totalScoreZone       总分区域
+     * @param objectiveQuestZone   客观题区域
+     * @param subjectiveQuestZones 图片切图区域列表
+     * @param path                 保存路径
+     * @param paper_positive       正面URL地址
+     * @param paper_reverse        反面URL地址
      */
-    public void paintPaper(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<Rect> rects, String path, String paper_positive, String paper_reverse) throws Exception{
+    public void paintPaper(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<SubjectiveQuestZone> subjectiveQuestZones,
+                           String path, String paper_positive, String paper_reverse) throws Exception {
         //将正反面截图读取到内存中
         BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
         BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
@@ -251,12 +366,12 @@ public class PaintService {
         }
 
         //标记主观题区域
-        for (Rect rect : rects) {
-            int pageIndex = rect.getPageIndex();
+        for (SubjectiveQuestZone subjectiveQuestZone : subjectiveQuestZones) {
+            int pageIndex = subjectiveQuestZone.getPageIndex();
             if (pageIndex == 0) {
-                img_positive = doPaint(img_positive, rect);
+                img_positive = doPaint(img_positive, subjectiveQuestZone);
             } else {
-                img_reverse = doPaint(img_reverse, rect);
+                img_reverse = doPaint(img_reverse, subjectiveQuestZone);
             }
         }
         //保存正面
@@ -265,6 +380,13 @@ public class PaintService {
         PaintUtils.writeImageLocal(renderSuffixByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.PNG);
     }
 
+    /**
+     * 绘制总分区域
+     *
+     * @param img_positive   图片缓存
+     * @param totalScoreZone 客观题区域
+     * @return 图片缓存
+     */
     private BufferedImage paintTotalScoreZone(BufferedImage img_positive, TotalScoreZone totalScoreZone) {
 
         Optional<TotalScoreZone> optional = Optional.of(totalScoreZone);
@@ -282,34 +404,46 @@ public class PaintService {
         return img_positive;
     }
 
-    private BufferedImage paintObjectiveQuestZone(BufferedImage img_positive, ObjectiveQuestZone objectiveQuestZone) {
+    /**
+     * 绘制客观题区域
+     *
+     * @param bufferedImage      图片缓存
+     * @param objectiveQuestZone 客观题区域
+     * @return 图片缓存
+     */
+    private BufferedImage paintObjectiveQuestZone(BufferedImage bufferedImage, ObjectiveQuestZone objectiveQuestZone) {
 
-        BufferedImage bufferedImage;
+        int lineIntervalY = TOTAL_SCORE_FONT.getSize() + 10;
 
+        //去小数点末尾0
         String scoreDesc = packScoreData(objectiveQuestZone.getTotalScore()) + "分";
 
         double coordinateX = objectiveQuestZone.getCoordinateX();
 
         //在客观题答题区域上方一个字体高度+10的位置开始绘制客观题正确率信息
-        double coordinateY = objectiveQuestZone.getCoordinateY() - TOTAL_SCORE_FONT.getSize() - 10;
-
-        //错题列表的起始位置
-        double scoreDescX = coordinateX + TOTAL_SCORE_FONT.getSize() * scoreDesc.length();
+        double coordinateY = objectiveQuestZone.getCoordinateY() - lineIntervalY * 2;
 
         //分数
-        bufferedImage = PaintUtils.modifyImage(img_positive, scoreDesc, TOTAL_SCORE_FONT, (float) coordinateX, (float) coordinateY);
+        bufferedImage = PaintUtils.modifyImage(bufferedImage, scoreDesc, TOTAL_SCORE_FONT, (float) coordinateX, (float) coordinateY);
 
-        //错题
-        bufferedImage = PaintUtils.modifyImage(bufferedImage, "错题：", TOTAL_SCORE_FONT, (float) scoreDescX, (float) coordinateY);
-
-        //获取错误题号列表
-        List<String> errorQuestList = objectiveQuestZone.getErrorQuestList();
-
-        //将题号封装成多个文字区域
-        List<TextRect> textRects = objectiveQuestZone.getTextRects(errorQuestList, scoreDescX + TOTAL_SCORE_FONT.getSize() * 3, coordinateY, OBJECTIVE_DESC_FONT);
+        List<TextRect> textRects = objectiveQuestZone.getTextRects();
 
         for (TextRect textRect : textRects) {
-            bufferedImage = PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), OBJECTIVE_DESC_FONT, textRect.getCoordinateX(), textRect.getCoordinateY());
+            bufferedImage = PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), textRect.getFont(), (float) coordinateX + TOTAL_SCORE_FONT.getSize() * scoreDesc.length(), (float) coordinateY);
+        }
+
+        //获取错误题号列表
+        List<String> errorQuestList = objectiveQuestZone.getErrorQuests();
+
+        String errorTitle = "错题：";
+
+        bufferedImage = PaintUtils.modifyImage(bufferedImage, errorTitle, TOTAL_SCORE_FONT, (float) coordinateX, (float) (coordinateY + lineIntervalY));
+
+        List<TextRect> lines = objectiveQuestZone.getLines(errorQuestList, (float) coordinateX + TOTAL_SCORE_FONT.getSize() * errorTitle.length(),
+                (float) (coordinateY + lineIntervalY), TOTAL_SCORE_FONT);
+
+        for (TextRect textRect : lines){
+            bufferedImage = PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), TOTAL_SCORE_FONT, textRect.getCoordinateX(), textRect.getCoordinateY());
         }
 
         return bufferedImage;
@@ -327,19 +461,22 @@ public class PaintService {
         return b ? path + "_positive" + suffix : path + "_reverse" + suffix;
     }
 
-    private BufferedImage doPaint(BufferedImage bufferedImage, Rect rect) {
-        String scoreContent = packScoreData(rect.getScore()) + "分";
-        String rankContent = "排名：";
-        String descContent = "总-" + rect.getRankInProvince() + "名，校-" + rect.getRankInSchool() + "名，班-" + rect.getRankInClass() + "名";
+    private BufferedImage doPaint(BufferedImage bufferedImage, SubjectiveQuestZone subjectiveQuestZone) {
+        String scoreContent = packScoreData(subjectiveQuestZone.getScore()) + "分";
+        List<TextRect> textRects = subjectiveQuestZone.getTextRects();
+
         bufferedImage = PaintUtils.modifyImage(bufferedImage, scoreContent, TOTAL_SCORE_FONT,
-                (float) (rect.getCoordinateX()),
-                (float) (rect.getCoordinateY()));
-        bufferedImage = PaintUtils.modifyImage(bufferedImage, rankContent, TOTAL_SCORE_FONT,
-                (float) (rect.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length()),
-                (float) (rect.getCoordinateY()));
-        return PaintUtils.modifyImage(bufferedImage, descContent, SUBJECTIVE_DESC_FONT,
-                (float) (rect.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length() + TOTAL_SCORE_FONT.getSize() * 3),
-                (float) (rect.getCoordinateY()) + TOTAL_SCORE_FONT.getSize() - SUBJECTIVE_DESC_FONT.getSize());
+                (float) (subjectiveQuestZone.getCoordinateX()),
+                (float) (subjectiveQuestZone.getCoordinateY()));
+
+        for (TextRect textRect : textRects) {
+            PaintUtils.modifyImage(bufferedImage, textRect.getTextContent(), TOTAL_SCORE_FONT,
+                    (float) (subjectiveQuestZone.getCoordinateX() + TOTAL_SCORE_FONT.getSize() * scoreContent.length()),
+                    (float) (subjectiveQuestZone.getCoordinateY())
+            );
+        }
+
+        return bufferedImage;
     }
 
     /**
@@ -353,11 +490,21 @@ public class PaintService {
      * @param paper_positive 试卷正面URL
      * @param paper_reverse  试卷反面URL
      * @param questionNo     试卷题号
+     * @param rankRuleMap    排名显示规则
      * @return 返回Rect对象
      */
-    private List<Rect> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo) {
+    private List<SubjectiveQuestZone> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo, Map<String, Object> rankRuleMap) {
+
+        Map<String, Object> rankInClassMap = MapUtils.getMap(rankRuleMap, "rankInClass");
+        Map<String, Object> rankInSchoolMap = MapUtils.getMap(rankRuleMap, "rankInSchool");
+        Map<String, Object> rankInProvinceMap = MapUtils.getMap(rankRuleMap, "rankInProvince");
+
+        List<String> questInClass = (List<String>) MapUtils.getObject(rankInClassMap, "subjective");
+        List<String> questInSchool = (List<String>) MapUtils.getObject(rankInSchoolMap, "subjective");
+        List<String> questInProvince = (List<String>) MapUtils.getObject(rankInProvinceMap, "subjective");
+
         List<Map<String, Object>> rects = (List<Map<String, Object>>) subjective.get("rects");
-        List<Rect> list = new ArrayList<>();
+        List<SubjectiveQuestZone> list = new ArrayList<>();
         for (Map<String, Object> rect : rects) {
 
             double score = MapUtils.getDouble(subjective, "score");
@@ -365,11 +512,28 @@ public class PaintService {
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
             Target questTarget = Target.quest(quest.getString("questId"));
 
-            int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), questTarget, score);
-            int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), questTarget, score);
-            int rankInClass = rankService.getRank(projectId, Range.clazz(classId), questTarget, score);
+            StringBuilder builder = new StringBuilder();
 
-            Rect r = new Rect();
+            if (null != questInProvince && questInProvince.contains(questionNo)) {
+                int rankInProvince = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), questTarget, score);
+                builder.append("总-").append(rankInProvince).append("名 ");
+            }
+
+            if (null != questInSchool && questInSchool.contains(questionNo)) {
+                int rankInSchool = rankService.getRank(projectId, Range.school(schoolId), questTarget, score);
+                builder.append("校-").append(rankInSchool).append("名 ");
+            }
+
+            if (null != questInClass && questInClass.contains(questionNo)) {
+                int rankInClass = rankService.getRank(projectId, Range.clazz(classId), questTarget, score);
+                builder.append("班-").append(rankInClass).append("名 ");
+            }
+
+            TextRect textRect = new TextRect();
+            textRect.setTextContent(builder.toString());
+            textRect.setFont(TOTAL_SCORE_FONT);
+
+            SubjectiveQuestZone r = new SubjectiveQuestZone();
             r.setQuestNo(questionNo);
             r.setCoordinateX(MapUtils.getDouble(rect, "coordinateX"));
             r.setCoordinateY(MapUtils.getDouble(rect, "coordinateY"));
@@ -380,10 +544,11 @@ public class PaintService {
             r.setPaper_positive(paper_positive);
             r.setPaper_reverse(paper_reverse);
             r.setPageIndex(MapUtils.getInteger(rect, "pageIndex"));
-            r.setRankInProvince(rankInProvince);
-            r.setRankInSchool(rankInSchool);
-            r.setRankInClass(rankInClass);
+
+            r.setTextRects(Collections.singletonList(textRect));
+
             list.add(r);
+
         }
         return list;
     }

@@ -15,6 +15,10 @@ public class TextRect {
 
     private Font font;
 
+    public TextRect() {
+
+    }
+
     public float getCoordinateX() {
         return coordinateX;
     }

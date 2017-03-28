@@ -118,7 +118,7 @@ public class PaperScreenShotService {
         PaperScreenShotBean paperScreenShotBean = packOneStuScreenShotTaskBean(projectId, schoolId, classId, subjectId, studentId, "");
 
         LOG.info("====项目{}， 重新生成学生{}，科目{}的试卷截图====");
-        paintService.saveScreenShot(paperScreenShotBean);
+        paintService.saveScreenShot(paperScreenShotBean, null);
         LOG.info("====项目{}， 学生{}，科目{}的试卷截图生成完毕====");
 
         if (generateClassZip) {
@@ -264,6 +264,9 @@ public class PaperScreenShotService {
         private String classId;
         private String subjectId;
 
+        //添加一个题目过滤规则
+        private Map<String, Object> rankRuleMap = new HashMap<>();
+
         public String getProjectId() {
             return projectId;
         }
@@ -296,6 +299,14 @@ public class PaperScreenShotService {
             this.subjectId = subjectId;
         }
 
+        public Map<String, Object> getRankRuleMap() {
+            return rankRuleMap;
+        }
+
+        public void setRankRuleMap(Map<String, Object> rankRuleMap) {
+            this.rankRuleMap = rankRuleMap;
+        }
+
         public PaperScreenShotsTaskByClassAndSubject(String projectId, String schoolId, String classId, String subjectId) {
             this.projectId = projectId;
             this.schoolId = schoolId;
@@ -303,9 +314,17 @@ public class PaperScreenShotService {
             this.subjectId = subjectId;
         }
 
+        public PaperScreenShotsTaskByClassAndSubject(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> rankRuleMap) {
+            this.projectId = projectId;
+            this.schoolId = schoolId;
+            this.classId = classId;
+            this.subjectId = subjectId;
+            this.rankRuleMap = rankRuleMap;
+        }
+
         @Override
         public void run() {
-            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), this.getSubjectId(), ""));
+            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), this.getSubjectId(), ""), null);
         }
     }
 

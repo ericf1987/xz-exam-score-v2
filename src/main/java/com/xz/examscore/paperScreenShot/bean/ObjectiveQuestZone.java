@@ -1,10 +1,8 @@
 package com.xz.examscore.paperScreenShot.bean;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author by fengye on 2017/3/15.
@@ -21,9 +19,9 @@ public class ObjectiveQuestZone {
 
     private double coordinateY;
 
-    private Map<String, Integer> rankMap = new HashMap<>();
-
     private List<String> errorQuests = new LinkedList<>();
+
+    private List<TextRect> textRects = new LinkedList<>();
 
     public double getTotalScore() {
         return totalScore;
@@ -73,37 +71,24 @@ public class ObjectiveQuestZone {
         this.coordinateY = coordinateY;
     }
 
-    public Map<String, Integer> getRankMap() {
-        return rankMap;
+    public List<TextRect> getTextRects() {
+        return textRects;
     }
 
-    public void setRankMap(Map<String, Integer> rankMap) {
-        this.rankMap = rankMap;
-    }
-
-    public List<String> getErrorQuestList() {
-        return errorQuests;
-    }
-
-    public void setErrorQuestList(List<String> errorQuests) {
-        this.errorQuests = errorQuests;
-    }
-
-    public String getCorrectDecs(ObjectiveQuestZone zone) {
-//        return zone == null ? "" : zone.getCorrectCount() + "/" + zone.getTotalCount() + " 错题：";
-        return zone == null ? "" : zone.getTotalScore() + "分 错题：";
+    public void setTextRects(List<TextRect> textRects) {
+        this.textRects = textRects;
     }
 
     /**
-     * 将错误描述截取成多个文字区域
+     * 绘制多行错题显示
      *
-     * @param errorDesc   错误描述信息
-     * @param errorDescX  错误描述信息的起始位置X
-     * @param coordinateY 错误描述信息的起始位置Y
+     * @param errorDesc   错误描述
+     * @param errorDescX  错误描述原点X坐标
+     * @param coordinateY 错误描述原点Y坐标
      * @param font        字体
-     * @return 文本区域对象列表
+     * @return 返回结果
      */
-    public List<TextRect> getTextRects(List<String> errorDesc, double errorDescX, double coordinateY, Font font) {
+    public List<TextRect> getLines(List<String> errorDesc, double errorDescX, double coordinateY, Font font) {
 
         int fontSize = font.getSize();
 
@@ -119,7 +104,7 @@ public class ObjectiveQuestZone {
         for (int x = 0; x <= row; x++) {
             int tail = count * (x + 1);
             int lastIndex = tail > size ? size : tail;
-            TextRect textRect = new TextRect((float) errorDescX, (float) coordinateY + fontSize * x,
+            TextRect textRect = new TextRect((float) errorDescX, (float) (coordinateY + fontSize * x),
                     getErrorNoString(errorDesc.subList(count * x, lastIndex)), font);
             textRects.add(textRect);
         }

@@ -37,7 +37,8 @@ public class ScoreMapDispatcher extends TaskDispatcher {
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
         // 对哪些分数进行排名
         // 对分数进行排名是因为要计算题目的区分度
-        List<Target> targets = targetService.queryTargets(projectId, Target.SUBJECT, Target.SUBJECT_COMBINATION, Target.PROJECT, Target.QUEST);
+        List<Target> targets = targetService.queryTargets(projectId,
+                Target.SUBJECT, Target.SUBJECT_OBJECTIVE, Target.SUBJECT_COMBINATION, Target.PROJECT, Target.QUEST);
 
         // 如果项目需要对文综理综进行整合（考试本身没有这两个科目），则额外
         // 添加文综理综的排名统计（总分统计在 CombinedSubjectScoreDispatcher 里已经做了）

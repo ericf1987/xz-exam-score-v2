@@ -2,12 +2,13 @@ package com.xz.examscore.paperScreenShot.service;
 
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
-import com.xz.examscore.paperScreenShot.bean.Rect;
+import com.xz.examscore.paperScreenShot.bean.SubjectiveQuestZone;
+import com.xz.examscore.services.SubjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -17,18 +18,51 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     PaintService paintService;
+    
+    @Autowired
+    SubjectService subjectService;
 
     @Autowired
     PaperScreenShotService paperScreenShotService;
 
     @Test
     public void testSaveScreenShot() throws Exception {
-        String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        /*String projectId = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         String schoolId = "dd46843a-0ea9-4d49-a664-7eb1fb869e79";
         String classId = "42ffec58-7d86-4979-9ae0-04e6b5f6771d";
-        String subjectId = "006";
-        PaperScreenShotBean paperScreenShotBean = paperScreenShotService.packScreenShotTaskBean(projectId, schoolId, classId, subjectId, "100");
-        paintService.saveScreenShot(paperScreenShotBean);
+        String subjectId = "006";*/
+
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> rankInClass = new HashMap<>();
+        rankInClass.put("subjective", Arrays.asList("7", "11", "12", "20"));
+        rankInClass.put("objective", true);
+        rankInClass.put("total", true);
+
+        Map<String, Object> rankInSchool = new HashMap<>();
+        rankInSchool.put("subjective", Arrays.asList("7", "13", "15", "20"));
+        rankInSchool.put("objective", false);
+        rankInSchool.put("total", false);
+
+        Map<String, Object> rankInProvince = new HashMap<>();
+        rankInProvince.put("subjective", Arrays.asList("16", "17", "19", "20"));
+        rankInProvince.put("objective", true);
+        rankInProvince.put("total", true);
+
+        Map<String, Object> subjectMap = new HashMap<>();
+        subjectMap.put("rankInClass", rankInClass);
+        subjectMap.put("rankInSchool", rankInSchool);
+        subjectMap.put("rankInProvince", rankInProvince);
+
+        String projectId = "430900-8f11fe8dbac842a3805d45e05eb31095";
+        String schoolId = "d0d78c80-b6ae-4908-80dd-fd78efc01479";
+        String classId = "a1ee55a0-a62d-4337-b50e-2e43e0423597";
+//        String subjectId = "001";
+        List<String> subjects = subjectService.querySubjects(projectId);
+        for(String subjectId : subjects){
+            map.put(subjectId, subjectMap);
+            PaperScreenShotBean paperScreenShotBean = paperScreenShotService.packScreenShotTaskBean(projectId, schoolId, classId, subjectId, "100");
+            paintService.saveScreenShot(paperScreenShotBean, map);
+        }
     }
 
     @Test
@@ -36,8 +70,8 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
         String savePath = "F:/paper/test1";
         String img_positive = "http://znxunzhi-marking-pic.oss-cn-shenzhen.aliyuncs.com/430300-9cef9f2059ce4a36a40a7a60b07c7e00/21454f2c-c3c7-4dcc-8a62-eef2164c07d1/001/01/paperImage/310160034_positive.png";
         String img_reverse = "http://znxunzhi-marking-pic.oss-cn-shenzhen.aliyuncs.com/430300-9cef9f2059ce4a36a40a7a60b07c7e00/21454f2c-c3c7-4dcc-8a62-eef2164c07d1/001/01/paperImage/310160034_reverse.png";
-        List<Rect> rects = new ArrayList<>();
-        Rect r1 = new Rect();
+        List<SubjectiveQuestZone> subjectiveQuestZones = new ArrayList<>();
+        SubjectiveQuestZone r1 = new SubjectiveQuestZone();
         r1.setQuestNo("12");
         r1.setCoordinateX(70.0);
         r1.setCoordinateY(1127.0);
@@ -49,7 +83,7 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
         r1.setPaper_positive(img_positive);
         r1.setPaper_reverse(img_reverse);
 
-        Rect r2 = new Rect();
+        SubjectiveQuestZone r2 = new SubjectiveQuestZone();
         r2.setQuestNo("13");
         r2.setCoordinateX(1111167.0);
         r2.setCoordinateY(111111388.0);
@@ -61,10 +95,10 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
         r2.setPaper_positive(img_positive);
         r2.setPaper_reverse(img_reverse);
 
-        rects.add(r1);
-        rects.add(r2);
+        subjectiveQuestZones.add(r1);
+        subjectiveQuestZones.add(r2);
 
-        paintService.paintPaper(null, null, rects, savePath, img_positive, img_reverse);
+        paintService.paintPaper(null, null, subjectiveQuestZones, savePath, img_positive, img_reverse);
     }
 
     @Test
