@@ -29,7 +29,7 @@ public class PaintUtils {
      * @param imgName URL地址
      * @return 图片缓存对象
      */
-    public static BufferedImage loadImageUrl(String imgName) throws Exception{
+    public static BufferedImage loadImageUrl(String imgName) throws Exception {
         try {
             URL url = new URL(imgName);
             return ImageIO.read(url);
@@ -46,7 +46,7 @@ public class PaintUtils {
      * @param img      图片缓存
      * @param suffix   扩展名
      */
-    public static void writeImageLocal(String newImage, BufferedImage img, String suffix) throws Exception{
+    public static void writeImageLocal(String newImage, BufferedImage img, String suffix) throws Exception {
         if (newImage != null && img != null) {
             File outputFile = new File(newImage);
             try {
@@ -89,10 +89,10 @@ public class PaintUtils {
                 y = positionY + font.getSize() + 2;//高度
             }
 
+            Color color = new Color(255, 0, 0);
 
             g = img.createGraphics();
-            g.setBackground(Color.RED);//背景颜色
-            g.setColor(Color.RED);//字体颜色
+            g.setColor(color);//字体颜色
             g.setFont(font);
 
             if (content != null) {

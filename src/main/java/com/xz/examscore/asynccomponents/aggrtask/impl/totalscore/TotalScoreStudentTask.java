@@ -92,6 +92,7 @@ public class TotalScoreStudentTask extends AggrTask {
     private void aggrStudentSubjectCombinationScores(String projectId, Target target, MongoCollection<Document> c, Range studentRange) {
         String studentId = studentRange.getId();
         Document student = studentService.findStudent(projectId, studentId);
+        boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
         String subjectCombinationId = target.getId().toString();
         List<String> subjectIds = importProjectService.separateSubject(subjectCombinationId);
         // 统计单个考生组合科目的总分
@@ -107,7 +108,7 @@ public class TotalScoreStudentTask extends AggrTask {
             Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
             Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                     .append("area", student.get("area")).append("city", student.get("city"))
-                    .append("province", student.get("province"));
+                    .append("province", student.get("province")).append("isAbsent", isAbsent);
             scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
         }
     }
@@ -115,6 +116,8 @@ public class TotalScoreStudentTask extends AggrTask {
     private void aggrStudentSubjectProjectScores(String projectId, Target target, MongoCollection<Document> c, Range studentRange) {
         String studentId = studentRange.getId();
         Document student = studentService.findStudent(projectId, studentId);
+
+        boolean isAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
 
         // 统计单个考生的科目/项目总分
         AggregateIterable<Document> aggregate = c.aggregate(Arrays.asList(
@@ -130,7 +133,8 @@ public class TotalScoreStudentTask extends AggrTask {
             Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
             Document extra = doc("class", student.get("class")).append("school", student.get("school"))
                     .append("area", student.get("area")).append("city", student.get("city"))
-                    .append("province", student.get("province"));
+                    .append("province", student.get("province"))
+                    .append("isAbsent", isAbsent);
             scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
         }
     }

@@ -67,7 +67,7 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testpaintRects() throws Exception {
-        String savePath = "F:/paper/test1";
+        String savePath = "F:/paper/test4";
         String img_positive = "http://znxunzhi-marking-pic.oss-cn-shenzhen.aliyuncs.com/430300-9cef9f2059ce4a36a40a7a60b07c7e00/21454f2c-c3c7-4dcc-8a62-eef2164c07d1/001/01/paperImage/310160034_positive.png";
         String img_reverse = "http://znxunzhi-marking-pic.oss-cn-shenzhen.aliyuncs.com/430300-9cef9f2059ce4a36a40a7a60b07c7e00/21454f2c-c3c7-4dcc-8a62-eef2164c07d1/001/01/paperImage/310160034_reverse.png";
         List<SubjectiveQuestZone> subjectiveQuestZones = new ArrayList<>();
@@ -85,8 +85,8 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
 
         SubjectiveQuestZone r2 = new SubjectiveQuestZone();
         r2.setQuestNo("13");
-        r2.setCoordinateX(1111167.0);
-        r2.setCoordinateY(111111388.0);
+        r2.setCoordinateX(167.0);
+        r2.setCoordinateY(388.0);
         r2.setFullScore(4.0);
         r2.setScore(3.0);
         r2.setHeight(269.0);

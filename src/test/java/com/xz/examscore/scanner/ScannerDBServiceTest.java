@@ -54,7 +54,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         /*System.out.println(calculateScore(3, "c", "c", null).score);
         System.out.println(calculateScore(4, "A1B1DA2BC2", "DA", null).score);*/
         System.out.println(scannerDBService.sortStdAnswer("BD"));
-        System.out.println(calculateScore(3, "BD", "BD", null).score);
+        System.out.println(calculateScore(4, "B, D", " ", false).score);
     }
 
     @Test

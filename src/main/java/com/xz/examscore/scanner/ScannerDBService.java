@@ -410,7 +410,7 @@ public class ScannerDBService {
         }
         //网阅题目ID列表
         if (null == subjectiveList || subjectiveList.isEmpty()) {
-            LOG.info("该学生{}网阅主观题列表为空，该学生是否有客观题和主观题得分！", studentId);
+            LOG.info("该学生{}网阅主观题列表为空", studentId);
             return;
         }
         //获取统计集合中主观题信息
@@ -503,6 +503,7 @@ public class ScannerDBService {
             String answerContent = StringUtil.isBlank(objectiveItem.getString("answerContent")) ?
                     "*" : objectiveItem.getString("answerContent");
 
+            //将学生作答按照字母升序排序
             String studentAnswer = sortStudentAnswer(answerContent.toUpperCase());
 
             //标准答案数据从统计数据库的quest_list中获取
@@ -516,8 +517,8 @@ public class ScannerDBService {
                         ", subject=" + sid +
                         ", objectiveItem=" + objectiveItem +
                         ", quest=" + quest +
-                        ", isAbsent=" + isAbsent +
-                        ", isCheating=" + isCheating);
+                        ", isAbsent=" + null +
+                        ", isCheating=" + false);
             }
 
             if (StringUtil.isBlank(standardAnswer)) {
@@ -538,8 +539,10 @@ public class ScannerDBService {
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
+                    //作弊||缺考||得分无效题目
                     .append("score", isCheating || (null != isAbsent && isAbsent) || !isEffective ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
+                    //未作弊&&未缺考&&得分有效题目&&回答正确
                     .append("right", !(isCheating || (null != isAbsent && isAbsent) || !isEffective) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("isEffective", isEffective)

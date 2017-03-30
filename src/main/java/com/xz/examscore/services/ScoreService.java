@@ -562,7 +562,8 @@ public class ScoreService {
         Document query = doc("project", projectId).append("student", studentId);
         switch (targetName) {
             case Target.PROJECT:
-                //只有当没有任何分数明细的时候，才判断考生整个考试项目为缺考状态
+                //该学生全部科目全部标记为缺考，则判定为项目缺考
+                query.append("isAbsent", $exists(false));
                 long count = collection.count(query);
                 return count == 0;
             case Target.SUBJECT:
