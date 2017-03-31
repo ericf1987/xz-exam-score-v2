@@ -7,6 +7,7 @@ import com.xz.examscore.api.server.project.ProjectBasicDataAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.services.SchoolService;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,10 +42,12 @@ public class TotalBasicDataSheets extends SheetGenerator {
         //设置表头
         Result result = projectBasicDataAnalysis.execute(param);
         List<Map<String, Object>> studentBasicData = result.get("studentBasicData");
+        //全部科目缺考学生列表
+        List<String> projectAbsentStudents = result.get("projectAbsentStudents");
         if(!studentBasicData.isEmpty()){
             setupHeader(excelWriter, studentBasicData);
             setupSecondaryHeader(excelWriter, studentBasicData);
-            fillSchoolData(excelWriter, studentBasicData);
+            fillSchoolData(excelWriter, studentBasicData, projectAbsentStudents);
         }
     }
 
@@ -89,7 +92,7 @@ public class TotalBasicDataSheets extends SheetGenerator {
         }
     }
 
-    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
+    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData, List<String> projectAbsentStudents) {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         for (Map<String, Object> one : studentBasicData) {
@@ -101,7 +104,11 @@ public class TotalBasicDataSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), one.get("class"));
             //全科数据
             Map<String, Object> projectAnalysis = (Map<String, Object>) one.get("projectAnalysis");
-            excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("score"));
+            if(projectAbsentStudents.contains(MapUtils.getString(one, "studentId"))){
+                excelWriter.set(row, column.incrementAndGet(), "-");
+            }else{
+                excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("score"));
+            }
             excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("totalRankIndex"));
             List<Map<String, Object>> subjects = (List<Map<String, Object>>)one.get("subjectAnalysis");
             for (Map<String, Object> subject : subjects) {

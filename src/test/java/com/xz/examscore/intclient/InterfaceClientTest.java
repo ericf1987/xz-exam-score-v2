@@ -3,6 +3,7 @@ package com.xz.examscore.intclient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.ajiaedu.common.json.JSONUtils;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.services.ImportProjectService;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.junit.Assert.*;
 
@@ -40,17 +42,27 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         System.out.println(jsonObject);
     }
 
+
+
     @Test
     public void testQueryQuestionByProject() throws Exception {
         JSONArray quests = interfaceClient.queryQuestionByProject("430500-858a2da0e24f4c329aafb9071e022e3b");
-        quests.stream().filter(q -> {
+
+        //指定科目和指定标答
+        Predicate<JSONObject> predicate = (p) -> p.getString("subjectId").equals("002") && p.getString("answer").equals("D");
+
+        JSONObject jsonObject = JSONUtils.getFromJSONArray(quests, predicate);
+
+        System.out.println(jsonObject.toJSONString());
+
+/*        quests.stream().filter(q -> {
             JSONObject obj = (JSONObject)q;
             if(obj.getString("subjectId").equals("001")){
                 System.out.println(obj.toString());
                 return true;
             }
             return false;
-        });
+        });*/
 
 /*        System.out.println(quests.toString());
         Map<String, Double> map = new HashMap<>();

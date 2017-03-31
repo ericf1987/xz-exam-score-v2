@@ -61,6 +61,9 @@ public class SchoolBasicDataAnalysis implements Server {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
 
+        //全科缺考学生列表
+        List<String> projectAbsentStudents = new ArrayList<>();
+
         List<Map<String, Object>> studentBasicData = new ArrayList<>();
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
         //获取学校各个班级学生
@@ -72,6 +75,7 @@ public class SchoolBasicDataAnalysis implements Server {
                 String studentId = student.getString("student");
                 String cityName = cityService.getCityName(student.getString("city"));
                 Map<String, Object> map = new HashMap<>();
+                map.put("studentId", studentId);
                 map.put("studentName", student.getString("name"));
                 map.put("examNo", student.getString("examNo"));
                 map.put("customExamNo", student.getString("customExamNo"));
@@ -81,7 +85,7 @@ public class SchoolBasicDataAnalysis implements Server {
 
                 //获取省排名
                 Range province = Range.province(student.getString("province"));
-                Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.school(schoolId), province, studentId);
+                Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.school(schoolId), province, studentId, projectAbsentStudents);
                 List<Map<String, Object>> subjectAnalysis = getSubjectAnalysis(projectId, Range.school(schoolId), province, studentId);
 
                 map.put("projectAnalysis", projectAnalysis);
@@ -96,13 +100,20 @@ public class SchoolBasicDataAnalysis implements Server {
             return score2.compareTo(score1);
         });
 
-        return Result.success().set("studentBasicData", studentBasicData);
+        return Result.success().set("studentBasicData", studentBasicData).set("projectAbsentStudents", projectAbsentStudents);
     }
 
-    private Map<String,Object> getProjectAnalysis(String projectId, Range school, Range province, String studentId) {
+    private Map<String,Object> getProjectAnalysis(String projectId, Range school, Range province, String studentId, List<String> projectAbsentStudents) {
         Map<String, Object> map = new HashMap<>();
         //获取总分(全科目总分)
         double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
+
+        boolean isAbsent = scoreService.isAbsentInTotalScore(projectId, studentId, Target.project(projectId));
+
+        if(isAbsent){
+            projectAbsentStudents.add(studentId);
+        }
+
         //获取排名
         int schoolRankIndex = rankService.getRank(projectId, school, Target.project(projectId), studentId);
         int totalRankIndex = rankService.getRank(projectId, province, Target.project(projectId), studentId);
@@ -121,7 +132,7 @@ public class SchoolBasicDataAnalysis implements Server {
             map.put("subjectId", subject);
             map.put("subjectName", SubjectService.getSubjectName(subject));
             //获取科目总分(具体科目分数)
-            double score = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subject));
+            String score = scoreService.getAbsentTotalScore(projectId, Range.student(studentId), Target.subject(subject));
             //获取排名
             int schoolRankIndex = rankService.getRank(projectId, school, Target.subject(subject), studentId);
             int totalRankIndex = rankService.getRank(projectId, province, Target.subject(subject), studentId);

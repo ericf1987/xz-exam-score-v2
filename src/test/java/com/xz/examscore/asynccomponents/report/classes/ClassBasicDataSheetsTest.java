@@ -14,6 +14,6 @@ public class ClassBasicDataSheetsTest extends XzExamScoreV2ApplicationTests{
 
     @Test
     public void testGenerateSheet() throws Exception {
-        classBasicDataReport.generate("431100-903288f61a5547f1a08a7e20420c4e9e", Range.clazz("79cbbdaf-584b-4a58-a474-870d549bedbd"), "target/class-basic-data.xlsx");
+        classBasicDataReport.generate("430200-cc721d3beb924d2997fe112c767b3a28", Range.clazz("fc512df4-fb9c-4e38-a2ce-5835e7e55a78"), "target/class-basic-data.xlsx");
     }
 }

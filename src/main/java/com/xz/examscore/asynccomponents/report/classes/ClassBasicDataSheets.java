@@ -9,6 +9,7 @@ import com.xz.examscore.asynccomponents.report.SheetTask;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.SchoolService;
+import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/24.
- * 班级成绩分析-基础数据-学生各科成绩明细
+ *         班级成绩分析-基础数据-学生各科成绩明细
  */
 @SuppressWarnings("unchecked")
 @Component
@@ -46,9 +47,11 @@ public class ClassBasicDataSheets extends SheetGenerator {
         //设置表头
         Result result = classBasicDataAnalysis.execute(param);
         List<Map<String, Object>> studentBasicData = result.get("studentBasicData");
+        //全部科目缺考学生列表
+        List<String> projectAbsentStudents = result.get("projectAbsentStudents");
         setupHeader(excelWriter, studentBasicData);
         setupSecondaryHeader(excelWriter, studentBasicData);
-        fillSchoolData(excelWriter, studentBasicData);
+        fillSchoolData(excelWriter, studentBasicData, projectAbsentStudents);
     }
 
     private void setupHeader(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
@@ -96,7 +99,7 @@ public class ClassBasicDataSheets extends SheetGenerator {
         }
     }
 
-    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData) {
+    private void fillSchoolData(ExcelWriter excelWriter, List<Map<String, Object>> studentBasicData, List<String> projectAbsentStudents) {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         for (Map<String, Object> one : studentBasicData) {
@@ -106,11 +109,15 @@ public class ClassBasicDataSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), one.get("class"));
             //全科数据
             Map<String, Object> projectAnalysis = (Map<String, Object>) one.get("projectAnalysis");
-            excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("score"));
+            if(projectAbsentStudents.contains(MapUtils.getString(one, "studentId"))){
+                excelWriter.set(row, column.incrementAndGet(), "-");
+            }else{
+                excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("score"));
+            }
             excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("totalRankIndex"));
             excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("schoolRankIndex"));
             excelWriter.set(row, column.incrementAndGet(), projectAnalysis.get("classRankIndex"));
-            List<Map<String, Object>> subjects = (List<Map<String, Object>>)one.get("subjectAnalysis");
+            List<Map<String, Object>> subjects = (List<Map<String, Object>>) one.get("subjectAnalysis");
             for (Map<String, Object> subject : subjects) {
                 excelWriter.set(row, column.incrementAndGet(), subject.get("score"));
                 excelWriter.set(row, column.incrementAndGet(), subject.get("totalRankIndex"));
@@ -123,7 +130,7 @@ public class ClassBasicDataSheets extends SheetGenerator {
     }
 
     private List<Map<String, Object>> getSubjects(List<Map<String, Object>> studentBasicData) {
-        if(studentBasicData.isEmpty()){
+        if (studentBasicData.isEmpty()) {
             return Collections.emptyList();
         }
         Map<String, Object> one = studentBasicData.get(0);

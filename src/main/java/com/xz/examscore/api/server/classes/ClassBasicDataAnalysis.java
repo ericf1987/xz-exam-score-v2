@@ -63,6 +63,9 @@ public class ClassBasicDataAnalysis implements Server {
         String schoolId = param.getString("schoolId");
         String classId = param.getString("classId");
 
+        //全科缺考学生列表
+        List<String> projectAbsentStudents = new ArrayList<>();
+
         //学校名称
         String schoolName = schoolService.getSchoolName(projectId, schoolId);
         String className = classService.getClassName(projectId, classId);
@@ -71,12 +74,13 @@ public class ClassBasicDataAnalysis implements Server {
         List<Document> studentList = studentService.getStudentList(projectId, Range.clazz(classId));
 
 
-        for(Document student : studentList){
+        for (Document student : studentList) {
             Map<String, Object> map = new HashMap<>();
             String studentId = student.getString("student");
             String cityName = cityService.getCityName(student.getString("city"));
             map.put("examNo", student.getString("examNo"));
             map.put("customExamNo", student.getString("customExamNo"));
+            map.put("studentId", studentId);
             map.put("studentName", student.getString("name"));
             map.put("school", schoolName);
             map.put("class", className);
@@ -84,7 +88,7 @@ public class ClassBasicDataAnalysis implements Server {
 
             //获取省排名
             Range province = Range.province(student.getString("province"));
-            Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), province, studentId);
+            Map<String, Object> projectAnalysis = getProjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), province, studentId, projectAbsentStudents);
             List<Map<String, Object>> subjectAnalysis = getSubjectAnalysis(projectId, Range.clazz(classId), Range.school(schoolId), province, studentId);
             map.put("projectAnalysis", projectAnalysis);
             map.put("subjectAnalysis", subjectAnalysis);
@@ -97,13 +101,20 @@ public class ClassBasicDataAnalysis implements Server {
             Double score2 = (Double) ((Map<String, Object>) o2.get("projectAnalysis")).get("score");
             return score2.compareTo(score1);
         });
-        return Result.success().set("studentBasicData", studentBasicData);
+        return Result.success().set("studentBasicData", studentBasicData).set("projectAbsentStudents", projectAbsentStudents);
     }
 
-    private Map<String,Object> getProjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId) {
+    private Map<String, Object> getProjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId, List<String> projectAbsentStudents) {
         Map<String, Object> map = new HashMap<>();
         //获取总分(全科目总分)
         double score = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
+
+        boolean isAbsent = scoreService.isAbsentInTotalScore(projectId, studentId, Target.project(projectId));
+
+        if (isAbsent) {
+            projectAbsentStudents.add(studentId);
+        }
+
         //获取排名
         int classRankIndex = rankService.getRank(projectId, clazz, Target.project(projectId), studentId);
         int schoolRankIndex = rankService.getRank(projectId, school, Target.project(projectId), studentId);
@@ -115,16 +126,16 @@ public class ClassBasicDataAnalysis implements Server {
         return map;
     }
 
-    private List<Map<String,Object>> getSubjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId) {
+    private List<Map<String, Object>> getSubjectAnalysis(String projectId, Range clazz, Range school, Range province, String studentId) {
         //获取考试的科目
         List<String> subjects = subjectService.querySubjects(projectId);
         List<Map<String, Object>> subjectAnalysis = new ArrayList<>();
-        for(String subject : subjects){
+        for (String subject : subjects) {
             Map<String, Object> map = new HashMap<>();
             map.put("subjectId", subject);
             map.put("subjectName", SubjectService.getSubjectName(subject));
             //获取科目总分(具体科目分数)
-            double score = scoreService.getScore(projectId, Range.student(studentId), Target.subject(subject));
+            String score = scoreService.getAbsentTotalScore(projectId, Range.student(studentId), Target.subject(subject));
             //获取排名
             int clazzRankIndex = rankService.getRank(projectId, clazz, Target.subject(subject), studentId);
             int schoolRankIndex = rankService.getRank(projectId, school, Target.subject(subject), studentId);

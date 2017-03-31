@@ -303,6 +303,45 @@ public class ScoreService {
         });
     }
 
+    public String getAbsentTotalScore(String projectId, Range range, Target target){
+        String collectionName = getTotalScoreCollection(projectId, target);
+        return getAbsentTotalScore0(collectionName, projectId, range, target);
+    }
+
+    //统计EXCEL中调用，对于科目或考试项目缺考的学生返回 "-" 作为标记
+    private String getAbsentTotalScore0(String collectionName, String projectId, Range range, Target target) {
+        MongoCollection<Document> totalScores = scoreDatabase.getCollection(collectionName);
+
+        Document query = Mongo.query(projectId, range, target);
+
+        List<Document> docs = MongoUtils.toList(totalScores.find(query).projection(doc("totalScore", 1).append("isAbsent", 1)));
+
+        double result = 0;
+        for (Document doc : docs) {
+            if (doc.get("totalScore") != null) {
+                result += doc.getDouble("totalScore");
+            }
+        }
+
+        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
+            Document first = docs.get(0);
+            boolean isAbsent = BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
+            return isAbsent ? "-" : String.valueOf(result);
+        }else{
+            return String.valueOf(result);
+        }
+    }
+
+    public boolean isAbsentInTotalScore(String projectId, String studentId, Target target){
+        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
+            MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
+            Document query = Mongo.query(projectId, Range.student(studentId), target);
+            Document first = totalScores.find(query).first();
+            return BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
+        }
+        return false;
+    }
+
     private Double getTotalScore0(String collection, String projectId, Range range, Target target) {
 
         MongoCollection<Document> totalScores = scoreDatabase.getCollection(collection);
@@ -361,6 +400,11 @@ public class ScoreService {
         String collectionName = getTotalScoreCollection(projectId, target);
         Document query = Mongo.query(projectId, range, target);
         Document update = doc("totalScore", totalScore);
+
+        if( (range.match(Range.STUDENT) && (target.match(Target.PROJECT) || target.match(Target.SUBJECT)) )){
+            boolean isAbsent = isStudentAbsent(projectId, range.getId(), target);
+            update.append("isAbsent", isAbsent);
+        }
 
         if (extra != null) {
             update.putAll(extra);
@@ -564,11 +608,13 @@ public class ScoreService {
             case Target.PROJECT:
                 //该学生全部科目全部标记为缺考，则判定为项目缺考
                 query.append("isAbsent", $exists(false));
+//                query.append("isAbsent", doc("$exists", false));
                 long count = collection.count(query);
                 return count == 0;
             case Target.SUBJECT:
                 query.append("subject", target.getId().toString());
                 Document doc = collection.find(query).first();
+                //没有参加该科目考试或有该科目的缺考标记则视为缺考
                 return null == doc || BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
             default:
                 return false;

@@ -188,4 +188,15 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         Collections.sort(errorQuestNo);
         System.out.println(errorQuestNo.toString());
     }
+
+    @Test
+    public void testisAbsentStudent() throws Exception {
+        String projectId = "430200-cc721d3beb924d2997fe112c767b3a28";
+        String studentId = "4ddf5393-0977-4f9e-b19a-6e26e102d7e8";
+        Target target = Target.project(projectId);
+
+        boolean studentAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
+        System.out.println(studentAbsent);
+    }
+
 }
