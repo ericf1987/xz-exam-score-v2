@@ -324,9 +324,12 @@ public class ScoreService {
         }
 
         if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
-            Document first = docs.get(0);
-            boolean isAbsent = BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
-            return isAbsent ? "-" : String.valueOf(result);
+            if(!docs.isEmpty()){
+                Document first = docs.get(0);
+                boolean isAbsent = BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
+                return isAbsent ? "-" : String.valueOf(result);
+            }
+            return "-";
         }else{
             return String.valueOf(result);
         }

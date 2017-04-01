@@ -156,6 +156,22 @@
 </fieldset>
 
 <fieldset>
+    <legend>生成单张 Excel 报表</legend>
+    <form action="report/one" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>文件目录：<input type="text" name="category"/></p>
+        <p>文件名：<input type="text" name="filename"/></p>
+        <p>维度名称：<input type="text" name="rangeName"/></p>
+        <p>维度ID：<input type="text" name="rangeId"/></p>
+        <p>报表生成器类名：<input type="text" name="reportGeneratorName"/></p>
+        <p><label><input type="checkbox" name="isExamAlliance" value="true"> 是否是联考项目</label></p>
+        <p>
+            <button type="submit">开始生成</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>（个性化需求）生成等第报表</legend>
     <form action="report/rank_level" method="post">
         <p>项目ID：<input type="text" name="project"/></p>

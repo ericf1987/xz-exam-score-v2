@@ -2,6 +2,7 @@ package com.xz.examscore.scanner;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.services.QuestService;
 import org.apache.commons.lang.BooleanUtils;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
@@ -121,5 +123,29 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         Document quest = questService.findQuest(projectId, "005", "11");
         String stdAnswerFromQuest = scannerDBService.getStdAnswerFromQuest(quest);
         System.out.println(stdAnswerFromQuest);
+    }
+
+    @Test
+    public void testisAbsent() throws Exception {
+        String projectId = "430100-4f461da047f04f81be437e7522e68cab";
+        String subjectId = "005";
+//        String studentId = "b0ffcd4a-f881-4c9f-9762-4fc09fa1e146";
+        String studentId = "a65823ea-8b7b-4513-8a80-ab8a70011ade";
+//        String studentId = "50a1ac07-fc9a-4b56-8931-bbbd2f6e0329";
+
+        MongoClient mongoClient1 = scannerDBService.getMongoClient(projectId);
+
+        MongoCollection<Document> students = mongoClient1.getDatabase(projectId + "_" + subjectId).getCollection("students");
+
+        Document studentId1 = students.find(MongoUtils.doc("studentId", studentId)).first();
+
+        scannerDBService.importStudentScore(projectId, subjectId, studentId1, new AtomicInteger(0));
+
+        System.out.println(scannerDBService.isAbsent(studentId1, true));
+    }
+
+    @Test
+    public void testimportStudentScore() throws Exception {
+
     }
 }

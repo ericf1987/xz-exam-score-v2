@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -145,7 +146,7 @@ public class ScannerDBService {
         LOG.info("科目数{}", tasks.size());
         tasks.forEach(task -> LOG.info("任务队列中科目为：{}", task.getSubjectId()));
 
-        for(ImportStudentCardSliceTask task : tasks){
+        for (ImportStudentCardSliceTask task : tasks) {
             try {
                 task.join();
             } catch (InterruptedException e) {
@@ -209,7 +210,7 @@ public class ScannerDBService {
             );
         }
 
-        if(counter.incrementAndGet() % 1000 == 0){
+        if (counter.incrementAndGet() % 1000 == 0) {
             LOG.info("当前科目为：{}， 已完成{}学生的试卷留痕数据导入", SubjectService.getSubjectName(subject), counter.get());
         }
     }
@@ -224,13 +225,13 @@ public class ScannerDBService {
         ).collect(Collectors.toList());
     }
 
-    public ImportStudentCardSliceTask runImportStudentCardSliceTasks(String project, String subject, MongoClient mongoClient){
+    public ImportStudentCardSliceTask runImportStudentCardSliceTasks(String project, String subject, MongoClient mongoClient) {
         ImportStudentCardSliceTask task = new ImportStudentCardSliceTask(project, subject, mongoClient);
         task.start();
         return task;
     }
 
-    class ImportStudentCardSliceTask extends Thread{
+    class ImportStudentCardSliceTask extends Thread {
         private String project;
         private String subjectId;
         private MongoClient mongoClient;
@@ -259,7 +260,7 @@ public class ScannerDBService {
             this.mongoClient = mongoClient;
         }
 
-        public ImportStudentCardSliceTask(String project, String subjectId, MongoClient mongoClient){
+        public ImportStudentCardSliceTask(String project, String subjectId, MongoClient mongoClient) {
             this.project = project;
             this.subjectId = subjectId;
             this.mongoClient = mongoClient;
@@ -361,12 +362,54 @@ public class ScannerDBService {
             LOG.info("该学生{}在科目{}的考试中存在作弊标记，将主观题和客观题分数改为0分", studentId, subjectId);
         }
 
-        saveObjectiveScores(projectId, subjectId, document, student, isCheating);
-        saveSubjectiveScores(projectId, subjectId, document, student, isCheating);
+        //判断该学生是否缺考
+        boolean isAbsent = isAbsent(document, true);
+
+        saveObjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent);
+        saveSubjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent);
 
         if (counter.incrementAndGet() % 100 == 0) {
             LOG.info("已导入科目 " + subjectId + " 的 " + counter.get() + " 名学生...");
         }
+    }
+
+    /**
+     * 判断学生是否缺考
+     *
+     * @param student 网阅学生分数记录
+     * @param b       是否把0分计入缺考
+     * @return 是否缺考
+     */
+    public boolean isAbsent(Document student, boolean b) {
+        //是否把0分计入缺考||无网阅分数||有缺考标记 三种条件满足一中则视为缺考
+
+        List<Document> objectiveList = DocumentUtils.getList(student, "objectiveList", Collections.emptyList());
+        List<Document> subjectiveList = DocumentUtils.getList(student, "subjectiveList", Collections.emptyList());
+        //无网阅分数
+        boolean hasNoQuestScore = objectiveList.isEmpty() && subjectiveList.isEmpty();
+
+        //各小题得分不能为0
+        Predicate<Document> predicate_o = (o) -> o.getString("answerContent").length() != 0 && !o.getString("answerContent").equals("*") && !StringUtil.isBlank(o.getString("answerContent"));
+        Predicate<Document> predicate_s = (s) -> Double.valueOf(s.get("score").toString()) != 0;
+
+        objectiveList.forEach(o -> {
+            String score = o.get("score").toString();
+            Double aDouble = Double.valueOf(score);
+            System.out.println(aDouble == 0);
+        });
+
+        //所有题目得分为0
+        boolean allQuestZero = false;
+        //有网阅数据&&把0分视为缺考
+        if (!hasNoQuestScore && b) {
+            List<Document> objectiveScores = objectiveList.stream().filter(predicate_o).collect(Collectors.toList());
+            List<Document> subjectiveScores = subjectiveList.stream().filter(predicate_s).collect(Collectors.toList());
+            allQuestZero = objectiveScores.isEmpty() && subjectiveScores.isEmpty();
+        }
+
+        boolean isAbsent = BooleanUtils.toBoolean(student.get("isAbsent", Boolean.class));
+
+        return hasNoQuestScore || allQuestZero || isAbsent;
     }
 
     private boolean isCheating(Document document) {
@@ -397,11 +440,10 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
+    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
-        Boolean isAbsent = document.getBoolean("isAbsent");
         String studentId = student.getString("student");
-        if (null != isAbsent) {
+        if (isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以主观题得分为0", studentId, subjectId);
         }
 
@@ -431,21 +473,21 @@ public class ScannerDBService {
             String questionNo = subjectiveItem.getString("questionNo");
             double score = Double.parseDouble(subjectiveItem.get("score").toString());
             double fullScore = Double.parseDouble(subjectiveItem.get("fullScore").toString());
-            Boolean missing = subjectiveItem.getBoolean("missing");
+            boolean missing = BooleanUtils.toBoolean(subjectiveItem.getBoolean("missing"));
 
             //主观题学生作答的切图所在的URL
             Map<String, Object> url = (Map<String, Object>) subjectiveItem.get("url");
             String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
 
-            //如果isEffective字段不为空，且为false，则无效，否则有效
-            boolean isEffective = !(null != subjectiveItem.getBoolean("isEffective") && !subjectiveItem.getBoolean("isEffective"));
+            //改题目是否得分有效（用于标记是否为选做题）
+            boolean isEffective = BooleanUtils.toBoolean(subjectiveItem.getBoolean("isEffective"));
 
             //如果该生作弊或缺考，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
                     .append("questNo", questionNo)
-                    .append("score", isCheating || (null != isAbsent && isAbsent) || !isEffective ? 0d : score)
-                    .append("right", !(isCheating || (null != isAbsent && isAbsent) || !isEffective) && NumberUtil.equals(score, fullScore))
+                    .append("score", isCheating || isAbsent || !isEffective ? 0d : score)
+                    .append("right", !(isCheating || isAbsent || !isEffective) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -456,11 +498,11 @@ public class ScannerDBService {
                     .append("province", student.getString("province"))
                     .append("url", url)
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
-            if (null != missing && missing) {
+            if (missing) {
                 scoreDoc.append("missing", true);
             }
             //如果有缺考标记，则标记缺考
-            if (null != isAbsent) {
+            if (isAbsent) {
                 scoreDoc.append("isAbsent", isAbsent);
             }
 
@@ -469,16 +511,16 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating) {
-        List<Document> objectiveList = (List<Document>) document.get("objectiveList");
-        Boolean isAbsent = document.getBoolean("isAbsent");
+    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent) {
+        List<Document> objectiveList = DocumentUtils.getList(document, "objectiveList", Collections.emptyList());
+
         String studentId = student.getString("student");
 
-        if (null != isAbsent) {
+        if (isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以客观题得分为0", studentId, subjectId);
         }
         //网阅题目ID列表
-        if (null == objectiveList || objectiveList.isEmpty()) {
+        if (objectiveList.isEmpty()) {
             LOG.info("该学生{}网阅客观题列表为空，对该学生进行数据修补，确保客观题结构存在", studentId);
             fixMissingObjectiveQuest(projectId, subjectId, isAbsent, student);
             return;
@@ -494,8 +536,8 @@ public class ScannerDBService {
                 throw new IllegalArgumentException("获取quest_list题号失败！统计失败");
             }
 
-            //如果isEffective字段不为空，且为false，则无效，否则有效
-            boolean isEffective = !(null != objectiveItem.getBoolean("isEffective") && !objectiveItem.getBoolean("isEffective"));
+            //改题目是否得分有效（用于标记是否为选做题）
+            boolean isEffective = BooleanUtils.toBoolean(objectiveItem.getBoolean("isEffective"));
 
             double fullScore = getFullScore(quest, objectiveItem);
 
@@ -511,13 +553,13 @@ public class ScannerDBService {
             String standardAnswer = getStdAnswerFromQuest(quest);
 
             //对于没有缺考或没有作弊的学生，客观题如果作答为空字符串，才报错判定为没有作答
-            if (null == isAbsent && !isCheating && StringUtil.isBlank(studentAnswer)) {
+            if (isAbsent && !isCheating && StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" + projectId +
                         ", studentId=" + studentId +
                         ", subject=" + sid +
                         ", objectiveItem=" + objectiveItem +
                         ", quest=" + quest +
-                        ", isAbsent=" + null +
+                        ", isAbsent=" + isAbsent +
                         ", isCheating=" + false);
             }
 
@@ -540,10 +582,10 @@ public class ScannerDBService {
                     .append("subject", sid)
                     .append("questNo", questionNo)
                     //作弊||缺考||得分无效题目
-                    .append("score", isCheating || (null != isAbsent && isAbsent) || !isEffective ? 0d : scoreAndRight.score)
+                    .append("score", isCheating || isAbsent || !isEffective ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
                     //未作弊&&未缺考&&得分有效题目&&回答正确
-                    .append("right", !(isCheating || (null != isAbsent && isAbsent) || !isEffective) && scoreAndRight.right)
+                    .append("right", !(isCheating || isAbsent || !isEffective) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -554,7 +596,8 @@ public class ScannerDBService {
                     .append("province", student.getString("province"))
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
-            if (null != isAbsent) {
+            //如果有缺考标记，则标记缺考
+            if (isAbsent) {
                 scoreDoc.append("isAbsent", isAbsent);
             }
 
@@ -763,13 +806,13 @@ public class ScannerDBService {
     }
 
     //查询学生某以科目的答题切图和留痕
-    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId){
+    public Map<String, Object> getStudentCardSlices(String projectId, String subjectId, String studentId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("scanner_student_card_slice");
         Document query = doc("project", projectId).append("student", studentId).append("subject", subjectId);
         Document document = collection.find(query).first();
 
         Map<String, Object> map = new HashMap<>();
-        if(null != document){
+        if (null != document) {
 
             List<Document> objectiveList = fixFullScore(projectId, subjectId, document.get("objectiveList", List.class));
             List<Document> subjectiveList = fixFullScore(projectId, subjectId, document.get("subjectiveList", List.class));
@@ -784,14 +827,14 @@ public class ScannerDBService {
             map.put("subjectiveList", newSubjectiveList);
             //只要主观题和客观题有一项目为空，则返回有数据坐标
             map.put("hasPaperPosition", CollectionUtils.isNotEmpty(newObjectiveList) || CollectionUtils.isNotEmpty(newSubjectiveList));
-        }else{
+        } else {
             map.put("hasPaperPosition", false);
         }
         return map;
     }
 
     private List<Document> fixFullScore(String projectId, String subjectId, List<Document> questList) {
-        for(Document questDoc : questList){
+        for (Document questDoc : questList) {
             Document quest = questService.findQuest(projectId, subjectId, questDoc.getString("questionNo"));
             double fullScore = DocumentUtils.getDouble(quest, "score", 0);
             questDoc.put("fullScore", fullScore);

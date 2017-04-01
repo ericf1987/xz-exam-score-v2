@@ -119,6 +119,35 @@ public class ReportManager implements ApplicationContextAware {
         }
     }
 
+    /**
+     * 生成单张报表
+     * @param projectId              项目ID
+     * @param isExamAlliance         是否联考
+     * @param category               目录
+     * @param filename               文件名
+     * @param range                  维度
+     * @param reportGeneratorName    报表生成类名
+     */
+    public void generateOneReport(String projectId, boolean isExamAlliance, String category, String filename, Range range, String reportGeneratorName) {
+        try {
+            ReportGenerator reportGenerator = (ReportGenerator)
+                    this.applicationContext.getBean(Class.forName(reportGeneratorName));
+
+            ReportTask reportTask = createReportTasks(category, filename, reportGenerator, range);
+
+            String filePath = reportTask.getCategory() + "/" + reportTask.getFilePathWithRange() + ".xlsx";
+            String saveFilePath = getSaveFilePath(projectId, isExamAlliance ? savePath2 : savePath, filePath);
+
+            LOG.info("开始生成报表 " + reportTask + ", 路径：" + saveFilePath);
+            reportTask.getReportGenerator().generate(projectId, reportTask.getRange(), saveFilePath);
+        } catch (ClassNotFoundException e) {
+            LOG.error("生成报表失败", e);
+            e.printStackTrace();
+        } finally {
+            LOG.info("执行完成");
+        }
+    }
+
     private boolean isUnitTesting() {
         return System.getProperty("unit_testing") != null;
     }
@@ -172,7 +201,6 @@ public class ReportManager implements ApplicationContextAware {
 
 
         } else if (xmlNode.getTagName().equals("report")) {
-            String filename = nodeName;
             String reportClassNameSuffix = xmlNode.getString("class");
             String reportClassNamePrefix = context.get("basePackage");
             String reportClassName = reportClassNamePrefix + reportClassNameSuffix;
@@ -180,7 +208,7 @@ public class ReportManager implements ApplicationContextAware {
             ReportGenerator reportGenerator = (ReportGenerator)
                     this.applicationContext.getBean(Class.forName(reportClassName));
 
-            reportTasks.add(createReportTasks(category, filename, reportGenerator, range));
+            reportTasks.add(createReportTasks(category, nodeName, reportGenerator, range));
 
         } else {  // reportSet
 
@@ -217,4 +245,5 @@ public class ReportManager implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 }

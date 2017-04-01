@@ -37,6 +37,12 @@ public class ReportService {
 
     static final Logger LOG = LoggerFactory.getLogger(ReportService.class);
 
+    public void generateOneReport(String projectId, boolean isExamAlliance,
+                                  String category, String filename, String rangeName, String rangeId, String reportGeneratorName){
+        Range range = new Range(rangeName, rangeId);
+        reportManager.generateOneReport(projectId, isExamAlliance, category, filename, range, reportGeneratorName);
+    }
+
     public void generateReports(String projectId, boolean async, boolean isExamAlliance) {
         deleteReportRuntimeRecord(projectId);
         //清除项目缓存，确保EXCEL数据生成的准确性
