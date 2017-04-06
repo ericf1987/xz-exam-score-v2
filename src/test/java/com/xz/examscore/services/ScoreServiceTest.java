@@ -191,8 +191,8 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testisAbsentStudent() throws Exception {
-        String projectId = "430200-cc721d3beb924d2997fe112c767b3a28";
-        String studentId = "4ddf5393-0977-4f9e-b19a-6e26e102d7e8";
+        String projectId = "430100-5d2142085fc747c9b5b230203bbfd402";
+        String studentId = "0b36fc96-6f56-406f-aaad-3077cc907395";
         Target target = Target.project(projectId);
 
         boolean studentAbsent = scoreService.isStudentAbsent(projectId, studentId, target);

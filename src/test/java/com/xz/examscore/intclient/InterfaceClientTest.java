@@ -46,7 +46,9 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryQuestionByProject() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430500-858a2da0e24f4c329aafb9071e022e3b");
+        JSONArray quests = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755");
+
+        System.out.println(quests.toJSONString());
 
         //指定科目和指定标答
         Predicate<JSONObject> predicate = (p) -> p.getString("subjectId").equals("002") && p.getString("answer").equals("D");
@@ -130,7 +132,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-c2ed12467b2d481dbc833bda83dee21a");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("431100-ac367ba398d744d489e9de4ed225b755");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

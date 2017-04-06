@@ -171,7 +171,7 @@ public class ImportProjectService {
      * @param projectId 考试项目ID
      * @param context   上下文信息
      */
-    private void importSubjects(String projectId, Context context) {
+    public void importSubjects(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 科目信息...");
         boolean isSubjectSplited = splitSubject(projectId, context);
         if (isSubjectSplited) {

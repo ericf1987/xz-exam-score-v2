@@ -90,7 +90,7 @@ public class ReportNameMappings {
         }
 
         //添加定制化报表
-        fileNames.addAll(CUSTOMIZED_REPORT_ITEM);
+        //fileNames.addAll(CUSTOMIZED_REPORT_ITEM);
 
         return fileNames.toArray(new String[fileNames.size()]);
     }

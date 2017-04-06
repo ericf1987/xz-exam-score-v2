@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.services.DownloadAnalysisService;
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,9 @@ import org.springframework.stereotype.Service;
  */
 @Function(description = "总体成绩-报表下载", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = false),
         @Parameter(name = "fileParam", type = Type.StringArray, description = "文件参数", required = false),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校id", required = false)
+        @Parameter(name = "isBureau", type = Type.String, description = "是否是教育局账号", required = true)
 })
 @Service
 public class DownLoadAnalysis implements Server{
@@ -29,6 +31,7 @@ public class DownLoadAnalysis implements Server{
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
         String[] fileParam = param.getStringValues("fileParam");
-        return downloadAnalysisService.generateZipFiles(projectId, schoolId, fileParam);
+        boolean isBureau = BooleanUtils.toBoolean(Boolean.valueOf(param.getString("isBureau")));
+        return downloadAnalysisService.generateZipFile(projectId, schoolId, fileParam, isBureau);
     }
 }

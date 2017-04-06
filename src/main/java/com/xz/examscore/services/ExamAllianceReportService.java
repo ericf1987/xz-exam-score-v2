@@ -57,7 +57,7 @@ public class ExamAllianceReportService {
 
         for (String fileName : EXCEL_FILE_NAME) {
             String[] param = fileName.split("-->");
-            List<Map<String, String>> category = downLoadAnalysisService.getFileCategory(projectId, fileName, param);
+            List<Map<String, String>> category = downLoadAnalysisService.getFileCategory(projectId, fileName, param, false);
             pathList.addAll(category);
         }
 

@@ -610,8 +610,8 @@ public class ScoreService {
         switch (targetName) {
             case Target.PROJECT:
                 //该学生全部科目全部标记为缺考，则判定为项目缺考
-                query.append("isAbsent", $exists(false));
-//                query.append("isAbsent", doc("$exists", false));
+//                query.append("isAbsent", $exists(false));
+                query.append("isAbsent", doc("$exists", false));
                 long count = collection.count(query);
                 return count == 0;
             case Target.SUBJECT:
