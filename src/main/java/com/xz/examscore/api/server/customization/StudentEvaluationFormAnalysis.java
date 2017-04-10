@@ -1,7 +1,9 @@
 package com.xz.examscore.api.server.customization;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.mongodb.client.FindIterable;
 import com.xz.ajiaedu.common.lang.Result;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
@@ -30,8 +32,8 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  */
 @Function(description = "学生测评报告分析", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = true),
-        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true),
+        @Parameter(name = "schoolId", type = Type.String, description = "学校ID", required = false),
+        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = false),
         @Parameter(name = "pageSize", type = Type.String, description = "每页查询学生数量", required = true),
         @Parameter(name = "pageCount", type = Type.String, description = "页码数", required = true)
 })
@@ -119,8 +121,20 @@ public class StudentEvaluationFormAnalysis implements Server {
     @Autowired
     StudentCompetitiveService studentCompetitiveService;
 
+    @Autowired
+    StudentEvaluationByRankAnalysis studentEvaluationByRankAnalysis;
+
     @Override
     public Result execute(Param param) throws Exception {
+        String schoolId = param.getString("schoolId");
+        String classId = param.getString("classId");
+        if(!StringUtil.isBlank(schoolId) && !StringUtils.isBlank(classId)){
+            return mainProcess(param);
+        }
+        return studentEvaluationByRankAnalysis.execute(param);
+    }
+
+    public Result mainProcess(Param param) {
         String projectId = param.getString("projectId");
         String schoolId = param.getString("schoolId");
         String classId = param.getString("classId");
@@ -155,35 +169,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         scoreLine.addLast(min);
 
         List<List<Map<String, Object>>> entryLevelList = new ArrayList<>();
-        //查询各个本科录取段内，各个目标维度的平均分
-        List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
-        Collections.sort(entryLevelDoc, (Document d1, Document d2) -> {
-            Double s1 = d1.getDouble("score");
-            Double s2 = d2.getDouble("score");
-            return s2.compareTo(s1);
-        });
-        List<String> entryLevelKey = entryLevelDoc.stream().map(doc -> doc.getString("level")).collect(Collectors.toList());
-        //增加统计本科未上线学生的平均得分
-        entryLevelKey.add("OFFLINE");
-        for (String key : entryLevelKey) {
-            //科目
-            List<Map<String, Object>> averagesInLevel = new ArrayList<>();
-            for (String subjectId : subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).collect(Collectors.toList())) {
-                Map<String, Object> averageInLevel = getAveragesInLevel(projectId, provinceRange, key, subjectId);
-                averagesInLevel.add(averageInLevel);
-            }
-            //组合科目
-            for (String combinedSubjectId : combinedSubjectIds) {
-                Map<String, Object> averageInLevel = new HashMap<>();
-                double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subjectCombination(combinedSubjectId), key);
-                String combinedSubjectName = SubjectService.getSubjectName(combinedSubjectId);
-                averageInLevel.put("subjectId", combinedSubjectId);
-                averageInLevel.put("subjectName", combinedSubjectName);
-                averageInLevel.put("average", DoubleUtils.round(average));
-                averagesInLevel.add(averageInLevel);
-            }
-            entryLevelList.add(averagesInLevel);
-        }
+        queryRangeAverageInEntryLevel(projectId, provinceRange, subjectIds, combinedSubjectIds, entryLevelList);
 
         for (Document studentDoc : projectStudentList) {
             Map<String, Object> studentMap = new HashMap<>();
@@ -237,6 +223,38 @@ public class StudentEvaluationFormAnalysis implements Server {
         return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
     }
 
+    public void queryRangeAverageInEntryLevel(String projectId, Range provinceRange, List<String> subjectIds, List<String> combinedSubjectIds, List<List<Map<String, Object>>> entryLevelList) {
+        //查询各个本科录取段内，各个目标维度的平均分
+        List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
+        Collections.sort(entryLevelDoc, (Document d1, Document d2) -> {
+            Double s1 = d1.getDouble("score");
+            Double s2 = d2.getDouble("score");
+            return s2.compareTo(s1);
+        });
+        List<String> entryLevelKey = entryLevelDoc.stream().map(doc -> doc.getString("level")).collect(Collectors.toList());
+        //增加统计本科未上线学生的平均得分
+        entryLevelKey.add("OFFLINE");
+        for (String key : entryLevelKey) {
+            //科目
+            List<Map<String, Object>> averagesInLevel = new ArrayList<>();
+            for (String subjectId : subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).collect(Collectors.toList())) {
+                Map<String, Object> averageInLevel = getAveragesInLevel(projectId, provinceRange, key, subjectId);
+                averagesInLevel.add(averageInLevel);
+            }
+            //组合科目
+            for (String combinedSubjectId : combinedSubjectIds) {
+                Map<String, Object> averageInLevel = new HashMap<>();
+                double average = collegeEntryLevelAverageService.getAverage(projectId, provinceRange, Target.subjectCombination(combinedSubjectId), key);
+                String combinedSubjectName = SubjectService.getSubjectName(combinedSubjectId);
+                averageInLevel.put("subjectId", combinedSubjectId);
+                averageInLevel.put("subjectName", combinedSubjectName);
+                averageInLevel.put("average", DoubleUtils.round(average));
+                averagesInLevel.add(averageInLevel);
+            }
+            entryLevelList.add(averagesInLevel);
+        }
+    }
+
     public boolean isRequiredStudent(String projectId, String studentId, List<String> subjectIds) {
         //只有全科参考且总分不为0才满足条件
         boolean b = studentService.hasAllSubjects(projectId, studentId, subjectIds);
@@ -271,7 +289,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         return averageInLevel;
     }
 
-    private List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {
+    public List<Map<String, Object>> getSubjectAbilityLevel(String projectId, String studentId, String subjectId) {
         String studyStage = projectService.findProjectStudyStage(projectId);
         Map<String, Document> levelMap = abilityLevelService.queryAbilityLevels(studyStage, subjectId);
         List<Map<String, Object>> classAbilityLevelList = classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
@@ -284,7 +302,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         return classAbilityLevelAnalysis.getLevelStats(projectId, subjectId, Range.student(studentId), levelMap);
     }
 
-    private Map<String, Object> getPointScoreMap(String projectId, String studentId, String subjectId) {
+    public Map<String, Object> getPointScoreMap(String projectId, String studentId, String subjectId) {
         Map<String, Object> pointScore = new HashMap<>();
         List<Map<String, Object>> pointStats = classPointAnalysis.getPointStats(projectId, subjectId, Range.student(studentId));
         Collections.sort(pointStats, (Map<String, Object> p1, Map<String, Object> p2) -> {
@@ -298,7 +316,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         return pointScore;
     }
 
-    private List<Map<String, Object>> getQuestTypeScoreMap(String projectId, String studentId, String subjectId) {
+    public List<Map<String, Object>> getQuestTypeScoreMap(String projectId, String studentId, String subjectId) {
         List<Map<String, Object>> questTypeList = projectQuestTypeAnalysis.getQuestTypeAnalysis(projectId, subjectId, Range.student(studentId));
         //按得分率排序
         Collections.sort(questTypeList, (Map<String, Object> m1, Map<String, Object> m2) -> {

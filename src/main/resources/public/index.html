@@ -45,6 +45,7 @@
     <legend>导出成绩并上传到OSS</legend>
     <form action="export-score-to-oss" method="post">
         <p>项目ID：<input type="text" name="project"/></p>
+        <p><label><input type="checkbox" name="notifyInterface" value="true"> 通知业务接口导入成绩</label></p>
         <p>
             <button type="submit">开始导出</button>
         </p>

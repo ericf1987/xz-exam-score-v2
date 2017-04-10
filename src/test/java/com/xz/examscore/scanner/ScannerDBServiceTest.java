@@ -55,8 +55,11 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         assertEquals(1, calculateScore(4, "A,D", "", true).score, 0.1);*/
         /*System.out.println(calculateScore(3, "c", "c", null).score);
         System.out.println(calculateScore(4, "A1B1DA2BC2", "DA", null).score);*/
-        System.out.println(scannerDBService.sortStdAnswer("BD"));
-        System.out.println(calculateScore(4, "B, D", " ", false).score);
+        Document quest = questService.findQuest("430300-29c4d40d93bf41a5a82baffe7e714dd9", "58e730b52d560287557a45b8");
+        String standardAnswer = scannerDBService.getStdAnswerFromQuest(quest);
+
+//        System.out.println(scannerDBService.sortStdAnswer("BD"));
+        System.out.println(calculateScore(6, standardAnswer, "ACD", false).score);
     }
 
     @Test
@@ -85,7 +88,7 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     public void testImportOneSubject() throws Exception {
         String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
         MongoClient mongoClient = scannerDBService.getMongoClient(project);
-        scannerDBService.importOneSubjectTask(project, mongoClient, "001");
+        scannerDBService.importOneSubjectTask(project, mongoClient, "003");
     }
 
     @Test
@@ -105,9 +108,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportOneSubjectTask() throws Exception {
-        String project = "430500-858a2da0e24f4c329aafb9071e022e3b";
-        MongoClient mongoClient = scannerDBService.getMongoClient("430500-858a2da0e24f4c329aafb9071e022e3b");
-        String subjectId = "001";
+        String project = "430300-c582131e66b64fe38da7d0510c399ec4";
+        MongoClient mongoClient = scannerDBService.getMongoClient(project);
+        String subjectId = "003";
         scannerDBService.importOneSubjectTask(project, mongoClient, subjectId);
     }
 
@@ -145,7 +148,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
-    public void testimportStudentScore() throws Exception {
-
+    public void testimportSubjectScore0() throws Exception {
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
+        String subjectId = "003";
+        scannerDBService.importSubjectScore0(projectId, subjectId);
     }
 }

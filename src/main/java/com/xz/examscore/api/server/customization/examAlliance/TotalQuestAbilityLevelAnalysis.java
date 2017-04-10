@@ -14,6 +14,8 @@ import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ import java.util.Map;
 })
 @Service
 public class TotalQuestAbilityLevelAnalysis implements Server{
+
+    public static Logger LOG = LoggerFactory.getLogger(TotalQuestAbilityLevelAnalysis.class);
 
     @Autowired
     QuestAbilityLevelService questAbilityLevelService;
@@ -144,6 +148,10 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         double totalScore = 0;
         for (String questNo : optionalQuestNo){
             Document quest = questService.findQuest(projectId, subjectId, questNo);
+            if(null == quest || quest.isEmpty()){
+                LOG.info("项目{}，科目{}，题号{}，不存在！", projectId, subjectId, questNo);
+                continue;
+            }
             double score = quest.getDouble("score");
             String loa = quest.getString("levelOrAbility");
             if(levelOrAbility.equals(loa))
@@ -164,8 +172,7 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         //累加能力检测总分
         double abilityTotal = subjects.stream().mapToDouble(subject -> {
             Map<String, Object> level = (Map<String, Object>) subject.get("ability");
-            double average = MapUtils.getDouble(level, "average");
-            return average;
+            return (double) MapUtils.getDouble(level, "average");
         }).sum();
 
         //能力检测良好率

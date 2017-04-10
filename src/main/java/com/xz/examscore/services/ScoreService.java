@@ -17,6 +17,8 @@ import com.xz.examscore.util.Mongo;
 import com.xz.examscore.util.SubjectUtil;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +58,9 @@ public class ScoreService {
 
     @Autowired
     private ProjectCacheManager projectCacheManager;
+
+    public static Logger LOG = LoggerFactory.getLogger(ScoreService.class);
+
 
     /**
      * 查询题目的答对人数
@@ -340,7 +345,12 @@ public class ScoreService {
             MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
             Document query = Mongo.query(projectId, Range.student(studentId), target);
             Document first = totalScores.find(query).first();
-            return BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
+            if(null != first){
+                return BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
+            }else{
+                LOG.error("未查到该学生的总分记录，对其标记为缺考！项目{}，学生{}，目标{}", projectId, studentId, target);
+                return true;
+            }
         }
         return false;
     }

@@ -71,11 +71,10 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentIds() throws Exception {
-        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
-        String schoolId = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
-        String subjectId = "001";
-        List<String> studentList = studentService.getStudentIds(projectId, Range.school(schoolId), Target.subject(subjectId));
-        int count = studentService.getStudentCount(projectId, Range.school(schoolId));
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
+        String province = "430000";
+        List<String> studentList = studentService.getStudentIds(projectId, Range.province(province), Target.project(projectId));
+        int count = studentService.getStudentCount(projectId, Range.province(province));
         System.out.println(studentList.toString());
         System.out.println(count);
     }

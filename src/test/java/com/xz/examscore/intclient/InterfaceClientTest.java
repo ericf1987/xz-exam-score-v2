@@ -81,8 +81,8 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("430300-564140e278df4e92a2a739a6f27ac391");
-        Map<String, Object> map = interfaceClient.queryQuestionByProject("430300-564140e278df4e92a2a739a6f27ac391", true);
+        JSONArray quests = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755");
+        Map<String, Object> map = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755", true);
         System.out.println(quests.toString());
         System.out.println(map.toString());
         //Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests, optionalQuestMap);
@@ -162,5 +162,24 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         System.out.println("科目ID-->" + subjectIds.toString());*/
     }
 
+    @Test
+    public void testImportSlicedSubject() throws Exception {
+
+        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+
+        System.out.println(jsonArray.toString());
+        //查询题目信息
+        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        System.out.println("试题：" + jsonQuest.toString());
+        //获取选做题
+        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+        System.out.println("选做题：" + optionalQuestMap.toString());
+        //统计出每个考试的总分
+        Map<String, Double> subjectScore = importProjectService.gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
+
+        System.out.println(subjectScore);
+    }
 
 }

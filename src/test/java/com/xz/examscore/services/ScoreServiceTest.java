@@ -49,12 +49,15 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     PointService pointService;
-    
+
     @Autowired
     PaintService packScoreData;
 
     @Autowired
     SimpleCache cache;
+
+    @Autowired
+    ProvinceService provinceService;
 
     @Test
     public void testGetTotalScore() throws Exception {
@@ -197,6 +200,47 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
         boolean studentAbsent = scoreService.isStudentAbsent(projectId, studentId, target);
         System.out.println(studentAbsent);
+    }
+
+    @Test
+    public void testGetStudentIdsByRanks() throws Exception {
+        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+        Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
+        Target projectTarget = Target.project(projectId);
+        double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, 300);
+        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, rankScore);
+
+        Collections.sort(listByScore, (Document d1, Document d2) -> {
+            Double totalScore1 = d1.getDouble("totalScore");
+            Double totalScore2 = d2.getDouble("totalScore");
+            return totalScore2.compareTo(totalScore1);
+        });
+
+        List<Double> tt = listByScore.stream().map(l -> l.getDouble("totalScore")).collect(Collectors.toList());
+        List<String> ttt = listByScore.stream().map(l -> l.get("range", Document.class).getString("id")).collect(Collectors.toList());
+
+        System.out.println(listByScore.size());
+        System.out.println(tt.toString());
+        System.out.println(ttt.toString());
+        System.out.println(ttt.subList(50 * (3-1), 50 * 3).toString());
+    }
+
+    @Test
+    public void test2() throws Exception {
+        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+        Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
+        Target projectTarget = Target.project(projectId);
+        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, 384);
+        List<Document> listByScore1 = scoreService.getListByScore(projectId, provinceRange, projectTarget, 448);
+        List<Document> listByScore2 = scoreService.getListByScore(projectId, provinceRange, projectTarget, 512);
+        System.out.println(listByScore.size());
+        System.out.println(listByScore1.size());
+        System.out.println(listByScore2.size());
+
+        int studentCount = studentService.getStudentCount(projectId, provinceRange, projectTarget);
+        List<String> studentIds = studentService.getStudentIds(projectId, provinceRange, projectTarget);
+        System.out.println("总体参考人数：" + studentCount);
+        System.out.println(studentIds.size());
     }
 
 }

@@ -365,8 +365,11 @@ public class ScannerDBService {
         //判断该学生是否缺考
         boolean isAbsent = isAbsent(document, true);
 
-        saveObjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent);
-        saveSubjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent);
+        //是否能找到该学生的试卷
+        boolean isLost = isLost(document, true);
+
+        saveObjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent, isLost);
+        saveSubjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent, isLost);
 
         if (counter.incrementAndGet() % 100 == 0) {
             LOG.info("已导入科目 " + subjectId + " 的 " + counter.get() + " 名学生...");
@@ -412,8 +415,20 @@ public class ScannerDBService {
         return hasNoQuestScore || allQuestZero || isAbsent;
     }
 
+    //是否作弊
     private boolean isCheating(Document document) {
         return BooleanUtils.toBoolean(document.getBoolean("isCheating"));
+    }
+
+    /**
+     * 是否缺卷
+     *
+     * @param student 网阅学生分数记录
+     * @param b       是否把缺卷计入缺考
+     * @return 返回结果
+     */
+    private boolean isLost(Document student, boolean b) {
+        return BooleanUtils.toBoolean(student.getBoolean("isLost")) && b;
     }
 
 
@@ -440,13 +455,15 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent) {
+    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent, boolean isLost) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
         String studentId = student.getString("student");
-        if (isAbsent) {
+/*        if (isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以主观题得分为0", studentId, subjectId);
+        }*/
+        if (isLost) {
+            LOG.info("该学生{}的考试科目{}试卷缺失！", studentId, subjectId);
         }
-
         if (isCheating) {
             LOG.info("该学生{}在考试科目{}中作弊！所以主观题得分为0", studentId, subjectId);
         }
@@ -455,15 +472,6 @@ public class ScannerDBService {
             LOG.info("该学生{}网阅主观题列表为空", studentId);
             return;
         }
-        //获取统计集合中主观题信息
-/*        List<Document> subQuestList = new ArrayList<>();
-
-        //获取拆分后所有综合科目的题目列表（quest_list）
-        List<String> subjectIds = importProjectService.separateSubject(subjectId);
-        subjectIds.forEach(s -> {
-            List<Document> subList = questService.getQuests(projectId, s, false);
-            subQuestList.addAll(subList);
-        });*/
 
         List<Document> subQuestList = questService.getQuests(projectId, subjectId, false);
         //对于统计集合中有的，但是网阅数据中没有的数据，则插入一条记录，并标识missing=true
@@ -485,9 +493,10 @@ public class ScannerDBService {
             //如果该生作弊或缺考，则主观题得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
+                    .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
-                    .append("score", isCheating || isAbsent || !isEffective ? 0d : score)
-                    .append("right", !(isCheating || isAbsent || !isEffective) && NumberUtil.equals(score, fullScore))
+                    .append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : score)
+                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -503,21 +512,27 @@ public class ScannerDBService {
             }
             //如果有缺考标记，则标记缺考
             if (isAbsent) {
-                scoreDoc.append("isAbsent", isAbsent);
+                scoreDoc.append("isAbsent", true);
             }
-
+            if (isLost) {
+                scoreDoc.append("isLost", true);
+            }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent) {
+    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isCheating, boolean isAbsent, boolean isLost) {
         List<Document> objectiveList = DocumentUtils.getList(document, "objectiveList", Collections.emptyList());
 
         String studentId = student.getString("student");
 
-        if (isAbsent) {
+/*        if (isAbsent) {
             LOG.info("该学生{}的考试科目{}为缺考状态！所以客观题得分为0", studentId, subjectId);
+        }*/
+
+        if (isLost) {
+            LOG.info("该学生{}的考试科目{}试卷缺失！", studentId, subjectId);
         }
         //网阅题目ID列表
         if (objectiveList.isEmpty()) {
@@ -553,13 +568,13 @@ public class ScannerDBService {
             String standardAnswer = getStdAnswerFromQuest(quest);
 
             //对于没有缺考或没有作弊的学生，客观题如果作答为空字符串，才报错判定为没有作答
-            if (isAbsent && !isCheating && StringUtil.isBlank(studentAnswer)) {
+            if (!isAbsent && !isCheating && StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" + projectId +
                         ", studentId=" + studentId +
                         ", subject=" + sid +
                         ", objectiveItem=" + objectiveItem +
                         ", quest=" + quest +
-                        ", isAbsent=" + isAbsent +
+                        ", isAbsent=" + false +
                         ", isCheating=" + false);
             }
 
@@ -580,12 +595,13 @@ public class ScannerDBService {
             //如果学生作弊，则客观题的得分为0
             Document scoreDoc = doc("project", projectId)
                     .append("subject", sid)
+                    .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
-                    //作弊||缺考||得分无效题目
-                    .append("score", isCheating || isAbsent || !isEffective ? 0d : scoreAndRight.score)
+                    //作弊||缺考||得分无效题目||试卷缺失
+                    .append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    //未作弊&&未缺考&&得分有效题目&&回答正确
-                    .append("right", !(isCheating || isAbsent || !isEffective) && scoreAndRight.right)
+                    //未作弊&&未缺考&&得分有效题目&&试卷未缺失&&回答正确
+                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -598,9 +614,11 @@ public class ScannerDBService {
 
             //如果有缺考标记，则标记缺考
             if (isAbsent) {
-                scoreDoc.append("isAbsent", isAbsent);
+                scoreDoc.append("isAbsent", true);
             }
-
+            if (isLost) {
+                scoreDoc.append("isLost", true);
+            }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
@@ -700,13 +718,10 @@ public class ScannerDBService {
     //获取标准答案
     public String getStdAnswerFromQuest(Document quest) {
 
-        Boolean isObjective = quest.getBoolean("isObjective");
-        if (isObjective != null && isObjective) {
-            if (!StringUtils.isEmpty(quest.getString("scoreRule"))) {
-                return sortStdAnswer(quest.getString("scoreRule"));
-            } else {
-                return quest.getString("answer");
-            }
+        boolean isObjective = BooleanUtils.toBoolean(quest.getBoolean("isObjective"));
+        if (isObjective) {
+            return !StringUtils.isEmpty(quest.getString("scoreRule")) ?
+                    sortStdAnswer(quest.getString("scoreRule")) : quest.getString("answer");
         }
         throw new IllegalArgumentException("获取试题" + quest.getString("questId") + "的标答出现异常，请核实试题类型和标答");
     }

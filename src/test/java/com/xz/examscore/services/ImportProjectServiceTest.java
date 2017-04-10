@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.Context;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.intclient.InterfaceClient;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetOptionalQuestNo() throws Exception{
-        String projectId = "430300-6f2f82b0ea1a4dcca29f692570eabb50";
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
         Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
         Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
         System.out.println("选做题->" + optionalQuestNo.toString());
