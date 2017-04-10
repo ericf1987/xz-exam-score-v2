@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Function(description = "联考项目-单科各校基本情况", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
-        @Parameter(name = "subjectId", type = Type.String, description = "考试科目ID", required = true)
+        @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true)
 })
 @Service
 public class SchoolSubjectBasicInfoAnalysis implements Server {

@@ -204,7 +204,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentIdsByRanks() throws Exception {
-        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+        String projectId = "430300-29c4d40d93bf41a5a82baffe7e714dd9";
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
         double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, 300);
@@ -222,7 +222,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(listByScore.size());
         System.out.println(tt.toString());
         System.out.println(ttt.toString());
-        System.out.println(ttt.subList(50 * (3-1), 50 * 3).toString());
+        System.out.println(ttt.subList(50 * (6-1), 50 * 6).toString());
     }
 
     @Test
