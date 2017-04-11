@@ -495,8 +495,10 @@ public class ScannerDBService {
                     .append("subject", sid)
                     .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
-                    .append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : score)
-                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && NumberUtil.equals(score, fullScore))
+                    /*.append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : score)
+                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && NumberUtil.equals(score, fullScore))*/
+                    .append("score", isCheating || isAbsent || !isEffective ? 0d : score)
+                    .append("right", !(isCheating || isAbsent || !isEffective) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -588,7 +590,10 @@ public class ScannerDBService {
                 );
             }
 
-            Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
+//            Boolean awardScoreTag = quest.getBoolean("awardScoreTag");
+
+            //如果该学生缺考或者作弊 则取消送分规则
+            boolean awardScoreTag = BooleanUtils.toBoolean(quest.getBoolean("awardScoreTag")) && !isAbsent && !isCheating;
 
             ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
 
@@ -598,10 +603,12 @@ public class ScannerDBService {
                     .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
                     //作弊||缺考||得分无效题目||试卷缺失
-                    .append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : scoreAndRight.score)
+//                    .append("score", isCheating || isAbsent || !isEffective || isLost ? 0d : scoreAndRight.score)
+                    .append("score", isCheating || isAbsent || !isEffective ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
                     //未作弊&&未缺考&&得分有效题目&&试卷未缺失&&回答正确
-                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && scoreAndRight.right)
+//                    .append("right", !(isCheating || isAbsent || !isEffective || isLost) && scoreAndRight.right)
+                    .append("right", !(isCheating || isAbsent || !isEffective) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))

@@ -117,7 +117,8 @@ public class PrepareDataService {
 
         //过滤掉缺考且缺卷的学生
         AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
-                $match(doc("project", projectId).append("isAbsent", doc("$exists", false)).append("isLost", doc("$exists", false))),
+//                $match(doc("project", projectId).append("isAbsent", doc("$exists", false)).append("isLost", doc("$exists", false))),
+                $match(doc("project", projectId).append("isAbsent", doc("$exists", false))),
                 $group(doc("_id", _id).append("subjects", $addToSet("$subject")))
         ));
 

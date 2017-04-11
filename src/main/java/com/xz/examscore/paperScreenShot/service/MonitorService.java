@@ -35,7 +35,7 @@ public class MonitorService {
 
     @Autowired
     private SchoolService schoolService;
-    
+
     @Autowired
     private StudentService studentService;
 
@@ -81,29 +81,29 @@ public class MonitorService {
 
     /**
      * 记录生成截图失败的学生信息
-     * @param projectId
-     * @param studentId
-     * @param subjectId
+     *
+     * @param projectId 项目ID
+     * @param studentId 学生ID
+     * @param subjectId 科目ID
      */
     public void recordFailedStudent(String projectId, String schoolId, String classId, String studentId, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
                 .append("subject", subjectId);
         UpdateResult result = collection.updateMany(query, $push("studentId", studentId));
-        if(result.getMatchedCount() == 0){
+        if (result.getMatchedCount() == 0) {
             collection.insertOne(query.append("students", Collections.emptyList()).append("md5", Mongo.md5()));
         }
     }
 
-    public List<String> getFailedStudents(String projectId, String subjectId){
+    public List<String> getFailedStudents(String projectId, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         Document query = doc("project", projectId).append("subject", subjectId);
         Document students = collection.find(query).projection(doc("students", 1)).first();
 
-        if(null != students){
+        if (null != students) {
             List<String> studentIds = students.get("students", List.class);
-            List<String> names = studentIds.stream().map(s -> studentService.findStudent(projectId, s).getString("name")).collect(Collectors.toList());
-            return names;
+            return studentIds.stream().map(s -> studentService.findStudent(projectId, s).getString("name")).collect(Collectors.toList());
         }
 
         return Collections.emptyList();

@@ -117,7 +117,9 @@ public class StudentEvaluationByRankAnalysis implements Server {
         List<List<Map<String, Object>>> entryLevelList = new ArrayList<>();
         studentEvaluationFormAnalysis.queryRangeAverageInEntryLevel(projectId, provinceRange, subjectIds, combinedSubjectIds, entryLevelList);
 
-        for (String studentId : studentIds.subList(pageSize * (pageCount - 1), pageSize * pageCount)) {
+        int lastIndex = pageSize * pageCount < studentIds.size() ? pageSize * pageCount : studentIds.size();
+
+        for (String studentId : studentIds.subList(pageSize * (pageCount - 1), lastIndex)) {
 
             Document studentDoc = studentService.findStudent(projectId, studentId);
             String schoolId = studentDoc.getString("school");
@@ -178,7 +180,7 @@ public class StudentEvaluationByRankAnalysis implements Server {
      * @param projectId 项目ID
      * @return 返回
      */
-    private int getRankByProject(String projectId) {
+    public int getRankByProject(String projectId) {
         Document projectDoc = projectService.findProject(projectId);
         String category = projectDoc.getString("category");
         if (StringUtils.isBlank(category))
