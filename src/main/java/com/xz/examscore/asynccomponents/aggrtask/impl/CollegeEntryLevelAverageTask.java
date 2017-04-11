@@ -46,6 +46,9 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
     CollegeEntryLevelService collegeEntryLevelService;
 
     @Autowired
+    CollegeEntryLevelAverageService collegeEntryLevelAverageService;
+
+    @Autowired
     StudentService studentService;
 
     @Override
@@ -64,6 +67,9 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
         double onlineTotalScore = 0;
         double onlineTotalCount = 0;
 
+        //清理原有数据
+        collegeEntryLevelAverageService.clearAverage(projectId, range, target, null);
+
         for (String key : entryLevel) {
             ArrayList<Document> entryLevelStudent = collegeEntryLevelService.getEntryLevelStudentByKey(projectId, provinceRange, projectTarget, key);
             //指定本科批次的人数
@@ -79,10 +85,12 @@ public class CollegeEntryLevelAverageTask extends AggrTask {
             Document query = Mongo.query(projectId, range, target).append("college_entry_level", level.get());
 
             // 保存平均分
-            UpdateResult result = collection.updateMany(query, $set(doc("average", average)));
+/*            UpdateResult result = collection.updateMany(query, $set(doc("average", average)));
             if (result.getMatchedCount() == 0) {
                 collection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
-            }
+            }*/
+
+            collection.insertOne(query.append("average", average).append("md5", MD5.digest(UUID.randomUUID().toString())));
 
             //累加本科上线的总分
             onlineTotalScore += totalScore;

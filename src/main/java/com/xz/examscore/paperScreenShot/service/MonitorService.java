@@ -90,9 +90,9 @@ public class MonitorService {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
                 .append("subject", subjectId);
-        UpdateResult result = collection.updateMany(query, $push("studentId", studentId));
+        UpdateResult result = collection.updateMany(query, $push("studentIds", studentId));
         if (result.getMatchedCount() == 0) {
-            collection.insertOne(query.append("students", Collections.emptyList()).append("md5", Mongo.md5()));
+            collection.insertOne(query.append("studentIds", Collections.emptyList()).append("md5", Mongo.md5()));
         }
     }
 
@@ -107,5 +107,11 @@ public class MonitorService {
         }
 
         return Collections.emptyList();
+    }
+
+    public void clearFailedStudents(String projectId){
+        MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
+        Document query = doc("project", projectId);
+        collection.deleteMany(query);
     }
 }

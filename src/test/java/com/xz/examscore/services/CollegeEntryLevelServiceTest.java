@@ -44,7 +44,7 @@ public class CollegeEntryLevelServiceTest extends XzExamScoreV2ApplicationTests 
 
     @Test
     public void testGetEntryLevelDoc() throws Exception {
-        String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
         List<Document> entryLevelDoc = collegeEntryLevelService.getEntryLevelDoc(projectId);
         entryLevelDoc.forEach(doc -> System.out.println(doc.toString()));
         Collections.sort(entryLevelDoc, (Document doc1, Document doc2) -> {

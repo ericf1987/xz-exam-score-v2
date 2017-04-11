@@ -4,6 +4,7 @@ import com.hyd.simplecache.SimpleCache;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.api.server.customization.StudentEvaluationByRankAnalysis;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.SubjectObjective;
@@ -58,6 +59,9 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     ProvinceService provinceService;
+
+    @Autowired
+    StudentEvaluationByRankAnalysis studentEvaluationByRankAnalysis;
 
     @Test
     public void testGetTotalScore() throws Exception {
@@ -204,10 +208,11 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentIdsByRanks() throws Exception {
+//        String projectId = "430300-29c4d40d93bf41a5a82baffe7e714dd9";
         String projectId = "430300-29c4d40d93bf41a5a82baffe7e714dd9";
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
-        double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, 300);
+        double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, studentEvaluationByRankAnalysis.getRankByProject(projectId));
         List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, rankScore);
 
         Collections.sort(listByScore, (Document d1, Document d2) -> {

@@ -22,12 +22,12 @@ public class CollegeEntryLevelAverageTaskTest extends XzExamScoreV2ApplicationTe
     @Test
     public void testRunTask() throws Exception {
         AggrTaskMessage atm = new AggrTaskMessage();
-        String projectId = "430500-ea90a33d908c40aba5907bd97b838d61";
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
         atm.setProjectId(projectId);
         String province = provinceService.getProjectProvince(projectId);
         Range provinceRange = Range.province(province);
         atm.setRange(provinceRange);
-        atm.setTarget(Target.project(projectId));
+        atm.setTarget(Target.subject("003"));
         atm.setType("college_entry_level_average");
         atm.setAggregationId("67978896786");
         collegeEntryLevelAverageTask.runTask(atm);

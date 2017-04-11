@@ -3,11 +3,13 @@ package com.xz.examscore.paperScreenShot.service;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
 import com.xz.examscore.paperScreenShot.bean.SubjectiveQuestZone;
+import com.xz.examscore.paperScreenShot.utils.PaintUtils;
 import com.xz.examscore.services.SubjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
@@ -114,5 +116,11 @@ public class PaintServiceTest extends XzExamScoreV2ApplicationTests {
     public void test1() throws Exception {
         String ss = "试卷题号";
         System.out.println(new String(ss.getBytes(), "UTF-8"));
+    }
+
+    @Test
+    public void test2() throws Exception {
+        BufferedImage bufferedImage = PaintUtils.loadImageUrl("http://znxunzhi-marking-pic.oss-cn-shenzhen.aliyuncs.com/430300-c582131e66b64fe38da7d0510c399ec4/c99a630b-d8e6-4758-b27d-4b062f9fec0a/002/18/paperImage/469140955_reverse.png");
+        System.out.println(bufferedImage);
     }
 }

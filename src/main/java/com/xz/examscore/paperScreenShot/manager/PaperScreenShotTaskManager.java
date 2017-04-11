@@ -77,6 +77,7 @@ public class PaperScreenShotTaskManager {
 
         LOG.info("====项目{}======, 试卷截图任务开始执行======", projectId);
         monitorService.reset(projectId, TaskProcess.GENERATE_PAPER_SCREEN_SHOT);
+        monitorService.clearFailedStudents(projectId);
 
         ThreadPoolExecutor pool = async ? threadPoolExecutor : newBlockingThreadPoolExecutor(10, 10, 100);
         for (Map<String, List<String>> map : list) {

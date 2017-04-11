@@ -1,5 +1,6 @@
 package com.xz.examscore.paperScreenShot.service;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.Range;
@@ -351,10 +352,36 @@ public class PaintService {
      */
     public void paintPaper(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, List<SubjectiveQuestZone> subjectiveQuestZones,
                            String path, String paper_positive, String paper_reverse) throws Exception {
-        //将正反面截图读取到内存中
-        BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
-        BufferedImage img_reverse = PaintUtils.loadImageUrl(paper_reverse);
 
+        if(!StringUtils.isBlank(paper_positive)){
+            BufferedImage img_positive = paintPositive(totalScoreZone, objectiveQuestZone, paper_positive);
+            //将正反面截图读取到内存中
+
+            BufferedImage img_reverse = null;
+            if(!StringUtils.isBlank(paper_reverse)){
+                img_reverse = PaintUtils.loadImageUrl(paper_reverse);
+            }
+
+            //标记主观题区域
+            for (SubjectiveQuestZone subjectiveQuestZone : subjectiveQuestZones) {
+                int pageIndex = subjectiveQuestZone.getPageIndex();
+                if (pageIndex == 0) {
+                    img_positive = doPaint(img_positive, subjectiveQuestZone);
+                } else {
+                    img_reverse = doPaint(img_reverse, subjectiveQuestZone);
+                }
+            }
+
+            //保存正面
+            PaintUtils.writeImageLocal(renderSuffixByIndex(path, true, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_positive, PaintUtils.PNG);
+            //保存反面
+            PaintUtils.writeImageLocal(renderSuffixByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.PNG);
+        }
+
+    }
+
+    public BufferedImage paintPositive(TotalScoreZone totalScoreZone, ObjectiveQuestZone objectiveQuestZone, String paper_positive) throws Exception {
+        BufferedImage img_positive = PaintUtils.loadImageUrl(paper_positive);
         //标记总分区域
         if (totalScoreZone != null) {
             img_positive = paintTotalScoreZone(img_positive, totalScoreZone);
@@ -364,20 +391,7 @@ public class PaintService {
         if (objectiveQuestZone != null && objectiveQuestZone.getCoordinateY() != 0) {
             img_positive = paintObjectiveQuestZone(img_positive, objectiveQuestZone);
         }
-
-        //标记主观题区域
-        for (SubjectiveQuestZone subjectiveQuestZone : subjectiveQuestZones) {
-            int pageIndex = subjectiveQuestZone.getPageIndex();
-            if (pageIndex == 0) {
-                img_positive = doPaint(img_positive, subjectiveQuestZone);
-            } else {
-                img_reverse = doPaint(img_reverse, subjectiveQuestZone);
-            }
-        }
-        //保存正面
-        PaintUtils.writeImageLocal(renderSuffixByIndex(path, true, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_positive, PaintUtils.PNG);
-        //保存反面
-        PaintUtils.writeImageLocal(renderSuffixByIndex(path, false, PaintUtils.SCREEN_SHOT_SUFFIX_PNG), img_reverse, PaintUtils.PNG);
+        return img_positive;
     }
 
     /**
