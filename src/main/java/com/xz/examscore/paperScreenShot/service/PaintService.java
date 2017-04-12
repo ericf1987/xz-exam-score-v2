@@ -90,7 +90,9 @@ public class PaintService {
                     //获取主观题每个题目的坐标信息
                     List<SubjectiveQuestZone> subjectiveQuestZones = convertToRectsObj(projectId, schoolId, classId, subjectId, subjective, paper_positive, paper_reverse, questNo, rankRuleMap);
                     //获取主观题最靠前的区域
-                    subjectiveQuestZoneList.add(subjectiveQuestZones.get(0));
+                    if(subjectiveQuestZones.size() != 0){
+                        subjectiveQuestZoneList.add(subjectiveQuestZones.get(0));
+                    }
                 });
 
                 //获取第一个客观题的高度
@@ -524,6 +526,11 @@ public class PaintService {
             double score = MapUtils.getDouble(subjective, "score");
 
             Document quest = questService.findQuest(projectId, subjectId, questionNo);
+
+            if(null == quest){
+                continue;
+            }
+
             Target questTarget = Target.quest(quest.getString("questId"));
 
             StringBuilder builder = new StringBuilder();

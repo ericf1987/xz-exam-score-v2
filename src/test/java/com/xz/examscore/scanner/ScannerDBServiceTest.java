@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
@@ -77,9 +76,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgetStudentCardSlices() throws Exception {
-        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
-        String subjectId = "001";
-        String studentId = "599e38a8-41af-40e8-be01-23c2b9898fcd";
+        String project = "430300-c582131e66b64fe38da7d0510c399ec4";
+        String subjectId = "007";
+        String studentId = "000517ac-9277-4795-b0e7-0e9236b0e0b0";
         Map<String, Object> map = scannerDBService.getStudentCardSlices(project, subjectId, studentId);
         System.out.println(map.toString());
     }
@@ -130,10 +129,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testisAbsent() throws Exception {
-        String projectId = "430100-4f461da047f04f81be437e7522e68cab";
-        String subjectId = "005";
+        String projectId = "431100-c2bd703d34c440d4ad98f4404cd0526e";
+        String subjectId = "006";
 //        String studentId = "b0ffcd4a-f881-4c9f-9762-4fc09fa1e146";
-        String studentId = "a65823ea-8b7b-4513-8a80-ab8a70011ade";
+        String studentId = "1c522b51-bc79-48a3-a0bb-8a3f9517d17a";
 //        String studentId = "50a1ac07-fc9a-4b56-8931-bbbd2f6e0329";
 
         MongoClient mongoClient1 = scannerDBService.getMongoClient(projectId);
@@ -142,9 +141,11 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
         Document studentId1 = students.find(MongoUtils.doc("studentId", studentId)).first();
 
-        scannerDBService.importStudentScore(projectId, subjectId, studentId1, new AtomicInteger(0));
+        //scannerDBService.importStudentScore(projectId, subjectId, studentId1, new AtomicInteger(0));
 
-        System.out.println(scannerDBService.isAbsent(studentId1, true));
+        boolean objectiveAllZero = scannerDBService.isObjectiveAllZero(projectId, subjectId, studentId1);
+
+        System.out.println(scannerDBService.isAbsent(studentId1, true, objectiveAllZero));
     }
 
     @Test

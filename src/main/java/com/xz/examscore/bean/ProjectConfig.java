@@ -75,6 +75,26 @@ public class ProjectConfig implements Serializable {
      */
     private boolean shareSchoolReport = true;
 
+    /**
+     * 比及格分低多少分以内算作及格
+     */
+    public String almostPassOffset;
+
+    /**
+     * 是否将接近及格的分数设为及格
+     */
+    public boolean fillAlmostPass;
+
+    /**
+     * 是否排除缺考记录
+     */
+    public boolean removeAbsentStudent;
+
+    /**
+     * 是否排除0分记录
+     */
+    public boolean removeZeroScores;
+
     public boolean isShareSchoolReport() {
         return shareSchoolReport;
     }
@@ -210,5 +230,37 @@ public class ProjectConfig implements Serializable {
             this.scoreLevels = new HashMap<>();
         }
         this.scoreLevels.put(scoreLevel, rate);
+    }
+
+    public String getAlmostPassOffset() {
+        return almostPassOffset;
+    }
+
+    public void setAlmostPassOffset(String almostPassOffset) {
+        this.almostPassOffset = almostPassOffset;
+    }
+
+    public boolean isFillAlmostPass() {
+        return fillAlmostPass;
+    }
+
+    public void setFillAlmostPass(boolean fillAlmostPass) {
+        this.fillAlmostPass = fillAlmostPass;
+    }
+
+    public boolean isRemoveAbsentStudent() {
+        return removeAbsentStudent;
+    }
+
+    public void setRemoveAbsentStudent(boolean removeAbsentStudent) {
+        this.removeAbsentStudent = removeAbsentStudent;
+    }
+
+    public boolean isRemoveZeroScores() {
+        return removeZeroScores;
+    }
+
+    public void setRemoveZeroScores(boolean removeZeroScores) {
+        this.removeZeroScores = removeZeroScores;
     }
 }

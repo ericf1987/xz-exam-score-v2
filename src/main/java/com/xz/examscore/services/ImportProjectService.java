@@ -199,6 +199,12 @@ public class ImportProjectService {
         JSONObject scoreLevels = result.get("scoreLevels");
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
+
+        String almostPassOffset = null == result.get("almostPassOffset") ? "" : result.get("almostPassOffset").toString();
+        boolean fillAlmostPass = null != result.get("fillAlmostPass") && BooleanUtils.toBoolean(result.get("fillAlmostPass").toString());
+        boolean removeAbsentStudent = null == result.get("removeAbsentStudent") || BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString());
+        boolean removeZeroScores = null != result.get("removeZeroScores") && BooleanUtils.toBoolean(result.get("removeZeroScores").toString());
+
         Map<String, Double> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = false;
         //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
@@ -268,9 +274,14 @@ public class ImportProjectService {
             projectConfig.setEntryLevelEnable(Boolean.parseBoolean(entryLevelEnable));
             projectConfig.setCollegeEntryLevel(collegeEntryLevel);
             projectConfig.setShareSchoolReport(shareSchoolReport);
+
+            projectConfig.setAlmostPassOffset(almostPassOffset);
+            projectConfig.setFillAlmostPass(BooleanUtils.toBoolean(fillAlmostPass));
+            projectConfig.setRemoveAbsentStudent(BooleanUtils.toBoolean(removeAbsentStudent));
+            projectConfig.setRemoveZeroScores(BooleanUtils.toBoolean(removeZeroScores));
+
             projectConfigService.fixProjectConfig(projectConfig);
 
-            //projectConfigService.updateRankLevelConfig(projectId, rankLevels, isCombine, displayOptions, scoreLevelsMap, topStudentRate);
             projectConfigService.updateRankLevelConfig(projectConfig);
 
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
@@ -285,7 +296,10 @@ public class ImportProjectService {
                     projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate(),
                     projectConfig.isSeparateCombine(), projectConfig.getEntryLevelStatType(),
                     projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel(),
-                    projectConfig.isShareSchoolReport());
+                    projectConfig.isShareSchoolReport(), projectConfig.getAlmostPassOffset(),
+                    projectConfig.isFillAlmostPass(), projectConfig.isRemoveAbsentStudent(),
+                    projectConfig.isRemoveZeroScores()
+            );
             //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
@@ -732,12 +746,10 @@ public class ImportProjectService {
             quests.add(questMap);
         });
 
-        Map<String, Double> subjectScoreMap = quests.stream().collect(
+        return quests.stream().collect(
                 //分组计算各科的题目总分
                 Collectors.groupingBy(quest -> quest.get("subjectId").toString(), Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score")))
         );
-
-        return subjectScoreMap;
     }
 
     //获取选做题题号

@@ -362,8 +362,10 @@ public class ScannerDBService {
             LOG.info("该学生{}在科目{}的考试中存在作弊标记，将主观题和客观题分数改为0分", studentId, subjectId);
         }
 
+        boolean objectiveAllZero = isObjectiveAllZero(projectId, subjectId, document);
+
         //判断该学生是否缺考
-        boolean isAbsent = isAbsent(document, true);
+        boolean isAbsent = isAbsent(document, true, objectiveAllZero);
 
         //是否能找到该学生的试卷
         boolean isLost = isLost(document, true);
@@ -379,11 +381,12 @@ public class ScannerDBService {
     /**
      * 判断学生是否缺考
      *
-     * @param student 网阅学生分数记录
-     * @param b       是否把0分计入缺考
+     * @param student          网阅学生分数记录
+     * @param b                是否把0分计入缺考
+     * @param objectiveAllZero 客观题得分是否全部为0
      * @return 是否缺考
      */
-    public boolean isAbsent(Document student, boolean b) {
+    public boolean isAbsent(Document student, boolean b, boolean objectiveAllZero) {
         //是否把0分计入缺考||无网阅分数||有缺考标记 三种条件满足一中则视为缺考
 
         List<Document> objectiveList = DocumentUtils.getList(student, "objectiveList", Collections.emptyList());
@@ -391,23 +394,18 @@ public class ScannerDBService {
         //无网阅分数
         boolean hasNoQuestScore = objectiveList.isEmpty() && subjectiveList.isEmpty();
 
-        //各小题得分不能为0
-        Predicate<Document> predicate_o = (o) -> o.getString("answerContent").length() != 0 && !o.getString("answerContent").equals("*") && !StringUtil.isBlank(o.getString("answerContent"));
+        //客观题是否作答
+//        Predicate<Document> predicate_o = (o) -> o.getString("answerContent").length() != 0 && !o.getString("answerContent").equals("*") && !StringUtil.isBlank(o.getString("answerContent"));
+        //主观题不为0分
         Predicate<Document> predicate_s = (s) -> Double.valueOf(s.get("score").toString()) != 0;
-
-        objectiveList.forEach(o -> {
-            String score = o.get("score").toString();
-            Double aDouble = Double.valueOf(score);
-            System.out.println(aDouble == 0);
-        });
 
         //所有题目得分为0
         boolean allQuestZero = false;
         //有网阅数据&&把0分视为缺考
         if (!hasNoQuestScore && b) {
-            List<Document> objectiveScores = objectiveList.stream().filter(predicate_o).collect(Collectors.toList());
+//            List<Document> objectiveScores = objectiveList.stream().filter(predicate_o).collect(Collectors.toList());
             List<Document> subjectiveScores = subjectiveList.stream().filter(predicate_s).collect(Collectors.toList());
-            allQuestZero = objectiveScores.isEmpty() && subjectiveScores.isEmpty();
+            allQuestZero = objectiveAllZero && subjectiveScores.isEmpty();
         }
 
         boolean isAbsent = BooleanUtils.toBoolean(student.get("isAbsent", Boolean.class));
@@ -431,6 +429,39 @@ public class ScannerDBService {
         return BooleanUtils.toBoolean(student.getBoolean("isLost")) && b;
     }
 
+    /**
+     * 判断是不是所有客观题都为0分
+     *
+     * @param projectId
+     * @param student
+     */
+    public boolean isObjectiveAllZero(String projectId, String subjectId, Document student) {
+        List<Document> objectiveList = DocumentUtils.getList(student, "objectiveList", Collections.emptyList());
+        boolean isAllZero = true;
+        for (Document o : objectiveList) {
+            String questionNo = o.getString("questionNo");
+            Document quest = questService.findQuest(projectId, subjectId, questionNo);
+
+            boolean awardScoreTag = BooleanUtils.toBoolean(quest.getBoolean("awardScoreTag"));
+
+            //将学生作答排序
+            String answerContent = StringUtil.isBlank(o.getString("answerContent")) ?
+                    "*" : o.getString("answerContent");
+
+            String studentAnswer = sortStudentAnswer(answerContent.toUpperCase());
+
+            String standardAnswer = getStdAnswerFromQuest(quest);
+
+            double fullScore = getFullScore(quest, o);
+
+            ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
+
+            if (scoreAndRight.score != 0) {
+                isAllZero = false;
+            }
+        }
+        return isAllZero;
+    }
 
     private void fixMissingSubjectQuest(List<Document> subQuestList, List<Document> subjectiveList) {
 
