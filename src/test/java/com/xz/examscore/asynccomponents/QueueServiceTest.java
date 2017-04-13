@@ -45,9 +45,9 @@ public class QueueServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void test1() throws Exception {
         //记录统计时间
-        queueService.recordAggrTime("3f4cfbff-9dcc-4470-bf2f-b8d7ee55974e");
+//        queueService.recordAggrTime("3f4cfbff-9dcc-4470-bf2f-b8d7ee55974e");
         //判断是否逾期
-        System.out.println(queueService.isAggrOverdue("aggr_start_time:10000"));
+//        System.out.println(queueService.isAggrOverdue("aggr_start_time:10000"));
         //删除任务
         queueService.clearOverdueAggr();
     }

@@ -72,6 +72,9 @@ public class PaintService {
         Map<String, Object> rankRuleMap = null == subjectRuleMap ? Collections.emptyMap() : (Map<String, Object>) subjectRuleMap.get(subjectId);
 
         List<Map<String, Object>> studentCardSlices = paperScreenShotBean.getStudentCardSlices();
+
+
+        List<String> failedStudents = new ArrayList<>();
         if (studentCardSlices.isEmpty()) {
             LOG.info("学生试卷留痕为空！项目{}，学校{}，班级{}", paperScreenShotBean.getProjectId(), paperScreenShotBean.getSchoolId(), paperScreenShotBean.getClassId());
         } else {
@@ -114,9 +117,11 @@ public class PaintService {
                             totalScoreZone, objectiveQuestZone, subjectiveQuestZoneList);
                 } catch (Exception e) {
                     LOG.error("生成学生试卷截图出现异常，项目ID:{}， 学生ID:{}, 科目ID:{}", projectId, studentId, subjectId);
-                    monitorService.recordFailedStudent(projectId, schoolId, classId, studentId, subjectId);
+                    failedStudents.add(studentId);
                 }
             });
+            //班级统计完成后，记录该班级，该科目生成截图失败的学生
+            monitorService.recordFailedStudent(projectId, schoolId, classId, failedStudents, subjectId);
         }
     }
 

@@ -248,4 +248,40 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(studentIds.size());
     }
 
+    /**
+     * 测试修正不及格分数
+     * @throws Exception
+     */
+    @Test
+    public void testFixTotalScore() throws Exception {
+        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
+        Target subjectTarget = Target.subject("003");
+        Range studentRange = Range.student("8eed6ed6-eb94-4101-b5db-b5299610308e");
+        double totalScore = 70;
+        Document update = doc("totalScore", totalScore);
+        scoreService.fixTotalScoreByProjectConfig(projectId, subjectTarget, update, totalScore);
+        System.out.println(update.toString());
+    }
+
+    /**
+     * 测试保存总分
+     * @throws Exception
+     */
+    @Test
+    public void testSaveTotalScore() throws Exception {
+        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
+        String studentId = "a36fd8a5-d0d8-495f-9682-8f20218d7952";
+        Target subjectTarget = Target.subject("003");
+
+        Range studentRange = Range.student(studentId);
+        double totalScore = 70;
+
+        Document student = studentService.findStudent(projectId, studentId);
+        Document extra = doc("class", student.get("class")).append("school", student.get("school"))
+                .append("area", student.get("area")).append("city", student.get("city"))
+                .append("province", student.get("province"));
+
+        scoreService.saveTotalScore(projectId, studentRange, subjectTarget, totalScore, extra);
+    }
+
 }

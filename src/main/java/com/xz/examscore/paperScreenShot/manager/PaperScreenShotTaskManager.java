@@ -92,6 +92,8 @@ public class PaperScreenShotTaskManager {
                 for (String classId : classIds) {
                     Runnable runnable = () -> {
                         try {
+                            //为当前班级的所有科目各创建一个doc用来记录截图生成失败的学生
+                            monitorService.createFailedStudentDoc(projectId, schoolId, classId, subjectIds);
                             paperScreenShotService.dispatchOneClassTask(projectId, schoolId, classId, subjectIds);
                         } catch (Exception e) {
                             LOG.info("生成试卷截图失败, 项目{}， 学校{}， 班级{}", projectId, schoolId, classId);

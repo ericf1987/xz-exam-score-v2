@@ -13,6 +13,7 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.SubjectObjective;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
+import com.xz.examscore.util.DoubleUtils;
 import com.xz.examscore.util.Mongo;
 import com.xz.examscore.util.SubjectUtil;
 import org.apache.commons.lang.BooleanUtils;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
+import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.Pass;
 import static com.xz.examscore.util.Mongo.range2Doc;
 import static com.xz.examscore.util.Mongo.target2Doc;
 
@@ -58,6 +60,9 @@ public class ScoreService {
 
     @Autowired
     private ProjectCacheManager projectCacheManager;
+
+    @Autowired
+    FullScoreService fullScoreService;
 
     public static Logger LOG = LoggerFactory.getLogger(ScoreService.class);
 
@@ -308,7 +313,7 @@ public class ScoreService {
         });
     }
 
-    public String getAbsentTotalScore(String projectId, Range range, Target target){
+    public String getAbsentTotalScore(String projectId, Range range, Target target) {
         String collectionName = getTotalScoreCollection(projectId, target);
         return getAbsentTotalScore0(collectionName, projectId, range, target);
     }
@@ -328,26 +333,26 @@ public class ScoreService {
             }
         }
 
-        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
-            if(!docs.isEmpty()){
+        if (target.match(Target.PROJECT) || target.match(Target.SUBJECT)) {
+            if (!docs.isEmpty()) {
                 Document first = docs.get(0);
                 boolean isAbsent = BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
                 return isAbsent ? "-" : String.valueOf(result);
             }
             return "-";
-        }else{
+        } else {
             return String.valueOf(result);
         }
     }
 
-    public boolean isAbsentInTotalScore(String projectId, String studentId, Target target){
-        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
+    public boolean isAbsentInTotalScore(String projectId, String studentId, Target target) {
+        if (target.match(Target.PROJECT) || target.match(Target.SUBJECT)) {
             MongoCollection<Document> totalScores = scoreDatabase.getCollection("total_score");
             Document query = Mongo.query(projectId, Range.student(studentId), target);
             Document first = totalScores.find(query).first();
-            if(null != first){
+            if (null != first) {
                 return BooleanUtils.toBoolean(first.getBoolean("isAbsent"));
-            }else{
+            } else {
                 LOG.error("未查到该学生的总分记录，对其标记为缺考！项目{}，学生{}，目标{}", projectId, studentId, target);
                 return true;
             }
@@ -361,14 +366,14 @@ public class ScoreService {
 
         Document query;
 
-        if(target.match(Target.SUBJECT_OBJECTIVE)){
+        if (target.match(Target.SUBJECT_OBJECTIVE)) {
             SubjectObjective subjectObjective = target.getId(SubjectObjective.class);
             query = doc("project", projectId)
                     .append("range", range2Doc(range))
                     .append("target.name", Target.SUBJECT_OBJECTIVE)
                     .append("target.id.subject", subjectObjective.getSubject())
                     .append("target.id.objective", subjectObjective.isObjective());
-        }else {
+        } else {
             query = Mongo.query(projectId, range, target);
         }
 /*
@@ -414,9 +419,14 @@ public class ScoreService {
         Document query = Mongo.query(projectId, range, target);
         Document update = doc("totalScore", totalScore);
 
-        if( (range.match(Range.STUDENT) && (target.match(Target.PROJECT) || target.match(Target.SUBJECT)) )){
+        if ((range.match(Range.STUDENT) && (target.match(Target.PROJECT) || target.match(Target.SUBJECT)))) {
             boolean isAbsent = isStudentAbsent(projectId, range.getId(), target);
             update.append("isAbsent", isAbsent);
+        }
+
+        //学生的科目不缺考
+        if (range.match(Range.STUDENT) && target.match(Target.SUBJECT) && !BooleanUtils.toBoolean(update.getBoolean("isAbsent"))) {
+            fixTotalScoreByProjectConfig(projectId, target, update, totalScore);
         }
 
         if (extra != null) {
@@ -433,6 +443,33 @@ public class ScoreService {
         SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
 
         simpleCache.delete(cacheKey);
+    }
+
+    /**
+     * 根据考试配置规则对不及格的学生分数进行修正
+     *
+     * @param projectId  项目ID
+     * @param target     目标
+     * @param update     更新条件
+     * @param totalScore 总分
+     */
+    public void fixTotalScoreByProjectConfig(String projectId, Target target, Document update, double totalScore) {
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        if (projectConfig.isFillAlmostPass()) {
+            Map<String, Double> scoreLevels = projectConfig.getScoreLevels();
+            Double rate = scoreLevels.get(Pass.name());
+            double fullScore = fullScoreService.getFullScore(projectId, target);
+            Double offSet = Double.valueOf(projectConfig.getAlmostPassOffset());
+
+            double max = DoubleUtils.round(fullScore * rate);
+            double min = DoubleUtils.round(max - offSet);
+
+            if (totalScore < max && totalScore >= min) {
+                update.append("offSet", fullScore * rate - totalScore)
+                        .append("originalScore", totalScore);
+                update.put("totalScore", fullScore * rate);
+            }
+        }
     }
 
     /**

@@ -13,6 +13,7 @@ import com.xz.examscore.services.ImportProjectService;
 import com.xz.examscore.services.ScoreService;
 import com.xz.examscore.services.StudentService;
 import com.xz.examscore.util.DoubleUtils;
+import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,10 +58,12 @@ public class TotalScoreStudentTask extends AggrTask {
 
             if (target.match(Target.SUBJECT_COMBINATION)) {
                 aggrStudentSubjectCombinationScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
-            } else if (target.match(Target.SUBJECT) || target.match(Target.PROJECT)) {
+            } else if (target.match(Target.SUBJECT)) {
                 aggrStudentSubjectProjectScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
-            } else if (target.match(Target.SUBJECT_OBJECTIVE)){
+            } else if (target.match(Target.SUBJECT_OBJECTIVE)) {
                 aggrStudentSubjectObjectiveScores(taskInfo.getProjectId(), target, scoreCollection, studentRange);
+            } else if (target.match(Target.PROJECT)) {
+                aggrStudentProjectScores(taskInfo.getProjectId(), target, studentRange);
             }
 
         }
@@ -125,6 +128,39 @@ public class TotalScoreStudentTask extends AggrTask {
         ));
         Document aggregateResult = aggregate.first();
 
+        // 如果缺考则会导致 aggregate() 没有返回值
+        if (aggregateResult != null) {
+            Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));
+            Document extra = doc("class", student.get("class")).append("school", student.get("school"))
+                    .append("area", student.get("area")).append("city", student.get("city"))
+                    .append("province", student.get("province"));
+            scoreService.saveTotalScore(projectId, studentRange, target, score, extra);
+        }
+    }
+
+    /**
+     * 统计学生考试总得分
+     *
+     * @param projectId    项目ID
+     * @param target       目标
+     * @param studentRange 学生维度
+     */
+    protected void aggrStudentProjectScores(String projectId, Target target, Range studentRange) {
+        String collectionName = scoreService.getTotalScoreCollection(projectId, target);
+        String studentId = studentRange.getId();
+        Document student = studentService.findStudent(projectId, studentId);
+        //统计单个考生所有单科的分数总和
+        MongoCollection<Document> collection = scoreDatabase.getCollection(collectionName);
+        Document match = doc("$match", doc("project", projectId)
+                .append("range", Mongo.range2Doc(studentRange))
+                .append("target.name", Target.SUBJECT));
+        Document group = doc("$group", new Document()
+                .append("_id", null)
+                .append("totalScore", new Document("$sum", "$totalScore")));
+        AggregateIterable<Document> aggregate = collection.aggregate(Arrays.asList(
+                match, group
+        ));
+        Document aggregateResult = aggregate.first();
         // 如果缺考则会导致 aggregate() 没有返回值
         if (aggregateResult != null) {
             Double score = DoubleUtils.round(aggregateResult.getDouble("totalScore"));

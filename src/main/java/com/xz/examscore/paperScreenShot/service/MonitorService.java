@@ -79,30 +79,36 @@ public class MonitorService {
         }
     }
 
+    public void createFailedStudentDoc(String projectId, String schoolId, String classId, List<String> subjectIds) {
+        MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
+        for(String subjectId : subjectIds){
+            Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
+                    .append("subject", subjectId);
+            collection.insertOne(query.append("md5", Mongo.md5()));
+        }
+    }
+
     /**
      * 记录生成截图失败的学生信息
      *
      * @param projectId 项目ID
-     * @param studentId 学生ID
+     * @param studentIds 学生列表
      * @param subjectId 科目ID
      */
-    public void recordFailedStudent(String projectId, String schoolId, String classId, String studentId, String subjectId) {
+    public void recordFailedStudent(String projectId, String schoolId, String classId, List<String> studentIds, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
                 .append("subject", subjectId);
-        UpdateResult result = collection.updateMany(query, $push("studentIds", studentId));
-        if (result.getMatchedCount() == 0) {
-            collection.insertOne(query.append("studentIds", Collections.emptyList()).append("md5", Mongo.md5()));
-        }
+        collection.updateMany(query, $set("studentIds", studentIds));
     }
 
     public List<String> getFailedStudents(String projectId, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         Document query = doc("project", projectId).append("subject", subjectId);
-        Document students = collection.find(query).projection(doc("students", 1)).first();
+        Document students = collection.find(query).projection(doc("studentIds", 1)).first();
 
         if (null != students) {
-            List<String> studentIds = students.get("students", List.class);
+            List<String> studentIds = students.get("studentIds", List.class);
             return studentIds.stream().map(s -> studentService.findStudent(projectId, s).getString("name")).collect(Collectors.toList());
         }
 

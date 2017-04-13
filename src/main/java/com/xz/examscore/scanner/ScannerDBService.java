@@ -116,6 +116,7 @@ public class ScannerDBService {
         if (projectDoc == null) {
             LOG.error("没有找到项目" + project);
             return;
+
         }
 
         Document subjectCodes = (Document) projectDoc.get("subjectcodes");
@@ -440,7 +441,10 @@ public class ScannerDBService {
         boolean isAllZero = true;
         for (Document o : objectiveList) {
             String questionNo = o.getString("questionNo");
-            Document quest = questService.findQuest(projectId, subjectId, questionNo);
+
+            String sid = getSubjectIdInQuestList(projectId, questionNo, subjectId);
+
+            Document quest = questService.findQuest(projectId, sid, questionNo);
 
             boolean awardScoreTag = BooleanUtils.toBoolean(quest.getBoolean("awardScoreTag"));
 
