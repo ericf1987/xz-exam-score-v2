@@ -6,12 +6,10 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
+import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.services.FullScoreService;
-import com.xz.examscore.services.ScoreLevelService;
-import com.xz.examscore.services.ScoreService;
-import com.xz.examscore.services.TargetService;
+import com.xz.examscore.services.*;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -48,6 +47,9 @@ public class ScoreRateTask extends AggrTask {
     @Autowired
     TargetService targetService;
 
+    @Autowired
+    ProjectConfigService projectConfigService;
+
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
         String projectId = taskInfo.getProjectId();
@@ -55,7 +57,19 @@ public class ScoreRateTask extends AggrTask {
 
         List<Target> targets = targetService.queryTargets(projectId, Target.PROJECT, Target.SUBJECT, Target.SUBJECT_COMBINATION);
 
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
         for (Target target : targets) {
+            doProcessStudentScoreRate(projectId, range, target, projectConfig);
+//            processStudentScoreRate(projectId, range, target);
+        }
+    }
+
+    private void doProcessStudentScoreRate(String projectId, Range range, Target target, ProjectConfig projectConfig) {
+        String scoreLevelConfig = "score";
+        if(scoreLevelConfig.equals("score")){
+            processStudentScoreRate2(projectId, range, target, projectConfig.getScoreLevels());
+        }else if(scoreLevelConfig.equals("rate")){
             processStudentScoreRate(projectId, range, target);
         }
     }
@@ -80,5 +94,12 @@ public class ScoreRateTask extends AggrTask {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_rate");
         collection.deleteMany(query);
         collection.insertOne(doc(query).append("scoreRate", scoreRate).append("scoreLevel", scoreLevel).append("md5", MD5.digest(UUID.randomUUID().toString())));
+    }
+
+    private void processStudentScoreRate2(String projectId, Range range, Target target, Map<String, Object> scoreLevels){
+        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
+            String targetId = target.getId().toString();
+
+        }
     }
 }

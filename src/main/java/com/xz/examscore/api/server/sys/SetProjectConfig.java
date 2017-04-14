@@ -136,8 +136,8 @@ public class SetProjectConfig implements Server {
         return map;
     }
 
-    public Map<String, Double> toScoreLevelsMap(String[] scoreLevels) {
-        Map<String, Double> map = new HashMap<>();
+    public Map<String, Object> toScoreLevelsMap(String[] scoreLevels) {
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < SCORE_LEVEL_PARAM.length; i++) {
             map.put(SCORE_LEVEL_PARAM[i], Double.parseDouble(scoreLevels[i]));
         }

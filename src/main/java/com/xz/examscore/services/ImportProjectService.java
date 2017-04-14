@@ -205,7 +205,7 @@ public class ImportProjectService {
         boolean removeAbsentStudent = null == result.get("removeAbsentStudent") || BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString());
         boolean removeZeroScores = null != result.get("removeZeroScores") && BooleanUtils.toBoolean(result.get("removeZeroScores").toString());
 
-        Map<String, Double> scoreLevelsMap = new HashMap<>();
+        Map<String, Object> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = false;
         //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
         boolean shareSchoolReport = true;
@@ -244,10 +244,10 @@ public class ImportProjectService {
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
-                scoreLevelsMap.put(Excellent.name(), Double.parseDouble(scoreLevels.get("excellent").toString()));
-                scoreLevelsMap.put(Good.name(), Double.parseDouble(scoreLevels.get("good").toString()));
-                scoreLevelsMap.put(Pass.name(), Double.parseDouble(scoreLevels.get("pass").toString()));
-                scoreLevelsMap.put(Fail.name(), Double.parseDouble(scoreLevels.get("fail").toString()));
+                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("excellent"));
+                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("good"));
+                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("pass"));
+                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("fail"));
             }
 
             //获取尖子生比例
@@ -300,7 +300,6 @@ public class ImportProjectService {
                     projectConfig.isFillAlmostPass(), projectConfig.isRemoveAbsentStudent(),
                     projectConfig.isRemoveZeroScores()
             );
-            //projectConfigService.updateRankLevelConfig(projectConfig);
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
     }

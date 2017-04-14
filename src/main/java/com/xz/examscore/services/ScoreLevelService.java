@@ -39,13 +39,13 @@ public class ScoreLevelService {
      */
     public String calculateScoreLevel(String projectId, double scoreRate) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        Map<String, Double> scoreLevels = projectConfig.getScoreLevels();
+        Map<String, Object> scoreLevels = projectConfig.getScoreLevels();
 
-        if (scoreRate >= scoreLevels.get(Excellent.name())) {
+        if (scoreRate >= Double.valueOf(scoreLevels.get(Excellent.name()).toString())) {
             return Excellent.name();
-        } else if (scoreRate >= scoreLevels.get(Good.name())) {
+        } else if (scoreRate >= Double.valueOf(scoreLevels.get(Good.name()).toString())) {
             return Good.name();
-        } else if (scoreRate >= scoreLevels.get(Pass.name())) {
+        } else if (scoreRate >= Double.valueOf(scoreLevels.get(Pass.name()).toString())) {
             return Pass.name();
         } else {
             return Fail.name();

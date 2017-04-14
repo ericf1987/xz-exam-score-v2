@@ -142,7 +142,7 @@ public class ProjectConfigService {
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
-            List<String> rankLevelCombines, Map<String, Double> scoreLevels, Double topStudentRate,
+            List<String> rankLevelCombines, Map<String, Object> scoreLevels, Double topStudentRate,
             String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
             String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel, boolean shareSchoolReport,
             String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores) {

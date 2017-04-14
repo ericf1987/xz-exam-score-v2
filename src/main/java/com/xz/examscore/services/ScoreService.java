@@ -456,8 +456,8 @@ public class ScoreService {
     public void fixTotalScoreByProjectConfig(String projectId, Target target, Document update, double totalScore) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         if (projectConfig.isFillAlmostPass()) {
-            Map<String, Double> scoreLevels = projectConfig.getScoreLevels();
-            Double rate = scoreLevels.get(Pass.name());
+            Map<String, Object> scoreLevels = projectConfig.getScoreLevels();
+            Double rate = Double.valueOf(scoreLevels.get(Pass.name()).toString());
             double fullScore = fullScoreService.getFullScore(projectId, target);
             Double offSet = Double.valueOf(projectConfig.getAlmostPassOffset());
 

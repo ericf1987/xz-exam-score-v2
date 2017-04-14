@@ -29,7 +29,7 @@ public class SubjectService {
     private static final Map<String, String> SUBJECT_NAMES = new HashMap<>();
 
     static {
-        SUBJECT_NAMES.put("", "全科");
+        SUBJECT_NAMES.put("000", "全科");
         SUBJECT_NAMES.put("001", "语文");
         SUBJECT_NAMES.put("002", "数学");
         SUBJECT_NAMES.put("003", "英语");

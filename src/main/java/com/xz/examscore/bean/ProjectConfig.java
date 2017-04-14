@@ -33,7 +33,7 @@ public class ProjectConfig implements Serializable {
     /**
      * 得分等级配置，每个等级的得分率
      */
-    private Map<String, Double> scoreLevels = new HashMap<>();
+    private Map<String, Object> scoreLevels = new HashMap<>();
 
     /**
      * 选择展示哪些等第组合（如 5A、4A1B）
@@ -174,11 +174,11 @@ public class ProjectConfig implements Serializable {
         this.rankSegmentCount = rankSegmentCount;
     }
 
-    public Map<String, Double> getScoreLevels() {
+    public Map<String, Object> getScoreLevels() {
         return scoreLevels;
     }
 
-    public void setScoreLevels(Map<String, Double> scoreLevels) {
+    public void setScoreLevels(Map<String, Object> scoreLevels) {
         this.scoreLevels = scoreLevels;
     }
 

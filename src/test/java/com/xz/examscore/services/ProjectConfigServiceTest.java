@@ -86,7 +86,7 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         }
 
         if (scoreRates != null && scoreRates.length > 0) {
-            HashMap<String, Double> scoreLevels = new HashMap<>();
+            HashMap<String, Object> scoreLevels = new HashMap<>();
             scoreLevels.put(ScoreLevel.Excellent.name(), scoreRates[0]);
             scoreLevels.put(ScoreLevel.Good.name(), scoreRates[1]);
             scoreLevels.put(ScoreLevel.Pass.name(), scoreRates[2]);
