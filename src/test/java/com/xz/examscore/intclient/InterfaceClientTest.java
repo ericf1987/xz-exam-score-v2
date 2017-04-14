@@ -43,7 +43,6 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
     }
 
 
-
     @Test
     public void testQueryQuestionByProject() throws Exception {
         JSONArray quests = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755");
@@ -121,18 +120,28 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         assertFalse(subjects.isEmpty());
     }
 
+    /**
+     * 基础数据接口-考试基础信息
+     *
+     * @throws Exception
+     */
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById("430300-32d8433951ce43cab5883abff77c8ea3");
+        JSONObject project = interfaceClient.queryProjectById("430300-c582131e66b64fe38da7d0510c399ec4");
         System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
         assertEquals(8, project.getIntValue("id"));
     }
 
+    /**
+     * 接口-考试配置信息
+     *
+     * @throws Exception
+     */
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430300-29c4d40d93bf41a5a82baffe7e714dd9");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430300-c582131e66b64fe38da7d0510c399ec4");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());
@@ -160,6 +169,30 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
             return s.getString("subjectId");
         }).collect(Collectors.toList());
         System.out.println("科目ID-->" + subjectIds.toString());*/
+    }
+
+    @Test
+    public void testImportSubject() throws Exception {
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId("430300-c582131e66b64fe38da7d0510c399ec4");
+        System.out.println(jsonArray.toString());
+    }
+
+    @Test
+    public void testImportSchools() throws Exception {
+        JSONArray jsonArray = interfaceClient.queryExamSchoolByProject("430300-c582131e66b64fe38da7d0510c399ec4", true);
+        System.out.println(jsonArray.toString());
+    }
+
+    @Test
+    public void testImportClasses() throws Exception {
+        JSONArray jsonArray = interfaceClient.queryExamClassByProject("430300-c582131e66b64fe38da7d0510c399ec4", "dd46843a-0ea9-4d49-a664-7eb1fb869e79", false);
+        System.out.println(jsonArray.toString());
+    }
+
+    @Test
+    public void testImportStudents() throws Exception {
+        JSONArray students = interfaceClient.queryClassExamStudent("430300-c582131e66b64fe38da7d0510c399ec4", "f33ab424-ec1e-4f55-a45d-47ad84faa796");
+        System.out.println(students.toString());
     }
 
     @Test
