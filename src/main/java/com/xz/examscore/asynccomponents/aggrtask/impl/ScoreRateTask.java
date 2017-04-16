@@ -11,6 +11,7 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.Mongo;
+import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,12 +62,11 @@ public class ScoreRateTask extends AggrTask {
 
         for (Target target : targets) {
             doProcessStudentScoreRate(projectId, range, target, projectConfig);
-//            processStudentScoreRate(projectId, range, target);
         }
     }
 
     private void doProcessStudentScoreRate(String projectId, Range range, Target target, ProjectConfig projectConfig) {
-        String scoreLevelConfig = "score";
+        String scoreLevelConfig = projectConfig.getScoreLevelConfig();
         if(scoreLevelConfig.equals("score")){
             processStudentScoreRate2(projectId, range, target, projectConfig.getScoreLevels());
         }else if(scoreLevelConfig.equals("rate")){
@@ -87,6 +87,28 @@ public class ScoreRateTask extends AggrTask {
         double scoreRate = score / fullScore;
         String scoreLevel = scoreLevelService.calculateScoreLevel(projectId, scoreRate);
 
+        saveScoreRate(projectId, range, target, scoreRate, scoreLevel);
+    }
+
+    private void processStudentScoreRate2(String projectId, Range range, Target target, Map<String, Object> scoreLevels){
+        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
+            String targetId = target.match(Target.PROJECT) ? "000" : target.getId().toString();
+            Map<String, Object> scoreLevel = MapUtils.getMap(scoreLevels, targetId);
+            double score = scoreService.getScore(projectId, range, target);
+            double fullScore = fullScoreService.getFullScore(projectId, target);
+
+            if (fullScore <= 0) {
+                LOG.warn("满分为零分：" + target);
+                return;
+            }
+
+            double scoreRate = score / fullScore;
+            String scoreLevelValue = scoreLevelService.calculateScoreLevelByScore(score, scoreLevel);
+            saveScoreRate(projectId, range, target, scoreRate, scoreLevelValue);
+        }
+    }
+
+    private void saveScoreRate(String projectId, Range range, Target target, double scoreRate, String scoreLevel) {
         Document query = doc("project", projectId)
                 .append("range", Mongo.range2Doc(range))
                 .append("target", Mongo.target2Doc(target));
@@ -94,12 +116,5 @@ public class ScoreRateTask extends AggrTask {
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_rate");
         collection.deleteMany(query);
         collection.insertOne(doc(query).append("scoreRate", scoreRate).append("scoreLevel", scoreLevel).append("md5", MD5.digest(UUID.randomUUID().toString())));
-    }
-
-    private void processStudentScoreRate2(String projectId, Range range, Target target, Map<String, Object> scoreLevels){
-        if(target.match(Target.PROJECT) || target.match(Target.SUBJECT)){
-            String targetId = target.getId().toString();
-
-        }
     }
 }

@@ -95,6 +95,12 @@ public class ProjectConfig implements Serializable {
      */
     public boolean removeZeroScores;
 
+    /**
+     * 按照得分还是得分率来计算三率
+     * @return
+     */
+    public String scoreLevelConfig;
+
     public boolean isShareSchoolReport() {
         return shareSchoolReport;
     }
@@ -262,5 +268,13 @@ public class ProjectConfig implements Serializable {
 
     public void setRemoveZeroScores(boolean removeZeroScores) {
         this.removeZeroScores = removeZeroScores;
+    }
+
+    public String getScoreLevelConfig() {
+        return scoreLevelConfig;
+    }
+
+    public void setScoreLevelConfig(String scoreLevelConfig) {
+        this.scoreLevelConfig = scoreLevelConfig;
     }
 }

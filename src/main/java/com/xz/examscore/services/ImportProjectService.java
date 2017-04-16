@@ -199,6 +199,7 @@ public class ImportProjectService {
         JSONObject scoreLevels = result.get("scoreLevels");
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
+        String scoreLevelConfig = result.get("scoreLevelConfig");
 
         String almostPassOffset = null == result.get("almostPassOffset") ? "" : result.get("almostPassOffset").toString();
         boolean fillAlmostPass = null != result.get("fillAlmostPass") && BooleanUtils.toBoolean(result.get("fillAlmostPass").toString());
@@ -244,10 +245,7 @@ public class ImportProjectService {
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
-                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("excellent"));
-                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("good"));
-                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("pass"));
-                scoreLevelsMap.put(Excellent.name(), scoreLevels.get("fail"));
+                getScoreLevelByConfig(scoreLevels, scoreLevelsMap, scoreLevelConfig);
             }
 
             //获取尖子生比例
@@ -301,6 +299,19 @@ public class ImportProjectService {
                     projectConfig.isRemoveZeroScores()
             );
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
+        }
+    }
+
+    public void getScoreLevelByConfig(JSONObject scoreLevels, Map<String, Object> scoreLevelsMap, String scoreLevelConfig) {
+        if (StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
+            for (String subjectKey : scoreLevels.keySet()) {
+                scoreLevelsMap.put(subjectKey, scoreLevels.get(subjectKey));
+            }
+        } else {
+            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("excellent"));
+            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("good"));
+            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("pass"));
+            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("fail"));
         }
     }
 
@@ -721,7 +732,7 @@ public class ImportProjectService {
 
     //判断改题目是否是选做题
     private boolean isOptionalQuest(Map<String, Object> optionalMap, String subjectId, String paperQuestNum) {
-        if(null == optionalMap || optionalMap.isEmpty()){
+        if (null == optionalMap || optionalMap.isEmpty()) {
             return false;
         }
         List<String> o = (List<String>) optionalMap.get(subjectId);
