@@ -659,13 +659,10 @@ public class ScoreService {
                 //该学生全部科目全部标记为缺考，则判定为项目缺考
 //                query.append("isAbsent", $exists(false));
                 query.append("isAbsent", doc("$exists", false));
-                long count = collection.count(query);
-                return count == 0;
+                return collection.count(query) == 0;
             case Target.SUBJECT:
-                query.append("subject", target.getId().toString());
-                Document doc = collection.find(query).first();
-                //没有参加该科目考试或有该科目的缺考标记则视为缺考
-                return null == doc || BooleanUtils.toBoolean(doc.getBoolean("isAbsent"));
+                query.append("subject", target.getId().toString()).append("isAbsent", doc("$exists", false));
+                return collection.count(query) == 0;
             default:
                 return false;
         }
