@@ -29,8 +29,8 @@ public class TotalScoreStudentTaskTest extends XzExamScoreV2ApplicationTests {
     //测试保存总分
     @Test
     public void testaggrStudentProjectScores() throws Exception {
-        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
-        Range studentRange = Range.student("f64e2631-8b0b-43a0-8743-6836bd1707a2");
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        Range studentRange = Range.student("5ba113bf-a635-4636-b6fa-4461347d0d37");
         Target projectTarget = Target.project(projectId);
         totalScoreStudentTask.aggrStudentProjectScores(projectId, projectTarget, studentRange);
     }

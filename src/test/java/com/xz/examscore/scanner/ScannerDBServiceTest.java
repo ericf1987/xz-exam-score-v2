@@ -83,11 +83,15 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(map.toString());
     }
 
+    /**
+     * 测试导入一个科目的分数
+     * @throws Exception
+     */
     @Test
     public void testImportOneSubject() throws Exception {
-        String project = "430300-9cef9f2059ce4a36a40a7a60b07c7e00";
+        String project = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
         MongoClient mongoClient = scannerDBService.getMongoClient(project);
-        scannerDBService.importOneSubjectTask(project, mongoClient, "003");
+        scannerDBService.importOneSubjectTask(project, mongoClient, "019");
     }
 
     @Test
@@ -162,5 +166,19 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         MongoClient mongoClient = scannerDBService.getMongoClient(projectId);
         boolean b = scannerDBService.existsSubjectDB(mongoClient, projectId, subjectId);
         System.out.println(b);
+    }
+
+    @Test
+    public void testisCheat() throws Exception {
+        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
+        String subjectId = "006";
+        String studentId = "1c522b51-bc79-48a3-a0bb-8a3f9517d17a";
+
+        MongoClient mongoClient1 = scannerDBService.getMongoClient(projectId);
+
+        MongoCollection<Document> students = mongoClient1.getDatabase(projectId + "_" + subjectId).getCollection("students");
+
+        Document studentId1 = students.find(MongoUtils.doc("studentId", studentId)).first();
+
     }
 }

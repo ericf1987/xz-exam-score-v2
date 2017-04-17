@@ -95,6 +95,7 @@ public class ProjectConfigService {
                         .append("fillAlmostPass", projectConfig.isFillAlmostPass())
                         .append("removeAbsentStudent", projectConfig.isRemoveAbsentStudent())
                         .append("removeZeroScores", projectConfig.isRemoveZeroScores())
+                        .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -115,6 +116,7 @@ public class ProjectConfigService {
                     .append("fillAlmostPass", projectConfig.isFillAlmostPass())
                     .append("removeAbsentStudent", projectConfig.isRemoveAbsentStudent())
                     .append("removeZeroScores", projectConfig.isRemoveZeroScores())
+                    .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -139,13 +141,14 @@ public class ProjectConfigService {
      * @param fillAlmostPass      是否将接近及格的分数设为及格
      * @param removeAbsentStudent 是否排除缺考记录
      * @param removeZeroScores    是否排除0分记录
+     * @param removeCheatStudent  是否排除违纪学生
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
             List<String> rankLevelCombines, Map<String, Object> scoreLevels, Double topStudentRate,
             String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
             String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel, boolean shareSchoolReport,
-            String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores) {
+            String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores, boolean removeCheatStudent) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -165,6 +168,7 @@ public class ProjectConfigService {
                         .append("fillAlmostPass", fillAlmostPass)
                         .append("removeAbsentStudent", removeAbsentStudent)
                         .append("removeZeroScores", removeZeroScores)
+                        .append("removeCheatStudent", removeCheatStudent)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -186,6 +190,7 @@ public class ProjectConfigService {
                     .append("fillAlmostPass", fillAlmostPass)
                     .append("removeAbsentStudent", removeAbsentStudent)
                     .append("removeZeroScores", removeZeroScores)
+                    .append("removeCheatStudent", removeCheatStudent)
             );
         }
     }

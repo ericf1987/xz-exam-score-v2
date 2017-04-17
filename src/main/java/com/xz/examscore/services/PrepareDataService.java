@@ -115,10 +115,15 @@ public class PrepareDataService {
                 .append("city", "$city").append("area", "$area").append("school", "$school")
                 .append("class", "$class").append("student", "$student");
 
-        //过滤掉缺考且缺卷的学生
+        //过滤掉缺考\作弊且缺卷的学生
         AggregateIterable<Document> aggregate = scoreCollection.aggregate(Arrays.asList(
 //                $match(doc("project", projectId).append("isAbsent", doc("$exists", false)).append("isLost", doc("$exists", false))),
-                $match(doc("project", projectId).append("isAbsent", doc("$exists", false))),
+//                $match(doc("project", projectId).append("isAbsent", doc("$exists", false))),
+                $match(
+                        doc("project", projectId).append("isAbsent", doc("$exists", false))
+                        .append("isCheating",  doc("$exists", false))
+                        .append("isLost",  doc("$exists", false))
+                ),
                 $group(doc("_id", _id).append("subjects", $addToSet("$subject")))
         ));
 

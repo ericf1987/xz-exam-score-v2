@@ -203,8 +203,9 @@ public class ImportProjectService {
 
         String almostPassOffset = null == result.get("almostPassOffset") ? "" : result.get("almostPassOffset").toString();
         boolean fillAlmostPass = null != result.get("fillAlmostPass") && BooleanUtils.toBoolean(result.get("fillAlmostPass").toString());
-        boolean removeAbsentStudent = null == result.get("removeAbsentStudent") || BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString());
+        boolean removeCheatStudent = null != result.get("removeCheatStudent") && BooleanUtils.toBoolean(result.get("removeCheatStudent").toString());
         boolean removeZeroScores = null != result.get("removeZeroScores") && BooleanUtils.toBoolean(result.get("removeZeroScores").toString());
+        boolean removeAbsentStudent = null == result.get("removeAbsentStudent") || BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString());
 
         Map<String, Object> scoreLevelsMap = new HashMap<>();
         boolean splitUnionSubject = false;
@@ -274,9 +275,10 @@ public class ImportProjectService {
             projectConfig.setShareSchoolReport(shareSchoolReport);
 
             projectConfig.setAlmostPassOffset(almostPassOffset);
-            projectConfig.setFillAlmostPass(BooleanUtils.toBoolean(fillAlmostPass));
-            projectConfig.setRemoveAbsentStudent(BooleanUtils.toBoolean(removeAbsentStudent));
-            projectConfig.setRemoveZeroScores(BooleanUtils.toBoolean(removeZeroScores));
+            projectConfig.setFillAlmostPass(fillAlmostPass);
+            projectConfig.setRemoveCheatStudent(removeCheatStudent);
+            projectConfig.setRemoveZeroScores(removeZeroScores);
+            projectConfig.setRemoveAbsentStudent(removeAbsentStudent);
 
             projectConfigService.fixProjectConfig(projectConfig);
 
@@ -296,22 +298,22 @@ public class ImportProjectService {
                     projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel(),
                     projectConfig.isShareSchoolReport(), projectConfig.getAlmostPassOffset(),
                     projectConfig.isFillAlmostPass(), projectConfig.isRemoveAbsentStudent(),
-                    projectConfig.isRemoveZeroScores()
+                    projectConfig.isRemoveZeroScores(), projectConfig.isRemoveCheatStudent()
             );
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
     }
 
     public void getScoreLevelByConfig(JSONObject scoreLevels, Map<String, Object> scoreLevelsMap, String scoreLevelConfig) {
-        if (StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
+        if (!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
             for (String subjectKey : scoreLevels.keySet()) {
                 scoreLevelsMap.put(subjectKey, scoreLevels.get(subjectKey));
             }
         } else {
             scoreLevelsMap.put(Excellent.name(), scoreLevels.get("excellent"));
-            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("good"));
-            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("pass"));
-            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("fail"));
+            scoreLevelsMap.put(Good.name(), scoreLevels.get("good"));
+            scoreLevelsMap.put(Pass.name(), scoreLevels.get("pass"));
+            scoreLevelsMap.put(Fail.name(), scoreLevels.get("fail"));
         }
     }
 
@@ -758,7 +760,9 @@ public class ImportProjectService {
 
         return quests.stream().collect(
                 //分组计算各科的题目总分
-                Collectors.groupingBy(quest -> quest.get("subjectId").toString(), Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score")))
+                Collectors.groupingBy(quest -> quest.get("subjectId").toString(),
+                        Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score"))
+                )
         );
     }
 

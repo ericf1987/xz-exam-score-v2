@@ -96,6 +96,11 @@ public class ProjectConfig implements Serializable {
     public boolean removeZeroScores;
 
     /**
+     * 是否排除违纪学生
+     */
+    public boolean removeCheatStudent;
+
+    /**
      * 按照得分还是得分率来计算三率
      * @return
      */
@@ -268,6 +273,14 @@ public class ProjectConfig implements Serializable {
 
     public void setRemoveZeroScores(boolean removeZeroScores) {
         this.removeZeroScores = removeZeroScores;
+    }
+
+    public boolean isRemoveCheatStudent() {
+        return removeCheatStudent;
+    }
+
+    public void setRemoveCheatStudent(boolean removeCheatStudent) {
+        this.removeCheatStudent = removeCheatStudent;
     }
 
     public String getScoreLevelConfig() {

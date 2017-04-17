@@ -380,19 +380,23 @@ public class ScannerDBService {
                 doc("project", projectId).append("student", studentId).append("subject", subjectId)
         );
 
-        //查询学生该科目是否作弊
-        boolean isCheating = isCheating(document);
-        if (isCheating) {
-            LOG.info("该学生{}在科目{}的考试中存在作弊标记，将主观题和客观题分数改为0分", studentId, subjectId);
-        }
-
         boolean objectiveAllZero = isObjectiveAllZero(projectId, subjectId, document);
 
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
+        //是否把0分计入缺考
+        boolean removeZeroScores = projectConfig.isRemoveZeroScores();
+
+        //是否移除违纪学生
+        boolean removeCheatStudent = projectConfig.isRemoveCheatStudent();
+
         //判断该学生是否缺考
-        boolean isAbsent = isAbsent(document, true, objectiveAllZero);
+        boolean isAbsent = isAbsent(document, removeZeroScores, objectiveAllZero);
 
         //是否能找到该学生的试卷
         boolean isLost = isLost(document, true);
+
+        boolean isCheating = isCheating(document, removeCheatStudent);
 
         saveObjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent, isLost);
         saveSubjectiveScores(projectId, subjectId, document, student, isCheating, isAbsent, isLost);
@@ -406,11 +410,11 @@ public class ScannerDBService {
      * 判断学生是否缺考
      *
      * @param student          网阅学生分数记录
-     * @param b                是否把0分计入缺考
+     * @param removeZeroScores 是否把0分计入缺考
      * @param objectiveAllZero 客观题得分是否全部为0
      * @return 是否缺考
      */
-    public boolean isAbsent(Document student, boolean b, boolean objectiveAllZero) {
+    public boolean isAbsent(Document student, boolean removeZeroScores, boolean objectiveAllZero) {
         //是否把0分计入缺考||无网阅分数||有缺考标记 三种条件满足一中则视为缺考
 
         List<Document> objectiveList = DocumentUtils.getList(student, "objectiveList", Collections.emptyList());
@@ -426,7 +430,7 @@ public class ScannerDBService {
         //所有题目得分为0
         boolean allQuestZero = false;
         //有网阅数据&&把0分视为缺考
-        if (!hasNoQuestScore && b) {
+        if (!hasNoQuestScore && removeZeroScores) {
 //            List<Document> objectiveScores = objectiveList.stream().filter(predicate_o).collect(Collectors.toList());
             List<Document> subjectiveScores = subjectiveList.stream().filter(predicate_s).collect(Collectors.toList());
             allQuestZero = objectiveAllZero && subjectiveScores.isEmpty();
@@ -438,8 +442,9 @@ public class ScannerDBService {
     }
 
     //是否作弊
-    private boolean isCheating(Document document) {
-        return BooleanUtils.toBoolean(document.getBoolean("isCheating"));
+    protected boolean isCheating(Document document, boolean removeCheatStudent) {
+        //有作弊标记且需要移除违纪则判定为作弊标记生效
+        return BooleanUtils.toBoolean(document.getBoolean("isCheating")) && removeCheatStudent;
     }
 
     /**
@@ -577,6 +582,9 @@ public class ScannerDBService {
             if (isLost) {
                 scoreDoc.append("isLost", true);
             }
+            if(isCheating){
+                scoreDoc.append("isCheating", true);
+            }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
@@ -683,6 +691,9 @@ public class ScannerDBService {
             }
             if (isLost) {
                 scoreDoc.append("isLost", true);
+            }
+            if(isCheating){
+                scoreDoc.append("isCheating", true);
             }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }

@@ -1,5 +1,6 @@
 package com.xz.examscore.asynccomponents.aggrtask.impl;
 
+import com.hyd.appserver.utils.StringUtils;
 import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -67,9 +68,9 @@ public class ScoreRateTask extends AggrTask {
 
     private void doProcessStudentScoreRate(String projectId, Range range, Target target, ProjectConfig projectConfig) {
         String scoreLevelConfig = projectConfig.getScoreLevelConfig();
-        if(scoreLevelConfig.equals("score")){
+        if(!StringUtils.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
             processStudentScoreRate2(projectId, range, target, projectConfig.getScoreLevels());
-        }else if(scoreLevelConfig.equals("rate")){
+        }else{
             processStudentScoreRate(projectId, range, target);
         }
     }
