@@ -154,4 +154,13 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         String subjectId = "004005006";
         scannerDBService.importSubjectScore0(projectId, subjectId);
     }
+
+    @Test
+    public void testexistsSubjectDB() throws Exception {
+        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
+        String subjectId = "007008009";
+        MongoClient mongoClient = scannerDBService.getMongoClient(projectId);
+        boolean b = scannerDBService.existsSubjectDB(mongoClient, projectId, subjectId);
+        System.out.println(b);
+    }
 }

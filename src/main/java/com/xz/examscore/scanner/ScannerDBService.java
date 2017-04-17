@@ -159,7 +159,7 @@ public class ScannerDBService {
     }
 
     public void importOneSubjectTask(String project, MongoClient mongoClient, String subject) {
-        String cardSubjectId = subjectService.getCombineOrSingle(project, subject);
+        String cardSubjectId = getCombineOrSingle(project, subject, mongoClient);
         LOG.info("当前科目为{}， 答题卡科目为{}", subject, cardSubjectId);
         LOG.info("导入开始...答题卡科目为：{}", SubjectService.getSubjectName(cardSubjectId));
         //根据考试科目获取数据库名
@@ -168,6 +168,29 @@ public class ScannerDBService {
         AtomicInteger counter = new AtomicInteger();
         students.find().forEach((Consumer<Document>) student -> doImportStuCardSlice(project, subject, cardSubjectId, student, counter));
         LOG.info("导入完成！答题卡科目为{}， 学生人数{}！", SubjectService.getSubjectName(cardSubjectId), counter.get());
+    }
+
+    public boolean existsSubjectDB(MongoClient mongoClient, String projectId, String subjectId) {
+        String dbName = projectId + "_" + subjectId;
+        MongoCollection<Document> students = mongoClient.getDatabase(dbName).getCollection("students");
+        return null != students.find().first();
+    }
+
+    public String getCombineOrSingle(String projectId, String subjectId, MongoClient mongoClient) {
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        boolean separateCombine = projectConfig.isSeparateCombine();
+        //如果该考试项目拆分文理科
+        if (separateCombine) {
+            if (SubjectCombinationService.isW(subjectId) && existsSubjectDB(mongoClient, projectId, "007008009")) {
+                return "007008009";
+            } else if (SubjectCombinationService.isL(subjectId) && existsSubjectDB(mongoClient, projectId, "004005006")) {
+                return "004005006";
+            } else {
+                return subjectId;
+            }
+        } else {
+            return subjectId;
+        }
     }
 
     public void doImportStuCardSlice(String project, String subject, String cardSubjectId, Document student, AtomicInteger counter) {

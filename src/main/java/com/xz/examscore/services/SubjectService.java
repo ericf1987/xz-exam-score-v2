@@ -115,23 +115,6 @@ public class SubjectService {
         }
     }
 
-    public String getCombineOrSingle(String projectId, String subjectId){
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-        boolean separateCombine = projectConfig.isSeparateCombine();
-        //如果该考试项目拆分文理科
-        if(separateCombine){
-            if(containAllArts(projectId) && SubjectCombinationService.isW(subjectId)){
-                return "007008009";
-            }else if (containAllSciences(projectId) && SubjectCombinationService.isL(subjectId)){
-                return "004005006";
-            }else{
-                return subjectId;
-            }
-        }else{
-            return subjectId;
-        }
-    }
-
     public boolean containAllArts(String projectId){
         List<String> subjects = querySubjects(projectId);
         return subjects.containsAll(Arrays.asList("007", "008", "009"));
