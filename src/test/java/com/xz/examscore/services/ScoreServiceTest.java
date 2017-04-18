@@ -254,10 +254,10 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
      */
     @Test
     public void testFixTotalScore() throws Exception {
-        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
-        Target subjectTarget = Target.subject("003");
-        Range studentRange = Range.student("8eed6ed6-eb94-4101-b5db-b5299610308e");
-        double totalScore = 70;
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        Target subjectTarget = Target.subject("004005006");
+        Range studentRange = Range.student("7fae2420-e5d4-4431-bcec-e4144096f0e5");
+        double totalScore = 15;
         Document update = doc("totalScore", totalScore);
         scoreService.fixTotalScoreByProjectConfig(projectId, subjectTarget, update, totalScore);
         System.out.println(update.toString());

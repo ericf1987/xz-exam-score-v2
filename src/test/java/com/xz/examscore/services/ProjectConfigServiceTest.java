@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * (description)
@@ -143,5 +144,14 @@ public class ProjectConfigServiceTest extends XzExamScoreV2ApplicationTests {
         Target target = Target.project(projectId);
         double scoreByIndex = projectConfigService.getScoreByIndex(projectId, range, target, 5, "0.4");
         System.out.println(scoreByIndex);
+    }
+
+    @Test
+    public void testgetScoreLevelByConfig() throws Exception {
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        Target subjectTarget = Target.subject("004");
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+        Map<String, Object> scoreLevelByConfig = projectConfigService.getScoreLevelByConfig(subjectTarget, projectConfig);
+        System.out.println(scoreLevelByConfig);
     }
 }

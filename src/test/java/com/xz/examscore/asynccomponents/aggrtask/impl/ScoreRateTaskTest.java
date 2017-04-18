@@ -18,8 +18,8 @@ public class ScoreRateTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        String projectId = "430600-d248e561aefc425b9971f2a26d267478";
-        String studentId = "9edff92f-eb7e-4b56-9f3c-62cffb3fa5d9";
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        String studentId = "4847b955-8c8e-4883-b9f6-2a4f42c44fe6";
         Range studentRange = Range.student(studentId);
         AggrTaskMessage atm = new AggrTaskMessage(projectId, "100", "score_rate");
         atm.setRange(studentRange);

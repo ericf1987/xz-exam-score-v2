@@ -54,9 +54,9 @@ public class ScoreMapTask extends AggrTask {
         Target target = taskInfo.getTarget();
 
         List<String> studentIds = studentService.getStudentIds(projectId, range, target);
-        if (studentIds.isEmpty()) {  // 可能对应的 range 考生全部没有分数
+/*        if (studentIds.isEmpty()) {  // 可能对应的 range 考生全部没有分数
             return;
-        }
+        }*/
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("score_map");
         Document query = Mongo.query(projectId, range, target);
@@ -80,10 +80,15 @@ public class ScoreMapTask extends AggrTask {
     private List<Document> createScoreMap(String projectId, Target target, List<String> studentIds) {
         List<Document> scoreCountList = new ArrayList<>();
 
-        for (String studentId : studentIds) {
-            Range studentRange = new Range(Range.STUDENT, studentId);
-            double totalScore = scoreService.getScore(projectId, studentRange, target);
-            addUpScoreMap(scoreCountList, totalScore);
+        //如果当前范围内没有学生，则需要将score_map中的scoreMap元素清空
+        if(studentIds.isEmpty()){
+            return scoreCountList;
+        }else {
+            for (String studentId : studentIds) {
+                Range studentRange = new Range(Range.STUDENT, studentId);
+                double totalScore = scoreService.getScore(projectId, studentRange, target);
+                addUpScoreMap(scoreCountList, totalScore);
+            }
         }
 
         return scoreCountList;

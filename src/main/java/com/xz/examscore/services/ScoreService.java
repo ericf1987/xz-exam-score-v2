@@ -7,6 +7,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 import com.xz.ajiaedu.common.lang.CollectionUtils;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
@@ -16,6 +17,7 @@ import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.DoubleUtils;
 import com.xz.examscore.util.Mongo;
 import com.xz.examscore.util.SubjectUtil;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -456,19 +458,53 @@ public class ScoreService {
     public void fixTotalScoreByProjectConfig(String projectId, Target target, Document update, double totalScore) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         if (projectConfig.isFillAlmostPass()) {
-            Map<String, Object> scoreLevels = projectConfig.getScoreLevels();
-            Double rate = Double.valueOf(scoreLevels.get(Pass.name()).toString());
-            double fullScore = fullScoreService.getFullScore(projectId, target);
-            Double offSet = Double.valueOf(projectConfig.getAlmostPassOffset());
 
-            double max = DoubleUtils.round(fullScore * rate);
-            double min = DoubleUtils.round(max - offSet);
+            Map<String, Object> scoreLevels = projectConfigService.getScoreLevelByConfig(target, projectConfig);
 
-            if (totalScore < max && totalScore >= min) {
-                update.append("offSet", fullScore * rate - totalScore)
-                        .append("originalScore", totalScore);
-                update.put("totalScore", fullScore * rate);
+            Map<String, Object> scoreLevelsMap = new HashMap<>();
+            String scoreLevelConfig = projectConfig.getScoreLevelConfig();
+
+            String targetId = target.getId().toString();
+
+            if(!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
+                scoreLevelsMap.putAll(MapUtils.getMap(scoreLevels, targetId));
+                packUpdateQueryByScore(update, totalScore, projectConfig, scoreLevelsMap);
+            }else{
+                scoreLevelsMap.putAll(scoreLevels);
+                packUpdateQueryByRate(projectId, target, update, totalScore, projectConfig, scoreLevelsMap);
             }
+        }
+    }
+
+    private void packUpdateQueryByScore(Document update, double totalScore, ProjectConfig projectConfig, Map<String, Object> scoreLevelsMap) {
+        Double score = Double.valueOf(scoreLevelsMap.get(Pass.name()).toString());
+        Double offSet = Double.valueOf(projectConfig.getAlmostPassOffset());
+        double min = DoubleUtils.round(score - offSet);
+
+        //学生得分小于设定的几个分数且大于及格线的最小分数
+        if (totalScore < score && totalScore >= min) {
+            update.append("offSet", score - totalScore)
+                    .append("originalScore", totalScore);
+            update.put("totalScore", score);
+        }else{
+            update.append("offSet", 0)
+                    .append("originalScore", totalScore);
+            update.put("totalScore", totalScore);
+        }
+    }
+
+    public void packUpdateQueryByRate(String projectId, Target target, Document update, double totalScore, ProjectConfig projectConfig, Map<String, Object> scoreLevelsMap) {
+        Double rate = Double.valueOf(scoreLevelsMap.get(Pass.name()).toString());
+        double fullScore = fullScoreService.getFullScore(projectId, target);
+        Double offSet = Double.valueOf(projectConfig.getAlmostPassOffset());
+
+        double max = DoubleUtils.round(fullScore * rate);
+        double min = DoubleUtils.round(max - offSet);
+
+        if (totalScore < max && totalScore >= min) {
+            update.append("offSet", fullScore * rate - totalScore)
+                    .append("originalScore", totalScore);
+            update.put("totalScore", fullScore * rate);
         }
     }
 

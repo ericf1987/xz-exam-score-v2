@@ -6,6 +6,7 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
 
 /**
  * (description)
@@ -96,6 +98,7 @@ public class ProjectConfigService {
                         .append("removeAbsentStudent", projectConfig.isRemoveAbsentStudent())
                         .append("removeZeroScores", projectConfig.isRemoveZeroScores())
                         .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
+                        .append("scoreLevelConfig", projectConfig.getScoreLevelConfig())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -117,6 +120,7 @@ public class ProjectConfigService {
                     .append("removeAbsentStudent", projectConfig.isRemoveAbsentStudent())
                     .append("removeZeroScores", projectConfig.isRemoveZeroScores())
                     .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
+                    .append("scoreLevelConfig", projectConfig.getScoreLevelConfig())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -148,7 +152,8 @@ public class ProjectConfigService {
             List<String> rankLevelCombines, Map<String, Object> scoreLevels, Double topStudentRate,
             String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
             String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel, boolean shareSchoolReport,
-            String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores, boolean removeCheatStudent) {
+            String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores,
+            boolean removeCheatStudent, String scoreLevelConfig) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -169,6 +174,7 @@ public class ProjectConfigService {
                         .append("removeAbsentStudent", removeAbsentStudent)
                         .append("removeZeroScores", removeZeroScores)
                         .append("removeCheatStudent", removeCheatStudent)
+                        .append("scoreLevelConfig", scoreLevelConfig)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -191,6 +197,7 @@ public class ProjectConfigService {
                     .append("removeAbsentStudent", removeAbsentStudent)
                     .append("removeZeroScores", removeZeroScores)
                     .append("removeCheatStudent", removeCheatStudent)
+                    .append("scoreLevelConfig", scoreLevelConfig)
             );
         }
     }
@@ -312,5 +319,50 @@ public class ProjectConfigService {
         double d = Double.parseDouble(rate) / 100;
         int index = (int) (studentCount * d);
         return rankService.getRankScore(projectId, range, projectTarget, index);
+    }
+
+    public Map<String, Object> getScoreLevelByConfig(Target target, ProjectConfig projectConfig){
+        String scoreLevelConfig = projectConfig.getScoreLevelConfig();
+        Map<String, Object> scoreLevels = projectConfig.getScoreLevels();
+
+        Map<String, Object> scoreLevelsMap = new HashMap<>();
+        if(target.match(Target.SUBJECT) || target.match(Target.PROJECT)){
+            packScoreLevelByConfig2(scoreLevelConfig, scoreLevels, scoreLevelsMap);
+        }
+
+        return scoreLevelsMap;
+    }
+
+    public void packScoreLevelByConfig(String scoreLevelConfig, Map<String, Object> scoreLevels, Map<String, Object> scoreLevelsMap) {
+        if(!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
+            for (String subjectKey : scoreLevels.keySet()) {
+                scoreLevelsMap.put(subjectKey, fixScoreLevelKey((Map<String, Object>) scoreLevels.get(subjectKey)));
+            }
+        }else{
+            scoreLevelsMap.putAll(fixScoreLevelKey(scoreLevels));
+        }
+    }
+
+    public void packScoreLevelByConfig2(String scoreLevelConfig, Map<String, Object> scoreLevels, Map<String, Object> scoreLevelsMap) {
+        if(!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
+            for (String subjectKey : scoreLevels.keySet()) {
+                scoreLevelsMap.put(subjectKey, scoreLevels.get(subjectKey));
+            }
+        }else{
+            scoreLevelsMap.put(Excellent.name(), scoreLevels.get(Excellent.name()));
+            scoreLevelsMap.put(Good.name(), scoreLevels.get(Good.name()));
+            scoreLevelsMap.put(Pass.name(), scoreLevels.get(Pass.name()));
+            scoreLevelsMap.put(Fail.name(), scoreLevels.get(Fail.name()));
+        }
+    }
+
+    //修复CMS导出三率时KEY的大小写问题
+    private Map<String, Object> fixScoreLevelKey(Map<String, Object> scoreLevels){
+        Map<String, Object> scoreLevelMap = new HashMap<>();
+        scoreLevelMap.put(Excellent.name(), scoreLevels.get("excellent"));
+        scoreLevelMap.put(Good.name(), scoreLevels.get("good"));
+        scoreLevelMap.put(Pass.name(), scoreLevels.get("pass"));
+        scoreLevelMap.put(Fail.name(), scoreLevels.get("fail"));
+        return scoreLevelMap;
     }
 }

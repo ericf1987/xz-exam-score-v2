@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.ajiaedu.common.report.Keys.ScoreLevel.*;
 
 /**
  * (description)
@@ -279,6 +278,7 @@ public class ImportProjectService {
             projectConfig.setRemoveCheatStudent(removeCheatStudent);
             projectConfig.setRemoveZeroScores(removeZeroScores);
             projectConfig.setRemoveAbsentStudent(removeAbsentStudent);
+            projectConfig.setScoreLevelConfig(scoreLevelConfig);
 
             projectConfigService.fixProjectConfig(projectConfig);
 
@@ -298,26 +298,18 @@ public class ImportProjectService {
                     projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel(),
                     projectConfig.isShareSchoolReport(), projectConfig.getAlmostPassOffset(),
                     projectConfig.isFillAlmostPass(), projectConfig.isRemoveAbsentStudent(),
-                    projectConfig.isRemoveZeroScores(), projectConfig.isRemoveCheatStudent()
+                    projectConfig.isRemoveZeroScores(), projectConfig.isRemoveCheatStudent(),
+                    projectConfig.getScoreLevelConfig()
             );
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
         }
     }
 
     public void getScoreLevelByConfig(JSONObject scoreLevels, Map<String, Object> scoreLevelsMap, String scoreLevelConfig) {
-        if (!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
-            for (String subjectKey : scoreLevels.keySet()) {
-                scoreLevelsMap.put(subjectKey, scoreLevels.get(subjectKey));
-            }
-        } else {
-            scoreLevelsMap.put(Excellent.name(), scoreLevels.get("excellent"));
-            scoreLevelsMap.put(Good.name(), scoreLevels.get("good"));
-            scoreLevelsMap.put(Pass.name(), scoreLevels.get("pass"));
-            scoreLevelsMap.put(Fail.name(), scoreLevels.get("fail"));
-        }
+        projectConfigService.packScoreLevelByConfig(scoreLevelConfig, scoreLevels, scoreLevelsMap);
     }
 
-    /**
+   /**
      * 导入考题信息
      *
      * @param projectId 考试项目ID

@@ -72,9 +72,9 @@ public class RankPositionTask extends AggrTask {
 
         //获取总人数
         int count = scoreMapDoc.getInteger("count");
-        if (count == 0) {
+        /*if (count == 0) {
             return;
-        }
+        }*/
 
         //获取总分表中的scoreMap节点
         List<Document> scoreMap = (List<Document>) scoreMapDoc.get("scoreMap");
@@ -92,7 +92,7 @@ public class RankPositionTask extends AggrTask {
         UpdateResult result = rankPositionCollection.updateMany(query,
                 $set(doc("positions", positions))
         );
-        if(result.getMatchedCount() == 0){
+        if (result.getMatchedCount() == 0) {
             rankPositionCollection.insertOne(
                     query.append("positions", positions)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
@@ -106,10 +106,12 @@ public class RankPositionTask extends AggrTask {
     }
 
     private double getRankPositionScore(List<Document> scoreMap, int[] indexs) {
-        if(scoreMap.size() == 1){
+        if (scoreMap.size() == 1) {
             //如果只有一个学生参考，则中位数就是得分
             return scoreMap.get(0).getDouble("score");
-        }else{
+        } else if (scoreMap.isEmpty()) {
+            return 0;
+        } else {
             // 按照分数从高到低排序
             Collections.sort(scoreMap, (d1, d2) -> d2.getDouble("score").compareTo(d1.getDouble("score")));
             double sum = 0;

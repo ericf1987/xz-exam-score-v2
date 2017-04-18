@@ -173,7 +173,7 @@ public class ScannerDBService {
     public boolean existsSubjectDB(MongoClient mongoClient, String projectId, String subjectId) {
         String dbName = projectId + "_" + subjectId;
         MongoCollection<Document> students = mongoClient.getDatabase(dbName).getCollection("students");
-        return null != students.find().first();
+        return students.count() != 0;
     }
 
     public String getCombineOrSingle(String projectId, String subjectId, MongoClient mongoClient) {

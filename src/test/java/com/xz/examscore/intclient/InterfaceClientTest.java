@@ -80,8 +80,8 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuestQuestionByProject2() throws Exception {
-        JSONArray quests = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755");
-        Map<String, Object> map = interfaceClient.queryQuestionByProject("431100-ac367ba398d744d489e9de4ed225b755", true);
+        JSONArray quests = interfaceClient.queryQuestionByProject("430300-c582131e66b64fe38da7d0510c399ec4");
+        Map<String, Object> map = interfaceClient.queryQuestionByProject("430300-c582131e66b64fe38da7d0510c399ec4", true);
         System.out.println(quests.toString());
         System.out.println(map.toString());
         //Map<String, Double> mm = importProjectService.gatherQuestScoreBySubject(quests, optionalQuestMap);
@@ -114,7 +114,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySubjectListByProjectId() throws Exception {
-        JSONArray subjects = interfaceClient.querySubjectListByProjectId("430100-d9463d7e76834ef69741bc77e631f282");
+        JSONArray subjects = interfaceClient.querySubjectListByProjectId("430100-472d49aee0624731b38a7c6cbd524d76");
         System.out.println(subjects.toString());
         assertNotNull(subjects);
         assertFalse(subjects.isEmpty());
@@ -141,7 +141,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
      */
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        ApiResponse result = interfaceClient.queryProjectReportConfig("430600-d248e561aefc425b9971f2a26d267478");
+        ApiResponse result = interfaceClient.queryProjectReportConfig("430100-354dce3ac8ef4800a1b57f81a10b8baa");
 //        JSONObject rankLevel = result.get("rankLevel");
 //        System.out.println(rankLevel.toString());
         System.out.println(result.getData());

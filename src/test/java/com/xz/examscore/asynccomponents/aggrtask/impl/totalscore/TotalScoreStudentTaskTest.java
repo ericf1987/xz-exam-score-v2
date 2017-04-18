@@ -19,19 +19,12 @@ public class TotalScoreStudentTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        String projectId = "430200-cc721d3beb924d2997fe112c767b3a28";
-        String studentId = "1f2cd3a4-e251-4718-b4fe-798835ded0bb";
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        String studentId = "5ba113bf-a635-4636-b6fa-4461347d0d37";
+        String subjectId = "004";
 
         totalScoreStudentTask.runTask(new AggrTaskMessage(projectId, "1", "total_score_student").setRange(Range.student(studentId))
-        .setTarget(Target.project(projectId)));
+        .setTarget(Target.subject("004")));
     }
 
-    //测试保存总分
-    @Test
-    public void testaggrStudentProjectScores() throws Exception {
-        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
-        Range studentRange = Range.student("5ba113bf-a635-4636-b6fa-4461347d0d37");
-        Target projectTarget = Target.project(projectId);
-        totalScoreStudentTask.aggrStudentProjectScores(projectId, projectTarget, studentRange);
-    }
 }
