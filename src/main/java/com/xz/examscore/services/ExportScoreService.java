@@ -123,7 +123,7 @@ public class ExportScoreService {
 
         String studentId = studentDoc.getString("student");
 
-        scoreService.getStudentQuestScores(projectId, studentId)
+        scoreService.getStudentScores(projectId, studentId)
                 .forEach(scoreDoc -> addStudentScore(packCreator, scoreDoc));
     }
 

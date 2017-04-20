@@ -76,7 +76,7 @@ public class AverageByRankLineAnalysis implements Server {
         //查出占比人数中最后一名对应的分数
         double rankScore = rankService.getRankScore(projectId, provinceRange, Target.project(projectId), requiredCount);
 
-        List<Document> studentListByScore = scoreService.getListByScore(projectId, provinceRange, Target.project(projectId), rankScore);
+        List<Document> studentListByScore = scoreService.getListByMinScore(projectId, provinceRange, Target.project(projectId), rankScore);
 
         int totalSize = studentListByScore.size();
 

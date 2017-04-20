@@ -59,7 +59,7 @@ public class StudentProjectRankAndScore implements Server{
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
         double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, 300);
-        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, rankScore);
+        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, rankScore);
 
 
         List<Map<String, Object>> result = new ArrayList<>();

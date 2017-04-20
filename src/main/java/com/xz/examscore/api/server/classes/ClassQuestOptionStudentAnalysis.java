@@ -165,7 +165,7 @@ public class ClassQuestOptionStudentAnalysis implements Server {
     }
 
     private List<String> getStudentNameByScoreSegment(String projectId, Range classRange, String subjectId, String questId, Double min, Double max) {
-        return scoreService.getScoreDocsByScoreSegment(projectId, classRange, subjectId, questId, min, max).stream().map(
+        return scoreService.getQuestScoreBySpan(projectId, classRange, subjectId, questId, min, max).stream().map(
                 doc -> studentService.findStudent(projectId, doc.getString("student")).getString("name")
         ).collect(Collectors.toList());
     }

@@ -81,7 +81,7 @@ public class AverageByScoreLineAnalysis implements Server {
 
         //填充全科数据
         Target target = Target.project(projectId);
-        List<Document> list = scoreService.getListByScore(projectId, range, target, scoreLine);
+        List<Document> list = scoreService.getListByMinScore(projectId, range, target, scoreLine);
         List<String> studentIds = list.stream().map(doc -> {
             Document studentDoc = (Document) doc.get("range");
             return studentDoc.getString("id");

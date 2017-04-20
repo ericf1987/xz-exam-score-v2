@@ -75,17 +75,13 @@ public class TestLamdar {
     }
 
     public static void main(String[] args) {
-        CounterMap<String> counterMap = new CounterMap();
+        Integer i1 = 20;
+        Integer i2 = 20;
+        System.out.println(i1 == i2);
 
-        String[] arr = new String[]{
-                "100001", "100002", "10003"
-        };
-
-        for(String id : arr){
-            counterMap.incre(id);
-        }
-
-        System.out.println(counterMap.toString());
+        Integer i3 = 200;
+        Integer i4 = 200;
+        System.out.println(i3 == i4);
     }
 
 }

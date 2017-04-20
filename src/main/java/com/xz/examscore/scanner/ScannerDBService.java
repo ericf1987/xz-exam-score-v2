@@ -382,8 +382,10 @@ public class ScannerDBService {
 
         //罗列出学生成绩无效的条件
 
+        //是否该考生所有试题作答为0分
         boolean isQuestScoreAllZero = isQuestScoreAllZero(projectId, subjectId, document);
 
+        //是否缺少主观题客观题数据
         boolean hasNoQuestScore = hasNoQuestScore(document);
 
         //判断该学生是否缺考
@@ -392,23 +394,36 @@ public class ScannerDBService {
         //是否能找到该学生的试卷
         boolean isCheating = isCheating(document);
 
+        //是否考生缺少试卷
         boolean isLost = isLost(document);
 
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
 
-        boolean isInvalid = scoreRecordInvalid(isQuestScoreAllZero, hasNoQuestScore, isAbsent, isCheating, isLost, projectConfig);
+        //是否得分无效
+        boolean isScoreInvalid = scoreRecordInvalid(isQuestScoreAllZero, hasNoQuestScore, isAbsent, isCheating, isLost, projectConfig);
 
-        if(isInvalid){
-            LOG.info("该学生当前考试得分无效：学生ID{}， 科目ID{}， 是否得分为0 {}， 是否缺失主观题和客观题结构 {}， 是否有缺考标记 {}， 是否有作弊标记 {}， 是否有却卷标记 {}",
-                    studentId, subjectId, isQuestScoreAllZero, hasNoQuestScore, isAbsent, isCheating, isLost);
+        //是否给分题无效
+        boolean isAwardQuestInvalid = awardQuestInvalid(isAbsent, isCheating, isLost, projectConfig);
+
+        if (isScoreInvalid || isAwardQuestInvalid) {
+            LOG.info("学生ID{}， 科目ID{}， 是否得分为0 {}， 是否缺失主观题和客观题结构 {}， 是否有缺考标记 {}， " +
+                    "是否有作弊标记 {}， 是否有却卷标记 {}, 是否得分无效{}，是否给分题无效{}",
+                    studentId, subjectId, isQuestScoreAllZero, hasNoQuestScore, isAbsent, isCheating, isLost, isScoreInvalid, isAwardQuestInvalid);
         }
 
-        saveObjectiveScores(projectId, subjectId, document, student, isInvalid);
-        saveSubjectiveScores(projectId, subjectId, document, student, isInvalid);
+        saveObjectiveScores(projectId, subjectId, document, student, isScoreInvalid, isAwardQuestInvalid);
+        saveSubjectiveScores(projectId, subjectId, document, student, isScoreInvalid);
 
         if (counter.incrementAndGet() % 100 == 0) {
             LOG.info("已导入科目 " + subjectId + " 的 " + counter.get() + " 名学生...");
         }
+    }
+
+    private boolean awardQuestInvalid(boolean isAbsent, boolean isCheating, boolean isLost, ProjectConfig projectConfig) {
+        boolean removeAbsentStudent = projectConfig.isRemoveAbsentStudent();
+        boolean removeCheatStudent = projectConfig.isRemoveCheatStudent();
+
+        return (isAbsent && removeAbsentStudent) || (isCheating && removeCheatStudent) || (isLost);
     }
 
     /**
@@ -595,7 +610,7 @@ public class ScannerDBService {
     }
 
     @SuppressWarnings("unchecked")
-    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isInvalid) {
+    private void saveSubjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isScoreInvalid) {
         List<Document> subjectiveList = (List<Document>) document.get("subjectiveList");
         String studentId = student.getString("student");
 
@@ -625,8 +640,8 @@ public class ScannerDBService {
                     .append("subject", sid)
                     .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
-                    .append("score", isInvalid || !isEffective ? 0d : score)
-                    .append("right", !(isInvalid || !isEffective) && NumberUtil.equals(score, fullScore))
+                    .append("score", isScoreInvalid || !isEffective ? 0d : score)
+                    .append("right", !(isScoreInvalid || !isEffective) && NumberUtil.equals(score, fullScore))
                     .append("isObjective", false)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -641,15 +656,15 @@ public class ScannerDBService {
                 scoreDoc.append("missing", true);
             }
             //如果该学生得分无效，则标记为缺考
-            if (isInvalid) {
-                scoreDoc.append("isAbsent", isInvalid);
+            if (isScoreInvalid) {
+                scoreDoc.append("isAbsent", isScoreInvalid);
             }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isInvalid) {
+    private void saveObjectiveScores(String projectId, String subjectId, Document document, Document student, boolean isScoreInvalid, boolean isAwardQuestInvalid) {
         List<Document> objectiveList = DocumentUtils.getList(document, "objectiveList", Collections.emptyList());
 
         String studentId = student.getString("student");
@@ -657,7 +672,7 @@ public class ScannerDBService {
         //网阅题目ID列表
         if (objectiveList.isEmpty()) {
             LOG.info("该学生{}网阅客观题列表为空，对该学生进行数据修补，确保客观题结构存在", studentId);
-            fixMissingObjectiveQuest(projectId, subjectId, isInvalid, student);
+            fixMissingObjectiveQuest(projectId, subjectId, isScoreInvalid, student);
             return;
         }
 
@@ -685,13 +700,13 @@ public class ScannerDBService {
             //标准答案数据从统计数据库的quest_list中获取
             String standardAnswer = getStdAnswerFromQuest(quest);
 
-            if (!isInvalid && StringUtil.isBlank(studentAnswer)) {
+            if (!isScoreInvalid && StringUtil.isBlank(studentAnswer)) {
                 throw new IllegalStateException("客观题没有考生作答, project=" + projectId +
                         ", studentId=" + studentId +
                         ", subject=" + sid +
                         ", objectiveItem=" + objectiveItem +
                         ", quest=" + quest +
-                        ", isInvalid=" + isInvalid);
+                        ", isScoreInvalid=" + isScoreInvalid);
             }
 
             if (StringUtil.isBlank(standardAnswer)) {
@@ -704,8 +719,8 @@ public class ScannerDBService {
                 );
             }
 
-            //如果该学生得分无效 则取消送分规则
-            boolean awardScoreTag = BooleanUtils.toBoolean(quest.getBoolean("awardScoreTag")) && !isInvalid;
+            //如果该学生给分题无效 则取消送分规则
+            boolean awardScoreTag = BooleanUtils.toBoolean(quest.getBoolean("awardScoreTag")) && !isAwardQuestInvalid;
 
             ScoreAndRight scoreAndRight = calculateScore(fullScore, standardAnswer, studentAnswer, awardScoreTag);
 
@@ -714,9 +729,9 @@ public class ScannerDBService {
                     .append("subject", sid)
                     .append("cardSubjectId", subjectId)
                     .append("questNo", questionNo)
-                    .append("score", isInvalid || !isEffective ? 0d : scoreAndRight.score)
+                    .append("score", isScoreInvalid || !isEffective ? 0d : scoreAndRight.score)
                     .append("answer", studentAnswer)
-                    .append("right", !(isInvalid || !isEffective) && scoreAndRight.right)
+                    .append("right", !(isScoreInvalid || !isEffective) && scoreAndRight.right)
                     .append("isObjective", true)
                     .append("isEffective", isEffective)
                     .append("student", student.getString("student"))
@@ -727,8 +742,8 @@ public class ScannerDBService {
                     .append("province", student.getString("province"))
                     .append("md5", MD5.digest(UUID.randomUUID().toString()));
 
-            if (isInvalid) {
-                scoreDoc.append("isAbsent", isInvalid);
+            if (isScoreInvalid) {
+                scoreDoc.append("isAbsent", isScoreInvalid);
             }
             scoreDatabase.getCollection("score").insertOne(scoreDoc);
         }

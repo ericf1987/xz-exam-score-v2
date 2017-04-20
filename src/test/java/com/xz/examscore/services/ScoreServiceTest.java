@@ -117,7 +117,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
         Range range = Range.school("c99a630b-d8e6-4758-b27d-4b062f9fec0a");
         Target target = Target.project(projectId);
-        int count = scoreService.getCountByScore(projectId, range, target, 800);
+        int count = scoreService.getCountByMinScore(projectId, range, target, 800);
         System.out.println(count);
     }
 
@@ -145,7 +145,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
     public void testGetStudentScores() throws Exception {
         String projectId = "430200-3e67c524f149491597279ef6ae31baef";
         String studentId = "00708600-9b39-49ad-a8e5-80f7aaa4cb1f";
-        List<Document> studentScores = scoreService.getStudentQuestScores(projectId, studentId);
+        List<Document> studentScores = scoreService.getStudentScores(projectId, studentId);
         System.out.println(studentScores);
     }
 
@@ -213,7 +213,7 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
         double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, studentEvaluationByRankAnalysis.getRankByProject(projectId));
-        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, rankScore);
+        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, rankScore);
 
         Collections.sort(listByScore, (Document d1, Document d2) -> {
             Double totalScore1 = d1.getDouble("totalScore");
@@ -235,9 +235,9 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
-        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, 384);
-        List<Document> listByScore1 = scoreService.getListByScore(projectId, provinceRange, projectTarget, 448);
-        List<Document> listByScore2 = scoreService.getListByScore(projectId, provinceRange, projectTarget, 512);
+        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 384);
+        List<Document> listByScore1 = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 448);
+        List<Document> listByScore2 = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 512);
         System.out.println(listByScore.size());
         System.out.println(listByScore1.size());
         System.out.println(listByScore2.size());

@@ -127,9 +127,10 @@ public class ScoreService {
      * @param studentId 学生ID
      * @return 分数记录
      */
-    List<Document> getStudentQuestScores(String projectId, String studentId) {
+    List<Document> getStudentScores(String projectId, String studentId) {
         List<String> allSubjects = new ArrayList<>();
-        allSubjects.addAll(subjectService.querySubjects(projectId).stream().filter(subject -> subject.length() == 3).collect(Collectors.toList()));
+        allSubjects.addAll(subjectService.querySubjects(projectId).stream().filter(subject -> subject.length() == 3)
+                .collect(Collectors.toList()));
         allSubjects.addAll(subjectCombinationService.getAllSubjectCombinations(projectId));
         List<Document> studentScores = new ArrayList<>();
         for (String subjectId : allSubjects) {
@@ -378,10 +379,6 @@ public class ScoreService {
         } else {
             query = Mongo.query(projectId, range, target);
         }
-/*
-        Document query = new Document("project", projectId)
-                .append("range", range2Doc(range))
-                .append("target", target2Doc(target));*/
 
         List<Document> docs = MongoUtils.toList(totalScores.find(query).projection(doc("totalScore", 1)));
 
@@ -517,13 +514,13 @@ public class ScoreService {
      * @param score     分数
      * @return 高于指定分数的记录总数
      */
-    public int getCountByScore(String projectId, Range range, Target target, double score) {
-        return getListByScore(projectId, range, target, score).size();
+    public int getCountByMinScore(String projectId, Range range, Target target, double score) {
+        return getListByMinScore(projectId, range, target, score).size();
     }
 
-    public List<Document> getListByScore(String projectId, Range range, Target target, double score) {
+    public List<Document> getListByMinScore(String projectId, Range range, Target target, double score) {
         String collectionName = getTotalScoreCollection(projectId, target);
-        String cacheKey = "listByScore:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + score;
+        String cacheKey = "listByMinScore:" + collectionName + ":" + projectId + ":" + range + ":" + target + ":" + score;
 
         SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
 
@@ -631,7 +628,7 @@ public class ScoreService {
     }
 
     /**
-     * 查询分数段内的记录
+     * 查询题目得分在指定的分段内的分数明细记录
      *
      * @param projectId 项目ID
      * @param range     范围
@@ -641,7 +638,7 @@ public class ScoreService {
      * @param max       最大分值
      * @return 返回记录
      */
-    public ArrayList<Document> getScoreDocsByScoreSegment(String projectId, Range range, String subjectId, String questId, Double min, Double max) {
+    public ArrayList<Document> getQuestScoreBySpan(String projectId, Range range, String subjectId, String questId, Double min, Double max) {
         String cacheKey = "quest_score:" + projectId + ":" + range + ":" + subjectId + ":" + questId + ":" + min + ":" + max;
         SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
         Document query = doc("project", projectId)

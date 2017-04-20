@@ -77,7 +77,7 @@ public class StudentEvaluationByRankAnalysis implements Server {
         Document projectDoc = projectService.findProject(projectId);
         String category = projectDoc.getString("category");
         double rankScore = rankService.getRankScore(projectId, provinceRange, projectTarget, getRankByProject(projectId));
-        List<Document> listByScore = scoreService.getListByScore(projectId, provinceRange, projectTarget, rankScore);
+        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, rankScore);
 
         List<String> subjectIds = subjectService.querySubjects(projectId);
         //存放文理单科
