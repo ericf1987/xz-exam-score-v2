@@ -54,6 +54,8 @@ public class SubjectService {
         SUBJECT_NAMES.put("006009", "生地综合");
         SUBJECT_NAMES.put("007008", "政史综合");
         SUBJECT_NAMES.put("004005", "理化综合");
+        SUBJECT_NAMES.put("001002", "语数综合");
+        SUBJECT_NAMES.put("003004005", "英物化综合");
     }
 
     @Autowired

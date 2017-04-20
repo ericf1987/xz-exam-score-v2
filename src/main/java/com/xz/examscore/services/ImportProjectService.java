@@ -848,6 +848,7 @@ public class ImportProjectService {
     }
 
     private void importSlicedSubjects(String projectId, Context context) {
+        //查询科目数据
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
         //查询题目信息
         JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
