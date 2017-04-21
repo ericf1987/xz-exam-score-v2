@@ -128,7 +128,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
      */
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject project = interfaceClient.queryProjectById("430300-c582131e66b64fe38da7d0510c399ec4");
+        JSONObject project = interfaceClient.queryProjectById("430100-354dce3ac8ef4800a1b57f81a10b8baa");
         System.out.println(project.toString());
         assertNotNull(project);
         assertEquals(PROJECT_ID, project.getString("id"));
@@ -174,7 +174,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testImportSubject() throws Exception {
-        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId("430300-c582131e66b64fe38da7d0510c399ec4");
+        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId("430100-354dce3ac8ef4800a1b57f81a10b8baa");
         System.out.println(jsonArray.toString());
     }
 
@@ -199,7 +199,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testImportSlicedSubject() throws Exception {
 
-        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+        String projectId = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
 
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
 

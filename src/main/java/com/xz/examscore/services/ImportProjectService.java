@@ -858,6 +858,7 @@ public class ImportProjectService {
     }
 
     private void importSlicedSubjects(String projectId, Context context) {
+        //查询科目数据
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
