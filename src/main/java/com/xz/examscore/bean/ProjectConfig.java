@@ -83,22 +83,22 @@ public class ProjectConfig implements Serializable {
     /**
      * 是否将接近及格的分数设为及格
      */
-    public boolean fillAlmostPass;
+    private boolean fillAlmostPass = false;
 
     /**
      * 是否排除缺考记录
      */
-    public boolean removeAbsentStudent;
+    private boolean removeAbsentStudent = true;
 
     /**
      * 是否排除0分记录
      */
-    public boolean removeZeroScores;
+    private boolean removeZeroScores = false;
 
     /**
      * 是否排除违纪学生
      */
-    public boolean removeCheatStudent;
+    private boolean removeCheatStudent = true;
 
     /**
      * 按照得分还是得分率来计算三率

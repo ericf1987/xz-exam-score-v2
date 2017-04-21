@@ -193,30 +193,44 @@ public class ImportProjectService {
      * @param context   上下文信息
      */
     public void importProjectReportConfig(String projectId, Context context) {
+
+        ProjectConfig projectConfig = new ProjectConfig();
+
+        //请求考试配置接口获取数据
         ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
+
         JSONObject rankLevel = result.get("rankLevel");
         JSONObject scoreLevels = result.get("scoreLevels");
         String topStudentRatio = result.get("topStudentRatio");
         String highScoreRatio = result.get("highScoreRatio");
         String scoreLevelConfig = result.get("scoreLevelConfig");
-
         String almostPassOffset = null == result.get("almostPassOffset") ? "" : result.get("almostPassOffset").toString();
-        boolean fillAlmostPass = null != result.get("fillAlmostPass") && BooleanUtils.toBoolean(result.get("fillAlmostPass").toString());
-        boolean removeCheatStudent = null != result.get("removeCheatStudent") && BooleanUtils.toBoolean(result.get("removeCheatStudent").toString());
-        boolean removeZeroScores = null != result.get("removeZeroScores") && BooleanUtils.toBoolean(result.get("removeZeroScores").toString());
-        boolean removeAbsentStudent = null == result.get("removeAbsentStudent") || BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString());
+
+        if (null != result.get("removeAbsentStudent")) {
+            projectConfig.setRemoveAbsentStudent(BooleanUtils.toBoolean(result.get("removeAbsentStudent").toString()));
+        }
+        if (null != result.get("removeCheatStudent")) {
+            projectConfig.setRemoveCheatStudent(BooleanUtils.toBoolean(result.get("removeCheatStudent").toString()));
+        }
+        if (null != result.get("removeZeroScores")) {
+            projectConfig.setRemoveZeroScores(BooleanUtils.toBoolean(result.get("removeZeroScores").toString()));
+        }
+        if (null != result.get("fillAlmostPass")) {
+            projectConfig.setFillAlmostPass(BooleanUtils.toBoolean(result.get("fillAlmostPass").toString()));
+        }
 
         Map<String, Object> scoreLevelsMap = new HashMap<>();
-        boolean splitUnionSubject = false;
+
         //是否开启学校信息共享(默认开启联考数据共享，如果是联考项目，则根据CMS配置的是否共享开关进行设置)
-        boolean shareSchoolReport = true;
-        if (result.get("shareSchoolReport") != null) {
-            shareSchoolReport = BooleanUtils.toBoolean(result.get("shareSchoolReport").toString());
+        if (null != result.get("shareSchoolReport")) {
+            projectConfig.setShareSchoolReport(BooleanUtils.toBoolean(result.get("shareSchoolReport").toString()));
         }
+
         //是否拆分科目
-        if (result.get("splitUnionSubject") != null) {
-            splitUnionSubject = Boolean.parseBoolean(result.get("splitUnionSubject").toString());
+        if (null != result.get("splitUnionSubject")) {
+            projectConfig.setSeparateCombine(Boolean.parseBoolean(result.get("splitUnionSubject").toString()));
         }
+
         //获取本科上线率统计相关参数
         String entryLevelStatType = "rate", entryLevelEnable = "false";
         List<String> collegeEntryLevel = new ArrayList<>();
@@ -239,9 +253,9 @@ public class ImportProjectService {
             Map<String, Double> rankLevels = formatRankLevel(standard);
             boolean isCombine = JudgeCombine((List<String>) rankLevel.get("modelSubjects"));
             //尖子生比例
-            Double topStudentRate = 0.05d;
+            double topStudentRate = 0.05d;
             //高分段比例
-            Double highScoreRate = 0.3d;
+            double highScoreRate = 0.3d;
 
             //获取和分数等级参数
             if (null != scoreLevels && !scoreLevels.isEmpty()) {
@@ -259,7 +273,6 @@ public class ImportProjectService {
             }
 
             //构建新的考试配置
-            ProjectConfig projectConfig = new ProjectConfig();
             projectConfig.setProjectId(projectId);
             projectConfig.setRankLevels(rankLevels);
             projectConfig.setCombineCategorySubjects(isCombine);
@@ -267,17 +280,11 @@ public class ImportProjectService {
             projectConfig.setScoreLevels(scoreLevelsMap);
             projectConfig.setTopStudentRate(topStudentRate);
             projectConfig.setHighScoreRate(highScoreRate);
-            projectConfig.setSeparateCombine(splitUnionSubject);
             projectConfig.setEntryLevelStatType(entryLevelStatType);
             projectConfig.setEntryLevelEnable(Boolean.parseBoolean(entryLevelEnable));
             projectConfig.setCollegeEntryLevel(collegeEntryLevel);
-            projectConfig.setShareSchoolReport(shareSchoolReport);
 
             projectConfig.setAlmostPassOffset(almostPassOffset);
-            projectConfig.setFillAlmostPass(fillAlmostPass);
-            projectConfig.setRemoveCheatStudent(removeCheatStudent);
-            projectConfig.setRemoveZeroScores(removeZeroScores);
-            projectConfig.setRemoveAbsentStudent(removeAbsentStudent);
             projectConfig.setScoreLevelConfig(scoreLevelConfig);
 
             projectConfigService.fixProjectConfig(projectConfig);
@@ -287,21 +294,21 @@ public class ImportProjectService {
             context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
 
         } else {
-            ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+            ProjectConfig pc = projectConfigService.getProjectConfig(projectId);
 
             projectConfigService.updateRankLevelConfig(projectId,
-                    projectConfig.getRankLevels(), projectConfig.isCombineCategorySubjects(),
-                    projectConfig.getRankLevelCombines(), projectConfig.getScoreLevels(),
-                    projectConfig.getTopStudentRate(), projectConfig.getLastRankLevel(),
-                    projectConfig.getRankSegmentCount(), projectConfig.getHighScoreRate(),
-                    projectConfig.isSeparateCombine(), projectConfig.getEntryLevelStatType(),
-                    projectConfig.isEntryLevelEnable(), projectConfig.getCollegeEntryLevel(),
-                    projectConfig.isShareSchoolReport(), projectConfig.getAlmostPassOffset(),
-                    projectConfig.isFillAlmostPass(), projectConfig.isRemoveAbsentStudent(),
-                    projectConfig.isRemoveZeroScores(), projectConfig.isRemoveCheatStudent(),
-                    projectConfig.getScoreLevelConfig()
+                    pc.getRankLevels(), pc.isCombineCategorySubjects(),
+                    pc.getRankLevelCombines(), pc.getScoreLevels(),
+                    pc.getTopStudentRate(), pc.getLastRankLevel(),
+                    pc.getRankSegmentCount(), pc.getHighScoreRate(),
+                    pc.isSeparateCombine(), pc.getEntryLevelStatType(),
+                    pc.isEntryLevelEnable(), pc.getCollegeEntryLevel(),
+                    pc.isShareSchoolReport(), pc.getAlmostPassOffset(),
+                    pc.isFillAlmostPass(), pc.isRemoveAbsentStudent(),
+                    pc.isRemoveZeroScores(), pc.isRemoveCheatStudent(),
+                    pc.getScoreLevelConfig()
             );
-            context.put("projectConfig", projectConfigService.getProjectConfig(projectId));
+            context.put("projectConfig", pc);
         }
     }
 
@@ -733,6 +740,13 @@ public class ImportProjectService {
         return o.contains(paperQuestNum);
     }
 
+    /**
+     * 对各科的题目得分进行分组求和
+     *
+     * @param jsonQuest        题目列表
+     * @param optionalQuestMap 选做题
+     * @return 返回结果
+     */
     public Map<String, Map<String, Double>> sumSubjectScoreByQuest(JSONArray jsonQuest, Map<String, Object> optionalQuestMap) {
         Map<String, Object> optionalMap = getOptionalQuestNo(optionalQuestMap);
 
@@ -857,6 +871,12 @@ public class ImportProjectService {
         subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds);
     }
 
+    /**
+     * 导入拆分科目
+     *
+     * @param projectId 项目ID
+     * @param context   上下文
+     */
     private void importSlicedSubjects(String projectId, Context context) {
         //查询科目数据
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
@@ -870,6 +890,7 @@ public class ImportProjectService {
         //获取选做题
         Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
 
+        //过滤选做题，求各科小题总分
         Map<String, Map<String, Double>> scoreMap = sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);
 
         //单科总分
@@ -879,9 +900,7 @@ public class ImportProjectService {
         LOG.info("CMS试题明细接口计算出的单科科目总分为：{}", subjectScore.toString());
         LOG.info("CMS试题明细接口计算出的组合科目总分为：{}", subjectCombinationScore.toString());
 
-        List<String> subjects = new ArrayList<>();
         List<String> subjectIds = new ArrayList<>();
-
         //取出所有科目
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
@@ -897,6 +916,7 @@ public class ImportProjectService {
         Value<Double> projectFullScore = Value.of(0d);
 
         //计算所有科目的总分和单科的总分
+        List<String> subjects = new ArrayList<>();
         for (String subjectId : subjectIds) {
             Double fullScore = MapUtils.getDouble(subjectScore, subjectId);
             // 科目没有录入或没有答题卡
