@@ -309,7 +309,7 @@ public class ImportProjectService {
         projectConfigService.packScoreLevelByConfig(scoreLevelConfig, scoreLevels, scoreLevelsMap);
     }
 
-   /**
+    /**
      * 导入考题信息
      *
      * @param projectId 考试项目ID
@@ -733,30 +733,57 @@ public class ImportProjectService {
         return o.contains(paperQuestNum);
     }
 
-    public Map<String, Double> gatherQuestScoreBySubject(JSONArray jsonQuest, Map<String, Object> optionalQuestMap) {
-        List<Map<String, Object>> quests = new ArrayList<>();
+    public Map<String, Map<String, Double>> sumSubjectScoreByQuest(JSONArray jsonQuest, Map<String, Object> optionalQuestMap) {
         Map<String, Object> optionalMap = getOptionalQuestNo(optionalQuestMap);
 
         //过滤选做题
-        jsonQuest.stream().filter(quest -> {
+        List<Object> questWithNoOptional = jsonQuest.stream().filter(quest -> {
             JSONObject questObj = (JSONObject) quest;
             String cardSubjectId = questObj.getString("cardSubjectId");
             return !isOptionalQuest(optionalMap, cardSubjectId, questObj.getString("paperQuestNum"));
-        }).forEach(quest -> {
+        }).collect(Collectors.toList());
+
+        //根据题目科目汇总计算总分
+        List<Map<String, Object>> subjectQuests = new ArrayList<>();
+        questWithNoOptional.forEach(quest -> {
             JSONObject questObj = (JSONObject) quest;
             Map<String, Object> questMap = new HashMap<>();
             questMap.put("subjectId", questObj.getString("subjectId"));
+            questMap.put("cardSubjectId", questObj.getString("cardSubjectId"));
             questMap.put("score", questObj.getDouble("score"));
-            quests.add(questMap);
+            subjectQuests.add(questMap);
         });
 
-        return quests.stream().collect(
+        //根据答题卡科目汇总计算总分
+        List<Map<String, Object>> cardSubjectQuests = new ArrayList<>();
+        questWithNoOptional.forEach(quest -> {
+            JSONObject questObj = (JSONObject) quest;
+            Map<String, Object> questMap = new HashMap<>();
+            questMap.put("cardSubjectId", questObj.getString("cardSubjectId"));
+            questMap.put("score", questObj.getDouble("score"));
+            cardSubjectQuests.add(questMap);
+        });
+
+        Map<String, Double> subjectScoreMap = subjectQuests.stream().collect(
                 //分组计算各科的题目总分
                 Collectors.groupingBy(quest -> quest.get("subjectId").toString(),
                         Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score"))
                 )
         );
+
+        Map<String, Double> cardSubjectScoreMap = cardSubjectQuests.stream().collect(
+                //分组计算各科的题目总分
+                Collectors.groupingBy(quest -> quest.get("cardSubjectId").toString(),
+                        Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score"))
+                )
+        );
+
+        Map<String, Map<String, Double>> map = new HashMap<>();
+        map.put("subjectId", subjectScoreMap);
+        map.put("cardSubjectId", cardSubjectScoreMap);
+        return map;
     }
+
 
     //获取选做题题号
     public Map<String, Object> getOptionalQuestNo(Map<String, Object> optionalQuestMap) {
@@ -788,15 +815,13 @@ public class ImportProjectService {
         //获取选做题
         Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
 
-        //统计出每个考试的总分
-        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
+        Map<String, Map<String, Double>> scoreMap = sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);
+
+        //组合科目总分
+        Map<String, Double> subjectCombinationScore = scoreMap.get("cardSubjectId");
 
         List<String> subjects = new ArrayList<>();
         Value<Double> projectFullScore = Value.of(0d);
-        //文综满分
-        Value<Double> artsFullScore = Value.of(0d);
-        //理综满分
-        Value<Double> scienceFullScore = Value.of(0d);
 
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
@@ -813,62 +838,50 @@ public class ImportProjectService {
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         });
 
-        processCombine(projectId, subjectScore, artsFullScore, scienceFullScore);
+        processCombine(projectId, subjectCombinationScore);
 
         subjectService.saveProjectSubjects(projectId, subjects);  // 保存科目列表
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分
         context.put("subjectList", subjects);
     }
 
-    private void processCombine(String projectId, Map<String, Double> subjects, Value<Double> artsFullScore, Value<Double> scienceFullScore) {
-        List<String> subjectIds = new ArrayList<>(subjects.keySet());
+    private void processCombine(String projectId, Map<String, Double> subjects) {
         //组合科目ID列表
         List<String> combinedSubjectIds = new ArrayList<>();
-        if (subjectIds.containsAll(Arrays.asList("007", "008", "009"))) {
-            combinedSubjectIds.add("007008009");
-            artsFullScore.set(artsFullScore.get() + subjects.get("007") + subjects.get("008") + subjects.get("009"));
-            fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
-        } else if (subjectIds.contains("007008009")) {
-            combinedSubjectIds.add("007008009");
-            artsFullScore.set(artsFullScore.get() + subjects.get("007008009"));
-            fullScoreService.saveFullScore(projectId, Target.subjectCombination("007008009"), artsFullScore.get());
-        }
 
-        if (subjectIds.containsAll(Arrays.asList("004", "005", "006"))) {
-            combinedSubjectIds.add("004005006");
-            scienceFullScore.set(scienceFullScore.get() + subjects.get("004") + subjects.get("005") + subjects.get("006"));
-            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
-        } else if (subjectIds.contains("004005006")) {
-            combinedSubjectIds.add("004005006");
-            scienceFullScore.set(scienceFullScore.get() + subjects.get("004005006"));
-            fullScoreService.saveFullScore(projectId, Target.subjectCombination("004005006"), scienceFullScore.get());
-        }
+        subjects.keySet().stream().filter(key -> key.length() != ImportProjectService.SUBJECT_LENGTH).forEach(key -> {
+            combinedSubjectIds.add(key);
+            fullScoreService.saveFullScore(projectId, Target.subjectCombination(key), subjects.get(key));
+        });
 
         subjectCombinationService.saveProjectSubjectCombinations(projectId, combinedSubjectIds);
     }
 
     private void importSlicedSubjects(String projectId, Context context) {
         JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
-        //查询题目信息
-        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
-        //获取选做题
-        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
-
-        //统计出每个考试的总分
-        Map<String, Double> subjectScore = gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
-        LOG.info("CMS试题明细接口计算出的科目总分为：{}", subjectScore.toString());
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
             return;
         }
 
+        //查询题目信息
+        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        //获取选做题
+        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+
+        Map<String, Map<String, Double>> scoreMap = sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);
+
+        //单科总分
+        Map<String, Double> subjectScore = scoreMap.get("subjectId");
+        //组合科目总分
+        Map<String, Double> subjectCombinationScore = scoreMap.get("cardSubjectId");
+        LOG.info("CMS试题明细接口计算出的单科科目总分为：{}", subjectScore.toString());
+        LOG.info("CMS试题明细接口计算出的组合科目总分为：{}", subjectCombinationScore.toString());
+
         List<String> subjects = new ArrayList<>();
-        Value<Double> projectFullScore = Value.of(0d);
-        //文综满分
-        Value<Double> artsFullScore = Value.of(0d);
-        //理综满分
-        Value<Double> scienceFullScore = Value.of(0d);
         List<String> subjectIds = new ArrayList<>();
+
+        //取出所有科目
         jsonArray.forEach(o -> {
             JSONObject subjectObj = (JSONObject) o;
             String subjectId = subjectObj.getString("subjectId");
@@ -880,6 +893,9 @@ public class ImportProjectService {
             }
         });
 
+        Value<Double> projectFullScore = Value.of(0d);
+
+        //计算所有科目的总分和单科的总分
         for (String subjectId : subjectIds) {
             Double fullScore = MapUtils.getDouble(subjectScore, subjectId);
             // 科目没有录入或没有答题卡
@@ -892,7 +908,7 @@ public class ImportProjectService {
             fullScoreService.saveFullScore(projectId, Target.subject(subjectId), fullScore);  // 保存科目总分
         }
 
-        processCombine(projectId, subjectScore, artsFullScore, scienceFullScore);
+        processCombine(projectId, subjectCombinationScore);
 
         subjectService.saveProjectSubjects(projectId, subjects);        // 保存科目列表
         fullScoreService.saveFullScore(projectId, Target.project(projectId), projectFullScore.get());  // 保存项目总分

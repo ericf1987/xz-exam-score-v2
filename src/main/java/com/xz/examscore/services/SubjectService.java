@@ -5,7 +5,6 @@ import com.hyd.simplecache.utils.MD5;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
-import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.cache.ProjectCacheManager;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +53,8 @@ public class SubjectService {
         SUBJECT_NAMES.put("006009", "生地综合");
         SUBJECT_NAMES.put("007008", "政史综合");
         SUBJECT_NAMES.put("004005", "理化综合");
+        SUBJECT_NAMES.put("001002", "语数综合");
+        SUBJECT_NAMES.put("003004005", "英物化综合");
     }
 
     @Autowired
@@ -91,6 +92,13 @@ public class SubjectService {
         }));
     }
 
+    public String getSubjectName0(String subjectId){
+        MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
+        Document query = doc("subjectId", subjectId);
+        Document first = c.find(query).first();
+        return null == first ? subjectId : first.getString("subjectName");
+    }
+
     public static String getSubjectName(String subjectId) {
         return SUBJECT_NAMES.get(subjectId);
     }
@@ -115,14 +123,9 @@ public class SubjectService {
         }
     }
 
-    public boolean containAllArts(String projectId){
-        List<String> subjects = querySubjects(projectId);
-        return subjects.containsAll(Arrays.asList("007", "008", "009"));
-    }
-
-    public boolean containAllSciences(String projectId){
-        List<String> subjects = querySubjects(projectId);
-        return subjects.containsAll(Arrays.asList("004", "005", "006"));
+    public void insertSubjects(List<Document> subjects){
+        MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
+        c.insertMany(subjects);
     }
 
 }

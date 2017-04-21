@@ -17,8 +17,8 @@ public class StudentQuestScoreRateReportTest extends XzExamScoreV2ApplicationTes
 
     @Test
     public void testGetSheetTasks() throws Exception {
-        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
-        String schoolId = "15e70531-5ac0-475d-a2da-2fc04242ac75";
-        studentQuestScoreRateReport.generate(projectId, Range.school(schoolId), "target/student-quest-score-rate.xlsx");
+        String projectId = "430600-12b3be890aa840c58cccdfd48b1c8a8f";
+        String schoolId = "a8e50b61-547a-485d-87b1-9a1527993b80";
+        studentQuestScoreRateReport.generate(projectId, Range.school(schoolId), "target/平江县第一中学-小题得分率.xlsx");
     }
 }

@@ -55,16 +55,6 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
-    public void testgetOptionalQuestNo() throws Exception{
-        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
-        Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
-        Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
-        System.out.println("选做题->" + optionalQuestNo.toString());
-        JSONArray jsonArr = interfaceClient.queryQuestionByProject(projectId);
-        System.out.println("总分信息->" + importProjectService.gatherQuestScoreBySubject(jsonArr, map));
-    }
-
-    @Test
     public void testimportSubjects() throws Exception {
         String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
         Context context = new Context();

@@ -159,7 +159,7 @@ public class ScannerDBService {
     }
 
     public void importOneSubjectTask(String project, MongoClient mongoClient, String subject) {
-        String cardSubjectId = getCombineOrSingle(project, subject, mongoClient);
+        String cardSubjectId = getCombineOrSingle(project, subject);
         LOG.info("当前科目为{}， 答题卡科目为{}", subject, cardSubjectId);
         LOG.info("导入开始...答题卡科目为：{}", SubjectService.getSubjectName(cardSubjectId));
         //根据考试科目获取数据库名
@@ -171,23 +171,25 @@ public class ScannerDBService {
     }
 
     public boolean existsSubjectDB(MongoClient mongoClient, String projectId, String subjectId) {
-        String dbName = projectId + "_" + subjectId;
+        String dbName = getScannerDBName(projectId, subjectId);
         MongoCollection<Document> students = mongoClient.getDatabase(dbName).getCollection("students");
         return students.count() != 0;
     }
 
-    public String getCombineOrSingle(String projectId, String subjectId, MongoClient mongoClient) {
+    public String getCombineOrSingle(String projectId, String subjectId) {
         ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
         boolean separateCombine = projectConfig.isSeparateCombine();
         //如果该考试项目拆分文理科
         if (separateCombine) {
-            if (SubjectCombinationService.isW(subjectId) && existsSubjectDB(mongoClient, projectId, "007008009")) {
-                return "007008009";
-            } else if (SubjectCombinationService.isL(subjectId) && existsSubjectDB(mongoClient, projectId, "004005006")) {
-                return "004005006";
-            } else {
-                return subjectId;
+            ArrayList<String> allSubjectCombinations = subjectCombinationService.getAllSubjectCombinations(projectId);
+
+            for (String subjectCombination : allSubjectCombinations) {
+                if (subjectCombination.contains(subjectId)) {
+                    return subjectCombination;
+                }
             }
+
+            return subjectId;
         } else {
             return subjectId;
         }
@@ -280,10 +282,6 @@ public class ScannerDBService {
             return mongoClient;
         }
 
-        public void setMongoClient(MongoClient mongoClient) {
-            this.mongoClient = mongoClient;
-        }
-
         public ImportStudentCardSliceTask(String project, String subjectId, MongoClient mongoClient) {
             this.project = project;
             this.subjectId = subjectId;
@@ -355,6 +353,8 @@ public class ScannerDBService {
     }
 
     /**
+     * 导入单科分数数据
+     *
      * @param projectId 项目ID
      * @param subjectId 网阅数据库科目ID
      * @param document  网阅数据库学生信息
@@ -407,7 +407,7 @@ public class ScannerDBService {
 
         if (isScoreInvalid || isAwardQuestInvalid) {
             LOG.info("学生ID{}， 科目ID{}， 是否得分为0 {}， 是否缺失主观题和客观题结构 {}， 是否有缺考标记 {}， " +
-                    "是否有作弊标记 {}， 是否有却卷标记 {}, 是否得分无效{}，是否给分题无效{}",
+                            "是否有作弊标记 {}， 是否有却卷标记 {}, 是否得分无效{}，是否给分题无效{}",
                     studentId, subjectId, isQuestScoreAllZero, hasNoQuestScore, isAbsent, isCheating, isLost, isScoreInvalid, isAwardQuestInvalid);
         }
 
@@ -419,6 +419,15 @@ public class ScannerDBService {
         }
     }
 
+    /**
+     * 给分题是否有效
+     *
+     * @param isAbsent      是否有缺考标记
+     * @param isCheating    是否有作弊标记
+     * @param isLost        是否有缺卷标记
+     * @param projectConfig 考试配置信息
+     * @return
+     */
     private boolean awardQuestInvalid(boolean isAbsent, boolean isCheating, boolean isLost, ProjectConfig projectConfig) {
         boolean removeAbsentStudent = projectConfig.isRemoveAbsentStudent();
         boolean removeCheatStudent = projectConfig.isRemoveCheatStudent();
@@ -984,26 +993,7 @@ public class ScannerDBService {
     }
 
     public String getScannerDBName(String projectId, String subjectId) {
-        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
-
-        String dbName = projectId + "_";
-
-        boolean separateCombine = projectConfig.isSeparateCombine();
-
-        ArrayList<String> subjectCombinations = subjectCombinationService.getAllSubjectCombinations(projectId);
-
-        if (separateCombine) {
-            if (StringUtil.isOneOf(subjectId, "004", "005", "006") && subjectCombinations.contains("004005006")) {
-                dbName += "004005006";
-            } else if (StringUtil.isOneOf(subjectId, "007", "008", "009") && subjectCombinations.contains("007008009")) {
-                dbName += "007008009";
-            } else {
-                dbName += subjectId;
-            }
-        } else {
-            dbName += subjectId;
-        }
-        return dbName;
+        return projectId + "_" + subjectId;
     }
 
 }

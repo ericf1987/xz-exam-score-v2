@@ -10,7 +10,8 @@ import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -210,9 +211,16 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
         Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
         System.out.println("选做题：" + optionalQuestMap.toString());
         //统计出每个考试的总分
-        Map<String, Double> subjectScore = importProjectService.gatherQuestScoreBySubject(jsonQuest, optionalQuestMap);
+        Map<String, Map<String, Double>> stringMapMap = importProjectService.sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);
+        System.out.println("根据答题卡ID和试题ID汇总得分：" + stringMapMap.toString());
 
-        System.out.println(subjectScore);
+        List<String> combinedSubjectIds = new ArrayList<>();
+        stringMapMap.get("cardSubjectId").keySet().stream().filter(key -> key.length() != ImportProjectService.SUBJECT_LENGTH).forEach(key -> {
+            combinedSubjectIds.add(key);
+        });
+
+        System.out.println(combinedSubjectIds);
+
     }
 
 }
