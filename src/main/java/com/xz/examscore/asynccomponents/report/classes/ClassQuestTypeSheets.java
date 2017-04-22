@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author by fengye on 2016/6/27.
- * 班级成绩分析-试卷分析-题型分析
+ *         班级成绩分析-试卷分析-题型分析
  */
 @SuppressWarnings("unchecked")
 @Component
@@ -73,9 +73,9 @@ public class ClassQuestTypeSheets extends SheetGenerator {
         excelWriter.set(1, column.incrementAndGet(), "学校考号");
         excelWriter.mergeCells(0, 1, 1, 1);
         excelWriter.set(1, column.incrementAndGet(), "本班");
-        for (Map<String, Object> clazz : classes) {
-            excelWriter.set(1, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(clazz.get("scoreRate").toString())));
-        }
+        classes.stream().filter(clazz -> null != clazz.get("scoreRate")).forEach(clazz ->
+                excelWriter.set(1, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(clazz.get("scoreRate").toString())))
+        );
     }
 
     private void fillStuData(ExcelWriter excelWriter, Result result) {
@@ -88,7 +88,9 @@ public class ClassQuestTypeSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), student.get("studentName"));
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>) student.get("questTypes");
             for (Map<String, Object> questType : questTypes) {
-                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                if (null != questType.get("scoreRate")) {
+                    excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                }
             }
             row++;
             column.set(-1);

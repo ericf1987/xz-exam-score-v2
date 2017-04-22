@@ -78,10 +78,10 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
     private void fillTotalData(ExcelWriter excelWriter, List<Map<String, Object>> totals) {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(2, column.incrementAndGet(), "总体");
-        for (Map<String, Object> total : totals) {
+        totals.stream().filter(total -> null != total && !total.isEmpty()).forEach(total -> {
             excelWriter.set(2, column.incrementAndGet(), total.get("score"));
             excelWriter.set(2, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(total.get("scoreRate").toString())));
-        }
+        });
     }
 
     private void fillData(ExcelWriter excelWriter, List<Map<String, Object>> schools) {
@@ -91,8 +91,10 @@ public class TotalPaperQuestTypeSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), school.get("schoolName"));
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>) school.get("questTypes");
             for (Map<String, Object> questType : questTypes) {
-                excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
-                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                if(null != questType && !questType.isEmpty()){
+                    excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
+                    excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                }
             }
             row++;
             column.set(-1);

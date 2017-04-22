@@ -18,8 +18,8 @@ public class ClassQuestTypeAnalysisTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-194d9c9dd59d4145ae94bb66a06434d0")
-                .setParameter("classId", "33af690e-a3a2-41e5-b689-0fff6ebb315e")
+        Param param = new Param().setParameter("projectId", "430600-262ccb128212420b95977d21601796ee")
+                .setParameter("classId", "67374c07-1576-4857-b978-95bcd8640749")
                 .setParameter("subjectId", "001");
         long begin = System.currentTimeMillis();
         Result result = classQuestTypeAnalysis.execute(param);

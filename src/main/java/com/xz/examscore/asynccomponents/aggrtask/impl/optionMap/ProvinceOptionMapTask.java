@@ -14,6 +14,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.OptionMapService;
 import com.xz.examscore.services.SchoolService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.TargetService;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  */
 @Component
 @AggrTaskMeta(taskType = "province_option_map")
-public class ProvinceOptionMapTask extends AggrTask{
+public class ProvinceOptionMapTask extends AggrTask {
     @Autowired
     MongoDatabase scoreDatabase;
 
@@ -45,6 +46,9 @@ public class ProvinceOptionMapTask extends AggrTask{
 
     @Autowired
     SchoolService schoolService;
+
+    @Autowired
+    TargetService targetService;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
@@ -62,7 +66,7 @@ public class ProvinceOptionMapTask extends AggrTask{
         //查询子维度
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
 
-        for (Document schoolDoc : projectSchools){
+        for (Document schoolDoc : projectSchools) {
             String schoolId = schoolDoc.getString("school");
             Range schoolRange = Range.school(schoolId);
             List<Document> optionList = optionMapService.getOptionList(projectId, questId, schoolRange);
@@ -73,8 +77,10 @@ public class ProvinceOptionMapTask extends AggrTask{
             });
         }
 
+        String targetSubjectId = targetService.getTargetSubjectId(projectId, questTarget);
+
         //获取参考人数
-        int studentCount = studentService.getStudentCount(projectId, provinceRange);
+        int studentCount = studentService.getStudentCount(projectId, targetSubjectId, provinceRange);
         List<Document> optionMapList = schoolOptionMapTask.convert2OptionDoc(counterMap, studentCount);
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("option_map");

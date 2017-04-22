@@ -1,6 +1,5 @@
 package com.xz.examscore.services;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.lang.Context;
@@ -10,7 +9,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.Map;
 
 /**
  * (description)

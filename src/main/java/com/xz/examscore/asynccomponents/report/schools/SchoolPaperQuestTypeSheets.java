@@ -75,10 +75,10 @@ public class SchoolPaperQuestTypeSheets extends SheetGenerator {
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "本校");
         List<Map<String, Object>> schools = result.get("schools");
-        for (Map<String, Object> school : schools) {
+        schools.stream().filter(school -> null != school && !school.isEmpty()).forEach(school -> {
             excelWriter.set(row, column.incrementAndGet(), school.get("score"));
             excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(school.get("scoreRate").toString())));
-        }
+        });
     }
 
     private void fillClassData(ExcelWriter excelWriter, Result result) {
@@ -89,8 +89,10 @@ public class SchoolPaperQuestTypeSheets extends SheetGenerator {
             excelWriter.set(row, column.incrementAndGet(), clazz.get("className"));
             List<Map<String, Object>> questTypes = (List<Map<String, Object>>)clazz.get("questTypes");
             for(Map<String, Object> questType : questTypes){
-                excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
-                excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                if(null != questType && !questType.isEmpty()){
+                    excelWriter.set(row, column.incrementAndGet(), questType.get("score"));
+                    excelWriter.set(row, column.incrementAndGet(), DoubleUtils.toPercent(Double.parseDouble(questType.get("scoreRate").toString())));
+                }
             }
             row++;
             column.set(-1);

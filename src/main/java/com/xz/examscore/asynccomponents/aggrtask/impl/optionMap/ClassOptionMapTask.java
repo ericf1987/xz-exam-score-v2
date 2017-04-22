@@ -10,7 +10,9 @@ import com.xz.examscore.asynccomponents.aggrtask.AggrTask;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMessage;
 import com.xz.examscore.asynccomponents.aggrtask.AggrTaskMeta;
 import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.TargetService;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,13 +32,16 @@ import static com.xz.examscore.util.Mongo.query;
  */
 @Component
 @AggrTaskMeta(taskType = "class_option_map")
-public class ClassOptionMapTask extends AggrTask{
+public class ClassOptionMapTask extends AggrTask {
 
     @Autowired
     MongoDatabase scoreDatabase;
 
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    TargetService targetService;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
@@ -61,7 +66,10 @@ public class ClassOptionMapTask extends AggrTask{
         ));
 
         List<Document> optionMapList = new ArrayList<>();
-        int studentCount = studentService.getStudentCount(projectId, range);
+
+        String targetSubjectId = targetService.getTargetSubjectId(projectId, Target.quest(questId));
+
+        int studentCount = studentService.getStudentCount(projectId, targetSubjectId, range);
 
         aggregate.forEach((Consumer<Document>) document -> {
             List<Document> newOptionMapList = convertOneDoc(document);

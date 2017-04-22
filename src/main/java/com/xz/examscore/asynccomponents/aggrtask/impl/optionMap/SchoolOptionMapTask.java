@@ -14,6 +14,7 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.ClassService;
 import com.xz.examscore.services.OptionMapService;
 import com.xz.examscore.services.StudentService;
+import com.xz.examscore.services.TargetService;
 import com.xz.examscore.util.Mongo;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
  */
 @Component
 @AggrTaskMeta(taskType = "school_option_map")
-public class SchoolOptionMapTask extends AggrTask{
+public class SchoolOptionMapTask extends AggrTask {
     @Autowired
     MongoDatabase scoreDatabase;
 
@@ -43,6 +44,9 @@ public class SchoolOptionMapTask extends AggrTask{
 
     @Autowired
     ClassService classService;
+
+    @Autowired
+    TargetService targetService;
 
     @Override
     protected void runTask(AggrTaskMessage taskInfo) {
@@ -60,7 +64,7 @@ public class SchoolOptionMapTask extends AggrTask{
         //查询子维度
         List<Document> classList = classService.listClasses(projectId, schoolRange.getId());
 
-        for (Document classDoc : classList){
+        for (Document classDoc : classList) {
             String classId = classDoc.getString("class");
             Range classRange = Range.clazz(classId);
             List<Document> optionList = optionMapService.getOptionList(projectId, questId, classRange);
@@ -71,8 +75,10 @@ public class SchoolOptionMapTask extends AggrTask{
             });
         }
 
+        String targetSubjectId = targetService.getTargetSubjectId(projectId, questTarget);
+
         //获取参考人数
-        int studentCount = studentService.getStudentCount(projectId, schoolRange);
+        int studentCount = studentService.getStudentCount(projectId, targetSubjectId, schoolRange);
         List<Document> optionMapList = convert2OptionDoc(counterMap, studentCount);
 
         MongoCollection<Document> collection = scoreDatabase.getCollection("option_map");
@@ -99,9 +105,9 @@ public class SchoolOptionMapTask extends AggrTask{
         List<String> answers = new ArrayList<>(counterMap.keySet());
 
         List<Document> optionDocs = new ArrayList<>();
-        for (String answer : answers){
+        for (String answer : answers) {
             int count = counterMap.getCount(answer);
-            double rate = studentCount == 0 || count == 0 ? 0 : (double)count / studentCount;
+            double rate = studentCount == 0 || count == 0 ? 0 : (double) count / studentCount;
             Document doc = MongoUtils.doc("answer", answer).append("count", count).append("rate", rate);
             optionDocs.add(doc);
         }
