@@ -16,9 +16,9 @@ public class SchoolPointAbilityLevelBizTest extends XzExamScoreV2ApplicationTest
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
-                .setParameter("schoolId", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0")
-                .setParameter("subjectId", "001");
+        Param param = new Param().setParameter("projectId", "430100-dd3013ab961946fb8a3668e5ccc475b6")
+                .setParameter("schoolId", "d9bdecc9-0185-4688-90d1-1aaf27e2dcfd")
+                .setParameter("subjectId", "008");
         long begin = System.currentTimeMillis();
         Result result = schoolPointAbilityLevelBiz.execute(param);
         long end = System.currentTimeMillis();

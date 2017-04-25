@@ -18,8 +18,8 @@ public class ClassCombinedRankLevelAnalysisTest extends XzExamScoreV2Application
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430600-2404b0cc131c472dbbd13085385f5ee0")
-                .setParameter("classId", "e86f50b4-cbe6-403c-84d1-8cc668ee0221");
+        Param param = new Param().setParameter("projectId", "430300-32d8433951ce43cab5883abff77c8ea3")
+                .setParameter("classId", "f33ab424-ec1e-4f55-a45d-47ad84faa796");
         Result result = classCombinedRankLevelAnalysis.execute(param);
         System.out.println(result.getData());
     }

@@ -2,7 +2,6 @@ package com.xz.examscore.asynccomponents.report.biz.school;
 
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
-import com.xz.examscore.api.server.Server;
 import com.xz.examscore.asynccomponents.report.biz.classes.ClassPointAbilityLevelBiz;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.Range;
@@ -23,7 +22,7 @@ import static com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalys
  * @author by fengye on 2017/2/13.
  */
 @Service
-public class SchoolPointAbilityLevelBiz extends ClassPointAbilityLevelBiz implements Server {
+public class SchoolPointAbilityLevelBiz extends ClassPointAbilityLevelBiz{
 
     @Autowired
     TargetService targetService;

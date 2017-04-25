@@ -154,8 +154,8 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testimportSubjectScore0() throws Exception {
-        String projectId = "431100-2b0e4338b9aa40269e552b9f86e51836";
-        String subjectId = "004005006";
+        String projectId = "430500-9da43baa0be04721a1cf11e451714b97";
+        String subjectId = "001";
         scannerDBService.importSubjectScore0(projectId, subjectId);
     }
 

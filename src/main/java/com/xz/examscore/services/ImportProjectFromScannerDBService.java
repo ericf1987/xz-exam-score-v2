@@ -25,8 +25,8 @@ import java.util.function.Consumer;
  * @author by fengye on 2017/4/14.
  */
 @Service
-public class ImportFromScannerDBService {
-    static final Logger LOG = LoggerFactory.getLogger(ImportFromScannerDBService.class);
+public class ImportProjectFromScannerDBService {
+    static final Logger LOG = LoggerFactory.getLogger(ImportProjectFromScannerDBService.class);
 
     @Autowired
     MongoClient scannerMongoClient;

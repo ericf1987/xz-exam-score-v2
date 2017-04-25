@@ -12,6 +12,8 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,8 @@ import static com.xz.examscore.util.Mongo.range2Doc;
 @Component
 @AggrTaskMeta(taskType = "average")
 public class AverageTask extends AggrTask {
+
+    private static Logger LOG = LoggerFactory.getLogger(AverageTask.class);
 
     @Autowired
     MongoDatabase scoreDatabase;
@@ -86,7 +90,13 @@ public class AverageTask extends AggrTask {
                 .append("target", targetDoc)
                 .append("project", projectId);
 
-        String subjectId = targetService.getTargetSubjectId(projectId, Target.parse(targetDoc));
+        String subjectId;
+        try {
+            subjectId = targetService.getTargetSubjectId(projectId, Target.parse(targetDoc));
+        } catch (Exception e) {
+            LOG.error("AverageTask:无法获取当前target的subjectId,target={}", targetDoc);
+            return 0;
+        }
 
         int studentCount;
         // 计算平均分

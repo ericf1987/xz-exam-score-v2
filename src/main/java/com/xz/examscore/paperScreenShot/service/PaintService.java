@@ -121,7 +121,9 @@ public class PaintService {
                 }
             });
             //班级统计完成后，记录该班级，该科目生成截图失败的学生
-            monitorService.recordFailedStudent(projectId, schoolId, classId, failedStudents, subjectId);
+            if(!failedStudents.isEmpty()){
+                monitorService.recordFailedStudent(projectId, schoolId, classId, failedStudents, subjectId);
+            }
         }
     }
 
@@ -590,7 +592,7 @@ public class PaintService {
      * @param paperScreenShotBean 试卷截图对象
      * @return 保存路径
      */
-    private String getScreenShotFilePath(PaperScreenShotBean paperScreenShotBean) {
+    public String getScreenShotFilePath(PaperScreenShotBean paperScreenShotBean) {
         if (null != paperScreenShotBean) {
             return StringUtil.joinPaths(paperScreenShotBean.getProjectId(),
                     paperScreenShotBean.getSchoolId(), paperScreenShotBean.getClassId(),

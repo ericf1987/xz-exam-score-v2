@@ -11,6 +11,7 @@ import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,8 @@ import static com.xz.examscore.api.server.project.ProjectPointAbilityLevelAnalys
 /**
  * @author by fengye on 2017/2/14.
  */
-public class ClassPointAbilityLevelBiz implements Server{
+@Service
+public class ClassPointAbilityLevelBiz implements Server {
 
     @Autowired
     TargetService targetService;
@@ -79,11 +81,11 @@ public class ClassPointAbilityLevelBiz implements Server{
 
     protected List<Document> getPointLevelSubject(String projectId, String subjectId, ArrayList<Document> pointLevelScores) {
         return pointLevelScores.stream().filter(p -> {
-                Document targetDoc = (Document) p.get("target");
-                Document pointLevelId = (Document) targetDoc.get("id");
-                PointLevel pointLevel = new PointLevel(pointLevelId.getString("point"), pointLevelId.getString("level"));
-                return subjectId.equals(targetService.getTargetSubjectId(projectId, Target.pointLevel(pointLevel)));
-            }).collect(Collectors.toList());
+            Document targetDoc = (Document) p.get("target");
+            Document pointLevelId = (Document) targetDoc.get("id");
+            PointLevel pointLevel = new PointLevel(pointLevelId.getString("point"), pointLevelId.getString("level"));
+            return subjectId.equals(targetService.getTargetSubjectId(projectId, Target.pointLevel(pointLevel)));
+        }).collect(Collectors.toList());
     }
 
     protected List<Map<String, Object>> packPointStats(String projectId, String subjectId, List<Document> pointLevelSubject, List<Document> pointScores, List<Document> quests, Map<String, Document> levelMap) {
@@ -142,13 +144,13 @@ public class ClassPointAbilityLevelBiz implements Server{
     //根据知识点和能力层级获取包含知识点能力层级的试题列表
     List<Document> findQuests(String pointId, String levelId, List<Document> quests) {
         List<Document> result = new ArrayList<>();
-        for(Document quest : quests){
+        for (Document quest : quests) {
             Document points = (Document) quest.get("points");
-            if(null == points || points.isEmpty())
+            if (null == points || points.isEmpty())
                 return result;
             if (points.containsKey(pointId)) {
-                List<String> levels = (List<String>)points.get(pointId);
-                if(levels.contains(levelId)){
+                List<String> levels = (List<String>) points.get(pointId);
+                if (levels.contains(levelId)) {
                     result.add(quest);
                 }
             }
@@ -160,7 +162,7 @@ public class ClassPointAbilityLevelBiz implements Server{
         Map<String, Object> abilityLevelMap = new HashMap<>();
         abilityLevelMap.put("subjectId", subjectId);
         List<Map<String, Object>> levelInfos = new ArrayList<>();
-        for(String levelId : levelMap.keySet()){
+        for (String levelId : levelMap.keySet()) {
             Map<String, Object> map = new HashMap<>();
             Document levelInfo = levelMap.get(levelId);
             map.put("levelId", levelId);

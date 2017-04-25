@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,9 +56,6 @@ public class SchoolCombinedRankLevelAnalysis implements Server {
     FullScoreService fullScoreService;
 
     @Autowired
-    SchoolRankLevelAnalysis scholRankLevelAnalysis;
-
-    @Autowired
     ClassCombinedRankLevelAnalysis classCombinedRankLevelAnalysis;
 
     @Override
@@ -77,9 +75,20 @@ public class SchoolCombinedRankLevelAnalysis implements Server {
         //组合科目
         List<String> combinedSubjectIds = new ArrayList<>(subjectCombinationService.getAllSubjectCombinations(projectId));
 
-        classCombinedRankLevelAnalysis.processRankLevelAnalysis(projectId, Range.school(schoolId), lastRankLevel,
-                students, nonCombinedSubjectIds, combinedSubjectIds, Range.SCHOOL);
-        return Result.success().set("subjectIds", ListUtils.union(nonCombinedSubjectIds, combinedSubjectIds))
-                .set("students", students);
+        //所有科目
+        List<String> subjectIds = subjectService.querySubjects(projectId);
+
+        if(combinedSubjectIds.isEmpty()){
+            classCombinedRankLevelAnalysis.processRankLevelAnalysis(projectId, Range.school(schoolId), lastRankLevel,
+                    students, subjectIds, Collections.emptyList(), Range.SCHOOL);
+            return Result.success().set("subjectIds", subjectIds)
+                    .set("students", students);
+        }else{
+            classCombinedRankLevelAnalysis.processRankLevelAnalysis(projectId, Range.school(schoolId), lastRankLevel,
+                    students, nonCombinedSubjectIds, combinedSubjectIds, Range.SCHOOL);
+            return Result.success().set("subjectIds", ListUtils.union(nonCombinedSubjectIds, combinedSubjectIds))
+                    .set("students", students);
+        }
+
     }
 }

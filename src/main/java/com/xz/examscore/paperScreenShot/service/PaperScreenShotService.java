@@ -84,18 +84,18 @@ public class PaperScreenShotService {
      */
     public Result startPaperScreenShotTask(String projectId) {
 
-        LOG.info("----项目{}，开始执行试卷截图保存任务----");
+        LOG.info("----项目{}，开始执行试卷截图保存任务----", projectId);
 
-        LOG.info("====项目{}， 开始保存截图====");
+        LOG.info("====项目{}， 开始保存截图====", projectId);
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATING);
         paperScreenShotTaskManager.generatePaperScreenShots(projectId, true);
-        LOG.info("====项目{}， 保存截图完成====");
+        LOG.info("====项目{}， 保存截图完成====", projectId);
 
-        LOG.info("====项目{}， 开始打包班级试卷截图压缩包====");
+        LOG.info("====项目{}， 开始打包班级试卷截图压缩包====", projectId);
         allClassScreenShotZipGenerator.generateClassPaperScreenShot(projectId, true);
-        LOG.info("====项目{}， 班级试卷截图压缩包生成完毕====");
+        LOG.info("====项目{}， 班级试卷截图压缩包生成完毕====", projectId);
 
-        LOG.info("----项目{}，试卷截图任务执行完成----");
+        LOG.info("----项目{}，试卷截图任务执行完成----", projectId);
 
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATED);
 

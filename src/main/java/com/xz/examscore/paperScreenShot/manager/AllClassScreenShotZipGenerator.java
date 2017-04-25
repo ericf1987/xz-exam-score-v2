@@ -109,9 +109,9 @@ public class AllClassScreenShotZipGenerator {
 
         try {
             countDownLatch.await(1, TimeUnit.HOURS);
-            LOG.info("====项目{}, 班级截图压缩包全部生成完毕！");
+            LOG.info("====项目{}, 班级截图压缩包全部生成完毕！", projectId);
         } catch (InterruptedException e) {
-            LOG.info("====项目{}, 班级截图压缩包生成超时！");
+            LOG.info("====项目{}, 班级截图压缩包生成超时！", projectId);
         }
 
     }

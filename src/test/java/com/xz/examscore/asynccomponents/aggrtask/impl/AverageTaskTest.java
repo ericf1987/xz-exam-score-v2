@@ -31,9 +31,9 @@ public class AverageTaskTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testRunTask() throws Exception {
-        averageTask.runTask(new AggrTaskMessage("431100-ac367ba398d744d489e9de4ed225b755", "1111", "average")
-                .setTarget(Target.subject("004"))
-                .setRange(Range.clazz("287b2ead-7593-4ddf-9234-875b7982d473")));
+        averageTask.runTask(new AggrTaskMessage("430100-dd3013ab961946fb8a3668e5ccc475b6", "1111", "average")
+                .setTarget(Target.subject("001"))
+                .setRange(Range.clazz("ab2fba9c-2bfe-4ef6-a3f0-ce62247b24ec")));
     }
 
     @Test

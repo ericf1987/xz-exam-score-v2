@@ -7,7 +7,6 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.api.server.school.SchoolRankLevelAnalysis;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
@@ -57,9 +56,6 @@ public class ClassCombinedRankLevelAnalysis implements Server {
     FullScoreService fullScoreService;
 
     @Autowired
-    SchoolRankLevelAnalysis scholRankLevelAnalysis;
-
-    @Autowired
     ClassService classService;
 
     @Override
@@ -77,11 +73,23 @@ public class ClassCombinedRankLevelAnalysis implements Server {
         //组合科目
         List<String> combinedSubjectIds = new ArrayList<>(subjectCombinationService.getAllSubjectCombinations(projectId));
 
-        processRankLevelAnalysis(projectId, Range.clazz(classId), lastRankLevel, students,
-                nonCombinedSubjectIds, combinedSubjectIds, Range.CLASS);
+        //所有科目
+        List<String> subjectIds = subjectService.querySubjects(projectId);
 
-        return Result.success().set("subjectIds", ListUtils.union(nonCombinedSubjectIds, combinedSubjectIds))
-                .set("students", students);
+        if(combinedSubjectIds.isEmpty()){
+            processRankLevelAnalysis(projectId, Range.clazz(classId), lastRankLevel, students,
+                    subjectIds, Collections.emptyList(), Range.CLASS);
+
+            return Result.success().set("subjectIds", subjectIds)
+                    .set("students", students);
+        }else{
+
+            processRankLevelAnalysis(projectId, Range.clazz(classId), lastRankLevel, students,
+                    nonCombinedSubjectIds, combinedSubjectIds, Range.CLASS);
+
+            return Result.success().set("subjectIds", ListUtils.union(nonCombinedSubjectIds, combinedSubjectIds))
+                    .set("students", students);
+        }
     }
 
     public void processRankLevelAnalysis(

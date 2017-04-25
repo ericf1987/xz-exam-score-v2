@@ -17,6 +17,7 @@ import java.util.List;
  */
 @Function(description = "查看试卷截图生成失败的学生列表", parameters = {
         @Parameter(name = "projectId", type = Type.String, description = "考试项目ID", required = true),
+        @Parameter(name = "classId", type = Type.String, description = "班级ID", required = true),
         @Parameter(name = "subjectId", type = Type.String, description = "科目ID", required = true)
 })
 @Service
@@ -28,9 +29,10 @@ public class PaperScreenShotFailedStudents implements Server{
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
+        String classId = param.getString("classId");
         String subjectId = param.getString("subjectId");
 
-        List<String> failedStudents = monitorService.getFailedStudents(projectId, subjectId);
+        List<String> failedStudents = monitorService.getFailedStudents(projectId, classId, subjectId);
 
         return Result.success().set("students", failedStudents);
     }

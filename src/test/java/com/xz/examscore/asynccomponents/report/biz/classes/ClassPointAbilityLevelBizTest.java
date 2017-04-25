@@ -18,9 +18,9 @@ public class ClassPointAbilityLevelBizTest extends XzExamScoreV2ApplicationTests
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430600-db9cff031e12437aab42de6fdbccbac6";
-        String classId = "4c8a3944-1b51-445f-8948-061747f13d74";
-        String subjectId = "001";
+        String projectId = "430100-dd3013ab961946fb8a3668e5ccc475b6";
+        String classId = "21c44641-dabd-4e98-b2fa-eef94a9d8ffc";
+        String subjectId = "008";
         Param param = new Param().setParameter("projectId", projectId)
                 .setParameter("classId", classId)
                 .setParameter("subjectId", subjectId);

@@ -82,7 +82,7 @@ public class MonitorService {
     public void createFailedStudentDoc(String projectId, String schoolId, String classId, List<String> subjectIds) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
         for(String subjectId : subjectIds){
-            Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
+            Document query = doc("project", projectId).append("school", schoolId).append("class", classId)
                     .append("subject", subjectId);
             collection.insertOne(query.append("md5", Mongo.md5()));
         }
@@ -97,14 +97,14 @@ public class MonitorService {
      */
     public void recordFailedStudent(String projectId, String schoolId, String classId, List<String> studentIds, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
-        Document query = doc("project", projectId).append("school", schoolId).append("classId", classId)
+        Document query = doc("project", projectId).append("school", schoolId).append("class", classId)
                 .append("subject", subjectId);
         collection.updateMany(query, $set("studentIds", studentIds));
     }
 
-    public List<String> getFailedStudents(String projectId, String subjectId) {
+    public List<String> getFailedStudents(String projectId, String classId, String subjectId) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("paperScreenShot_fail_student");
-        Document query = doc("project", projectId).append("subject", subjectId);
+        Document query = doc("project", projectId).append("class", classId).append("subject", subjectId);
         Document students = collection.find(query).projection(doc("studentIds", 1)).first();
 
         if (null != students) {
