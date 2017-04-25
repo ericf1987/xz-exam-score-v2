@@ -20,7 +20,7 @@ public class PointServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetPoints() throws Exception {
-        List<Point> points = pointService.getPoints(UNION_PROJECT_ID, "001");
+        List<Point> points = pointService.getPoints("430100-dd3013ab961946fb8a3668e5ccc475b6", "007");
         points.forEach(System.out::println);
     }
 }

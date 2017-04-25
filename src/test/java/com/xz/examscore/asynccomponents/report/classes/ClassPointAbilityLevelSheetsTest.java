@@ -16,7 +16,8 @@ public class ClassPointAbilityLevelSheetsTest extends XzExamScoreV2ApplicationTe
     @Test
     public void testGenerateSheet() throws Exception {
         long begin = System.currentTimeMillis();
-        classPointAbilityLevelReport.generate("430100-e7bd093d92d844819c7eda8b641ab6ee", Range.clazz("0bc7b0a4-adfc-4cb2-8324-863b976ab543"), "target/class-point-ability-level-new.xlsx");
+        classPointAbilityLevelReport.generate("430100-dd3013ab961946fb8a3668e5ccc475b6",
+                Range.clazz("21c44641-dabd-4e98-b2fa-eef94a9d8ffc"), "target/class-point-ability-level.xlsx");
         long end = System.currentTimeMillis();
         System.out.println(end - begin);
     }

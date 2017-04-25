@@ -33,7 +33,7 @@ public class QuestServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetQuestsByPointLevel() throws Exception {
-        List<Document> quests = questService.getQuests(UNION_PROJECT_ID, "1022505", "C");
+        List<Document> quests = questService.getQuests("430100-dd3013ab961946fb8a3668e5ccc475b6", "1023816", "C");
         quests.forEach(System.out::println);
     }
 }

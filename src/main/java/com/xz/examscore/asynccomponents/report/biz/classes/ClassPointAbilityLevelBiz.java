@@ -105,7 +105,9 @@ public class ClassPointAbilityLevelBiz implements Server {
             List<Map<String, Object>> pointLevels = new ArrayList<>();
             for (String levelId : levelMap.keySet()) {
                 Map<String, Object> pointLevel = new HashMap<>();
-
+                if (pointId.equals("1023816") && levelId.equals("C")) {
+                    System.out.println("123");
+                }
                 Document levelInfo = levelMap.get(levelId);
                 List<Document> targetQuests = findQuests(pointId, levelId, quests);
                 List<String> questNos = targetQuests.stream().map(document ->
@@ -142,18 +144,20 @@ public class ClassPointAbilityLevelBiz implements Server {
     }
 
     //根据知识点和能力层级获取包含知识点能力层级的试题列表
-    List<Document> findQuests(String pointId, String levelId, List<Document> quests) {
+    public List<Document> findQuests(String pointId, String levelId, List<Document> quests) {
         List<Document> result = new ArrayList<>();
         for (Document quest : quests) {
             Document points = (Document) quest.get("points");
-            if (null == points || points.isEmpty())
-                return result;
-            if (points.containsKey(pointId)) {
-                List<String> levels = (List<String>) points.get(pointId);
-                if (levels.contains(levelId)) {
-                    result.add(quest);
+
+            if (null != points && !points.isEmpty()) {
+                if (points.containsKey(pointId)) {
+                    List<String> levels = (List<String>) points.get(pointId);
+                    if (levels.contains(levelId)) {
+                        result.add(quest);
+                    }
                 }
             }
+
         }
         return result;
     }

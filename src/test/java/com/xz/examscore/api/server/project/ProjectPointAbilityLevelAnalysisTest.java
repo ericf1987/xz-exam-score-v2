@@ -15,9 +15,9 @@ public class ProjectPointAbilityLevelAnalysisTest extends XzExamScoreV2Applicati
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-e7bd093d92d844819c7eda8b641ab6ee")
-                .setParameter("subjectId", "001")
-                .setParameter("schoolId", "d00faaa0-8a9b-45c4-ae16-ea2688353cd0");
+        Param param = new Param().setParameter("projectId", "430100-dd3013ab961946fb8a3668e5ccc475b6")
+                .setParameter("subjectId", "007")
+                .setParameter("schoolId", "d9bdecc9-0185-4688-90d1-1aaf27e2dcfd");
         Result result = projectPointAbilityLevelAnalysis.execute(param);
         System.out.println(result.getData());
     }
