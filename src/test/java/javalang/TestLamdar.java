@@ -1,7 +1,8 @@
 package javalang;
 
-import com.xz.ajiaedu.common.lang.CounterMap;
+import com.xz.examscore.api.server.school.SchoolAbilityLevelAnalysis;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -75,17 +76,12 @@ public class TestLamdar {
     }
 
     public static void main(String[] args) {
-/*        Integer i1 = 20;
-        Integer i2 = 20;
-        System.out.println(i1 == i2);
-
-        Integer i3 = 200;
-        Integer i4 = 200;
-        System.out.println(i3 == i4);*/
-
-        int i = 2;
-        int j = 3;
-        System.out.println(i | j);
+        SchoolAbilityLevelAnalysis sa = new SchoolAbilityLevelAnalysis();
+        Class<? extends SchoolAbilityLevelAnalysis> aClass = sa.getClass();
+        Annotation[] annotations = aClass.getAnnotations();
+        for(Annotation annotation : annotations){
+            System.out.println(annotation.toString());
+        }
     }
 
 }

@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @TaskDispatcherInfo(taskType = "student_competitive", dependentTaskType = "total_score_province", isCustomized = true)
 @Component
-public class StudentCompetitiveDispatcher extends TaskDispatcher{
+public class StudentCompetitiveDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(ScoreSegmentDispatcher.class);
 
     @Autowired
@@ -32,7 +32,7 @@ public class StudentCompetitiveDispatcher extends TaskDispatcher{
     @Override
     public void dispatch(String projectId, String aggregationId, ProjectConfig projectConfig, Map<String, List<Range>> rangesMap) {
         String[] rangeKeys = new String[]{
-                Range.PROVINCE
+                Range.PROVINCE, Range.SCHOOL
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);

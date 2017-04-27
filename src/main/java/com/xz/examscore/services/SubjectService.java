@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 
 /**
  * (description)
@@ -128,4 +129,8 @@ public class SubjectService {
         c.insertMany(subjects);
     }
 
+    public List<Document> getAllSubjects(){
+        MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
+        return toList(c.find());
+    }
 }
