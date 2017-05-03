@@ -22,10 +22,12 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 
 /**
  * @author by fengye on 2016/12/8.
@@ -159,6 +161,14 @@ public class StudentEvaluationFormAnalysis implements Server {
         FindIterable<Document> projectStudentList = studentService.getProjectStudentList(projectId, Range.clazz(classId),
                 pageSize, pageSize * pageCount, doc("student", 1).append("name", 1));
 
+        List<Document> projectStudents = toList(projectStudentList);
+        Collections.sort(projectStudents, (Document d1, Document d2) ->{
+            String name1 = d1.getString("name");
+            String name2 = d2.getString("name");
+            Collator collator= Collator.getInstance(java.util.Locale.CHINA);
+            return collator.compare(name1, name2);
+        });
+
         //项目最高最低分
         double[] minMaxScore = minMaxScoreService.getMinMaxScore(projectId, Range.province(provinceService.getProjectProvince(projectId)), Target.project(projectId));
         double min = minMaxScore[0];
@@ -171,7 +181,7 @@ public class StudentEvaluationFormAnalysis implements Server {
         List<List<Map<String, Object>>> entryLevelList = new ArrayList<>();
         queryRangeAverageInEntryLevel(projectId, provinceRange, subjectIds, combinedSubjectIds, entryLevelList);
 
-        for (Document studentDoc : projectStudentList) {
+        for (Document studentDoc : projectStudents) {
             Map<String, Object> studentMap = new HashMap<>();
             //统计基础信息
             String studentId = studentDoc.getString("student");
@@ -353,10 +363,11 @@ public class StudentEvaluationFormAnalysis implements Server {
         scoreAndRank.put("schoolMaxScore", maxScore);
         scoreAndRank.put("schoolAvgScore", DoubleUtils.round(avgScore));
 
-        int rank = rankService.getRank(projectId, Range.province(provinceService.getProjectProvince(projectId)), target, studentId);
         //竞争对手平均分
-        double competitiveAverage = studentCompetitiveService.getAverage(projectId, Range.province(provinceService.getProjectProvince(projectId)), target, rank);
-        scoreAndRank.put("competitiveAverage", DoubleUtils.round(competitiveAverage));
+        double competitiveAverage_province = studentCompetitiveService.getAverage(projectId, Range.province(provinceService.getProjectProvince(projectId)), target, provinceRank);
+        double competitiveAverage_school = studentCompetitiveService.getAverage(projectId, Range.school(schoolId), target, schoolRank);
+        scoreAndRank.put("competitiveAverage_province", DoubleUtils.round(competitiveAverage_province));
+        scoreAndRank.put("competitiveAverage_school", DoubleUtils.round(competitiveAverage_school));
         return scoreAndRank;
     }
 }

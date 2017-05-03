@@ -57,7 +57,7 @@ public class PaperScreenShotTaskManager {
         this.threadPoolExecutor = Executors.newBlockingThreadPoolExecutor(poolSize, poolSize, 100);
     }
 
-    public void generatePaperScreenShots(final String projectId, boolean async) {
+    public void generatePaperScreenShots(final String projectId, Map<String, Object> configFromCMS, boolean async) {
         //遍历考试学校ID
         List<String> schoolIds = schoolService.getProjectSchools(projectId).stream().map(s -> s.getString("school")).collect(Collectors.toList());
 
@@ -94,7 +94,7 @@ public class PaperScreenShotTaskManager {
                         try {
                             //为当前班级的所有科目各创建一个doc用来记录截图生成失败的学生
                             monitorService.createFailedStudentDoc(projectId, schoolId, classId, subjectIds);
-                            paperScreenShotService.dispatchOneClassTask(projectId, schoolId, classId, subjectIds);
+                            paperScreenShotService.dispatchOneClassTask(projectId, schoolId, classId, subjectIds, configFromCMS);
                         } catch (Exception e) {
                             LOG.info("生成试卷截图失败, 项目{}， 学校{}， 班级{}", projectId, schoolId, classId);
                         } finally {

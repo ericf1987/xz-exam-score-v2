@@ -9,7 +9,10 @@ import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.aliyun.ApiClient;
 import com.xz.ajiaedu.common.aliyun.OSSFileClient;
 import com.xz.ajiaedu.common.aliyun.OSSTempCridentialKeeper2;
+import com.xz.ajiaedu.common.appauth.AppAuthClient;
 import com.xz.ajiaedu.common.redis.Redis;
+import com.xz.examscore.config.AppAuthConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.MultipartConfigFactory;
@@ -60,6 +63,9 @@ public class Config {
     @Value("${multipart.maxRequestSize}")
     private String maxRequestSize;
 
+    @Autowired
+    private AppAuthConfig appAuthConfig;
+
     @Bean
     public Redis redis() {
         return new Redis(redisHost, redisPort, 5);
@@ -95,6 +101,15 @@ public class Config {
     @Bean
     public ApiClient apiClient() {
         return new ApiClient(aliyunApiUrl, aliyunApiKey, aliyunApiSecret);
+    }
+
+    @Bean
+    public AppAuthClient appAuthClient() {
+        return new AppAuthClient(
+                appAuthConfig.getUrl(),
+                appAuthConfig.getAppKey(),
+                appAuthConfig.getAppSecret()
+        );
     }
 
     @Bean

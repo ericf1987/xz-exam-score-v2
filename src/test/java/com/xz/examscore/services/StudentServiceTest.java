@@ -10,9 +10,14 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 
 /**
  * (description)
@@ -80,7 +85,7 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
     }
 
     @Test
-    public void test2() throws Exception{
+    public void test2() throws Exception {
         String projectId = "430300-672a0ed23d9148e5a2a31c8bf1e08e62";
         String schoolId = "11b66fc2-8a76-41c2-a1b3-5011523c7e47";
         Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId);
@@ -102,5 +107,15 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
                 "7ab1a822-45a9-40e7-b753-95d16a95534e");
         ArrayList<Document> school = studentService.pickStudentsByRange(projectId, studentIds, "school");
         System.out.println(school);
+    }
+
+    @Test
+    public void testGetProjectStudentList() throws Exception {
+        String projectId = "430600-12b3be890aa840c58cccdfd48b1c8a8f";
+        Range range = Range.clazz("4fd9984d-23fb-43ce-9aa3-c47cb1c2e229");
+        Document projection = doc("student", 1).append("name", 1);
+        List<Document> documents = toList(studentService.getProjectStudentList(projectId, range, 0, 0, projection));
+        System.out.println(documents.toString());
+        System.out.println(documents.size());
     }
 }

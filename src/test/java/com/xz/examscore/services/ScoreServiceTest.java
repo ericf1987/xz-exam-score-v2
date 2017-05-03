@@ -230,22 +230,27 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(ttt.subList(50 * (6-1), 50 * 6).toString());
     }
 
+    //查询高于指定排名的学生ID
     @Test
     public void test2() throws Exception {
-        String projectId = "431100-ac367ba398d744d489e9de4ed225b755";
+        String projectId = "430300-c582131e66b64fe38da7d0510c399ec4";
         Range provinceRange = Range.province(provinceService.getProjectProvince(projectId));
         Target projectTarget = Target.project(projectId);
-        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 384);
-        List<Document> listByScore1 = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 448);
-        List<Document> listByScore2 = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, 512);
+        //排名位置的得分
+        double score = rankService.getRankScore(projectId, provinceRange, projectTarget, 15);
+        //高于指定得分的学生ID列表
+        List<Document> listByScore = scoreService.getListByMinScore(projectId, provinceRange, projectTarget, score);
+        Collections.sort(listByScore, (Document d1, Document d2) -> {
+            Double s1 = d1.getDouble("totalScore");
+            Double s2 = d2.getDouble("totalScore");
+            return s2.compareTo(s1);
+        });
         System.out.println(listByScore.size());
-        System.out.println(listByScore1.size());
-        System.out.println(listByScore2.size());
+        listByScore.forEach(l -> {
+            Document doc = l.get("range", Document.class);
+            System.out.println(doc.getString("id"));
+        });
 
-        int studentCount = studentService.getStudentCount(projectId, provinceRange, projectTarget);
-        List<String> studentIds = studentService.getStudentIds(projectId, provinceRange, projectTarget);
-        System.out.println("总体参考人数：" + studentCount);
-        System.out.println(studentIds.size());
     }
 
     /**

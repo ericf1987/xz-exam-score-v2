@@ -69,7 +69,8 @@ public class PaintService {
         String subjectId = paperScreenShotBean.getSubjectId();
 
         //排名显示规则配置
-        Map<String, Object> rankRuleMap = null == subjectRuleMap ? Collections.emptyMap() : (Map<String, Object>) subjectRuleMap.get(subjectId);
+        Map<String, Object> rankRuleMap = MapUtils.isEmpty(subjectRuleMap) ?
+                Collections.emptyMap() : (Map<String, Object>) subjectRuleMap.get(subjectId);
 
         List<Map<String, Object>> studentCardSlices = paperScreenShotBean.getStudentCardSlices();
 
@@ -171,9 +172,9 @@ public class PaintService {
     private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
                                              double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
 
-        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankInClass");
-        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankInSchool");
-        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankInProvince");
+        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankClass");
+        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankSchool");
+        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankProvince");
 
         boolean isClassOn = MapUtils.getBooleanValue(rankInClass, "total");
         boolean isSchoolOn = MapUtils.getBooleanValue(rankInSchool, "total");
@@ -250,9 +251,9 @@ public class PaintService {
     private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
                                                      double firstObjectiveHeight, double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
 
-        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankInClass");
-        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankInSchool");
-        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankInProvince");
+        Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankClass");
+        Map<String, Object> rankInSchool = MapUtils.getMap(rankRuleMap, "rankSchool");
+        Map<String, Object> rankInProvince = MapUtils.getMap(rankRuleMap, "rankProvince");
 
         boolean isClassOn = MapUtils.getBooleanValue(rankInClass, "objective");
         boolean isSchoolOn = MapUtils.getBooleanValue(rankInSchool, "objective");
@@ -518,9 +519,9 @@ public class PaintService {
      */
     private List<SubjectiveQuestZone> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo, Map<String, Object> rankRuleMap) {
 
-        Map<String, Object> rankInClassMap = MapUtils.getMap(rankRuleMap, "rankInClass");
-        Map<String, Object> rankInSchoolMap = MapUtils.getMap(rankRuleMap, "rankInSchool");
-        Map<String, Object> rankInProvinceMap = MapUtils.getMap(rankRuleMap, "rankInProvince");
+        Map<String, Object> rankInClassMap = MapUtils.getMap(rankRuleMap, "rankClass");
+        Map<String, Object> rankInSchoolMap = MapUtils.getMap(rankRuleMap, "rankSchool");
+        Map<String, Object> rankInProvinceMap = MapUtils.getMap(rankRuleMap, "rankProvince");
 
         List<String> questInClass = (List<String>) MapUtils.getObject(rankInClassMap, "subjective");
         List<String> questInSchool = (List<String>) MapUtils.getObject(rankInSchoolMap, "subjective");

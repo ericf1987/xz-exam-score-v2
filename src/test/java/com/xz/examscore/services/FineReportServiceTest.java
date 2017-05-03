@@ -19,10 +19,11 @@ public class FineReportServiceTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testInsertItem() throws Exception {
         FineReportItem item = new FineReportItem();
-        item.setItemId("101");
-        item.setItemName("腾讯");
+        item.setItemId("112");
+        item.setItemName("单校各科数据统计");
         item.setItemType("basics");
-        item.setItemUrl("http://www.qq.com");
+        item.setItemUrl("http://10.10.22.212:8280/ReportServer?reportlet=palo%2F%5B5355%5D%5B6821%5D%5B5404%5D%5B79d1%5D%5B6570%5D%5B636e%5D%5B7edf%5D%5B8ba1%5D.cpt&op=view");
+        item.setPosition(12);
         fineReportService.insertItem(item);
     }
 

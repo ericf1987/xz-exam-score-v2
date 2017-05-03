@@ -76,6 +76,9 @@ public class PaperScreenShotService {
     @Value("${paper.screenshot.savepath}")
     private String srcPath;
 
+    @Autowired
+    PaperScreenShotConfigService paperScreenShotConfigService;
+
     /**
      * 试卷截图保存任务执行入口
      *
@@ -88,7 +91,10 @@ public class PaperScreenShotService {
 
         LOG.info("====项目{}， 开始保存截图====", projectId);
         projectService.setPaperScreenShotStatus(projectId, PaperScreenShotStatus.GENERATING);
-        paperScreenShotTaskManager.generatePaperScreenShots(projectId, true);
+        //从CMS获取试卷截图配置信息
+        Map<String, Object> configFromCMS = paperScreenShotConfigService.getConfigFromCMS(projectId);
+
+        paperScreenShotTaskManager.generatePaperScreenShots(projectId, configFromCMS, true);
         LOG.info("====项目{}， 保存截图完成====", projectId);
 
         LOG.info("====项目{}， 开始打包班级试卷截图压缩包====", projectId);
@@ -134,14 +140,15 @@ public class PaperScreenShotService {
     /**
      * 按班级和科目分发生成试卷截图任务
      *
-     * @param projectId 项目ID
-     * @param schoolId  学校ID
-     * @param classId   班级ID
-     * @param subjectId 科目列表
+     * @param projectId     项目ID
+     * @param schoolId      学校ID
+     * @param classId       班级ID
+     * @param subjectId     科目列表
+     * @param configFromCMS
      * @return result
      */
-    private PaperScreenShotsTaskByClassAndSubject runTaskByClassAndSubjectId(String projectId, String schoolId, String classId, String subjectId) {
-        PaperScreenShotsTaskByClassAndSubject paperScreenShotsTaskByClassAndSubject = new PaperScreenShotsTaskByClassAndSubject(projectId, schoolId, classId, subjectId);
+    private PaperScreenShotsTaskByClassAndSubject runTaskByClassAndSubjectId(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> configFromCMS) {
+        PaperScreenShotsTaskByClassAndSubject paperScreenShotsTaskByClassAndSubject = new PaperScreenShotsTaskByClassAndSubject(projectId, schoolId, classId, subjectId, configFromCMS);
         paperScreenShotsTaskByClassAndSubject.start();
         return paperScreenShotsTaskByClassAndSubject;
     }
@@ -190,15 +197,17 @@ public class PaperScreenShotService {
     /**
      * 按班级和科目分发任务
      *
-     * @param projectId  项目ID
-     * @param schoolId   学校ID
-     * @param classId    班级ID
-     * @param subjectIds 科目列表
+     * @param projectId     项目ID
+     * @param schoolId      学校ID
+     * @param classId       班级ID
+     * @param subjectIds    科目列表
+     * @param configFromCMS 试卷截图参数配置
+     * @param configFromCMS
      */
-    public void dispatchOneClassTask(String projectId, String schoolId, String classId, List<String> subjectIds) {
+    public void dispatchOneClassTask(String projectId, String schoolId, String classId, List<String> subjectIds, Map<String, Object> configFromCMS) {
         //根据科目数分发任务
         List<PaperScreenShotsTaskByClassAndSubject> tasks = subjectIds.stream().map(
-                subjectId -> runTaskByClassAndSubjectId(projectId, schoolId, classId, subjectId)
+                subjectId -> runTaskByClassAndSubjectId(projectId, schoolId, classId, subjectId, configFromCMS)
         ).collect(Collectors.toList());
         for (PaperScreenShotsTaskByClassAndSubject task : tasks) {
             try {
@@ -324,7 +333,7 @@ public class PaperScreenShotService {
 
         @Override
         public void run() {
-            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), this.getSubjectId(), ""), null);
+            paintService.saveScreenShot(packScreenShotTaskBean(this.getProjectId(), this.getSchoolId(), this.getClassId(), this.getSubjectId(), ""), this.getRankRuleMap());
         }
     }
 

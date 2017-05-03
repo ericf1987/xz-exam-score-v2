@@ -9,6 +9,7 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.util.DoubleUtils;
+import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +86,25 @@ public class ScoreSegmentService {
             scoreSegmentList.add(map);
         }
 
+        if(endScoreSegment == fullScore){
+            addCountToScoreSegment(scoreSegmentList, segmentMap, endScoreSegment);
+        }
+
         scoreSegmentList.sort((o1, o2) -> ((Integer) (o2.get("startScoreSegment")))
                 .compareTo((Integer) (o1.get("startScoreSegment"))));
         return scoreSegmentList;
+    }
+
+    private void addCountToScoreSegment(List<Map<String, Object>> scoreSegmentList, Map<String, Document> segmentMap, int endScoreSegment) {
+        Document scoreSegment = segmentMap.get(String.valueOf(endScoreSegment));
+        if (scoreSegment != null) {
+            scoreSegmentList.stream().forEach(s -> {
+                if(endScoreSegment == MapUtils.getInteger(s, "endScoreSegment")){
+                    int count = scoreSegment.getInteger("count") + MapUtils.getInteger(s, "count");
+                    s.put("count", count);
+                }
+            });
+        }
     }
 
     /**

@@ -2,10 +2,12 @@ package com.xz.examscore.intclient;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.ajiaedu.common.appauth.AppAuthClient;
 import com.xz.ajiaedu.common.json.JSONUtils;
+import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.api.Param;
 import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ import static org.junit.Assert.*;
  */
 public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
-    public static final String PROJECT_ID = "430100-eddd6548432c4e5fab54739101c0affb";
+    public static final String PROJECT_ID = "430100-b05a111c72c740f4898660a057c48e28";
 
     public static final String SCHOOL_ID = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
 
@@ -150,9 +152,6 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testAddRpApplyOpen() throws Exception {
-        Param param = new Param().setParameter("pageSize", 10).setParameter("pageIndex", 0);
-        ApiResponse result = interfaceClient.listRpApplyOpen(param);
-        System.out.println(result.getData());
     }
 
     @Test
