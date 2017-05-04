@@ -7,12 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-/**
- * (description)
- * created at 16/06/28
- *
- * @author yiding_he
- */
 public class PointServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
