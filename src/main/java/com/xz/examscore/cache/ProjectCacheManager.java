@@ -5,8 +5,8 @@ import com.hyd.simplecache.SimpleCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -17,7 +17,7 @@ public class ProjectCacheManager {
 
     private long lastShrink;
 
-    private final Map<String, CacheWrapper> projectCacheMap = new ConcurrentHashMap<>();
+    private final Map<String, CacheWrapper> projectCacheMap = new HashMap<>();
 
     /**
      * 获得一个项目缓存实例。如果缓存实例不存在，则自动创建一个
@@ -28,17 +28,20 @@ public class ProjectCacheManager {
      */
     public SimpleCache getProjectCache(String projectId) {
 
-        if (!projectCacheMap.containsKey(projectId)) {
-            synchronized (projectCacheMap) {
-                if (!projectCacheMap.containsKey(projectId)) {
-                    projectCacheMap.put(projectId, createCache(projectId));
+        try {
+            if (!projectCacheMap.containsKey(projectId)) {
+                synchronized (projectCacheMap) {
+                    if (!projectCacheMap.containsKey(projectId)) {
+                        projectCacheMap.put(projectId, createCache(projectId));
+                    }
                 }
             }
+
+            return projectCacheMap.get(projectId).simpleCache;
+
+        } finally {
+            shrink();
         }
-
-        shrink();
-
-        return projectCacheMap.get(projectId).simpleCache;
     }
 
     private void shrink() {
@@ -84,7 +87,8 @@ public class ProjectCacheManager {
         }
 
         public boolean isExpired() {
-            return System.currentTimeMillis() - lastAccess > cacheConfig.getProjectTtl() * 1000;
+            int duration = Math.max(cacheConfig.getProjectTtl() * 1000, 10000);
+            return System.currentTimeMillis() - lastAccess > duration;
         }
     }
 }
