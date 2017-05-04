@@ -48,7 +48,9 @@ public class ProjectCacheManager {
         long now = System.currentTimeMillis();
 
         if (now - lastShrink > TimeUnit.MINUTES.toMillis(1)) {
-            projectCacheMap.entrySet().removeIf(entry -> entry.getValue().isExpired());
+            synchronized (projectCacheMap) {
+                projectCacheMap.entrySet().removeIf(entry -> entry.getValue().isExpired());
+            }
             lastShrink = now;
         }
     }
