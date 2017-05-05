@@ -10,11 +10,10 @@ import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
@@ -37,6 +36,9 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     QueryExamSubjects queryExamSubjects;
+
+    @Autowired
+    SubjectService subjectService;
 
     @Test
     public void testGetStudentCount() throws Exception {
@@ -113,9 +115,23 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
     public void testGetProjectStudentList() throws Exception {
         String projectId = "430600-12b3be890aa840c58cccdfd48b1c8a8f";
         Range range = Range.clazz("4fd9984d-23fb-43ce-9aa3-c47cb1c2e229");
-        Document projection = doc("student", 1).append("name", 1);
-        List<Document> documents = toList(studentService.getProjectStudentList(projectId, range, 0, 0, projection));
+        Document projection = doc("student", 1).append("name", 1).append("school", 1).append("class", 1);
+        Document sort = doc("school", 1).append("class", 1);
+        List<Document> documents = toList(studentService.getProjectStudentList(projectId, range, 0, 0, projection, sort));
         System.out.println(documents.toString());
         System.out.println(documents.size());
+    }
+
+    @Test
+    public void testhasAllSubjectsStudent() throws Exception {
+        String projectId = "430000-79eee8ac6c244d92a24dbcc66a2ffda2";
+        Document projection = doc("student", 1).append("name", 1).append("school", 1).append("class", 1);
+        Document sort = doc("school", 1).append("class", 1);
+        List<String> subjects = subjectService.querySubjects(projectId);
+        ArrayList<Document> documents = studentService.hasAllSubjectsStudent(projectId, subjects, null, 0, 0, projection, sort);
+        System.out.println(documents.size());
+        List<Document> students = documents.stream().filter(s -> studentService.isRequiredStudent(projectId, s.getString("student"), subjects))
+                .collect(Collectors.toList());
+        System.out.println(students.size());
     }
 }

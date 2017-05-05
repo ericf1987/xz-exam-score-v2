@@ -29,4 +29,10 @@ public class ProjectCacheManagerTest extends XzExamScoreV2ApplicationTests {
         cache.put("name", "123456");
         System.out.println((String)cache.get("name"));
     }
+
+    @Test
+    public void testDeleteProjectCache() throws Exception {
+        String projectId = "430000-dc7f1816166b4ea09b0b20f36cf8c76e";
+        projectCacheManager.deleteProjectCache(projectId);
+    }
 }

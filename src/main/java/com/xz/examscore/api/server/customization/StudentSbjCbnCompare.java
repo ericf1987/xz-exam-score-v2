@@ -51,7 +51,7 @@ public class StudentSbjCbnCompare implements Server {
         String subjectCombinationId = param.getString("subjectCombinationId");
         List<Map<String, Object>> result = new ArrayList<>();
         Target subjectCombinationTarget = Target.subjectCombination(subjectCombinationId);
-        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, -1, 0, null);
+        FindIterable<Document> list = this.studentService.getProjectStudentList(projectId, null, -1, 0, null, null);
         for (Document doc : list) {
             String studentId = doc.getString("student");
             String studentName = doc.getString("name");

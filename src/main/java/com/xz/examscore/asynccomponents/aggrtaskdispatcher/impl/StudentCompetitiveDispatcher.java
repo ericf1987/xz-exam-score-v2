@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * @author by fengye on 2016/12/29.
  */
-@TaskDispatcherInfo(taskType = "student_competitive", dependentTaskType = "total_score_province", isCustomized = true)
+@TaskDispatcherInfo(taskType = "student_competitive", dependentTaskType = "total_score_province")
 @Component
 public class StudentCompetitiveDispatcher extends TaskDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(ScoreSegmentDispatcher.class);

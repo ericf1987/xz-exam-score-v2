@@ -7,6 +7,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
+import com.xz.examscore.api.server.customization.baseQuery.StudentEvaluationBaseQuery;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
@@ -66,6 +67,9 @@ public class StudentEvaluationByRankAnalysis implements Server {
 
     @Autowired
     CollegeEntryLevelAverageService collegeEntryLevelAverageService;
+
+    @Autowired
+    StudentEvaluationBaseQuery studentEvaluationBaseQuery;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -137,11 +141,14 @@ public class StudentEvaluationByRankAnalysis implements Server {
 
             //查询得分及排名
             Map<String, Object> scoreAndRankMap = new HashMap<>();
-            scoreAndRankMap.put("project", studentEvaluationFormAnalysis.getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.project(projectId)));
+            scoreAndRankMap.put("project", studentEvaluationBaseQuery.getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.project(projectId)));
             //语数外得分及排名
             List<Map<String, Object>> subjectScoreAndRank = new ArrayList<>();
             subjectIds.stream().filter(s -> !SubjectCombinationService.isW(s) && !SubjectCombinationService.isL(s)).forEach(subjectId -> {
-                Map<String, Object> map = studentEvaluationFormAnalysis.getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(subjectId), studentEvaluationFormAnalysis.getQuestTypeScoreMap(projectId, studentId, subjectId), studentEvaluationFormAnalysis.getPointScoreMap(projectId, studentId, subjectId), studentEvaluationFormAnalysis.getSubjectAbilityLevel(projectId, studentId, subjectId));
+                Map<String, Object> map = studentEvaluationBaseQuery.getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(subjectId),
+                        studentEvaluationBaseQuery.getQuestTypeScoreMap(projectId, studentId, subjectId),
+                        studentEvaluationBaseQuery.getPointScoreMap(projectId, studentId, subjectId),
+                        studentEvaluationBaseQuery.getSubjectAbilityLevel(projectId, studentId, subjectId));
                 subjectScoreAndRank.add(map);
             });
             scoreAndRankMap.put("subjects", subjectScoreAndRank);
@@ -149,10 +156,10 @@ public class StudentEvaluationByRankAnalysis implements Server {
             //文理单科得分及排名
             List<Map<String, Object>> wlSubjectScoreAndRank = new ArrayList<>();
             wlSubjectIds.forEach(wlSubjectId -> {
-                Map<String, Object> map = studentEvaluationFormAnalysis.getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(wlSubjectId),
-                        studentEvaluationFormAnalysis.getQuestTypeScoreMap(projectId, studentId, wlSubjectId),
-                        studentEvaluationFormAnalysis.getPointScoreMap(projectId, studentId, wlSubjectId),
-                        studentEvaluationFormAnalysis.getSubjectAbilityLevel(projectId, studentId, wlSubjectId));
+                Map<String, Object> map = studentEvaluationBaseQuery.getSingleSubjectRankAndLevel(projectId, schoolId, classId, studentId, Target.subject(wlSubjectId),
+                        studentEvaluationBaseQuery.getQuestTypeScoreMap(projectId, studentId, wlSubjectId),
+                        studentEvaluationBaseQuery.getPointScoreMap(projectId, studentId, wlSubjectId),
+                        studentEvaluationBaseQuery.getSubjectAbilityLevel(projectId, studentId, wlSubjectId));
                 wlSubjectScoreAndRank.add(map);
             });
             scoreAndRankMap.put("wlSubjects", wlSubjectScoreAndRank);
@@ -160,7 +167,7 @@ public class StudentEvaluationByRankAnalysis implements Server {
             //查询组合科目得分及排名
             List<Map<String, Object>> combinedSubjectScoreAndRank = new ArrayList<>();
             combinedSubjectIds.forEach(combinedSubjectId -> {
-                Map<String, Object> map = studentEvaluationFormAnalysis.getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subjectCombination(combinedSubjectId));
+                Map<String, Object> map = studentEvaluationBaseQuery.getScoreAndRankMap(projectId, schoolId, classId, studentId, Target.subjectCombination(combinedSubjectId));
                 combinedSubjectScoreAndRank.add(map);
             });
 

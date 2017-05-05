@@ -22,15 +22,15 @@ public class StudentEvaluationFormAnalysisTest extends XzExamScoreV2ApplicationT
 
     @Test
     public void testExecute() throws Exception {
-        String projectId = "430100-501b96776dc348748e2afdb95d491516";
+        String projectId = "430000-79eee8ac6c244d92a24dbcc66a2ffda2";
         String schoolId = "4b2efe63-0d1d-4a58-b355-23a29d1d433a";
         String classId = "b329dda6-f7a9-4ea2-a8df-1e863b244e22";
         String pageSize = "70";
         String pageCount = "1";
-        Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", schoolId)
-                .setParameter("classId", classId)
-                .setParameter("pageSize", pageSize)
-                .setParameter("pageCount", pageCount);
+        Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", "")
+                .setParameter("classId", "")
+                .setParameter("pageSize", "")
+                .setParameter("pageCount", "");
         Result result = studentEvaluationFormAnalysis.execute(param);
         System.out.println(result.getData());
     }

@@ -6,6 +6,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.xz.ajiaedu.common.concurrent.LockFactory;
+import com.xz.ajiaedu.common.lang.CollectionUtils;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.ajiaedu.common.mongo.MongoUtils;
 import com.xz.examscore.bean.ProjectConfig;
@@ -52,6 +53,9 @@ public class StudentService {
 
     @Autowired
     ProjectCacheManager projectCacheManager;
+
+    @Autowired
+    ScoreService scoreService;
 
     /**
      * 查询项目考生数量
@@ -125,10 +129,11 @@ public class StudentService {
      * @param maxStudentCount 最多查询多少个学生（调试用，<=0 表示不限）
      * @param skipCount       跳过多少条记录（分页用）
      * @param projection      要取哪些字段（可选，null 表示取所有字段）
+     * @param sort            排序字段
      * @return 学生列表
      */
     public FindIterable<Document> getProjectStudentList(
-            String projectId, Range range, int maxStudentCount, int skipCount, Document projection) {
+            String projectId, Range range, int maxStudentCount, int skipCount, Document projection, Document sort) {
 
         MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
 
@@ -138,6 +143,10 @@ public class StudentService {
         }
 
         FindIterable<Document> findIterable = students.find(query);
+
+        if(null != sort && !sort.isEmpty()){
+            findIterable.sort(sort);
+        }
 
         if (maxStudentCount > 0) {
             findIterable.limit(maxStudentCount);
@@ -328,6 +337,49 @@ public class StudentService {
             Document query = doc("project", projectId).append("student", studentId).append("subjects", doc("$all", subjectIds));
             Document first = students.find(query).first();
             return first != null && !first.isEmpty();
+        });
+    }
+
+    public boolean isRequiredStudent(String projectId, String studentId, List<String> subjectIds) {
+        //只有全科参考且总分不为0才满足条件
+        boolean b = hasAllSubjects(projectId, studentId, subjectIds);
+        double totalScore = scoreService.getScore(projectId, Range.student(studentId), Target.project(projectId));
+        return b && totalScore != 0;
+    }
+
+    public ArrayList<Document> hasAllSubjectsStudent(String projectId, List<String> subjectIds, Range range,
+                                      int maxStudentCount, int skipCount, Document projection, Document sort){
+        String cacheKey = "hasAllSubjectsStudent" + projectId + ":" + subjectIds;
+
+        SimpleCache simpleCache = projectCacheManager.getProjectCache(projectId);
+
+        return simpleCache.get(cacheKey, () -> {
+            MongoCollection<Document> students = scoreDatabase.getCollection("student_list");
+            Document query = doc("project", projectId).append("subjects", doc("$all", subjectIds));
+
+            FindIterable<Document> findIterable = students.find(query);
+
+            if (range != null) {
+                query.append(range.getName(), range.getId());
+            }
+
+            if(null != sort && !sort.isEmpty()){
+                findIterable.sort(sort);
+            }
+
+            if (maxStudentCount > 0) {
+                findIterable.limit(maxStudentCount);
+            }
+
+            if (skipCount > 0) {
+                findIterable.skip(skipCount);
+            }
+
+            if (projection != null) {
+                findIterable.projection(projection);
+            }
+
+            return CollectionUtils.asArrayList(toList(findIterable));
         });
     }
 }
