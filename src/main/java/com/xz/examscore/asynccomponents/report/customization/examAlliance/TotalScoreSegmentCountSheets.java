@@ -3,7 +3,7 @@ package com.xz.examscore.asynccomponents.report.customization.examAlliance;
 import com.xz.ajiaedu.common.excel.ExcelWriter;
 import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.server.customization.examAlliance.TotalScoreSegmentCountAnalysis;
 import com.xz.examscore.asynccomponents.report.SheetGenerator;
 import com.xz.examscore.asynccomponents.report.SheetTask;

@@ -1,15 +1,14 @@
 package com.xz.examscore.api.server.sys;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xz.ajiaedu.common.aliyun.ApiResponse;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.ProjectConfig;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import com.xz.examscore.services.ProjectConfigService;
 import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -55,7 +54,7 @@ public class SetProjectConfig implements Server {
     ProjectConfigService projectConfigService;
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     public static final Logger LOG = LoggerFactory.getLogger(SetProjectConfig.class);
 
@@ -71,8 +70,8 @@ public class SetProjectConfig implements Server {
             LOG.info("提交至CMS的参数：{}", projectConfigJson);
             Param _param = new Param().setParameter("projectId", projectId)
                     .setParameter("settings", projectConfigJson);
-            ApiResponse apiResponse = interfaceClient.setProjectConfig(_param);
-            if (apiResponse.isSuccess()) {
+            Result result = interfaceAuthClient.setProjectConfig(_param);
+            if (result.isSuccess()) {
                 projectConfigService.updateRankLevelConfig(projectConfig);
                 return Result.success("配置保存成功!");
             } else {

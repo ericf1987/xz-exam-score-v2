@@ -6,7 +6,7 @@ import com.xz.ajiaedu.common.aliyun.Api.ApiName;
 import com.xz.ajiaedu.common.aliyun.ApiClient;
 import com.xz.ajiaedu.common.aliyun.ApiRequest;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

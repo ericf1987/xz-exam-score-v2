@@ -3,7 +3,7 @@ package com.xz.examscore.api.server.customization.examAlliance;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.mongo.QuestNoComparator;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;

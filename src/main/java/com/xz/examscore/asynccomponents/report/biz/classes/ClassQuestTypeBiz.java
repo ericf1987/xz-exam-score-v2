@@ -2,7 +2,7 @@ package com.xz.examscore.asynccomponents.report.biz.classes;
 
 import com.xz.ajiaedu.common.beans.dic.QuestType;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;

@@ -1,7 +1,7 @@
 package com.xz.examscore.asynccomponents.report.biz.school;
 
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.asynccomponents.report.biz.classes.ClassQuestScoreDetailBiz;
 import com.xz.examscore.bean.Range;
 import org.springframework.stereotype.Service;

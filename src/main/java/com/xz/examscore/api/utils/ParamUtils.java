@@ -2,7 +2,7 @@ package com.xz.examscore.api.utils;
 
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.api.ApiException;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;

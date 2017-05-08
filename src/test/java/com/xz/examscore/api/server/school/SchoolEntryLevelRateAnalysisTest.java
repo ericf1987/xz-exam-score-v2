@@ -2,7 +2,7 @@ package com.xz.examscore.api.server.school;
 
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.services.ClassService;
 import org.bson.Document;
 import org.junit.Test;

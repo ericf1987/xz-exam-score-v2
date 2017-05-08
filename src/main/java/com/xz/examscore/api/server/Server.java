@@ -1,7 +1,7 @@
 package com.xz.examscore.api.server;
 
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 
 /**
  * (描述)

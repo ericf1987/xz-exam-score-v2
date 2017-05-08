@@ -2,7 +2,7 @@ package com.xz.examscore.services;
 
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.server.sys.QueryExamSubjects;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;

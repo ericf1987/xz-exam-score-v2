@@ -1,12 +1,12 @@
 package com.xz.examscore.api.server.sys;
 
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +30,11 @@ import org.springframework.stereotype.Service;
 public class AddFeedbackInfo implements Server {
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     @Override
     public Result execute(Param param) throws Exception {
-        interfaceClient.addRpFeedbackInfo(param);
+        interfaceAuthClient.addRpFeedbackInfo(param);
         return Result.success();
     }
 }

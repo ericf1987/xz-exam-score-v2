@@ -1,7 +1,7 @@
 package com.xz.examscore.api.server.sys;
 
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.annotation.*;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.services.ProjectService;

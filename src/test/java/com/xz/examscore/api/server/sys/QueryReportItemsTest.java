@@ -3,7 +3,7 @@ package com.xz.examscore.api.server.sys;
 import com.alibaba.fastjson.JSON;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
-import com.xz.examscore.api.Param;
+import com.xz.ajiaedu.common.ajia.Param;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
