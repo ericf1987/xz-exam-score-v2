@@ -6,7 +6,7 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.lang.Value;
 import com.xz.examscore.AppException;
 import com.xz.examscore.bean.Range;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import com.xz.score.bean.Score;
 import com.xz.score.creator.ScoreDataPackCreator;
 import org.bson.Document;
@@ -44,9 +44,6 @@ public class ExportScoreService {
     ProvinceService provinceService;
 
     @Autowired
-    InterfaceClient interfaceClient;
-
-    @Autowired
     SubjectService subjectService;
 
     @Autowired
@@ -54,6 +51,9 @@ public class ExportScoreService {
 
     @Autowired
     OSSFileClient scorePackOssFileClient;
+
+    @Autowired
+    InterfaceAuthClient interfaceAuthClient;
 
     /**
      * 导出成绩到阿里云
@@ -94,7 +94,7 @@ public class ExportScoreService {
     }
 
     private void notifyInterface(String ossPath) {
-        interfaceClient.importExamScoreFromOSS(ossPath);
+        interfaceAuthClient.importExamScoreFromOSS(ossPath);
     }
 
     public void createPack(String projectId, String filePath) throws IOException {

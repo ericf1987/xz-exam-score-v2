@@ -5,7 +5,7 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.*;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +24,13 @@ import org.springframework.stereotype.Service;
 public class QueryProjectPublishStatus implements Server {
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
 
-        JSONObject projectObj = interfaceClient.queryProjectById(projectId);
+        JSONObject projectObj = interfaceAuthClient.queryProjectById(projectId);
         if (projectObj == null) {
             return Result.fail("项目结果属性为空");
         }

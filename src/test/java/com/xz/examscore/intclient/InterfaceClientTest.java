@@ -2,11 +2,8 @@ package com.xz.examscore.intclient;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.ajiaedu.common.aliyun.ApiResponse;
-import com.xz.ajiaedu.common.appauth.AppAuthClient;
 import com.xz.ajiaedu.common.json.JSONUtils;
-import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.services.ImportProjectService;
 import org.junit.Test;
@@ -38,9 +35,6 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Autowired
     ImportProjectService importProjectService;
-
-    @Autowired
-    AppAuthClient appAuthClient;
 
     @Test
     public void testQueryKnowledgePointById() throws Exception {
@@ -98,6 +92,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testQueryExamSchoolByProject() throws Exception {
         JSONArray schools = interfaceClient.queryExamSchoolByProject(PROJECT_ID, false);
+        System.out.println(schools);
         assertNotNull(schools);
         assertFalse(schools.isEmpty());
     }
@@ -112,7 +107,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryClassExamStudent() throws Exception {
-        JSONArray students = interfaceClient.queryClassExamStudent("430100-501b96776dc348748e2afdb95d491516", "006832bd-1ce7-477d-9a49-7d401aa38505");
+        JSONArray students = interfaceClient.queryClassExamStudent("431200-5c78e22cb1e64e4caa9583d35ad92658", "eebdc578-fa1e-4dfc-b50f-7d17be9fb540");
         System.out.println(students.toJSONString());
         assertNotNull(students);
         assertFalse(students.isEmpty());
@@ -120,7 +115,7 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQuerySubjectListByProjectId() throws Exception {
-        JSONArray subjects = interfaceClient.querySubjectListByProjectId("430100-472d49aee0624731b38a7c6cbd524d76");
+        JSONArray subjects = interfaceClient.querySubjectListByProjectId(PROJECT_ID);
         System.out.println(subjects.toString());
         assertNotNull(subjects);
         assertFalse(subjects.isEmpty());
@@ -223,15 +218,6 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
         System.out.println(combinedSubjectIds);
 
-    }
-
-    @Test
-    public void testCustomReportParam() throws Exception {
-        String projectId = "430100-7a2b072ade884b3c84510f0be97f489e";
-        Result result = appAuthClient.callApi("QueryProjectConfig",
-                new Param().setParameter("projectId", projectId)
-                        .setParameter("settingKey", "customReport"));
-        System.out.println(result.getData().toString());
     }
 
 }

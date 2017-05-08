@@ -5,7 +5,7 @@ import com.xz.ajiaedu.common.lang.Result;
 import com.xz.examscore.api.Param;
 import com.xz.examscore.api.annotation.*;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 public class QueryExamSubjectStatus implements Server {
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -35,7 +35,7 @@ public class QueryExamSubjectStatus implements Server {
 
         JSONArray result;
         try {
-            result = interfaceClient.querySubjectListByProjectId(projectId);
+            result = interfaceAuthClient.querySubjectListByProjectId(projectId);
         } catch (Exception e) {
             return Result.fail(e.getMessage());
         }

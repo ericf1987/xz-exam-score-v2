@@ -3,19 +3,15 @@ package com.xz.examscore.services;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hyd.simplecache.utils.MD5;
-import com.xz.ajiaedu.common.aliyun.ApiResponse;
 import com.xz.ajiaedu.common.beans.exam.ExamProject;
 import com.xz.ajiaedu.common.io.ZipFileReader;
-import com.xz.ajiaedu.common.lang.Context;
-import com.xz.ajiaedu.common.lang.DoubleCounterMap;
-import com.xz.ajiaedu.common.lang.StringUtil;
-import com.xz.ajiaedu.common.lang.Value;
+import com.xz.ajiaedu.common.lang.*;
 import com.xz.examscore.bean.PointLevel;
 import com.xz.examscore.bean.ProjectConfig;
 import com.xz.examscore.bean.SubjectLevel;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import com.xz.examscore.scanner.ScannerDBService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -44,9 +40,6 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
 public class ImportProjectService {
 
     static final Logger LOG = LoggerFactory.getLogger(ImportProjectService.class);
-
-    @Autowired
-    InterfaceClient interfaceClient;
 
     @Autowired
     ProjectService projectService;
@@ -102,6 +95,9 @@ public class ImportProjectService {
     @Autowired
     ProjectCacheManager projectCacheManager;
 
+    @Autowired
+    InterfaceAuthClient interfaceAuthClient;
+
     public static final int SUBJECT_LENGTH = 3;
 
     /**
@@ -143,7 +139,7 @@ public class ImportProjectService {
      */
     protected void importProjectInfo(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 基本信息...");
-        JSONObject projectObj = interfaceClient.queryProjectById(projectId);
+        JSONObject projectObj = interfaceAuthClient.queryProjectById(projectId);
 
         if (projectObj == null) {
             LOG.info("没有找到项目 " + projectId);
@@ -197,7 +193,7 @@ public class ImportProjectService {
         ProjectConfig projectConfig = new ProjectConfig();
 
         //请求考试配置接口获取数据
-        ApiResponse result = interfaceClient.queryProjectReportConfig(projectId);
+        Result result = interfaceAuthClient.queryProjectReportConfig(projectId);
 
         JSONObject rankLevel = result.get("rankLevel");
         JSONObject scoreLevels = result.get("scoreLevels");
@@ -324,7 +320,7 @@ public class ImportProjectService {
      */
     private void importQuests(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 考题信息...");
-        JSONArray jsonArray = interfaceClient.queryQuestionByProject(projectId);
+        JSONArray jsonArray = interfaceAuthClient.queryQuestionByProject(projectId);
         List<Document> projectQuests = new ArrayList<>();
 
         //如果科目中包含综合科目，则将题目的科目ID由单科改为综合科目ID
@@ -425,7 +421,7 @@ public class ImportProjectService {
 
                 //////////////////////////////////////////////////////////////
 
-                JSONObject point = interfaceClient.queryKnowledgePointById(pointId);
+                JSONObject point = interfaceAuthClient.queryKnowledgePointById(pointId);
                 if (point != null) {
                     pointService.savePoint(pointId,
                             point.getString("point_name"),
@@ -561,7 +557,7 @@ public class ImportProjectService {
      */
     private void importSchools(String projectId, Context context) {
         LOG.info("导入项目 " + projectId + " 学校信息...");
-        JSONArray jsonArray = interfaceClient.queryExamSchoolByProject(projectId, false);
+        JSONArray jsonArray = interfaceAuthClient.queryExamSchoolByProject(projectId, false);
 
         List<Document> schoolList = new ArrayList<>();  // 存入 project_list
         Set<String> areas = new HashSet<>();
@@ -613,7 +609,7 @@ public class ImportProjectService {
 
             LOG.info("导入学校 " + schoolId + "(" + school.getString("name") + ") 班级信息...");
 
-            JSONArray jsonArray = interfaceClient.queryExamClassByProject(projectId, schoolId, false);
+            JSONArray jsonArray = interfaceAuthClient.queryExamClassByProject(projectId, schoolId, false);
 
             jsonArray.forEach(o -> {
                 JSONObject classObj = (JSONObject) o;
@@ -656,7 +652,7 @@ public class ImportProjectService {
             LOG.info("导入班级 " + classId + " 的考生信息(" + index + "/" + classCount + ")...");
 
             List<Document> classStudents = new ArrayList<>();
-            JSONArray students = interfaceClient.queryClassExamStudent(projectId, classId);
+            JSONArray students = interfaceAuthClient.queryClassExamStudent(projectId, classId);
             students.forEach(o -> {
                 JSONObject studentObj = (JSONObject) o;
                 Document studentDoc = new Document()
@@ -817,17 +813,17 @@ public class ImportProjectService {
     }
 
     private void importNormalSubjects(String projectId, Context context) {
-        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+        JSONArray jsonArray = interfaceAuthClient.querySubjectListByProjectId(projectId);
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
             return;
         }
 
         //查询题目信息
-        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        JSONArray jsonQuest = interfaceAuthClient.queryQuestionByProject(projectId);
 
         //获取选做题
-        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+        Map<String, Object> optionalQuestMap = interfaceAuthClient.queryQuestionByProject(projectId, true);
 
         Map<String, Map<String, Double>> scoreMap = sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);
 
@@ -879,16 +875,16 @@ public class ImportProjectService {
      */
     private void importSlicedSubjects(String projectId, Context context) {
         //查询科目数据
-        JSONArray jsonArray = interfaceClient.querySubjectListByProjectId(projectId);
+        JSONArray jsonArray = interfaceAuthClient.querySubjectListByProjectId(projectId);
         if (jsonArray == null) {
             LOG.info("没有项目 " + projectId + " 的科目信息。");
             return;
         }
 
         //查询题目信息
-        JSONArray jsonQuest = interfaceClient.queryQuestionByProject(projectId);
+        JSONArray jsonQuest = interfaceAuthClient.queryQuestionByProject(projectId);
         //获取选做题
-        Map<String, Object> optionalQuestMap = interfaceClient.queryQuestionByProject(projectId, true);
+        Map<String, Object> optionalQuestMap = interfaceAuthClient.queryQuestionByProject(projectId, true);
 
         //过滤选做题，求各科小题总分
         Map<String, Map<String, Double>> scoreMap = sumSubjectScoreByQuest(jsonQuest, optionalQuestMap);

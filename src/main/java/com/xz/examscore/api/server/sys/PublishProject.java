@@ -6,7 +6,7 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +23,12 @@ import org.springframework.stereotype.Service;
 public class PublishProject implements Server {
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     @Override
     public Result execute(Param param) throws Exception {
         String projectId = param.getString("projectId");
-        interfaceClient.releaseExamScore(projectId);
+        interfaceAuthClient.releaseExamScore(projectId);
         return Result.success();
     }
 }

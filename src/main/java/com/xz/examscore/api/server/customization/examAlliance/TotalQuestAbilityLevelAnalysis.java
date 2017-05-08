@@ -9,10 +9,9 @@ import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
 import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
-import com.xz.examscore.intclient.InterfaceClient;
+import com.xz.examscore.intclient.InterfaceAuthClient;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
-import org.apache.commons.collections.MapUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.collections.MapUtils.getDouble;
+import static org.apache.commons.collections.MapUtils.getInteger;
 
 /**
  * @author by fengye on 2017/1/4.
@@ -60,7 +62,7 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
     ImportProjectService importProjectService;
 
     @Autowired
-    InterfaceClient interfaceClient;
+    InterfaceAuthClient interfaceAuthClient;
 
     @Autowired
     QuestService questService;
@@ -76,7 +78,7 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         List<Document> projectSchools = schoolService.getProjectSchools(projectId);
 
         //获取选做题的题号
-        Map<String, Object> map = interfaceClient.queryQuestionByProject(projectId, true);
+        Map<String, Object> map = interfaceAuthClient.queryQuestionByProject(projectId, true);
         Map<String, Object> optionalQuestNo = importProjectService.getOptionalQuestNo(map);
 
         List<Map<String, Object>> result = new ArrayList<>();
@@ -132,9 +134,9 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         double average = averageService.getAverage(projectId, schoolRange, Target.subject(subjectId));
         List<Document> scoreLevelRate = scoreLevelService.getScoreLevelRate(projectId, schoolRange, Target.subject(subjectId));
         double rate = scoreLevelRate.stream().filter(s -> s.getString("scoreLevel").equals(Keys.ScoreLevel.Excellent.name()))
-                .mapToDouble(s -> MapUtils.getDouble(s, "rate")).sum();
+                .mapToDouble(s -> getDouble(s, "rate")).sum();
         double c = scoreLevelRate.stream().filter(s -> s.getString("scoreLevel").equals(Keys.ScoreLevel.Excellent.name()))
-                .mapToDouble(s -> MapUtils.getDouble(s, "count")).sum();
+                .mapToDouble(s -> getDouble(s, "count")).sum();
         Map<String, Object> totalMap = new HashMap<>();
         totalMap.put("average", DoubleUtils.round(average));
         totalMap.put("rate", DoubleUtils.round(rate, true));
@@ -165,14 +167,13 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         //累加水平检测总分
         double levelTotal = subjects.stream().mapToDouble(subject -> {
             Map<String, Object> level = (Map<String, Object>) subject.get("level");
-            double average = MapUtils.getDouble(level, "average");
-            return average;
+            return getDouble(level, "average");
         }).sum();
 
         //累加能力检测总分
         double abilityTotal = subjects.stream().mapToDouble(subject -> {
             Map<String, Object> level = (Map<String, Object>) subject.get("ability");
-            return (double) MapUtils.getDouble(level, "average");
+            return getDouble(level, "average");
         }).sum();
 
         //能力检测良好率
@@ -183,7 +184,7 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
 
         List<Document> scoreLevelRate = scoreLevelService.getScoreLevelRate(projectId, schoolRange, Target.project(projectId));
         double excellentRate = scoreLevelRate.stream().filter(s -> s.getString("scoreLevel").equals(Keys.ScoreLevel.Excellent.name()))
-                .mapToDouble(s -> MapUtils.getDouble(s, "rate")).sum();
+                .mapToDouble(s -> getDouble(s, "rate")).sum();
 
         //总分
         Map<String, Object> t = new HashMap<>();
@@ -216,9 +217,9 @@ public class TotalQuestAbilityLevelAnalysis implements Server{
         int total = 0;
         for (Map<String, Object> subject : subjects){
             Map<String, Object> ability = (Map<String, Object>)subject.get("ability");
-            int c = MapUtils.getInteger(ability, "count");
+            int c = getInteger(ability, "count");
             count += c;
-            int t = MapUtils.getInteger(ability, "totalCount");
+            int t = getInteger(ability, "totalCount");
             total += t;
         }
         return total == 0 ? 0 : DoubleUtils.round((double) count / total);
