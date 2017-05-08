@@ -39,6 +39,9 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     ImportProjectService importProjectService;
 
+    @Autowired
+    AppAuthClient appAuthClient;
+
     @Test
     public void testQueryKnowledgePointById() throws Exception {
         JSONObject jsonObject = interfaceClient.queryKnowledgePointById("1007348");
@@ -220,6 +223,15 @@ public class InterfaceClientTest extends XzExamScoreV2ApplicationTests {
 
         System.out.println(combinedSubjectIds);
 
+    }
+
+    @Test
+    public void testCustomReportParam() throws Exception {
+        String projectId = "430100-7a2b072ade884b3c84510f0be97f489e";
+        Result result = appAuthClient.callApi("QueryProjectConfig",
+                new Param().setParameter("projectId", projectId)
+                        .setParameter("settingKey", "customReport"));
+        System.out.println(result.getData().toString());
     }
 
 }
