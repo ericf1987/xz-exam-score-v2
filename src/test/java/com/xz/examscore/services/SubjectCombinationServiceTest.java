@@ -73,6 +73,6 @@ public class SubjectCombinationServiceTest extends XzExamScoreV2ApplicationTests
                 MongoUtils.doc("subjectId", "001002").append("subjectName", "语数综合").append("md5", MD5.digest(UUID.randomUUID().toString())),
                 MongoUtils.doc("subjectId", "003004005").append("subjectName", "英物化综合").append("md5", MD5.digest(UUID.randomUUID().toString()))
         );
-        subjectService.insertSubjects(docs);
+        subjectService.insertSubjects("430300-32d8433951ce43cab5883abff77c8ea3", null);
     }
 }

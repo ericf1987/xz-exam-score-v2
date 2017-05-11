@@ -177,6 +177,20 @@ public class ImportProjectService {
         context.put("isSubjectSplited", isSubjectSplited);
     }
 
+    public void importAllSubjects(String projectId) {
+        LOG.info("==========科目数据刷新开始==========");
+        JSONArray jsonArray = interfaceAuthClient.queryAllSubjects();
+        LOG.info("从接口获取的科目列表：{}", jsonArray);
+        Document subjects = new Document();
+        jsonArray.forEach(o -> {
+            JSONObject jsonObject = (JSONObject) o;
+            subjects.append(jsonObject.getString("dic_key"), jsonObject.getString("dic_value"));
+        });
+        subjectService.clearSubjects(projectId);
+        subjectService.insertSubjects(projectId,subjects);
+        LOG.info("==========科目数据刷新完成==========");
+    }
+
     private boolean splitSubject(String projectId, Context context) {
         ProjectConfig projectConfig = context.get("projectConfig");
         return projectConfig.isSeparateCombine();

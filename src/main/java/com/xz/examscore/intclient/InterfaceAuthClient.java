@@ -130,6 +130,20 @@ public class InterfaceAuthClient {
     }
 
     /**
+     * 查询所有科目
+     *
+     * @return
+     */
+    public JSONArray queryAllSubjects() {
+        Result result = appAuthClient.callApi(
+                Api.ApiName.QueryDictionary.name(),
+                new Param().setParameter("type", "subject")
+        );
+
+        return result.isSuccess() ? result.get("items") : null;
+    }
+
+    /**
      * 查询考试信息
      *
      * @param projectId 考试项目ID

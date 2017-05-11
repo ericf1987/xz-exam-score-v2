@@ -160,8 +160,10 @@ public class StudentEvaluationFormAnalysis implements Server {
         FindIterable<Document> projectStudentList = studentService.getProjectStudentList(projectId, Range.clazz(classId),
                 pageSize, pageSize * pageCount, PROJECTION, SORT);
 
+        int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId));
+
         return packingResult(projectId, schoolId, classId, category, provinceRange,
-                subjectIds, wlSubjectIds, combinedSubjectIds, entryLevelScoreLine, projectStudentList);
+                subjectIds, wlSubjectIds, combinedSubjectIds, entryLevelScoreLine, projectStudentList, studentCount);
     }
 
     //获取整个项目的数据，明细数据按照学校，班级排序
@@ -182,14 +184,16 @@ public class StudentEvaluationFormAnalysis implements Server {
         FindIterable<Document> projectStudentList = studentService.getProjectStudentList(projectId, provinceRange,
                 pageSize, pageSize * pageCount, PROJECTION, SORT);
 
+        int studentCount = studentService.getStudentCount(projectId, provinceRange);
+
         return packingResult(projectId, schoolId, classId, category, provinceRange,
-                subjectIds, wlSubjectIds, combinedSubjectIds, entryLevelScoreLine, projectStudentList);
+                subjectIds, wlSubjectIds, combinedSubjectIds, entryLevelScoreLine, projectStudentList, studentCount);
     }
 
     //封装结果并返回
     private Result packingResult(String projectId, String schoolId, String classId, String category, Range provinceRange,
                                  List<String> subjectIds, List<String> wlSubjectIds, List<String> combinedSubjectIds,
-                                 List<Double> entryLevelScoreLine, FindIterable<Document> projectStudentList) {
+                                 List<Double> entryLevelScoreLine, FindIterable<Document> projectStudentList, int studentCount) {
         //结果参数-追加项目最高最低分
         List<Double> scoreLine = paddingMaxMinScore(projectId, entryLevelScoreLine);
 
@@ -216,7 +220,8 @@ public class StudentEvaluationFormAnalysis implements Server {
             resultList.add(studentMap);
 
         }
-        return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList);
+        return Result.success().set("scoreLine", scoreLine).set("entryLevelList", entryLevelList).set("studentList", resultList)
+                .set("studentCount", studentCount);
     }
 
     //获取学生分数排名数据信息

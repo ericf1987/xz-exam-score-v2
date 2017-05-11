@@ -25,7 +25,7 @@ public class StudentEvaluationFormAnalysisTest extends XzExamScoreV2ApplicationT
         String projectId = "430000-79eee8ac6c244d92a24dbcc66a2ffda2";
         String schoolId = "4b2efe63-0d1d-4a58-b355-23a29d1d433a";
         String classId = "b329dda6-f7a9-4ea2-a8df-1e863b244e22";
-        String pageSize = "70";
+        String pageSize = "10";
         String pageCount = "1";
         Param param = new Param().setParameter("projectId", projectId).setParameter("schoolId", "")
                 .setParameter("classId", "")

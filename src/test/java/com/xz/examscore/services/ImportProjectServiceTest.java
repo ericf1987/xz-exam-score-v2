@@ -76,4 +76,9 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
         importProjectService.importSubjects(projectId, context);
     }
 
+
+    @Test
+    public void testImportAllSubjects() throws Exception {
+        importProjectService.importAllSubjects("430300-32d8433951ce43cab5883abff77c8ea3");
+    }
 }

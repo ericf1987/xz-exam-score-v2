@@ -100,4 +100,10 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
     public void testSetProjectConfig() throws Exception {
 
     }
+
+    @Test
+    public void testQueryAllSubjects() throws Exception {
+        JSONArray jsonArray = interfaceAuthClient.queryAllSubjects();
+        System.out.println(jsonArray);
+    }
 }

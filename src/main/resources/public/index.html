@@ -53,6 +53,17 @@
 </fieldset>
 
 <fieldset>
+    <legend>导出学生信息并上传到OSS验证</legend>
+    <form action="export-students-to-oss" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p><label><input type="checkbox" name="notifyInterface" value="true"> 通知业务接口导入成绩</label></p>
+        <p>
+            <button type="submit">开始导出</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>统计项目</legend>
     <form action="aggr/start/project" method="post">
         <p>项目ID：<input type="text" name="project"/></p>
@@ -256,6 +267,16 @@
     <form action="paperScreenShot/fonts" method="post">
         <p>
             <button type="submit">查询</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
+    <legend>学生测评报告</legend>
+    <form action="test/student_evaluation" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>
+            <button type="submit">导出报表</button>
         </p>
     </form>
 </fieldset>

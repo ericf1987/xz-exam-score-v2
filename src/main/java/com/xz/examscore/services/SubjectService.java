@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
-import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
 
 /**
  * (description)
@@ -49,6 +48,8 @@ public class SubjectService {
         SUBJECT_NAMES.put("017", "小学综合");
         SUBJECT_NAMES.put("018", "学法知法");
         SUBJECT_NAMES.put("019", "道德与法治");
+        SUBJECT_NAMES.put("020", "专业科目");
+        SUBJECT_NAMES.put("021", "专业科目2");
         SUBJECT_NAMES.put("004005006", "理科综合");
         SUBJECT_NAMES.put("007008009", "文科综合");
         SUBJECT_NAMES.put("006009", "生地综合");
@@ -71,7 +72,6 @@ public class SubjectService {
      * 查询考试项目的科目列表
      *
      * @param projectId 项目ID
-     *
      * @return 科目ID列表
      */
     @SuppressWarnings("unchecked")
@@ -93,7 +93,7 @@ public class SubjectService {
         }));
     }
 
-    public String getSubjectName0(String subjectId){
+    public String getSubjectName0(String subjectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
         Document query = doc("subjectId", subjectId);
         Document first = c.find(query).first();
@@ -116,7 +116,7 @@ public class SubjectService {
         MongoCollection<Document> c = scoreDatabase.getCollection("subject_list");
         Document query = doc("project", projectId);
         UpdateResult result = c.updateMany(query, $set(doc("subjects", subjects)));
-        if(result.getMatchedCount()== 0){
+        if (result.getMatchedCount() == 0) {
             c.insertOne(
                     query.append("subjects", subjects)
                             .append("md5", MD5.digest(UUID.randomUUID().toString()))
@@ -124,13 +124,13 @@ public class SubjectService {
         }
     }
 
-    public void insertSubjects(List<Document> subjects){
+    public void insertSubjects(String projectId, Document subjects) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
-        c.insertMany(subjects);
+        c.insertOne(doc("project", projectId).append("subjects", subjects).append("md5", MD5.digest(UUID.randomUUID().toString())));
     }
 
-    public List<Document> getAllSubjects(){
+    public void clearSubjects(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
-        return toList(c.find());
+        c.deleteMany(doc("project", projectId));
     }
 }

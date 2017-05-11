@@ -5,6 +5,7 @@ import com.xz.ajiaedu.common.io.FileUtils;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.services.ExportScoreService;
+import com.xz.examscore.services.IdentifyStudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -36,6 +37,9 @@ public class ScoreExportController {
 
     @Autowired
     OSSFileClient componentUpdateOssFileClient;
+
+    @Autowired
+    IdentifyStudentService identifyStudentService;
 
     /**
      * 导出成绩到阿里云
@@ -87,6 +91,28 @@ public class ScoreExportController {
         componentUpdateOssFileClient.uploadFile(new File(saveFilePath), ossFilePath);
 
         return Result.success().set("url", ossUrlPrefix + ossFilePath);
+    }
+
+    /**
+     * 导出成绩到阿里云
+     *
+     * @param projectId       项目ID
+     * @param notifyInterface 是否要通知接口导入成绩
+     *
+     * @return 操作结果
+     */
+    @RequestMapping(value = "export-students-to-oss", method = RequestMethod.POST)
+    @ResponseBody
+    public Result identifyStudents(
+            @RequestParam("project") String projectId,
+            @RequestParam(value = "notifyInterface", required = false, defaultValue = "false") boolean notifyInterface
+    ) {
+        try {
+            String ossPath = identifyStudentService.exportStudents(projectId, notifyInterface);
+            return Result.success().set("ossPath", ossPath);
+        } catch (Exception e) {
+            return Result.fail(e.getMessage());
+        }
     }
 
 }
