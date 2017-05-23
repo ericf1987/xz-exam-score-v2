@@ -24,11 +24,11 @@
             </report-category>
         </report-category>
 
-<!--        <report-category name="学校成绩分析" range="school">
+        <report-category name="学校成绩分析" range="school">
             <report-category name="基础分析">
                 <report name="学生各小题得分率" class=".StudentQuestScoreRateReport"/>
             </report-category>
-        </report-category>-->
+        </report-category>
 
     </report-set>
 </report-config>

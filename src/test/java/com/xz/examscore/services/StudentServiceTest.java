@@ -26,7 +26,7 @@ import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
  */
 public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
-    public static final String PROJECT = "430100-a05db0d05ad14010a5c782cd31c0283f";
+    public static final String PROJECT = "431200-5c78e22cb1e64e4caa9583d35ad92658";
 
     @Autowired
     StudentService studentService;
@@ -63,9 +63,9 @@ public class StudentServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetStudentList() throws Exception {
-        Range range = new Range("class", "a1895cd9-d82c-4b12-a698-164fb5ceb1f3");
-        List<String> studentList = studentService.getStudentIds(PROJECT, "003", range);
-        studentList.forEach(System.out::println);
+        Range provinceRange = Range.province("430000");
+        List<String> studentList = studentService.getStudentIds(PROJECT, "001", provinceRange);
+        System.out.println(studentList.size());
     }
 
     @Test

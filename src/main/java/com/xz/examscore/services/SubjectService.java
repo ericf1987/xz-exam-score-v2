@@ -50,6 +50,7 @@ public class SubjectService {
         SUBJECT_NAMES.put("019", "道德与法治");
         SUBJECT_NAMES.put("020", "专业科目");
         SUBJECT_NAMES.put("021", "专业科目2");
+        SUBJECT_NAMES.put("020021", "专业科目12综合");
         SUBJECT_NAMES.put("004005006", "理科综合");
         SUBJECT_NAMES.put("007008009", "文科综合");
         SUBJECT_NAMES.put("006009", "生地综合");

@@ -21,7 +21,7 @@ public class ScoreSegmentTaskTest extends XzExamScoreV2ApplicationTests {
 
     public static final Range range = Range.province("430000");
 
-    public static final Target target = Target.subject("009");
+    public static final Target target = Target.subject("001");
 
     @Test
     public void testRunTask() throws Exception {

@@ -135,6 +135,7 @@ public class ClassPointAnalysis implements Server {
             String pointId = point.getId();
             Map<String, Object> pointStat = new HashMap<>();
             pointStat.put("pointName", point.getName());
+            pointStat.put("pointId", point.getId());
 
             Target target = Target.point(pointId);
             double score;

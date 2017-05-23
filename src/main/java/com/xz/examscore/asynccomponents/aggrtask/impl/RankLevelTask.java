@@ -226,7 +226,8 @@ public class RankLevelTask extends AggrTask {
     private Range[] getRankRanges(String projectId, String studentId) {
         Range classRange = studentService.getStudentRange(projectId, studentId, Range.CLASS);
         Range schoolRange = studentService.getStudentRange(projectId, studentId, Range.SCHOOL);
-        return new Range[]{classRange, schoolRange};
+        Range provinceRange = studentService.getStudentRange(projectId, studentId, Range.PROVINCE);
+        return new Range[]{classRange, schoolRange, provinceRange};
     }
 
     private List<Target> getSubjectTargets(String projectId) {

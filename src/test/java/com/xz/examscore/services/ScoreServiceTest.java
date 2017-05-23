@@ -151,13 +151,17 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testGetCountByScoreSpan() throws Exception {
-        String projectId = "430300-32d8433951ce43cab5883abff77c8ea3";
-        Range range = Range.school("15e70531-5ac0-475d-a2da-2fc04242ac75");
-        Target target = Target.project(projectId);
-        int countByScoreSpan = scoreService.getCountByScoreSpan(projectId, range, target, 1000, 0);
-        int schoolCount = studentService.getStudentCount(projectId, range);
+        String projectId = "431200-5c78e22cb1e64e4caa9583d35ad92658";
+//        Range range = Range.school("15e70531-5ac0-475d-a2da-2fc04242ac75");
+        Range range = Range.province(provinceService.getProjectProvince(projectId));
+//        Target target = Target.project(projectId);
+        Target target = Target.subject("001");
+        int countByScoreSpan = scoreService.getCountByScoreSpan(projectId, range, target, 120, 110);
+        int c1 = studentService.getStudentCount(projectId, range);
+        int c2 = studentService.getStudentCount(projectId, range, target);
         System.out.println(countByScoreSpan);
-        System.out.println(schoolCount);
+        System.out.println(c1);
+        System.out.println(c2);
     }
 
     @Test

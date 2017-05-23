@@ -790,7 +790,8 @@ public class ImportProjectService {
 
         Map<String, Double> subjectScoreMap = subjectQuests.stream().collect(
                 //分组计算各科的题目总分
-                Collectors.groupingBy(quest -> quest.get("subjectId").toString(),
+                Collectors.groupingBy(
+                        quest -> quest.get("subjectId").toString(),
                         Collectors.summingDouble(quest -> MapUtils.getDouble(quest, "score"))
                 )
         );

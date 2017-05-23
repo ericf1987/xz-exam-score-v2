@@ -86,18 +86,7 @@ public class PaintService {
                 String paper_positive = MapUtils.getString(student, "paper_positive");
                 //反面试卷截图
                 String paper_reverse = MapUtils.getString(student, "paper_reverse");
-                List<SubjectiveQuestZone> subjectiveQuestZoneList = new ArrayList<>();
-
-                subjectiveList.forEach(subjective -> {
-                    //题号
-                    String questNo = MapUtils.getString(subjective, "questionNo");
-                    //获取主观题每个题目的坐标信息
-                    List<SubjectiveQuestZone> subjectiveQuestZones = convertToRectsObj(projectId, schoolId, classId, subjectId, subjective, paper_positive, paper_reverse, questNo, rankRuleMap);
-                    //获取主观题最靠前的区域
-                    if(subjectiveQuestZones.size() != 0){
-                        subjectiveQuestZoneList.add(subjectiveQuestZones.get(0));
-                    }
-                });
+                List<SubjectiveQuestZone> subjectiveQuestZoneList = getSubjectiveQuestZones(projectId, schoolId, classId, subjectId, rankRuleMap, subjectiveList, paper_positive, paper_reverse);
 
                 //获取第一个客观题的高度
                 double firstObjectiveHeight = getFirstObjectiveHeight(student);
@@ -128,7 +117,23 @@ public class PaintService {
         }
     }
 
-    private double getFirstSubjectiveWidth(Map<String, Object> student) {
+    protected List<SubjectiveQuestZone> getSubjectiveQuestZones(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> rankRuleMap, List<Map<String, Object>> subjectiveList, String paper_positive, String paper_reverse) {
+        List<SubjectiveQuestZone> subjectiveQuestZoneList = new ArrayList<>();
+
+        subjectiveList.forEach(subjective -> {
+            //题号
+            String questNo = MapUtils.getString(subjective, "questionNo");
+            //获取主观题每个题目的坐标信息
+            List<SubjectiveQuestZone> subjectiveQuestZones = convertToRectsObj(projectId, schoolId, classId, subjectId, subjective, paper_positive, paper_reverse, questNo, rankRuleMap);
+            //获取主观题最靠前的区域
+            if(subjectiveQuestZones.size() != 0){
+                subjectiveQuestZoneList.add(subjectiveQuestZones.get(0));
+            }
+        });
+        return subjectiveQuestZoneList;
+    }
+
+    protected double getFirstSubjectiveWidth(Map<String, Object> student) {
         List<Map<String, Object>> subjectiveList = (List<Map<String, Object>>) student.get("subjectiveList");
         if (null != subjectiveList) {
             Collections.sort(subjectiveList, (o1, o2) -> {
@@ -169,7 +174,7 @@ public class PaintService {
         return 0;
     }
 
-    private TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
+    protected TotalScoreZone getTotalScoreZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
                                              double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
 
         Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankClass");
@@ -248,7 +253,7 @@ public class PaintService {
      * @param rankRuleMap          排名显示规则
      * @return 返回结果
      */
-    private ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
+    protected ObjectiveQuestZone getObjectiveQuestZone(String projectId, String studentId, String subjectId, String schoolId, String classId,
                                                      double firstObjectiveHeight, double firstSubjectiveWidth, Map<String, Object> rankRuleMap) {
 
         Map<String, Object> rankInClass = MapUtils.getMap(rankRuleMap, "rankClass");
@@ -411,7 +416,7 @@ public class PaintService {
      * @param totalScoreZone 客观题区域
      * @return 图片缓存
      */
-    private BufferedImage paintTotalScoreZone(BufferedImage img_positive, TotalScoreZone totalScoreZone) {
+    protected BufferedImage paintTotalScoreZone(BufferedImage img_positive, TotalScoreZone totalScoreZone) {
 
         Optional<TotalScoreZone> optional = Optional.of(totalScoreZone);
 
@@ -435,7 +440,7 @@ public class PaintService {
      * @param objectiveQuestZone 客观题区域
      * @return 图片缓存
      */
-    private BufferedImage paintObjectiveQuestZone(BufferedImage bufferedImage, ObjectiveQuestZone objectiveQuestZone) {
+    protected BufferedImage paintObjectiveQuestZone(BufferedImage bufferedImage, ObjectiveQuestZone objectiveQuestZone) {
 
         int lineIntervalY = TOTAL_SCORE_FONT.getSize() + 10;
 
@@ -485,7 +490,7 @@ public class PaintService {
         return b ? path + "_positive" + suffix : path + "_reverse" + suffix;
     }
 
-    private BufferedImage doPaint(BufferedImage bufferedImage, SubjectiveQuestZone subjectiveQuestZone) {
+    protected BufferedImage doPaint(BufferedImage bufferedImage, SubjectiveQuestZone subjectiveQuestZone) {
         String scoreContent = packScoreData(subjectiveQuestZone.getScore()) + "分";
         List<TextRect> textRects = subjectiveQuestZone.getTextRects();
 
@@ -517,7 +522,7 @@ public class PaintService {
      * @param rankRuleMap    排名显示规则
      * @return 返回Rect对象
      */
-    private List<SubjectiveQuestZone> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo, Map<String, Object> rankRuleMap) {
+    protected List<SubjectiveQuestZone> convertToRectsObj(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> subjective, String paper_positive, String paper_reverse, String questionNo, Map<String, Object> rankRuleMap) {
 
         Map<String, Object> rankInClassMap = MapUtils.getMap(rankRuleMap, "rankClass");
         Map<String, Object> rankInSchoolMap = MapUtils.getMap(rankRuleMap, "rankSchool");

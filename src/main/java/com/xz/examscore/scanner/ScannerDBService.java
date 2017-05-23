@@ -446,8 +446,12 @@ public class ScannerDBService {
      * @param projectConfig       考试配置参数
      */
     private boolean scoreRecordInvalid(boolean isQuestScoreAllZero, boolean hasNoQuestScore, boolean isAbsent, boolean isCheating, boolean isLost, ProjectConfig projectConfig) {
+
+        //CMS配置 是否排除0分
         boolean removeZeroScores = projectConfig.isRemoveZeroScores();
+        //CMS配置 是否排除缺考
         boolean removeAbsentStudent = projectConfig.isRemoveAbsentStudent();
+        //CMS配置 是否排除作弊
         boolean removeCheatStudent = projectConfig.isRemoveCheatStudent();
 
         return (isQuestScoreAllZero && removeZeroScores) ||

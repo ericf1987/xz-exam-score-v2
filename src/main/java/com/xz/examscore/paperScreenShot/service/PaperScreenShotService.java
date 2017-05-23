@@ -316,13 +316,6 @@ public class PaperScreenShotService {
             this.rankRuleMap = rankRuleMap;
         }
 
-        public PaperScreenShotsTaskByClassAndSubject(String projectId, String schoolId, String classId, String subjectId) {
-            this.projectId = projectId;
-            this.schoolId = schoolId;
-            this.classId = classId;
-            this.subjectId = subjectId;
-        }
-
         public PaperScreenShotsTaskByClassAndSubject(String projectId, String schoolId, String classId, String subjectId, Map<String, Object> rankRuleMap) {
             this.projectId = projectId;
             this.schoolId = schoolId;

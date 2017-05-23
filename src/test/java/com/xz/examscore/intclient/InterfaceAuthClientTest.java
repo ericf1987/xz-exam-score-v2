@@ -92,7 +92,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        Result result = interfaceAuthClient.queryProjectReportConfig("430100-354dce3ac8ef4800a1b57f81a10b8baa");
+        Result result = interfaceAuthClient.queryProjectReportConfig("430400-4bdb6913b75f49eea33f22843f1bdc27");
         System.out.println(result.getData());
     }
 
