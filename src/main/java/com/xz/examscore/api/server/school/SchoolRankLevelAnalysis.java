@@ -1,8 +1,8 @@
 package com.xz.examscore.api.server.school;
 
+import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.ajiaedu.common.lang.CounterMap;
 import com.xz.ajiaedu.common.lang.Result;
-import com.xz.ajiaedu.common.ajia.Param;
 import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
@@ -14,7 +14,6 @@ import com.xz.examscore.bean.Target;
 import com.xz.examscore.services.*;
 import com.xz.examscore.util.DoubleUtils;
 import com.xz.examscore.util.RankLevelFormater;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -119,12 +118,12 @@ public class SchoolRankLevelAnalysis implements Server {
         List<Map<String, Object>> classList = new ArrayList<>();
 
         for (String classId : classIds) {
-            int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId));
-            List<Document> studentList = studentService.getStudentList(projectId, Range.clazz(classId));
+            int studentCount = studentService.getStudentCount(projectId, Range.clazz(classId), target);
+            List<String> studentIds = studentService.getStudentIds(projectId, target.match(Target.PROJECT) ? null : target.getId().toString(),
+                    Range.clazz(classId));
             CounterMap map = new CounterMap();
             //统计每个班级中的学生在学校范围内的等第情况，并做汇总
-            for (Document doc : studentList) {
-                String studentId = doc.getString("student");
+            for (String studentId : studentIds) {
                 String subjectRankLevel = rankLevelService.getRankLevel(projectId, studentId, target, Range.SCHOOL, lastRankLevel);
                 map.incre(subjectRankLevel);
             }

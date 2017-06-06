@@ -449,9 +449,8 @@ public class ScannerDBService {
 
         //CMS配置 是否排除0分
         boolean removeZeroScores = projectConfig.isRemoveZeroScores();
-        //CMS配置 是否排除缺考
+
         boolean removeAbsentStudent = projectConfig.isRemoveAbsentStudent();
-        //CMS配置 是否排除作弊
         boolean removeCheatStudent = projectConfig.isRemoveCheatStudent();
 
         return (isQuestScoreAllZero && removeZeroScores) ||

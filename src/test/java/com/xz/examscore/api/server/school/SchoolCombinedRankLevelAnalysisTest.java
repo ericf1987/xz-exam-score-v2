@@ -18,8 +18,8 @@ public class SchoolCombinedRankLevelAnalysisTest extends XzExamScoreV2Applicatio
 
     @Test
     public void testExecute() throws Exception {
-        Param param = new Param().setParameter("projectId", "430100-f779e2171766442a80afd512add13856")
-                .setParameter("schoolId", "742bc2bc-5375-4281-9e66-0632a1a4c9dd");
+        Param param = new Param().setParameter("projectId", "430200-fe3b4d91bb804c249b5b97a8d95c3709")
+                .setParameter("schoolId", "55c3e888-7f90-4d6d-977d-d0bef861d6a9");
         Result result = schoolCombinedRankLevelAnalysis.execute(param);
         System.out.println(result.getData());
     }

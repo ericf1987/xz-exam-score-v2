@@ -58,6 +58,19 @@ public class SubjectService {
         SUBJECT_NAMES.put("004005", "理化综合");
         SUBJECT_NAMES.put("001002", "语数综合");
         SUBJECT_NAMES.put("003004005", "英物化综合");
+        SUBJECT_NAMES.put("101", "种植专业");
+        SUBJECT_NAMES.put("102", "英语专业");
+        SUBJECT_NAMES.put("103", "医卫专业");
+        SUBJECT_NAMES.put("104", "文秘专业");
+        SUBJECT_NAMES.put("105", "师范专业");
+        SUBJECT_NAMES.put("106", "商贸专业");
+        SUBJECT_NAMES.put("107", "美术专业");
+        SUBJECT_NAMES.put("108", "旅游专业");
+        SUBJECT_NAMES.put("109", "计算机专业");
+        SUBJECT_NAMES.put("110", "机电专业");
+        SUBJECT_NAMES.put("111", "电子专业");
+        SUBJECT_NAMES.put("112", "财会专业");
+
     }
 
     @Autowired

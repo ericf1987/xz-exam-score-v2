@@ -64,7 +64,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testMain1() throws Exception {
-        String projectId = "430300-f39dc20ba0044b8b9cb302d7910c87c4";
+        String projectId = "430100-c6da4bfd10134ddb9c87c601d51eb631";
         String[] param = new String[]{"总体成绩分析", "基础分析", "分数分析.xlsx"};
         String result = downloadAnalysisService.getSaveFilePath(projectId, "F://", StringUtil.joinPaths(param));
         System.out.println(result);
@@ -82,7 +82,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgenerateBureauZipFile0() throws Exception {
-        String projectId = "430100-e7bd093d92d844819c7eda8b641ab6ee";
+        String projectId = "430200-fe3b4d91bb804c249b5b97a8d95c3709";
         String schoolId = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
         Result result = downloadAnalysisService.generateBureauZipFile0(projectId, schoolId, REPORT_PARAMS);
         System.out.println(result.getData());
