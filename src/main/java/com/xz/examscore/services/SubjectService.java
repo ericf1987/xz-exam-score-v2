@@ -50,6 +50,10 @@ public class SubjectService {
         SUBJECT_NAMES.put("019", "道德与法治");
         SUBJECT_NAMES.put("020", "专业科目");
         SUBJECT_NAMES.put("021", "专业科目2");
+        SUBJECT_NAMES.put("022", "音乐");
+        SUBJECT_NAMES.put("023", "美术");
+        SUBJECT_NAMES.put("022023", "音乐美术");
+
         SUBJECT_NAMES.put("020021", "专业科目12综合");
         SUBJECT_NAMES.put("004005006", "理科综合");
         SUBJECT_NAMES.put("007008009", "文科综合");
@@ -57,6 +61,7 @@ public class SubjectService {
         SUBJECT_NAMES.put("007008", "政史综合");
         SUBJECT_NAMES.put("004005", "理化综合");
         SUBJECT_NAMES.put("001002", "语数综合");
+        SUBJECT_NAMES.put("011013", "科学思品");
         SUBJECT_NAMES.put("003004005", "英物化综合");
         SUBJECT_NAMES.put("101", "种植专业");
         SUBJECT_NAMES.put("102", "英语专业");

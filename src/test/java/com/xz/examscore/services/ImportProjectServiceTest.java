@@ -49,7 +49,7 @@ public class ImportProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testimportProject() throws Exception{
-        importProjectService.importProject("430300-f529e0f0236d49559b0c27acbbb255ed", true);
+        importProjectService.importProject("430100-900dc0df84d14337976c6cc351552740", true);
     }
 
     @Test

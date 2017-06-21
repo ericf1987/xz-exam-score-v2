@@ -1,9 +1,7 @@
 package com.xz.examscore.paperScreenShot.service;
 
-import com.xz.ajiaedu.common.cryption.Base64;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
 import com.xz.examscore.paperScreenShot.bean.PaperScreenShotBean;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,8 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * @author by fengye on 2017/5/18.

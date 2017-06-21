@@ -36,7 +36,9 @@ public class RankSegmentDispatcher extends TaskDispatcher{
         };
 
         List<Range> ranges = fetchRanges(rangeKeys, rangesMap);
-        List<Target> targets = targetService.queryTargets(projectId, Target.QUEST, Target.SUBJECT, Target.PROJECT);
+        List<Target> targets = targetService.queryTargets(projectId,
+                Target.SUBJECT, Target.PROJECT
+        );
 
         int counter = 0;
         for(Range range : ranges){
