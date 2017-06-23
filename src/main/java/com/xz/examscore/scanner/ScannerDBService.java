@@ -10,8 +10,11 @@ import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.ajiaedu.common.mongo.DocumentUtils;
 import com.xz.ajiaedu.common.score.ScorePattern;
 import com.xz.examscore.bean.ProjectConfig;
+import com.xz.examscore.bean.Range;
+import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.services.*;
+import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
@@ -973,11 +976,12 @@ public class ScannerDBService {
             List<Document> newObjectiveList = objectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
             List<Document> newSubjectiveList = subjectiveList.stream().filter(doc -> doc.getBoolean("isEffective")).collect(Collectors.toList());
 
-            map.put("studentId", DocumentUtils.getString(document, "student", ""));
+            map.put("studentId", studentId);
             map.put("paper_positive", DocumentUtils.getString(document, "paper_positive", ""));
             map.put("paper_reverse", DocumentUtils.getString(document, "paper_reverse", ""));
             map.put("objectiveList", newObjectiveList);
             map.put("subjectiveList", newSubjectiveList);
+            map.put("totalScore", scoreService.getScore(projectId, Range.student(studentId), Target.subject(subjectId)));
             //只要主观题和客观题有一项目为空，则返回有数据坐标
             map.put("hasPaperPosition", CollectionUtils.isNotEmpty(newObjectiveList) || CollectionUtils.isNotEmpty(newSubjectiveList));
         } else {
