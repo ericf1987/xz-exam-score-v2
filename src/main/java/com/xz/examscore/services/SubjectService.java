@@ -52,7 +52,9 @@ public class SubjectService {
         SUBJECT_NAMES.put("021", "专业科目2");
         SUBJECT_NAMES.put("022", "音乐");
         SUBJECT_NAMES.put("023", "美术");
+        SUBJECT_NAMES.put("024", "生命与健康");
         SUBJECT_NAMES.put("022023", "音乐美术");
+        SUBJECT_NAMES.put("011016024", "科学-品生-生命");
 
         SUBJECT_NAMES.put("020021", "专业科目12综合");
         SUBJECT_NAMES.put("004005006", "理科综合");

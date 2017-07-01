@@ -17,7 +17,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
     @Autowired
     InterfaceAuthClient interfaceAuthClient;
 
-    public static final String PROJECT_ID = "430100-b05a111c72c740f4898660a057c48e28";
+    public static final String PROJECT_ID = "430200-13e01c025ac24c6497d916551b3ae7a6";
 
     @Test
     public void testQueryKnowledgePointById() throws Exception {
@@ -66,7 +66,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject jsonObject = interfaceAuthClient.queryProjectById("430100-354dce3ac8ef4800a1b57f81a10b8baa");
+        JSONObject jsonObject = interfaceAuthClient.queryProjectById("430200-13e01c025ac24c6497d916551b3ae7a6");
         System.out.println(jsonObject);
     }
 
@@ -92,7 +92,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        Result result = interfaceAuthClient.queryProjectReportConfig("430400-4bdb6913b75f49eea33f22843f1bdc27");
+        Result result = interfaceAuthClient.queryProjectReportConfig("431100-a827f9b3effe4081b87c8f773242c7ce");
         System.out.println(result.getData());
     }
 

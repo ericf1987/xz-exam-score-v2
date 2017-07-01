@@ -30,7 +30,7 @@ public class ProjectServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testFindProjectStudyStage() throws Exception {
-        String studyStage = projectService.findProjectStudyStage("430300-672a0ed23d9148e5a2a31c8bf1e08e62");
+        String studyStage = projectService.findProjectStudyStage("430200-13e01c025ac24c6497d916551b3ae7a6");
         System.out.println(studyStage);
     }
 

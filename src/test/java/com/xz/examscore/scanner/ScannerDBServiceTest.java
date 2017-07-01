@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static com.xz.examscore.scanner.ScannerDBService.calculateScore;
@@ -133,10 +134,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testisAbsent() throws Exception {
-        String projectId = "431100-c2bd703d34c440d4ad98f4404cd0526e";
-        String subjectId = "005";
+        String projectId = "431100-a827f9b3effe4081b87c8f773242c7ce";
+        String subjectId = "022023";
 //        String studentId = "b0ffcd4a-f881-4c9f-9762-4fc09fa1e146";
-        String studentId = "4847b955-8c8e-4883-b9f6-2a4f42c44fe6";
+        String studentId = "66aa3961-ec4a-4d99-a151-ed4c72036f0f";
 //        String studentId = "50a1ac07-fc9a-4b56-8931-bbbd2f6e0329";
 
         MongoClient mongoClient1 = scannerDBService.getMongoClient(projectId);
@@ -145,11 +146,11 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
         Document studentId1 = students.find(MongoUtils.doc("studentId", studentId)).first();
 
-        //scannerDBService.importStudentScore(projectId, subjectId, studentId1, new AtomicInteger(0));
-
+        scannerDBService.importStudentScore(projectId, subjectId, studentId1, new AtomicInteger(0));
+/*
         boolean objectiveAllZero = scannerDBService.isObjectiveAllZero(projectId, subjectId, studentId1);
 
-        System.out.println(scannerDBService.isAbsent(studentId1, true, objectiveAllZero));
+        System.out.println(scannerDBService.isAbsent(studentId1, false, objectiveAllZero));*/
     }
 
     @Test
