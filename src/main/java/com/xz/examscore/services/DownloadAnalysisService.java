@@ -89,7 +89,7 @@ public class DownloadAnalysisService {
     }
 
     public Result generateBureauZipFile0(String projectId, String schoolId, String[] filePath) {
-        String zipFileName = projectService.findProject(projectId).getString("name") + "-教育局分析报表.zip";
+        String zipFileName = StringUtil.trim(projectService.findProject(projectId).getString("name")) + "-教育局分析报表.zip";
         List<String> schoolIds = schoolService.getProjectSchools(projectId).stream().map(s -> s.getString("school")).collect(Collectors.toList());
 
         List<String> schoolFilePath = Arrays.asList(filePath).stream().filter(s -> !s.contains("100")).collect(Collectors.toList());

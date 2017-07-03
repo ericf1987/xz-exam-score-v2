@@ -148,7 +148,7 @@ public class ImportProjectService {
 
         ExamProject project = new ExamProject();
         project.setId(projectId);
-        project.setName(projectObj.getString("name"));
+        project.setName(StringUtil.trim(projectObj.getString("name")));
         project.setGrade(projectObj.getInteger("grade"));
         project.setCreateTime(new Date());
         //项目类型 文科：W，理科：L

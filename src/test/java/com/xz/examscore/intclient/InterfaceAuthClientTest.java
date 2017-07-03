@@ -66,7 +66,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectById() throws Exception {
-        JSONObject jsonObject = interfaceAuthClient.queryProjectById("430200-13e01c025ac24c6497d916551b3ae7a6");
+        JSONObject jsonObject = interfaceAuthClient.queryProjectById("430200-26928e8efc064ca5a313e34321dd0b0a");
         System.out.println(jsonObject);
     }
 

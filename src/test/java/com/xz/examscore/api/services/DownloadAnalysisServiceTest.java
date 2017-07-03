@@ -82,7 +82,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testgenerateBureauZipFile0() throws Exception {
-        String projectId = "430200-fe3b4d91bb804c249b5b97a8d95c3709";
+        String projectId = "431100-a1dc056391744ef5afc296541ed4414f";
         String schoolId = "d00faaa0-8a9b-45c4-ae16-ea2688353cd0";
         Result result = downloadAnalysisService.generateBureauZipFile0(projectId, schoolId, REPORT_PARAMS);
         System.out.println(result.getData());
