@@ -99,6 +99,7 @@ public class ProjectConfigService {
                         .append("removeZeroScores", projectConfig.isRemoveZeroScores())
                         .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
                         .append("scoreLevelConfig", projectConfig.getScoreLevelConfig())
+                        .append("allowPaperMark", projectConfig.isAllowPaperMark())
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectConfig.getProjectId())
@@ -121,6 +122,7 @@ public class ProjectConfigService {
                     .append("removeZeroScores", projectConfig.isRemoveZeroScores())
                     .append("removeCheatStudent", projectConfig.isRemoveCheatStudent())
                     .append("scoreLevelConfig", projectConfig.getScoreLevelConfig())
+                    .append("allowPaperMark", projectConfig.isAllowPaperMark())
                     .append("md5", MD5.digest(UUID.randomUUID().toString()))
             );
         }
@@ -146,6 +148,8 @@ public class ProjectConfigService {
      * @param removeAbsentStudent 是否排除缺考记录
      * @param removeZeroScores    是否排除0分记录
      * @param removeCheatStudent  是否排除违纪学生
+     * @param scoreLevelConfig    分数等级配置
+     * @param allowPaperMark      是否允许查看试卷留痕
      */
     public void updateRankLevelConfig(
             String projectId, Map<String, Double> rankLevels, boolean isCombine,
@@ -153,7 +157,7 @@ public class ProjectConfigService {
             String lastRankLevel, int rankSegmentCount, Double highScoreRate, Boolean splitUnionSubject,
             String entryLevelStatType, boolean entryLevelEnable, List<String> collegeEntryLevel, boolean shareSchoolReport,
             String almostPassOffset, boolean fillAlmostPass, boolean removeAbsentStudent, boolean removeZeroScores,
-            boolean removeCheatStudent, String scoreLevelConfig) {
+            boolean removeCheatStudent, String scoreLevelConfig, boolean allowPaperMark) {
         MongoCollection<Document> collection = scoreDatabase.getCollection("project_config");
         UpdateResult result = collection.updateMany(doc("projectId", projectId), $set(
                 doc("combineCategorySubjects", isCombine)
@@ -175,6 +179,7 @@ public class ProjectConfigService {
                         .append("removeZeroScores", removeZeroScores)
                         .append("removeCheatStudent", removeCheatStudent)
                         .append("scoreLevelConfig", scoreLevelConfig)
+                        .append("allowPaperMark", allowPaperMark)
         ));
         if (result.getMatchedCount() == 0) {
             collection.insertOne(doc("projectId", projectId)
@@ -198,6 +203,7 @@ public class ProjectConfigService {
                     .append("removeZeroScores", removeZeroScores)
                     .append("removeCheatStudent", removeCheatStudent)
                     .append("scoreLevelConfig", scoreLevelConfig)
+                    .append("allowPaperMark", allowPaperMark)
             );
         }
     }
@@ -321,12 +327,12 @@ public class ProjectConfigService {
         return rankService.getRankScore(projectId, range, projectTarget, index);
     }
 
-    public Map<String, Object> getScoreLevelByConfig(Target target, ProjectConfig projectConfig){
+    public Map<String, Object> getScoreLevelByConfig(Target target, ProjectConfig projectConfig) {
         String scoreLevelConfig = projectConfig.getScoreLevelConfig();
         Map<String, Object> scoreLevels = projectConfig.getScoreLevels();
 
         Map<String, Object> scoreLevelsMap = new HashMap<>();
-        if(target.match(Target.SUBJECT) || target.match(Target.PROJECT)){
+        if (target.match(Target.SUBJECT) || target.match(Target.PROJECT)) {
             packScoreLevelByConfig2(scoreLevelConfig, scoreLevels, scoreLevelsMap);
         }
 
@@ -334,21 +340,21 @@ public class ProjectConfigService {
     }
 
     public void packScoreLevelByConfig(String scoreLevelConfig, Map<String, Object> scoreLevels, Map<String, Object> scoreLevelsMap) {
-        if(!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
+        if (!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
             for (String subjectKey : scoreLevels.keySet()) {
                 scoreLevelsMap.put(subjectKey, fixScoreLevelKey((Map<String, Object>) scoreLevels.get(subjectKey)));
             }
-        }else{
+        } else {
             scoreLevelsMap.putAll(fixScoreLevelKey(scoreLevels));
         }
     }
 
     public void packScoreLevelByConfig2(String scoreLevelConfig, Map<String, Object> scoreLevels, Map<String, Object> scoreLevelsMap) {
-        if(!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")){
+        if (!StringUtil.isBlank(scoreLevelConfig) && scoreLevelConfig.equals("score")) {
             for (String subjectKey : scoreLevels.keySet()) {
                 scoreLevelsMap.put(subjectKey, scoreLevels.get(subjectKey));
             }
-        }else{
+        } else {
             scoreLevelsMap.put(Excellent.name(), scoreLevels.get(Excellent.name()));
             scoreLevelsMap.put(Good.name(), scoreLevels.get(Good.name()));
             scoreLevelsMap.put(Pass.name(), scoreLevels.get(Pass.name()));
@@ -357,7 +363,7 @@ public class ProjectConfigService {
     }
 
     //修复CMS导出三率时KEY的大小写问题
-    private Map<String, Object> fixScoreLevelKey(Map<String, Object> scoreLevels){
+    private Map<String, Object> fixScoreLevelKey(Map<String, Object> scoreLevels) {
         Map<String, Object> scoreLevelMap = new HashMap<>();
         scoreLevelMap.put(Excellent.name(), scoreLevels.get("excellent"));
         scoreLevelMap.put(Good.name(), scoreLevels.get("good"));

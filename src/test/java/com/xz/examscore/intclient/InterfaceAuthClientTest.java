@@ -52,8 +52,8 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
     @Test
     public void testQueryClassExamStudent() throws Exception {
         JSONArray jsonArray = interfaceAuthClient.queryClassExamStudent(
-                "431200-5c78e22cb1e64e4caa9583d35ad92658",
-                "eebdc578-fa1e-4dfc-b50f-7d17be9fb540"
+                "431200-fbf6938dd0964e27bb637072ff15ed51",
+                "2c0ca269-b39e-47a3-a3d2-2a00530ba6cb"
         );
         System.out.println(jsonArray);
     }
@@ -92,7 +92,7 @@ public class InterfaceAuthClientTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testQueryProjectReportConfig() throws Exception {
-        Result result = interfaceAuthClient.queryProjectReportConfig("431100-a827f9b3effe4081b87c8f773242c7ce");
+        Result result = interfaceAuthClient.queryProjectReportConfig("430200-13e01c025ac24c6497d916551b3ae7a6");
         System.out.println(result.getData());
     }
 

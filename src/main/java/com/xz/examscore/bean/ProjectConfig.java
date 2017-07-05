@@ -102,9 +102,12 @@ public class ProjectConfig implements Serializable {
 
     /**
      * 按照得分还是得分率来计算三率
+     *
      * @return
      */
     public String scoreLevelConfig;
+
+    public boolean allowPaperMark = false;
 
     public boolean isShareSchoolReport() {
         return shareSchoolReport;
@@ -289,5 +292,13 @@ public class ProjectConfig implements Serializable {
 
     public void setScoreLevelConfig(String scoreLevelConfig) {
         this.scoreLevelConfig = scoreLevelConfig;
+    }
+
+    public boolean isAllowPaperMark() {
+        return allowPaperMark;
+    }
+
+    public void setAllowPaperMark(boolean allowPaperMark) {
+        this.allowPaperMark = allowPaperMark;
     }
 }

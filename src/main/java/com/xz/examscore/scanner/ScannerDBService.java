@@ -14,7 +14,6 @@ import com.xz.examscore.bean.Range;
 import com.xz.examscore.bean.Target;
 import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.services.*;
-import com.xz.examscore.util.DoubleUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.bson.Document;
@@ -79,6 +78,23 @@ public class ScannerDBService {
 
     @Autowired
     ProjectCacheManager projectCacheManager;
+
+    public static final List<String> excludeProjects = Arrays.asList(
+            "431100-ed122ceff3e74201ad70c7ca2bb5b1cb",
+            "431100-8b3c36cdf2fe442cbc96a50021a2dc2b",
+            "431100-7821fdac9ca042b6a335c6aea4126931",
+            "431100-11e501430e7a4d02b4b260790379041e",
+            "431100-861fdd56d2034f008fad3c8ef310cef4",
+            "431100-7d54a4b2d6604d16aa3061f3195df209",
+
+            "430500-fc26e2e955f441e3bfa25d5ac557f892",
+            "430500-748e9a53189b47cc97eeaeb9694aad90",
+            "430500-31e6f9107e0b4b4a9c50f1cf37a0a1a0",
+            "430500-9ce4ab0352c0448994c2a7a3eed0eb85",
+            "430500-d31ecea0265c42208715a49f9079731e",
+            "430500-f12c01cb17f74aefac0adb0e94bce6d4",
+            "430500-178705695ac040ec99631448cb30a373"
+    );
 
     public MongoClient getMongoClient(String project) {
 
@@ -968,6 +984,14 @@ public class ScannerDBService {
         Document document = collection.find(query).first();
 
         Map<String, Object> map = new HashMap<>();
+
+        ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
+
+        if(!projectConfig.isAllowPaperMark()){
+            map.put("hasPaperPosition", false);
+            return map;
+        }
+
         if (null != document) {
 
             List<Document> objectiveList = fixFullScore(projectId, subjectId, document.get("objectiveList", List.class));

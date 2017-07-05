@@ -228,6 +228,9 @@ public class ImportProjectService {
         if (null != result.get("fillAlmostPass")) {
             projectConfig.setFillAlmostPass(BooleanUtils.toBoolean(result.get("fillAlmostPass").toString()));
         }
+        if (null != result.get("allowPaperMark")) {
+            projectConfig.setAllowPaperMark(BooleanUtils.toBoolean(result.get("allowPaperMark").toString()));
+        }
 
         Map<String, Object> scoreLevelsMap = new HashMap<>();
 
@@ -316,7 +319,7 @@ public class ImportProjectService {
                     pc.isShareSchoolReport(), pc.getAlmostPassOffset(),
                     pc.isFillAlmostPass(), pc.isRemoveAbsentStudent(),
                     pc.isRemoveZeroScores(), pc.isRemoveCheatStudent(),
-                    pc.getScoreLevelConfig()
+                    pc.getScoreLevelConfig(), pc.isAllowPaperMark()
             );
             context.put("projectConfig", pc);
         }
