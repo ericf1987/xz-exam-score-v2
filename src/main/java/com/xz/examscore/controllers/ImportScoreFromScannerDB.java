@@ -60,6 +60,16 @@ public class ImportScoreFromScannerDB {
         return Result.success();
     }
 
+    @RequestMapping(value = "/import-one-subject-from-scanner-db", method = RequestMethod.POST)
+    @ResponseBody
+    public Result importScoreFromScannerDB(
+            @RequestParam("project") String project,
+            @RequestParam("subject") String subject) {
+        scannerDBService.importSubjectScore0(project, subject);
+
+        return Result.success();
+    }
+
     // 计算分数总和
     private void prepareData(String projectId) {
         prepareDataService.prepare(projectId);

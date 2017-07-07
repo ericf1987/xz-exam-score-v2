@@ -26,7 +26,7 @@ public class ScannerDBExceptionService {
         collection.insertOne(query);
     }
 
-    public void deleteRecord(String projectId) {
-        scoreDatabase.getCollection("scannerDB_exception_list").deleteMany(doc("project", projectId));
+    public void deleteRecord(String projectId, String subjectId) {
+        scoreDatabase.getCollection("scannerDB_exception_list").deleteMany(doc("project", projectId).append("subject", subjectId));
     }
 }

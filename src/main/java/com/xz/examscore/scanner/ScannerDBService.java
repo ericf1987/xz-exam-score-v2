@@ -79,23 +79,6 @@ public class ScannerDBService {
     @Autowired
     ProjectCacheManager projectCacheManager;
 
-    public static final List<String> excludeProjects = Arrays.asList(
-            "431100-ed122ceff3e74201ad70c7ca2bb5b1cb",
-            "431100-8b3c36cdf2fe442cbc96a50021a2dc2b",
-            "431100-7821fdac9ca042b6a335c6aea4126931",
-            "431100-11e501430e7a4d02b4b260790379041e",
-            "431100-861fdd56d2034f008fad3c8ef310cef4",
-            "431100-7d54a4b2d6604d16aa3061f3195df209",
-
-            "430500-fc26e2e955f441e3bfa25d5ac557f892",
-            "430500-748e9a53189b47cc97eeaeb9694aad90",
-            "430500-31e6f9107e0b4b4a9c50f1cf37a0a1a0",
-            "430500-9ce4ab0352c0448994c2a7a3eed0eb85",
-            "430500-d31ecea0265c42208715a49f9079731e",
-            "430500-f12c01cb17f74aefac0adb0e94bce6d4",
-            "430500-178705695ac040ec99631448cb30a373"
-    );
-
     public MongoClient getMongoClient(String project) {
 
         MongoClient[] availableClients =
@@ -362,7 +345,7 @@ public class ScannerDBService {
     public void importSubjectScore0(String project, String subjectId) {
         String dbName = project + "_" + subjectId;
         LOG.info("导入 " + dbName + " 的成绩...");
-        scannerDBExceptionService.deleteRecord(project);
+        scannerDBExceptionService.deleteRecord(project, subjectId);
         MongoCollection<Document> collection = getMongoClient(project).getDatabase(dbName).getCollection("students");
         AtomicInteger counter = new AtomicInteger();
         collection.find(doc()).forEach(
@@ -647,7 +630,7 @@ public class ScannerDBService {
 
         //网阅题目ID列表
         if (null == subjectiveList || subjectiveList.isEmpty()) {
-            LOG.info("该学生{}网阅主观题列表为空", studentId);
+            //LOG.info("该学生{}网阅主观题列表为空", studentId);
             return;
         }
 
@@ -702,7 +685,7 @@ public class ScannerDBService {
 
         //网阅题目ID列表
         if (objectiveList.isEmpty()) {
-            LOG.info("该学生{}网阅客观题列表为空，对该学生进行数据修补，确保客观题结构存在", studentId);
+            //LOG.info("该学生{}网阅客观题列表为空，对该学生进行数据修补，确保客观题结构存在", studentId);
             fixMissingObjectiveQuest(projectId, subjectId, isScoreInvalid, student);
             return;
         }

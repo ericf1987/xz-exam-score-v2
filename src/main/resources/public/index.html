@@ -94,6 +94,17 @@
 </fieldset>
 
 <fieldset>
+    <legend>从网阅平台导入单科成绩</legend>
+    <form action="import-one-subject-from-scanner-db" method="post">
+        <p>项目ID：<input type="text" name="project"/></p>
+        <p>科目ID：<input type="text" name="subject"/></p>
+        <p>
+            <button type="submit">开始导入</button>
+        </p>
+    </form>
+</fieldset>
+
+<fieldset>
     <legend>从网阅平台导入学生试卷留痕信息</legend>
     <form action="import-student-card-slice" method="post">
         <p>项目ID：<input type="text" name="project"/></p>

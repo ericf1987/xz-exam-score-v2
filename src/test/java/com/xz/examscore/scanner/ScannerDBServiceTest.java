@@ -90,9 +90,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
      */
     @Test
     public void testImportOneSubject() throws Exception {
-        String project = "430100-354dce3ac8ef4800a1b57f81a10b8baa";
+        String project = "431100-b332394d9bc944718c4a28778710eebc";
         MongoClient mongoClient = scannerDBService.getMongoClient(project);
-        scannerDBService.importOneSubjectTask(project, mongoClient, "019");
+        scannerDBService.importOneSubjectTask(project, mongoClient, "002");
     }
 
     @Test
@@ -155,8 +155,8 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testimportSubjectScore0() throws Exception {
-        String projectId = "430500-9da43baa0be04721a1cf11e451714b97";
-        String subjectId = "001";
+        String projectId = "431100-b332394d9bc944718c4a28778710eebc";
+        String subjectId = "002";
         scannerDBService.importSubjectScore0(projectId, subjectId);
     }
 
