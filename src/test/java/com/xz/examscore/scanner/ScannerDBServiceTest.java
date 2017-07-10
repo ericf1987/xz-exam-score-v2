@@ -55,6 +55,9 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
         assertEquals(1, calculateScore(4, "A,D", "", true).score, 0.1);*/
         /*System.out.println(calculateScore(3, "c", "c", null).score);
         System.out.println(calculateScore(4, "A1B1DA2BC2", "DA", null).score);*/
+
+        System.out.println(calculateScore(5, "B2.5D2.5BD5", "B", null).score);
+
         Document quest = questService.findQuest("430300-29c4d40d93bf41a5a82baffe7e714dd9", "58e730b52d560287557a45b8");
         String standardAnswer = scannerDBService.getStdAnswerFromQuest(quest);
 
@@ -155,8 +158,8 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testimportSubjectScore0() throws Exception {
-        String projectId = "431100-b332394d9bc944718c4a28778710eebc";
-        String subjectId = "002";
+        String projectId = "430100-011c32284ea24606aa3a1aa30e11ef1a";
+        String subjectId = "001";
         scannerDBService.importSubjectScore0(projectId, subjectId);
     }
 

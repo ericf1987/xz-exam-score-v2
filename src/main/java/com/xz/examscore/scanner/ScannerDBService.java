@@ -861,7 +861,7 @@ public class ScannerDBService {
         boolean isObjective = BooleanUtils.toBoolean(quest.getBoolean("isObjective"));
         if (isObjective) {
             return !StringUtils.isEmpty(quest.getString("scoreRule")) ?
-                    sortStdAnswer(quest.getString("scoreRule")) : quest.getString("answer");
+                    quest.getString("scoreRule") : quest.getString("answer");
         }
         throw new IllegalArgumentException("获取试题" + quest.getString("questId") + "的标答出现异常，请核实试题类型和标答");
     }

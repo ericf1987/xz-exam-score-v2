@@ -102,7 +102,7 @@ public class TotalScoreSegmentCountAnalysis implements Server {
         return schoolsData;
     }
 
-    private CounterMap<Integer> getScoreSegmentMap(String projectId, Range range, int maxScore, int minScore, int span) {
+    public CounterMap<Integer> getScoreSegmentMap(String projectId, Range range, int maxScore, int minScore, int span) {
         ScoreSegmentCounter scoreSegmentCounter = new ScoreSegmentCounter(projectId, range, maxScore, minScore, span);
         int min = scoreSegmentCounter.getMin();
         int interval = scoreSegmentCounter.getInterval();
