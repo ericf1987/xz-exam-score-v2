@@ -293,4 +293,8 @@ public class ScoreServiceTest extends XzExamScoreV2ApplicationTests {
         scoreService.saveTotalScore(projectId, studentRange, subjectTarget, totalScore, extra);
     }
 
+    @Test
+    public void testQueryAbsentSubject() throws Exception {
+    }
+
 }

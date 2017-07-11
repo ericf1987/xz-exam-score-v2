@@ -49,7 +49,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
         Result result = projectScoreSegment.execute(param);
         setupHeader(excelWriter, result.get("totals"));
         setupSecondaryHeader(excelWriter, result.get("totals"));
-        fillProviceData(result.get("totals"), excelWriter);
+        fillProvinceData(result.get("totals"), excelWriter);
         fillSchoolData(result.get("schools"), excelWriter);
     }
 
@@ -84,7 +84,7 @@ public class TotalBasicScoreSegmentSheet extends SheetGenerator {
     }
 
     //填充汇总数据
-    private void fillProviceData(List<Map<String, Object>> totals, ExcelWriter excelWriter) {
+    private void fillProvinceData(List<Map<String, Object>> totals, ExcelWriter excelWriter) {
         int row = 2;
         AtomicInteger column = new AtomicInteger(-1);
         excelWriter.set(row, column.incrementAndGet(), "总体");

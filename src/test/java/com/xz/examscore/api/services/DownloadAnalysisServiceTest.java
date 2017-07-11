@@ -3,6 +3,8 @@ package com.xz.examscore.api.services;
 import com.xz.ajiaedu.common.lang.Result;
 import com.xz.ajiaedu.common.lang.StringUtil;
 import com.xz.examscore.XzExamScoreV2ApplicationTests;
+import com.xz.examscore.asynccomponents.report.ReportManager;
+import com.xz.examscore.cache.ProjectCacheManager;
 import com.xz.examscore.services.DownloadAnalysisService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Value("${zip.download.url}")
     private String downloadURL;
+
+    @Autowired
+    ProjectCacheManager projectCacheManager;
 
     public static final String[] REPORT_PARAMS = new String[]{
             "100-200-300",
@@ -64,7 +69,7 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testMain1() throws Exception {
-        String projectId = "430100-c6da4bfd10134ddb9c87c601d51eb631";
+        String projectId = "430200-ceb62b9fa81f47e480731d1f70e57509";
         String[] param = new String[]{"总体成绩分析", "基础分析", "分数分析.xlsx"};
         String result = downloadAnalysisService.getSaveFilePath(projectId, "F://", StringUtil.joinPaths(param));
         System.out.println(result);
@@ -78,6 +83,11 @@ public class DownloadAnalysisServiceTest extends XzExamScoreV2ApplicationTests {
         System.out.println(result.getData());
 /*        String s = "http://report.ajia.cn/download-zip/430100-e7bd093d92d844819c7eda8b641ab6ee/430100-e7bd093d92d844819c7eda8b641ab6ee/2017/4/5\\中南迅智中学2016年6月初二期末考试（演示）-教育局分析报表.zip,";
         System.out.println(s.replaceAll(downloadURL, downloadPath));*/
+    }
+
+    @Test
+    public void test1() throws Exception {
+        projectCacheManager.deleteProjectCache("430200-ceb62b9fa81f47e480731d1f70e57509");
     }
 
     @Test

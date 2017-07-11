@@ -137,10 +137,10 @@ public class ScannerDBServiceTest extends XzExamScoreV2ApplicationTests {
 
     @Test
     public void testisAbsent() throws Exception {
-        String projectId = "431100-a827f9b3effe4081b87c8f773242c7ce";
-        String subjectId = "022023";
+        String projectId = "431100-249018735a484a52a6b5fb0916a6092d";
+        String subjectId = "002";
 //        String studentId = "b0ffcd4a-f881-4c9f-9762-4fc09fa1e146";
-        String studentId = "66aa3961-ec4a-4d99-a151-ed4c72036f0f";
+        String studentId = "8727d737-e3c3-446c-9b06-d5fbb5e8d815";
 //        String studentId = "50a1ac07-fc9a-4b56-8931-bbbd2f6e0329";
 
         MongoClient mongoClient1 = scannerDBService.getMongoClient(projectId);
