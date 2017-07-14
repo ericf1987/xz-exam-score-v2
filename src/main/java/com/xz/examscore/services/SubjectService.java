@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.$set;
 import static com.xz.ajiaedu.common.mongo.MongoUtils.doc;
@@ -93,6 +94,9 @@ public class SubjectService {
     @Autowired
     ProjectConfigService projectConfigService;
 
+    @Autowired
+    StudentService studentService;
+
     /**
      * 查询考试项目的科目列表
      *
@@ -157,5 +161,33 @@ public class SubjectService {
     public void clearSubjects(String projectId) {
         MongoCollection<Document> c = scoreDatabase.getCollection("subjects");
         c.deleteMany(doc("project", projectId));
+    }
+
+    /**
+     * 查询学生缺考科目
+     * @param projectId 项目ID
+     * @param studentId 科目ID
+     */
+    public List<Map<String, String>> queryAbsentSubject(String projectId, String studentId){
+        //查询科目表数据
+        List<String> subjectIds = querySubjects(projectId);
+
+        //查询学生参考科目
+        Document student = studentService.findStudent(projectId, studentId);
+
+        if(null != student){
+            List subjects = student.get("subjects", List.class);
+
+            subjectIds.removeIf(s -> null != subjects && subjects.contains(s));
+            return subjectIds.stream().map(this::packSubject).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public Map<String, String> packSubject(String subjectId) {
+        Map<String, String> m = new HashMap<>();
+        m.put("subjectId", subjectId);
+        m.put("subjectName", getSubjectName(subjectId));
+        return m;
     }
 }

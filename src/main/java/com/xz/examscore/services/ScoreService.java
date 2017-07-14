@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.xz.ajiaedu.common.mongo.MongoUtils.*;
@@ -750,27 +753,4 @@ public class ScoreService {
         });
     }
 
-    //查询学生有哪些科目缺考了
-    public ArrayList<Map<String, String>> queryStudentAbsentSubject(String projectId, String studentId) {
-        MongoCollection<Document> collection = scoreDatabase.getCollection("total_score");
-        Document query = doc("project", projectId).append("range.id", studentId)
-                .append("target.name", Target.SUBJECT).append("isAbsent", true);
-        List<Document> documents = toList(collection.find(query));
-
-        if (null != documents && !documents.isEmpty()) {
-            return CollectionUtils.asArrayList(
-                    documents.stream().map(d -> {
-                        Map<String, String> subjectMap = new HashMap<>();
-                        Document document = (Document) d.get("target");
-                        String subjectId = document.getString("id");
-                        subjectMap.put("subjectId", document.getString("id"));
-                        subjectMap.put("subjectName", SubjectService.getSubjectName(subjectId));
-                        return subjectMap;
-                    }).collect(Collectors.toList())
-            );
-        } else {
-            return new ArrayList<>();
-        }
-
-    }
 }

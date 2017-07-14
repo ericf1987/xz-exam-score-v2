@@ -6,12 +6,12 @@ import com.xz.examscore.api.annotation.Function;
 import com.xz.examscore.api.annotation.Parameter;
 import com.xz.examscore.api.annotation.Type;
 import com.xz.examscore.api.server.Server;
-import com.xz.examscore.services.ScoreService;
+import com.xz.examscore.services.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +25,7 @@ import java.util.Map;
 public class QueryStudentAbsentSubject implements Server{
 
     @Autowired
-    ScoreService scoreService;
+    SubjectService subjectService;
 
     @Override
     public Result execute(Param param) throws Exception {
@@ -34,7 +34,7 @@ public class QueryStudentAbsentSubject implements Server{
 
         String studentId = param.getString("studentId");
 
-        ArrayList<Map<String, String>> subjects = scoreService.queryStudentAbsentSubject(projectId, studentId);
+        List<Map<String, String>> subjects = subjectService.queryAbsentSubject(projectId, studentId);
 
         Collections.sort(subjects, (Map<String, String> m1, Map<String, String> m2) -> {
             String s1 = m1.get("subjectId");
