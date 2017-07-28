@@ -914,6 +914,7 @@ public class ImportProjectService {
         LOG.info("CMS试题明细接口计算出的单科科目总分为：{}", subjectScore.toString());
         LOG.info("CMS试题明细接口计算出的组合科目总分为：{}", subjectCombinationScore.toString());
 
+        //拆分后的科目
         List<String> subjectIds = new ArrayList<>();
         //取出所有科目
         jsonArray.forEach(o -> {

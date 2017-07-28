@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static com.xz.ajiaedu.common.mongo.MongoUtils.toList;
+
 /**
  * 统计 [考生] 的 [知识点] 得分/得分率
  * 统计 [班级/学校] 的 [知识点/知识点-能力层级] 的总分
@@ -262,12 +264,15 @@ public class PointTask extends AggrTask {
 
     }
 
-    private void doPointTaskDistribute(String projectId, String subjectId, String studentId,
+    public void doPointTaskDistribute(String projectId, String subjectId, String studentId,
                                        DoubleCounterMap<String> pointScores,
                                        DoubleCounterMap<SubjectLevel> subjectLevelScores,
                                        DoubleCounterMap<PointLevel> pointLevelScores) {
         FindIterable<Document> scores = scoreService.getStudentSubjectScores(projectId, studentId, subjectId);
-        for (Document scoreDoc : scores) {
+
+        List<Document> documents = toList(scores);
+
+        for (Document scoreDoc : documents) {
             double score = scoreDoc.getDouble("score");
             String subject = scoreDoc.getString("subject");
             String questId = scoreDoc.getString("quest");
